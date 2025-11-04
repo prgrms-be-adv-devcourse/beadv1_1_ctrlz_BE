@@ -1,13 +1,11 @@
 package com.common.model.persistence;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -17,37 +15,29 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     private String code;
 
     @Enumerated(EnumType.STRING)
     private DeleteStatus deleteStatus = DeleteStatus.N;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // 각 엔티티가 구현해야 하는 추상 메서드
-    protected abstract String getEntityPrefix();
+    protected abstract String getEntityPrefix(); // 각 엔티티가 구현해야 하는 추상 메서드
 
-    @PrePersist
-    public void prePersist() {
+    @PrePersist // persist() 를 호출하기 전, 새로운 엔티티가 영속성 컨텍스트에 관리되기 직전에 호출
+    protected void onCreate() {
 
-        // ex: product-69a29997-2c97-433b-a3a5-1656721a4efc
-        if (this.code == null) {
-            this.code = getEntityPrefix() + "-" + UUID.randomUUID().toString();
-        }
+        String UUIDv7 = UuidCreator.getTimeOrderedEpoch().toString();
+        this.code = getEntityPrefix() + "-" + UUIDv7;
 
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-        if (this.updatedAt == null) {
-            this.updatedAt = LocalDateTime.now();
-        }
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+
     }
 
     public void delete() {
