@@ -22,6 +22,7 @@ public class EncryptUserFactory {
 			.password(encode(userContext.password()))
 			.name(encode(userContext.name()))
 			.phoneNumber(encode(userContext.phoneNumber()))
+			.nickname(userContext.nickname())
 			.address(
 				Address.builder()
 					.state(encode(userContext.state()))

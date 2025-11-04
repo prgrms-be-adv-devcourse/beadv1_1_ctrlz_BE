@@ -23,6 +23,9 @@ public class UserApplication implements UserCommandUseCase {
 	@Override
 	public User create(UserContext userContext) {
 
+		verifyPhoneNumber(userContext.phoneNumber());
+		verifyNickname(userContext.nickname());
+
 		//암호화
 		User encryptUser = encryptUserFactory.toEncryptUser(userContext);
 
@@ -35,6 +38,18 @@ public class UserApplication implements UserCommandUseCase {
 		// cart
 
 		return savedUser;
+	}
+
+	private void verifyNickname(String nickname) {
+		if (userPersistencePort.existsNickname(nickname)) {
+			throw new IllegalStateException("이미 존재하는 닉네임 " + nickname);
+		}
+	}
+
+	private void verifyPhoneNumber(String phoneNumber) {
+		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
+			throw new IllegalStateException("이미 존재하는 연락처");
+		}
 	}
 
 	@Override

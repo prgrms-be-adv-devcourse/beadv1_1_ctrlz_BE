@@ -28,6 +28,7 @@ public class UserEntity extends BaseEntity {
 
 	private String OAuthId;
 	private String name;
+	private String nickname;
 	private String email;
 	private String password;
 
@@ -51,7 +52,8 @@ public class UserEntity extends BaseEntity {
 		String profileUrl,
 		String phoneNumber,
 		EmbeddedAddress address,
-		String oauthId
+		String oauthId,
+		String nickname
 	) {
 		this.id = id;
 		this.name = name;
@@ -62,5 +64,6 @@ public class UserEntity extends BaseEntity {
 		this.address = address;
 		this.phoneNumber = phoneNumber;
 		this.id = id;
+		this.nickname = nickname;
 	}
 }
