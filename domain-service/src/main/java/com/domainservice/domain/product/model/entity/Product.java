@@ -3,6 +3,7 @@ package com.domainservice.domain.product.model.entity;
 import com.common.model.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,12 @@ public class Product extends BaseEntity {
     @Override
     protected String getEntityPrefix() {
         return "product"; // 해당 메서드를 통해 "product-UUID" 형태의 code가 자동 생성됨
+    }
+
+    @Builder
+    public Product(String title, String description) {
+        this.title = title;
+        this.description = description;
     }
 
 }

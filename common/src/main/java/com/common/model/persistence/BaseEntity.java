@@ -24,18 +24,29 @@ public abstract class BaseEntity {
     private DeleteStatus deleteStatus = DeleteStatus.N;
 
     @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     // 각 엔티티가 구현해야 하는 추상 메서드
     protected abstract String getEntityPrefix();
 
     @PrePersist
-    public void generateCode() {
+    public void prePersist() {
+
+        // ex: product-69a29997-2c97-433b-a3a5-1656721a4efc
         if (this.code == null) {
             this.code = getEntityPrefix() + "-" + UUID.randomUUID().toString();
+        }
+
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
         }
     }
 
@@ -60,7 +71,7 @@ public abstract class BaseEntity {
         N, D
     }
 
-    /* Getter and Setter */
+    /* Getter */
     public Long getId() {
         return id;
     }
