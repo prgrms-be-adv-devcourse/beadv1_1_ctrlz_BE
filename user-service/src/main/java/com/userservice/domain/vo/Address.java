@@ -24,4 +24,24 @@ public class Address {
 		this.state = state;
 		this.details = details;
 	}
+
+	public void changeZipCode(String zipCode) {
+		this.zipCode = zipCode;
+	}
+
+	public void changeCity(String city) {
+		this.city = city;
+	}
+
+	public void changeStreet(String street) {
+		this.street = street;
+	}
+
+	public void changeState(String state) {
+		this.state = state;
+	}
+
+	public void changeDetails(String details) {
+		this.details = details;
+	}
 }

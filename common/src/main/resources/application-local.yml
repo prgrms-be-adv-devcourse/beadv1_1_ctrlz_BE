@@ -2,12 +2,6 @@ spring:
   application:
     name: asset
 
-  profiles:
-    group:
-      local:
-        - secret
-
-
   servlet:
     multipart:
       max-file-size: 10MB

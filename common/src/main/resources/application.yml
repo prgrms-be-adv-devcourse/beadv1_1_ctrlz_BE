@@ -2,7 +2,3 @@ spring:
   application:
     name: common
 
-    profiles:
-      group:
-        local:
-          - secret

@@ -2,7 +2,7 @@ package com.common.asset.image.domain.repository;
 
 import java.util.Optional;
 
-import com.asset.image.domain.entity.Image;
+import com.common.asset.image.domain.entity.Image;
 
 public interface ImageRepository {
 

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.asset.image.application.AssetService;
-import com.asset.image.domain.entity.Image;
+import com.common.asset.image.application.AssetService;
+import com.common.asset.image.domain.entity.Image;
 
 import lombok.RequiredArgsConstructor;
 
