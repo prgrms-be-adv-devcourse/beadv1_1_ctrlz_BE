@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: test
+  kafka:
+    bootstrap-servers: localhost:9092
+custom:
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
