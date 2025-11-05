@@ -16,9 +16,9 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import lombok.Getter;
 
+@Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-@Getter
 public abstract class BaseEntity {
 
 	@Id
@@ -39,7 +39,7 @@ public abstract class BaseEntity {
 	protected void onCreate() {
 
 		String UUIDv7 = UuidCreator.getTimeOrderedEpoch().toString();
-		this.id = UUIDv7 + getEntitySuffix();
+		this.id = UUIDv7 + "-" + getEntitySuffix();
 
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
@@ -68,21 +68,5 @@ public abstract class BaseEntity {
 
 	public enum DeleteStatus {
 		N, D
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public DeleteStatus getDeleteStatus() {
-		return deleteStatus;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
 	}
 }
