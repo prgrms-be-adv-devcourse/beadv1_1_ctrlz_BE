@@ -24,9 +24,8 @@ public class ProductPostService {
     /**
      * 상품 게시글 생성
      */
-    public ProductPostResponse createProductPost(CreateProductPostRequest request, String userId) {
+    public ProductPost createProductPost(CreateProductPostRequest request, String userId) {
 
-        // 3. ProductPost 생성
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
                 .categoryId(request.categoryId())
@@ -46,11 +45,10 @@ public class ProductPostService {
         }
 
         productPost.addTags(findTags);
-        ProductPost savedProductPost = productRepository.save(productPost);
 
         // TODO: 판매자(user)에게 해당 게시글 정보 넣어주기
 
-        return ProductPostResponse.from(savedProductPost);
+        return productRepository.save(productPost);
     }
 
 }
