@@ -1,4 +1,4 @@
-package com.domainservice.domain.Order.model.entity;
+package com.domainservice.domain.order.model.entity;
 
 public enum OrderStatus {
 	PAYMENT_PENDING,    // 결제대기

@@ -1,4 +1,4 @@
-package com.domainservice.domain.Order.model.entity;
+package com.domainservice.domain.order.model.entity;
 
 import java.time.LocalDateTime;
 
@@ -32,7 +32,7 @@ public class Order extends BaseEntity {
 	private Integer totalAmount;  // 총 결제 금액
 
 	@Column(nullable = false, length = 30)
-	private String orderStatus;  // 주문 상태 (결제대기, 결제완료 등)
+	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
 
 	@Override
 	protected String getEntitySuffix() {
