@@ -24,6 +24,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+
     // https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 
