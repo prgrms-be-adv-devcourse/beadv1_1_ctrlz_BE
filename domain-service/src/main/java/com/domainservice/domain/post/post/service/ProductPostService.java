@@ -1,17 +1,20 @@
 package com.domainservice.domain.post.post.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -41,7 +44,7 @@ public class ProductPostService {
         List<String> tagIds = request.tagIds();
         List<Tag> findTags = tagRepository.findAllById(tagIds);
         if (findTags.size() != tagIds.size()) {
-            throw new IllegalArgumentException("존재하지 않는 태그가 포함되어있습니다.");
+            throw new ProductPostException(ProductPostExceptionCode.TAG_NOT_FOUND);
         }
 
         productPost.addTags(findTags);
