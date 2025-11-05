@@ -7,6 +7,7 @@ import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.userservice.application.adapter.event.CartCreatedEvent;
 import com.userservice.application.adapter.event.DepositCreatedEvent;
@@ -14,6 +15,7 @@ import com.userservice.application.adapter.event.DepositCreatedEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@ActiveProfiles("test")
 @Getter
 @Slf4j
 @Component
