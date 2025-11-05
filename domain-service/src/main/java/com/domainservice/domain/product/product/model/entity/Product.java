@@ -1,4 +1,4 @@
-package com.domainservice.domain.product.model.entity;
+package com.domainservice.domain.product.product.model.entity;
 
 import com.common.model.persistence.BaseEntity;
 import jakarta.persistence.Column;

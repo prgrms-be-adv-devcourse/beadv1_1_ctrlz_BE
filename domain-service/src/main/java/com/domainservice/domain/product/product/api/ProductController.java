@@ -1,8 +1,8 @@
-package com.domainservice.domain.product.api;
+package com.domainservice.domain.product.product.api;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.domainservice.domain.product.service.ProductService;
+import com.domainservice.domain.product.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
