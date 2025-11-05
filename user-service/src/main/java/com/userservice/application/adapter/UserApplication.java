@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.exception.CustomException;
+import com.common.exception.vo.UserExceptionCode;
 import com.userservice.application.adapter.dto.UserContext;
+import com.userservice.application.adapter.event.CartCreatedEvent;
+import com.userservice.application.adapter.event.DepositCreatedEvent;
 import com.userservice.application.port.in.UserCommandUseCase;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
-import com.userservice.application.adapter.event.CartCreatedEvent;
-import com.userservice.application.adapter.event.DepositCreatedEvent;
 import com.userservice.infrastructure.kafka.producer.KafkaProducer;
 
 import lombok.RequiredArgsConstructor;
@@ -34,29 +36,16 @@ public class UserApplication implements UserCommandUseCase {
 	@Override
 	public User create(UserContext userContext) {
 
-		verifyPhoneNumber(userContext.phoneNumber());
 		verifyNickname(userContext.nickname());
+		verifyPhoneNumber(userContext.phoneNumber());
 
 		User encryptUser = encryptUserFactory.toEncryptUser(userContext);
-
 		User savedUser = userPersistencePort.save(encryptUser);
 
 		kafkaProducer.send(depositTopicCommand, new DepositCreatedEvent(savedUser.getId()));
 		kafkaProducer.send(cartTopicCommand, new CartCreatedEvent(savedUser.getId()));
 
 		return savedUser;
-	}
-
-	private void verifyNickname(String nickname) {
-		if (userPersistencePort.existsNickname(nickname)) {
-			throw new IllegalStateException("이미 존재하는 닉네임 " + nickname);
-		}
-	}
-
-	private void verifyPhoneNumber(String phoneNumber) {
-		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
-			throw new IllegalStateException("이미 존재하는 연락처");
-		}
 	}
 
 	@Override
@@ -74,5 +63,17 @@ public class UserApplication implements UserCommandUseCase {
 	@Override
 	public User getUser(String id) {
 		return userPersistencePort.findById(id);
+	}
+
+	void verifyNickname(String nickname) {
+		if (userPersistencePort.existsNickname(nickname)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_NICKNAME.getMessage());
+		}
+	}
+
+	void verifyPhoneNumber(String phoneNumber) {
+		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
+		}
 	}
 }
