@@ -1,9 +1,9 @@
 package com.userservice.infrastructure.adapter.out;
 
-import java.util.NoSuchElementException;
-
 import org.springframework.stereotype.Repository;
 
+import com.common.exception.CustomException;
+import com.common.exception.vo.UserExceptionCode;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
 import com.userservice.infrastructure.model.entity.UserEntity;
@@ -20,7 +20,8 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
 	@Override
 	public User findById(String id) {
-		UserEntity userEntity = userJpaRepository.findById(id).orElseThrow(NoSuchElementException::new);
+		UserEntity userEntity = userJpaRepository.findById(id)
+			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
 		return UserEntityMapper.toDomain(userEntity);
 	}
 
@@ -54,11 +55,11 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
 	@Override
 	public boolean existsPhoneNumber(String phoneNumber) {
-		return false;
+		return userJpaRepository.existsUserEntitiesByPhoneNumber(phoneNumber);
 	}
 
 	@Override
 	public boolean existsNickname(String nickname) {
-		return false;
+		return userJpaRepository.existsUserEntitiesByNickname(nickname);
 	}
 }
