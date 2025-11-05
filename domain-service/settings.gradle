@@ -1,3 +1,4 @@
 rootProject.name = 'domain-service'
 
-include("order", "payment", "review", "product", "search", "comment")
+include(':common')
+project(':common').projectDir = file('../common')

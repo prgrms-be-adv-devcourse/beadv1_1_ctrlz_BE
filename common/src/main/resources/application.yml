@@ -1,9 +1,3 @@
 spring:
   application:
     name: common
-
-  data:
-    redis:
-      port: 6379
-      host: localhost
-
