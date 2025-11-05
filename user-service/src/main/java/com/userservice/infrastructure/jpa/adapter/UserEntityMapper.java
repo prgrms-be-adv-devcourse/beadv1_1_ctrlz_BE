@@ -23,6 +23,7 @@ public class UserEntityMapper {
 			.name(user.getName())
 			.password(user.getPassword())
 			.profileUrl(user.getProfileUrl())
+			.phoneNumber(user.getPhoneNumber())
 			.build();
 	}
 
