@@ -12,7 +12,7 @@ import com.common.model.persistence.BaseEntity;
 import com.userservice.domain.model.User;
 import com.userservice.domain.vo.Address;
 import com.userservice.domain.vo.UserRole;
-import com.userservice.infrastructure.jpa.infrastructure.UserJpaRepository;
+import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
 
 @DataJpaTest
 class UserPersistenceAdapterTest {
