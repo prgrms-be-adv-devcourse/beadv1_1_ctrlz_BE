@@ -2,6 +2,7 @@ package com.userservice.infrastructure.jpa.adapter;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,14 @@ class UserPersistenceAdapterTest {
 
 	@Autowired
 	private UserJpaRepository userJpaRepository;
+	private User mockUser;
+	private UserPersistenceAdapter userPersistenceAdapter;
 
-	@DisplayName("UserEntity를 저장할 수 있다.")
-	@Test
-	void test1() throws Exception {
-		//given
-		var mockUser = User.builder()
+	@BeforeEach
+	void setUp() {
+		userJpaRepository.deleteAllInBatch();
+
+		mockUser = User.builder()
 			.email("testuser@example.com")
 			.nickname("tester")
 			.name("테스트 유저")
@@ -42,8 +45,14 @@ class UserPersistenceAdapterTest {
 			.oauthId("kakao_1234567890")
 			.build();
 
-		var userPersistenceAdapter = new UserPersistenceAdapter(userJpaRepository);
+		userPersistenceAdapter = new UserPersistenceAdapter(userJpaRepository);
 
+	}
+
+	@DisplayName("UserEntity를 저장할 수 있다.")
+	@Test
+	void test1() throws Exception {
+		//given
 		//when
 		User result = userPersistenceAdapter.save(mockUser);
 
@@ -53,5 +62,28 @@ class UserPersistenceAdapterTest {
 		assertThat(result.getId()).isInstanceOf(String.class);
 		assertThat(result.getDeleteStatus()).isEqualByComparingTo(BaseEntity.DeleteStatus.N);
 		assertThat(result.getRole()).isEqualByComparingTo(UserRole.USER);
+		assertThat(result.getPhoneNumber()).isEqualTo("010-1234-5678");
+	}
+
+	@DisplayName("연락처를 통해 객체 유무를 판별할 수 있다.")
+	@Test
+	void test2() throws Exception {
+		//given
+		User save = userPersistenceAdapter.save(mockUser);
+		System.out.println(save.getPhoneNumber());
+
+		//when then
+		assertThat(userPersistenceAdapter.existsPhoneNumber(mockUser.getPhoneNumber())).isTrue();
+	}
+
+	@DisplayName("닉네임을 통해 유무를 판별할 수 있다.")
+	@Test
+	void test3() throws Exception {
+		//given
+		User save = userPersistenceAdapter.save(mockUser);
+		System.out.println(save.getPhoneNumber());
+
+		//when then
+		assertThat(userPersistenceAdapter.existsPhoneNumber(mockUser.getPhoneNumber())).isTrue();
 	}
 }
