@@ -8,7 +8,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.userservice.infrastructure.kafka.event.CartCreatedEvent;
+import com.userservice.application.adapter.event.CartCreatedEvent;
+import com.userservice.application.adapter.event.DepositCreatedEvent;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,15 +18,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @KafkaListener(
-	topics = "${custom.cart.topic.command}"
+	topics = {"${custom.cart.topic.command}", "${custom.deposit.topic.command}"}
 )
 public class TestKafkaConsumer {
 
-	private final List<CartCreatedEvent> testStore = new ArrayList<>();
+	private final List<Object> testStore = new ArrayList<>();
 
 	@KafkaHandler
 	public void handler(@Payload CartCreatedEvent event) {
-		log.info("event.testId() = {}", event.testId());
+		log.info("event.testId() = {}", event.id());
+		testStore.add(event);
+	}
+
+	@KafkaHandler
+	public void handler(@Payload DepositCreatedEvent event) {
+		log.info("event.testId() = {}", event.id());
 		testStore.add(event);
 	}
 

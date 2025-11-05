@@ -12,3 +12,9 @@ custom:
     topic:
       command: cart-command
 
+  deposit:
+    topic:
+      command: deposit-command
+
+
+
