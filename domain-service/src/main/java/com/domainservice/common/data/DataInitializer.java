@@ -1,7 +1,7 @@
 package com.domainservice.common.data;
 
-import com.domainservice.domain.product.category.service.CategoryService;
-import com.domainservice.domain.product.tag.service.TagService;
+import com.domainservice.domain.post.category.service.CategoryService;
+import com.domainservice.domain.post.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
