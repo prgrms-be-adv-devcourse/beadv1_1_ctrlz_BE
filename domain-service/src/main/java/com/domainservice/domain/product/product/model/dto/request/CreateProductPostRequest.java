@@ -26,9 +26,6 @@ public record CreateProductPostRequest(
         @NotNull(message = "카테고리는 필수입니다.")
         String categoryId,
 
-        @NotNull(message = "브랜드는 필수입니다.")
-        String brandId,
-
         @NotNull(message = "상품 상태는 필수입니다.")
         ProductStatus status,
 

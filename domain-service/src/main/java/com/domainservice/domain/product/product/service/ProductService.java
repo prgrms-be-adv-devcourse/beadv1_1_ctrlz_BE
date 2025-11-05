@@ -30,7 +30,6 @@ public class ProductService {
         Product product = Product.builder()
                 .userId(userId)
                 .categoryId(request.categoryId())
-                .brandId(request.brandId())
                 .title(request.title())
                 .name(request.name())
                 .price(request.price())

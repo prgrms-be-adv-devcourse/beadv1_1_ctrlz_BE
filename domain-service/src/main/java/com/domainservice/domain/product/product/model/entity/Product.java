@@ -29,9 +29,6 @@ public class Product extends BaseEntity {
     @Column(name = "categorie_id", nullable = false)
     private String categoryId;
 
-    @Column(name = "brand_id", nullable = false)
-    private String brandId;
-
     @OneToMany(mappedBy = "productPosts", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductTag> productTags = new ArrayList<>();
 
@@ -79,12 +76,11 @@ public class Product extends BaseEntity {
     }
 
     @Builder
-    public Product(String userId, String categoryId, String brandId,
+    public Product(String userId, String categoryId,
                    String title, String name, Integer price, String description,
                    ProductStatus status, TradeStatus tradeStatus, String imageUrl) {
         this.userId = userId;
         this.categoryId = categoryId;
-        this.brandId = brandId;
         this.title = title;
         this.name = name;
         this.price = price;
