@@ -13,6 +13,7 @@ import com.userservice.infrastructure.web.mapper.UserContextMapper;
 import com.userservice.infrastructure.web.dto.UserCreateRequest;
 import com.userservice.infrastructure.web.dto.UserCreateResponse;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class UserController {
 
 	@PostMapping
 	public BaseResponse<UserCreateResponse> createUser(
-		@RequestBody UserCreateRequest request
+		@Valid @RequestBody UserCreateRequest request
 	) {
 
 		UserContext context = UserContextMapper.toContext(request);

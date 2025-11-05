@@ -6,11 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.validation.ConstraintViolationException;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiErrorResponse {
 
 	private final int status;
