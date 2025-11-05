@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Profile("prod")
+@Profile("prod || local")
 @Component
 public class KafkaProducer {
 

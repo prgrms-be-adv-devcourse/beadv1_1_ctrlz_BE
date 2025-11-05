@@ -13,21 +13,21 @@ spring:
     url: jdbc:h2:mem:user-db
 
 
-#  kafka:
-#    bootstrap-servers:
-#      - localhost:9092
-#    producer:
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#
-#      acks: all
-#
-#      properties:
-#        delivery.timeout.ms: 120000
-#        linger.ms: 0
-#        request.timeout.ms: 30000
-#        enable.idempotence: true
-#        allow.auto.create.topics: false
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      properties:
+        delivery.timeout.ms: 120000
+        linger.ms: 0
+        request.timeout.ms: 30000
+        enable.idempotence: true
+        allow.auto.create.topics: false
 
 
 

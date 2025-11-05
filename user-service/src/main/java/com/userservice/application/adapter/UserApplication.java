@@ -1,5 +1,6 @@
 package com.userservice.application.adapter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +8,8 @@ import com.userservice.application.dto.UserContext;
 import com.userservice.application.port.in.UserCommandUseCase;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
+import com.userservice.infrastructure.kafka.event.CartCreatedEvent;
+import com.userservice.infrastructure.kafka.producer.KafkaProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserApplication implements UserCommandUseCase {
 
+	@Value("${custom.cart.topic.command}")
+	private String cartTopicCommand;
+
 	private final UserPersistencePort userPersistencePort;
 	private final EncryptUserFactory encryptUserFactory;
+	private final KafkaProducer kafkaProducer;
 
 	@Override
 	public User create(UserContext userContext) {
@@ -35,7 +42,8 @@ public class UserApplication implements UserCommandUseCase {
 
 		// deposit
 
-		// cart
+
+		kafkaProducer.send(cartTopicCommand, new CartCreatedEvent(savedUser.getId()));
 
 		return savedUser;
 	}
