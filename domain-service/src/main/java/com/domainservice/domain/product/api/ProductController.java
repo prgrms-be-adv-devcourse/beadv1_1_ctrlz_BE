@@ -1,22 +1,15 @@
 package com.domainservice.domain.product.api;
 
-import com.common.model.web.BaseResponse;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.domainservice.domain.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/products")
 public class ProductController {
 
-    @GetMapping
-    public BaseResponse<String> hello() {
+    private final ProductService productService;
 
-        String data = "응답 데이터";
-
-        return new BaseResponse(
-                data,
-                "상품을 성공적으로 조회하였습니다."
-        );
-    }
 }

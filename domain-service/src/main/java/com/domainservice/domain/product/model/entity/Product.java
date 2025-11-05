@@ -23,8 +23,8 @@ public class Product extends BaseEntity {
      */
 
     @Override
-    protected String getEntityPrefix() {
-        return "product"; // 해당 메서드를 통해 "product-UUID" 형태의 code가 자동 생성됨
+    protected String getEntitySuffix() {
+        return "product";
     }
 
     @Builder
