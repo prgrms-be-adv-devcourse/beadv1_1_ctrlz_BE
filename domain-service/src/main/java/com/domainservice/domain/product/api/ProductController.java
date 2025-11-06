@@ -12,7 +12,7 @@ public class ProductController {
     @GetMapping
     public BaseResponse<String> hello() {
 
-        String data = "응답 데이터";
+        String data = "응답 데이터 추가";
 
         return new BaseResponse(
                 data,
