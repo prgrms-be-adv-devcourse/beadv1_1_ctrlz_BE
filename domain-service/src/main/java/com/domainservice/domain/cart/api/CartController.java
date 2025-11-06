@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.cart.model.dto.response.CartItemResponse;
-import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.service.CartService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,13 +29,9 @@ public class CartController {
 	 */
 	@GetMapping
 	public BaseResponse<List<CartItemResponse>> getMyCart() {
-		// TODO 유저 정보는
+		// TODO 유저 정보는 이후 수정
 		String userId = "test";
-		// TODO
-		List<CartItem> cartItemList = cartService.getCartItemList(userId);
-		return new BaseResponse<>(cartItemList.stream()
-			.map(x -> new CartItemResponse("title", "name", x.getTotalPrice(), x.getQuantity(), x.isSelected()))
-			.toList(), "장바구니 아이템 리스트 조회 성공했습니다");
+		return new BaseResponse<>(cartService.getCartItemList(userId), "장바구니 아이템 리스트 조회 성공했습니다");
 	}
 
 	/**
@@ -46,11 +41,10 @@ public class CartController {
 	@PostMapping("/items")
 	public BaseResponse<CartItemResponse> addItemToCart(
 		@RequestParam("productPostId") String productPostId, @RequestParam("quantity") int quantity) {
+		// TODO 유저 정보는 이후 수정
 		String userId = "testUser";
-		CartItem addedItem = cartService.addItem(userId, productPostId, quantity);
-		return new BaseResponse<>(
-			new CartItemResponse("title", "name", addedItem.getTotalPrice(), addedItem.getQuantity(),
-				addedItem.isSelected()), "장바구니 아이템 수량 변경 성공했습니다");
+		return new BaseResponse<>(cartService.addItem(userId, productPostId, quantity)
+			, "장바구니 아이템 수량 변경 성공했습니다");
 	}
 
 	/**
@@ -58,10 +52,8 @@ public class CartController {
 	 */
 	@PatchMapping("/items/{itemId}/quantity")
 	public BaseResponse<CartItemResponse> updateItemQuantity(@PathVariable String itemId, @RequestParam int quantity) {
-		CartItem updatedItem = cartService.updateQuantity(itemId, quantity);
 		return new BaseResponse<>(
-			new CartItemResponse("title", "name", updatedItem.getTotalPrice(), updatedItem.getQuantity(),
-				updatedItem.isSelected()), "장바구니 아이템 수량 변경 성공했습니다");
+			cartService.updateQuantity(itemId, quantity), "장바구니 아이템 수량 변경 성공했습니다");
 	}
 
 	/**
@@ -70,10 +62,8 @@ public class CartController {
 	@PatchMapping("/items/{itemId}/select")
 	public BaseResponse<CartItemResponse> toggleItemSelection(@PathVariable String itemId,
 		@RequestParam boolean selected) {
-		CartItem updatedItem = cartService.setItemSelected(itemId, selected);
 		return new BaseResponse<>(
-			new CartItemResponse("title", "name", updatedItem.getTotalPrice(), updatedItem.getQuantity(),
-				updatedItem.isSelected()), "장바구니 아이템 수량 변경 성공했습니다");
+			cartService.setItemSelected(itemId, selected), "장바구니 아이템 수량 변경 성공했습니다");
 	}
 
 	/**

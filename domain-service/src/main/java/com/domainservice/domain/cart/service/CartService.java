@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
+import com.domainservice.domain.cart.model.dto.response.CartItemResponse;
 import com.domainservice.domain.cart.model.entity.Cart;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
@@ -27,11 +28,13 @@ public class CartService {
 	 * 1. userid로 장바구니 조회 - 없으면 생성 <p></p>
 	 * 2. 장바구니id로 장바구니 아이템 리스트 조회
 	 */
-	public List<CartItem> getCartItemList(String userId) {
+	public List<CartItemResponse> getCartItemList(String userId) {
 
 		Cart cart = getCartByUserId(userId);
 
-		return cartItemJpaRepository.findByCart(cart);
+		return cartItemJpaRepository.findByCart(cart).stream()
+			.map(x -> new CartItemResponse("title", "name", x.getTotalPrice(), x.getQuantity(), x.isSelected()))
+			.toList();
 	}
 
 	public Cart getCartByUserId(String userId) {
@@ -45,7 +48,7 @@ public class CartService {
 	 * 장바구니 아이템을 순회하며 이미 추가된 아이템인지 조회 <p>
 	 * 추가된 아이템이면 수량만 업데이트 <p>
 	 */
-	public CartItem addItem(String userId, String productPostId, int quantity) {
+	public CartItemResponse addItem(String userId, String productPostId, int quantity) {
 		Cart cart = getCartByUserId(userId);
 		List<CartItem> cartItems = cart.getCartItems();
 
@@ -72,7 +75,8 @@ public class CartService {
 			targetItem = newItem;
 		}
 		cartJpaRepository.save(cart);
-		return targetItem;
+		return new CartItemResponse("title", "name", targetItem.getTotalPrice(), targetItem.getQuantity(),
+			targetItem.isSelected());
 
 	}
 
@@ -82,13 +86,16 @@ public class CartService {
 	 * 수량 업데이트 <p>
 	 * 변경사항 저장 <p>
 	 */
-	public CartItem updateQuantity(String itemId, int quantity) {
+	public CartItemResponse updateQuantity(String itemId, int quantity) {
 		CartItem cartItem = cartItemJpaRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
 
 		cartItem.updateQuantity(quantity);
 
-		return cartItemJpaRepository.save(cartItem);
+		CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
+
+		return new CartItemResponse("title", "name", savedCartItem.getTotalPrice(), savedCartItem.getQuantity(),
+			savedCartItem.isSelected());
 	}
 
 	/**
@@ -96,13 +103,15 @@ public class CartService {
 	 * 선택 상태 업데이트
 	 * 변경사항 저장
 	 */
-	public CartItem setItemSelected(String itemId, boolean selected) {
+	public CartItemResponse setItemSelected(String itemId, boolean selected) {
 		CartItem cartItem = cartItemJpaRepository.findById(itemId)
 			.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
 
 		cartItem.setSelected(selected);
 
-		return cartItemJpaRepository.save(cartItem);
+		CartItem savedItem = cartItemJpaRepository.save(cartItem);
+		return new CartItemResponse("title", "name", savedItem.getTotalPrice(), savedItem.getQuantity(),
+			savedItem.isSelected());
 	}
 
 	/**
