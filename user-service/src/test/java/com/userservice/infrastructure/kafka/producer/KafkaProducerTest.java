@@ -50,7 +50,7 @@ class KafkaProducerTest {
 
 		//when
 		testKafkaProducer.send(cartTopicCommand, event);
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 
 		//then
 		assertThat(testKafkaConsumer.getTestStore().size()).isEqualTo(1);
@@ -64,7 +64,7 @@ class KafkaProducerTest {
 
 		//when
 		testKafkaProducer.send(depositTopicCommand, event);
-		Thread.sleep(1000);
+		Thread.sleep(1500);
 
 		//then
 		assertThat(testKafkaConsumer.getTestStore().size()).isEqualTo(1);
