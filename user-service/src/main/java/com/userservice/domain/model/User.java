@@ -63,6 +63,6 @@ public class User {
 	}
 
 	public List<String> getRolesToString() {
-		return List.of(roles.toArray(new String[0]));
+		return roles.stream().map(Enum::name).toList();
 	}
 }
