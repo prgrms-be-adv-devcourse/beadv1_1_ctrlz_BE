@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.common.asset.image.domain.entity.Image;
 import com.common.asset.image.domain.repository.ImageRepository;
+import com.common.asset.image.domain.service.AssetService;
 import com.common.exception.CustomException;
 import com.common.exception.vo.FileExceptionCode;
 
@@ -24,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +40,6 @@ public class ImageService implements AssetService<Image> {
 	private long maxSize;
 
 	private final S3Client s3Client;
-	private final S3Presigner s3Presigner;
 	private final ImageRepository imageRepository;
 	private final ImageCompressor compressor;
 

@@ -1,4 +1,4 @@
-package com.common.asset.image.application;
+package com.common.asset.image.domain.service;
 
 import org.springframework.web.multipart.MultipartFile;
 

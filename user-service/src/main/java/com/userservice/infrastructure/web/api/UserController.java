@@ -1,17 +1,19 @@
 package com.userservice.infrastructure.web.api;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.common.asset.image.infrastructure.ProfileImageUploadClient;
 import com.common.model.web.BaseResponse;
 import com.userservice.application.adapter.dto.UserContext;
 import com.userservice.application.port.in.UserCommandUseCase;
 import com.userservice.domain.model.User;
-import com.userservice.infrastructure.web.mapper.UserContextMapper;
 import com.userservice.infrastructure.web.dto.UserCreateRequest;
 import com.userservice.infrastructure.web.dto.UserCreateResponse;
+import com.userservice.infrastructure.web.mapper.UserContextMapper;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +24,16 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserCommandUseCase userCommandUseCase;
+	private final ProfileImageUploadClient profileImageUploadClient;
 
 	@PostMapping
 	public BaseResponse<UserCreateResponse> createUser(
-		@Valid @RequestBody UserCreateRequest request
+		@RequestPart("profileImage") MultipartFile profileImage,
+		@Valid @RequestPart("request") UserCreateRequest request
 	) {
 
-		UserContext context = UserContextMapper.toContext(request);
+		String imageUrl = profileImageUploadClient.uploadImage(profileImage).profileUrl();
+		UserContext context = UserContextMapper.toContext(request, imageUrl);
 		User user = userCommandUseCase.create(context);
 
 		return new BaseResponse<>(new UserCreateResponse(

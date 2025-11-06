@@ -5,7 +5,7 @@ import com.userservice.domain.vo.OAuthId;
 import com.userservice.infrastructure.web.dto.UserCreateRequest;
 
 public class UserContextMapper {
-	public static UserContext toContext(UserCreateRequest request) {
+	public static UserContext toContext(UserCreateRequest request, String profileUrl) {
 		return UserContext.builder()
 			.phoneNumber(request.phoneNumber())
 			.addressDetails(request.details())
@@ -18,7 +18,7 @@ public class UserContextMapper {
 			.zipCode(request.zipCode())
 			.nickname(request.nickname())
 			.oauthId(OAuthId.GOOGLE.name())
-			.profileImageUrl(request.profileImageUrl())
+			.profileImageUrl(profileUrl)
 			.build();
 	}
 }
