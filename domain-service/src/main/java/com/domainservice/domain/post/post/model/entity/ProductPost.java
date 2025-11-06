@@ -1,6 +1,9 @@
 package com.domainservice.domain.post.post.model.entity;
 
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+
 import com.common.model.persistence.BaseEntity;
+import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
@@ -101,6 +104,33 @@ public class ProductPost extends BaseEntity {
                 .toList();
 
         this.productPostTags.addAll(productPostTags);
+    }
+
+
+    public void validateDelete(String userId) {
+
+        // TODO: 1. 요청자가 admin 이라면 통과
+
+        // TODO: 2. 인증된 회원의 요청인지 확인 (추후수정)
+        if (userId == null || userId.isBlank()) {
+            throw new ProductPostException(UNAUTHORIZED);
+        }
+
+        // 삭제 여부 확인
+        if (this.getDeleteStatus() == DeleteStatus.D) {
+            throw new ProductPostException(ALREADY_DELETED);
+        }
+
+        // 거래가 진행중인 상품은 삭제 불가
+        if (this.tradeStatus == TradeStatus.PROCESSING) {
+            throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
+        }
+
+        // 게시글을 삭제하고자 하는 사람이 본인이 맞는지 확인
+        if (!this.userId.equals(userId)) {
+            throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
+        }
+
     }
 
 }
