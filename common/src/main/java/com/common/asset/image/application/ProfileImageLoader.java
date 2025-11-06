@@ -18,7 +18,7 @@ public class ProfileImageLoader implements ProfileImageUploadClient {
 
 	@Override
 	public ImageUrlResponse uploadImage(MultipartFile file) {
-		Image upload = assetService.upload(file);
+		Image upload = assetService.uploadUserProfile(file);
 		return new ImageUrlResponse(upload.getS3Url());
 	}
 }

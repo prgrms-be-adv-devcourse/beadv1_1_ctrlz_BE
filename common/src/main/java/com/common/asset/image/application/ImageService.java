@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.common.asset.image.domain.entity.Image;
+import com.common.asset.image.domain.entity.ImageTarget;
 import com.common.asset.image.domain.repository.ImageRepository;
 import com.common.asset.image.domain.service.AssetService;
 import com.common.exception.CustomException;
@@ -44,7 +45,7 @@ public class ImageService implements AssetService<Image> {
 	private final ImageCompressor compressor;
 
 	@Override
-	public Image upload(MultipartFile file) {
+	public Image uploadUserProfile(MultipartFile file) {
 
 		validateFile(file);
 
@@ -52,7 +53,7 @@ public class ImageService implements AssetService<Image> {
 		File compressedFile = compressor.compressToWebp(originalFileName, file);
 
 		String storedFileName = generateFileName(compressedFile.getName());
-		String s3key = generateS3Key(storedFileName);
+		String s3key = generateS3Key(storedFileName, ImageTarget.USER.name());
 		String s3Url = getS3Url(bucketName, s3key);
 
 		try {
@@ -67,6 +68,7 @@ public class ImageService implements AssetService<Image> {
 				.originalContentType(file.getContentType())
 				.compressedFileSize(compressedFile.length())
 				.convertedContentType(Files.probeContentType(compressedFile.toPath()))
+				.imageTarget(ImageTarget.USER)
 				.build();
 
 			return imageRepository.save(image);

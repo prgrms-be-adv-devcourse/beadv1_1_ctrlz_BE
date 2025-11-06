@@ -26,7 +26,7 @@ public class ImageTestController {
 
 	@PostMapping
 	public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile profileImage) {
-		Image upload = assetService.upload(profileImage);
+		Image upload = assetService.uploadUserProfile(profileImage);
 		return ResponseEntity.ok(upload);
 	}
 
