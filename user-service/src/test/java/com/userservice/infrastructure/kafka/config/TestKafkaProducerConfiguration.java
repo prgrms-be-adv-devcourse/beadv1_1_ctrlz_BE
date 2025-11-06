@@ -27,6 +27,8 @@ public class TestKafkaProducerConfiguration {
 		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		properties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 15000);
+		properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 15000);
 		properties.put(ProducerConfig.ACKS_CONFIG, "all");
 		properties.put("allow.auto.create.topics", false);
 

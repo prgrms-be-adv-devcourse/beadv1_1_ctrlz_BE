@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.userservice.application.adapter.event.DepositCreatedEvent;
 import com.userservice.infrastructure.kafka.TestKafkaConsumer;
 import com.userservice.infrastructure.kafka.config.TestKafkaProducer;
 import com.userservice.application.adapter.event.CartCreatedEvent;
+
+import software.amazon.awssdk.services.s3.S3Client;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -24,6 +27,9 @@ import com.userservice.application.adapter.event.CartCreatedEvent;
 	ports = 9092
 )
 class KafkaProducerTest {
+
+	@MockitoBean
+	private S3Client s3Client;
 
 	@Autowired
 	TestKafkaProducer testKafkaProducer;

@@ -1,10 +1,24 @@
 spring:
-  autoconfigure:
-    exclude: io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
   profiles:
     active: test
+  autoconfigure:
+    exclude: io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
+
+  cloud:
+    aws:
+      credentials:
+        secret-key: dsf
+        access-key: sdf
+      region:
+        static: df
+      s3:
+        enabled: true
+
+
   kafka:
     bootstrap-servers: localhost:9092
+
+
 custom:
   config:
     topic-partitions: 1
@@ -18,5 +32,10 @@ custom:
     topic:
       command: deposit-command
 
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+
+  bucketname: sdfsdf
 
 
