@@ -14,10 +14,13 @@ import com.common.asset.image.domain.entity.Image;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 테스트용 컨트롤러입니다.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/images")
-public class ImageController {
+public class ImageTestController {
 
 	private final AssetService<Image> assetService;
 

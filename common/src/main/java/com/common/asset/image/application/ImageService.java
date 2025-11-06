@@ -1,6 +1,6 @@
 package com.common.asset.image.application;
 
-import static com.common.asset.image.application.utils.FileUtils.*;
+import static com.common.asset.image.application.FileUtils.*;
 import static java.nio.file.Files.*;
 
 import java.io.File;
