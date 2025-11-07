@@ -31,6 +31,6 @@ aes:
   key: 1234567890123456
 
 coolsms:
-  apiKey: asdfasdf
-  secretKey: asdfasdf
-  from: asdfasdf
+  apiKey: aaaaaaaaaaaaaaaa
+  secretKey: aaaaaaaaaaaaaaaa
+  from: 01011111111
