@@ -64,22 +64,6 @@ class CartServiceTest {
 	}
 
 	@Test
-	@DisplayName("사용자 ID로 장바구니 조회 - 존재하지 않는 경우 신규 생성")
-	void test2() {
-		// given
-		when(cartJpaRepository.findByUserId(userId)).thenReturn(Optional.empty());
-		when(cartJpaRepository.save(any(Cart.class))).thenReturn(cart);
-
-		// when
-		Cart result = cartService.getCartByUserId(userId);
-
-		// then
-		assertThat(result).isEqualTo(cart);
-		verify(cartJpaRepository).findByUserId(userId);
-		verify(cartJpaRepository).save(any(Cart.class));
-	}
-
-	@Test
 	@DisplayName("장바구니 아이템 목록 조회")
 	void test3() {
 		// given

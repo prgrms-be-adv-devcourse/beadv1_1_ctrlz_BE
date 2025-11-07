@@ -39,7 +39,7 @@ public class CartService {
 
 	public Cart getCartByUserId(String userId) {
 		return cartJpaRepository.findByUserId(userId)
-			.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
+			.orElseThrow(() -> new CustomException(CartExceptionCode.CART_NOT_FOUND.getMessage()));
 	}
 
 	public void addCart(String userId) {
