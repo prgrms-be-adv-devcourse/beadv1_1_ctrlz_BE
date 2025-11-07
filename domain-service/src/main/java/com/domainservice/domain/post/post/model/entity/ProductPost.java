@@ -47,19 +47,13 @@ public class ProductPost extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    /**
-     * 상품 상태 (NEW, GOOD, FAIR)
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ProductStatus status;
+    private ProductStatus status; // 상품 상태 (NEW, GOOD, FAIR)
 
-    /**
-     * 거래 상태 (SELLING, PROCESSING, SOLDOUT)
-     */
     @Enumerated(EnumType.STRING)
     @Column(name = "trade_status", nullable = false, length = 20)
-    private TradeStatus tradeStatus;
+    private TradeStatus tradeStatus; // 거래 상태 (SELLING, PROCESSING, SOLDOUT)
 
     // TODO: s3 구현 완료 시 이미지를 여러개 업로드 할 수 있게 수정 필요
     @Column(name = "image_url", columnDefinition = "TEXT")
@@ -70,14 +64,6 @@ public class ProductPost extends BaseEntity {
 
     @Column(name = "liked_count", nullable = false)
     private Integer likedCount;
-
-    /**
-     * BaseEntity의 추상 메서드 구현
-     */
-    @Override
-    protected String getEntitySuffix() {
-        return "product";
-    }
 
     @Builder
     public ProductPost(String userId, String categoryId,
@@ -96,9 +82,19 @@ public class ProductPost extends BaseEntity {
         this.likedCount = 0;
     }
 
-    /**
-     * 게시글 정보 수정
-     */
+    @Override
+    protected String getEntitySuffix() {
+        return "product";
+    }
+
+    /*
+     =============== 비즈니스 로직 ===============
+    */
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+
     public void update(UpdateProductPostRequest request) {
         if (request.title() != null) this.title = request.title();
         if (request.name() != null) this.name = request.name();
@@ -106,13 +102,9 @@ public class ProductPost extends BaseEntity {
         if (request.description() != null) this.description = request.description();
         if (request.status() != null) this.status = request.status();
         if (request.imageUrl() != null) this.imageUrl = request.imageUrl();
-
-        this.update(); // updateAt 최신화
+        this.update(); // updatedAt 최신화
     }
 
-    /**
-     * 태그 목록 추가
-     */
     public void addTags(List<Tag> tags) {
         List<ProductPostTag> productPostTags = tags.stream()
                 .map(tag -> ProductPostTag
@@ -125,18 +117,14 @@ public class ProductPost extends BaseEntity {
         this.productPostTags.addAll(productPostTags);
     }
 
-    /**
-     * 태그 전체 교체
-     */
+    // 입력 받은 태그 목록으로 교체
     public void replaceTags(List<Tag> newTags) {
-
         if (!this.productPostTags.isEmpty())
             this.productPostTags.clear();
 
         if (newTags != null && !newTags.isEmpty()) {
             addTags(newTags);
         }
-
     }
 
     /*

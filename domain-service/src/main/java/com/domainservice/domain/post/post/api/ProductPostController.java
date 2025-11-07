@@ -29,7 +29,6 @@ public class ProductPostController {
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID를 사용
         ProductPostResponse response = productPostService.createProductPost(request, userId);
-
         return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
     }
 
@@ -61,6 +60,16 @@ public class ProductPostController {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID를 사용
         ProductPostResponse response = productPostService.updateProductPost(userId, postId, request);
         return new BaseResponse<>(response, "상품 게시글이 수정되었습니다.");
+    }
+
+    /**
+     * 단일 게시글 조회
+     */
+    @GetMapping("{postId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<ProductPostResponse> getProductPostById(@PathVariable String postId) {
+        ProductPostResponse response = productPostService.getProductPostById(postId);
+        return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
     }
 
 }

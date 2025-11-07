@@ -91,4 +91,22 @@ public class ProductPostService {
             productPost.replaceTags(tags);
         }
     }
+
+    public ProductPostResponse getProductPostById(String postId) {
+
+        ProductPost productPost = productPostRepository.findById(postId)
+                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+
+        productPost.incrementViewCount();
+
+        return ProductPostMapper.toProductPostResponse(productPost);
+    }
+
+    // TODO: 게시글 목록 조회 (정렬)
+    // TODO: 상품 판매상태 변경
+    // TODO: 내가 구매한 상품 조회
+    // TODO: 내가 판매한 상품 조회
+    // TODO: 좋아요 로직 구현
+    // TODO: 찜한 게시물
+    // TODO: 최근 본 상품 redis?
 }
