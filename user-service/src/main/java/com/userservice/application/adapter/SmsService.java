@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.sms.adapter;
+package com.userservice.application.adapter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
+import com.userservice.application.port.in.SellerVerificationUseCase;
 import com.userservice.infrastructure.cache.vo.CacheType;
+import com.userservice.infrastructure.sms.adapter.SmsClientAdapter;
 import com.userservice.infrastructure.sms.utils.VerificationCodeSupplier;
 
 import jakarta.annotation.PostConstruct;
@@ -19,11 +21,10 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Service
-public class SmsService {
+public class SmsService implements SellerVerificationUseCase {
 
 	private final CacheManager cacheManager;
-	private final SmsClient smsClient;
-	private final AtomicInteger counter = new AtomicInteger(0);
+	private final SmsClientAdapter smsClientAdapter;
 	private Cache verificationTryCache;
 
 	@PostConstruct
@@ -31,11 +32,11 @@ public class SmsService {
 		verificationTryCache = cacheManager.getCache(CacheType.VERIFICATION_TRY.name());
 	}
 
-	public void sendSms(String phoneNumber) {
+	@Override
+	public void sendVerificationCode(String phoneNumber) {
+		smsClientAdapter.send(phoneNumber, VerificationCodeSupplier.generateCode());
 		applyVerificationCount(phoneNumber);
-		smsClient.send(phoneNumber, VerificationCodeSupplier.generateCode());
 	}
-
 
 
 	// 인증 횟수 추가/체크
@@ -47,7 +48,7 @@ public class SmsService {
 
 		AtomicInteger count = verificationTryCache.get(phoneNumber, AtomicInteger.class);
 		if (count == null) {
-			count = new AtomicInteger(0);
+			count = new AtomicInteger(1);
 			verificationTryCache.put(phoneNumber, count);
 		}
 
