@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
+import com.domainservice.domain.cart.model.dto.CreateCartRequest;
 import com.domainservice.domain.cart.model.dto.response.CartItemResponse;
 import com.domainservice.domain.cart.service.CartService;
 
@@ -75,4 +77,14 @@ public class CartController {
 		return new BaseResponse<>(null, "삭제 완료");
 	}
 
+	/**
+	 * 장바구니 생성
+	 * 사용자별 장바구니 생성 (이미 존재하는 경우 에러 반환)
+	 */
+	@PostMapping
+	public BaseResponse<String> createCart(@RequestBody CreateCartRequest request) {
+		String userId = "testUser";
+		cartService.addCart(userId);
+		return new BaseResponse<>(null, "장바구니가 성공적으로 생성되었습니다");
+	}
 }

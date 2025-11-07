@@ -1,6 +1,7 @@
 package com.domainservice.domain.cart.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +23,11 @@ public class CartService {
 	private final CartJpaRepository cartJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
 
-	// TODO 회원가입 프로듀서 전송 시 생성 로직 추가 필요!!
-
 	/**
 	 * 1. userid로 장바구니 조회 - 없으면 생성 <p></p>
 	 * 2. 장바구니id로 장바구니 아이템 리스트 조회
 	 */
+	@Transactional(readOnly = true)
 	public List<CartItemResponse> getCartItemList(String userId) {
 
 		Cart cart = getCartByUserId(userId);
@@ -39,7 +39,15 @@ public class CartService {
 
 	public Cart getCartByUserId(String userId) {
 		return cartJpaRepository.findByUserId(userId)
-			.orElseGet(() -> cartJpaRepository.save(Cart.builder().userId(userId).build()));
+			.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
+	}
+
+	public void addCart(String userId) {
+		Optional<Cart> cart = cartJpaRepository.findByUserId(userId);
+		if (cart.isPresent()) {
+			throw new CustomException(CartExceptionCode.CART_ALREADY_EXISTS.getMessage());
+		}
+		cartJpaRepository.save(Cart.builder().userId(userId).build());
 	}
 
 	/**
