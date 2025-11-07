@@ -50,6 +50,10 @@ public abstract class BaseEntity {
 		this.updatedAt = LocalDateTime.now();
 	}
 
+    public void update() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass())

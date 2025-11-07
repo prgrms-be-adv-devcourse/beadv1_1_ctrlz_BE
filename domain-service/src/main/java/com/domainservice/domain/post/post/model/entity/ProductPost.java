@@ -1,9 +1,8 @@
 package com.domainservice.domain.post.post.model.entity;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
-
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
@@ -16,6 +15,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 엔티티 (Product_posts 테이블)
@@ -60,6 +61,7 @@ public class ProductPost extends BaseEntity {
     @Column(name = "trade_status", nullable = false, length = 20)
     private TradeStatus tradeStatus;
 
+    // TODO: s3 구현 완료 시 이미지를 여러개 업로드 할 수 있게 수정 필요
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
@@ -94,6 +96,23 @@ public class ProductPost extends BaseEntity {
         this.likedCount = 0;
     }
 
+    /**
+     * 게시글 정보 수정
+     */
+    public void update(UpdateProductPostRequest request) {
+        if (request.title() != null) this.title = request.title();
+        if (request.name() != null) this.name = request.name();
+        if (request.price() != null) this.price = request.price();
+        if (request.description() != null) this.description = request.description();
+        if (request.status() != null) this.status = request.status();
+        if (request.imageUrl() != null) this.imageUrl = request.imageUrl();
+
+        this.update(); // updateAt 최신화
+    }
+
+    /**
+     * 태그 목록 추가
+     */
     public void addTags(List<Tag> tags) {
         List<ProductPostTag> productPostTags = tags.stream()
                 .map(tag -> ProductPostTag
@@ -106,12 +125,29 @@ public class ProductPost extends BaseEntity {
         this.productPostTags.addAll(productPostTags);
     }
 
+    /**
+     * 태그 전체 교체
+     */
+    public void replaceTags(List<Tag> newTags) {
+
+        if (!this.productPostTags.isEmpty())
+            this.productPostTags.clear();
+
+        if (newTags != null && !newTags.isEmpty()) {
+            addTags(newTags);
+        }
+
+    }
+
+    /*
+    ================ validate ================
+     */
 
     public void validateDelete(String userId) {
 
         // TODO: 1. 요청자가 admin 이라면 통과
 
-        // TODO: 2. 인증된 회원의 요청인지 확인 (추후수정)
+        // TODO: 2. 인증된 회원의 요청인지 확인 (auth 관련 추후수정)
         if (userId == null || userId.isBlank()) {
             throw new ProductPostException(UNAUTHORIZED);
         }
@@ -131,6 +167,29 @@ public class ProductPost extends BaseEntity {
             throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
         }
 
+    }
+
+    public void validateUpdate(String userId) {
+
+        // TODO: 1. 인증된 회원의 요청인지 확인 (auth 관련 추후수정)
+        if (userId == null || userId.isBlank()) {
+            throw new ProductPostException(UNAUTHORIZED);
+        }
+
+        // 2. 이미 삭제 요청된 게시글이면 삭제 불가
+        if (this.getDeleteStatus() == DeleteStatus.D) {
+            throw new ProductPostException(ALREADY_DELETED);
+        }
+
+        // 3. 게시글 작성자 본인인지 확인
+        if (!this.userId.equals(userId)) {
+            throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
+        }
+
+        // 4. 판매 완료된 상품은 수정 불가
+        if (this.tradeStatus == TradeStatus.SOLDOUT) {
+            throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
+        }
     }
 
 }
