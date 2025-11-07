@@ -12,7 +12,7 @@ public class FakeRepository implements UserPersistencePort {
 
 	@Override
 	public User save(User user) {
-		return null;
+		return User.builder().id("test").build();
 	}
 
 	@Override
@@ -43,5 +43,10 @@ public class FakeRepository implements UserPersistencePort {
 	@Override
 	public boolean existsNickname(String nickname) {
 		return true;
+	}
+
+	@Override
+	public void delete(String id) {
+
 	}
 }

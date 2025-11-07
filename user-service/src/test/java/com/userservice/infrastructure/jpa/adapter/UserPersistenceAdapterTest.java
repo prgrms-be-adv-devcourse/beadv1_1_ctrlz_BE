@@ -9,13 +9,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import com.common.model.persistence.BaseEntity;
 import com.userservice.domain.model.User;
 import com.userservice.domain.vo.Address;
 import com.userservice.domain.vo.UserRole;
+import com.userservice.infrastructure.jpa.converter.AESUtils;
 import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
 
+@Import(AESUtils.class)
 @DataJpaTest
 class UserPersistenceAdapterTest {
 

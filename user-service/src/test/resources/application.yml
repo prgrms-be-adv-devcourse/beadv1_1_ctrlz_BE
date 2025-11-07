@@ -38,4 +38,5 @@ custom:
 
   bucketname: sdfsdf
 
-
+aes:
+  key: 1234567890123456

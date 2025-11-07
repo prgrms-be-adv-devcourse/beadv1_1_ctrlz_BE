@@ -8,15 +8,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import com.userservice.domain.model.User;
 import com.userservice.domain.vo.Address;
 import com.userservice.domain.vo.UserRole;
 import com.userservice.infrastructure.jpa.adapter.UserPersistenceAdapter;
+import com.userservice.infrastructure.jpa.converter.AESUtils;
 import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
 import com.userservice.infrastructure.reader.port.UserReaderPort;
 import com.userservice.infrastructure.reader.port.dto.UserDescription;
 
+@Import(AESUtils.class)
 @DataJpaTest
 class UserReaderAdapterTest {
 
