@@ -7,6 +7,7 @@ import com.domainservice.domain.reivew.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +15,7 @@ public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
 
+	@Transactional
 	public Review createReview(ReviewRequest request) {
 		Review newReview = Review.builder()
 			.contents(request.contents())
@@ -25,6 +27,7 @@ public class ReviewService {
 
 	}
 
+	@Transactional
 	public Review updateReview(String reviewId, ReviewRequest request) {
 		//TODO: 오류 처리 로직을 한번 볼 필요가 있음, 임시로 IllegalArgumentException으로 작성
 		Review findReview = reviewRepository.findById(reviewId)
