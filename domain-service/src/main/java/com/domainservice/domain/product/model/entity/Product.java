@@ -18,14 +18,6 @@ public class Product extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    /*
-    ...
-     */
-
-    @Override
-    protected String getEntityPrefix() {
-        return "product"; // 해당 메서드를 통해 "product-UUID" 형태의 code가 자동 생성됨
-    }
 
     @Builder
     public Product(String title, String description) {
@@ -33,4 +25,8 @@ public class Product extends BaseEntity {
         this.description = description;
     }
 
+	@Override
+	protected String getEntitySuffix() {
+		return "";
+	}
 }

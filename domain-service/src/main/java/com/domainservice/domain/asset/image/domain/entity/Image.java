@@ -1,4 +1,4 @@
-package com.common.asset.image.domain.entity;
+package com.domainservice.domain.asset.image.domain.entity;
 
 import com.common.model.persistence.BaseEntity;
 
