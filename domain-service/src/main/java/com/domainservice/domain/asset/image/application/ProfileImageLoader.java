@@ -1,12 +1,12 @@
-package com.common.asset.image.application;
+package com.domainservice.domain.asset.image.application;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.asset.image.domain.entity.Image;
-import com.common.asset.image.domain.service.AssetService;
-import com.common.asset.image.infrastructure.ProfileImageUploadClient;
-import com.common.asset.image.infrastructure.dto.ImageUrlResponse;
+import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.asset.image.domain.service.AssetService;
+import com.domainservice.domain.asset.image.infrastructure.ProfileImageUploadClient;
+import com.domainservice.domain.asset.image.infrastructure.dto.ImageUrlResponse;
 
 import lombok.RequiredArgsConstructor;
 

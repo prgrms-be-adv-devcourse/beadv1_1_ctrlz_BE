@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ImageUtils {
-
 	public static String getFileExtension(String fileName) {
 		int lastIndexOf = fileName.lastIndexOf(".");
 		if (lastIndexOf == -1) {
@@ -34,5 +33,4 @@ public class ImageUtils {
 	public static String getS3Url(String bucketName, String s3Key) {
 		return "https://%s.s3.amazonaws.com/%s".formatted(bucketName, s3Key);
 	}
-
 }

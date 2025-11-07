@@ -10,9 +10,10 @@ public interface ImageRepository extends JpaRepository<Image, String> {
 	Image save(Image image);
 
 	Optional<Image> findById(String id);
-	Optional<Image> findByS3Key(String s3Key);
-    Optional<Image> findByS3Url(String s3Url);
 
-    void deleteById(String id);
-    void deleteByS3Key(String s3Key);
+	Optional<Image> findByS3Key(String s3Key);
+
+	void deleteByS3Key(String s3Key);
+
+	void deleteById(String id);
 }
