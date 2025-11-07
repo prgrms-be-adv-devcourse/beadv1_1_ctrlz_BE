@@ -1,6 +1,5 @@
 package com.domainservice.domain.asset.image.infrastructure.api;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -9,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.service.AssetService;
-import com.domainservice.domain.asset.image.infrastructure.api.dto.ImageResponse;
 
 import lombok.RequiredArgsConstructor;
 
