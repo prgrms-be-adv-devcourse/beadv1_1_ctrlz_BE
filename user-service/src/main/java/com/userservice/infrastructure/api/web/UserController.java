@@ -82,14 +82,16 @@ public class UserController {
 		return new BaseResponse<>(null, "판매자 등록이 완료됐습니다.");
 	}
 
-	@GetMapping("/sellers/verification/{id}")
+	@PostMapping("/sellers/verification/{id}")
 	public void sendVerificationCode(
 		@PathVariable String id,
 		@RequestBody VerificationReqeust request
 	) {
 		User user = userCommandUseCase.getUser(id);
+
 		SellerVerificationContext sellerVerificationContext =
 			SellerVerificationContext.forSending(request.phoneNumber(), id, user);
+
 		sellerVerificationUseCase.requestVerificationCode(sellerVerificationContext);
 	}
 }
