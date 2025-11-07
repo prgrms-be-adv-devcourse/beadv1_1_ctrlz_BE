@@ -1,5 +1,7 @@
 package com.userservice.infrastructure.sms.adapter;
 
+import java.util.concurrent.CountDownLatch;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,8 @@ public class SmsClientAdapter implements SellerVerificationClient {
 
 	private DefaultMessageService messageService;
 
+	private final CountDownLatch smsLatch = new CountDownLatch(10);
+
 	@PostConstruct
 	public void init() {
 		messageService = SolapiClient.INSTANCE.createInstance(apiKey, secretKey);
@@ -36,6 +40,12 @@ public class SmsClientAdapter implements SellerVerificationClient {
 
 	@Override
 	public void send(String phoneNumber, String verificationCode) {
+
+		if (smsLatch.getCount() == 0) {
+			log.warn("SMS 전송 횟수 초과 - 전화번호: {}", phoneNumber);
+			throw new CustomException("SMS는 더 이상 사용할 수 없습니다.");
+		}
+
 		Message message = new Message();
 		message.setFrom(from);
 		message.setTo(phoneNumber.replaceAll("-", ""));
@@ -48,6 +58,7 @@ public class SmsClientAdapter implements SellerVerificationClient {
 
 		try {
 			messageService.send(message);
+			smsLatch.countDown();
 		} catch (Exception e) {
 			throw new CustomException(e.getMessage());
 		}
