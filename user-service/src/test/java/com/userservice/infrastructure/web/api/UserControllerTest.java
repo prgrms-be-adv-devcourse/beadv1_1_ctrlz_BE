@@ -21,13 +21,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.asset.image.infrastructure.ProfileImageUploadClient;
-import com.common.asset.image.infrastructure.dto.ImageUrlResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.userservice.infrastructure.api.dto.UserCreateRequest;
 import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
 import com.userservice.infrastructure.writer.CartClient;
+import com.userservice.infrastructure.writer.ProfileImageClient;
 import com.userservice.infrastructure.writer.dto.CartCreateRequest;
+import com.userservice.infrastructure.writer.dto.ImageUrlResponse;
 
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -45,11 +45,12 @@ class UserControllerTest {
 
 	@Autowired
 	private UserJpaRepository userJpaRepository;
+
 	@MockitoBean
 	private S3Client s3Client;
 
 	@MockitoBean
-	private ProfileImageUploadClient profileImageUploadClient;
+	private ProfileImageClient profileImageClient;
 
 	@MockitoBean
 	private CartClient cartClient;
@@ -71,7 +72,7 @@ class UserControllerTest {
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
 			new ImageUrlResponse("profileImageUrl"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(200).body(any()));
 
@@ -99,7 +100,7 @@ class UserControllerTest {
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
 			new ImageUrlResponse("profileImageUrl"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(400).body(any()));
 
@@ -123,7 +124,7 @@ class UserControllerTest {
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
 			new ImageUrlResponse("profileImageUrl"));
 
 		// when & then
