@@ -1,9 +1,7 @@
 package com.userservice.infrastructure.kafka.config;
 
 import org.junit.jupiter.api.Disabled;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 @Disabled("kafka 도입 시 다시 테스트 합니다.")
 @Slf4j
 @RequiredArgsConstructor
-@Profile("test")
-@Component
+// @Profile("test")
+// @Component
 public class TestKafkaProducer {
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;
