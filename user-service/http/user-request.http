@@ -24,4 +24,9 @@ Content-Type: application/json
   "nickname": "nickname_9ca5bcb1ad24"
 }
 
---WebAppBoundary--
+> {%
+    client.global.set("id", response.body.data.userId);
+%}
+
+### 회원 정보 조회
+GET localhost:8080/api/users/{{id}}

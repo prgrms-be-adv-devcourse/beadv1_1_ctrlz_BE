@@ -24,10 +24,10 @@ public class Image extends BaseEntity {
 	@Column(nullable = false)
 	private String storedFileName;
 
-	@Column(nullable = false, length = 1000)
+	@Column(name = "s3_url", nullable = false, length = 1000)
 	private String s3Url;
 
-	@Column(nullable = false)
+	@Column(name = "s3_key", nullable = false)
 	private String s3Key;
 
 	@Column(nullable = false)
@@ -44,7 +44,7 @@ public class Image extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private	ImageTarget imageTarget;
+	private ImageTarget imageTarget;
 
 	@Builder
 	public Image(
@@ -55,7 +55,8 @@ public class Image extends BaseEntity {
 		Long originalFileSize,
 		String originalContentType,
 		Long compressedFileSize,
-		String convertedContentType, ImageTarget imageTarget
+		String convertedContentType,
+		ImageTarget imageTarget
 	) {
 		this.originalFileName = originalFileName;
 		this.storedFileName = storedFileName;

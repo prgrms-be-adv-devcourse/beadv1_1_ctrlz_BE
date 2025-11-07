@@ -1,5 +1,7 @@
 package com.userservice.infrastructure.api.web;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -14,6 +16,8 @@ import com.userservice.domain.model.User;
 import com.userservice.infrastructure.api.dto.UserCreateRequest;
 import com.userservice.infrastructure.api.dto.UserCreateResponse;
 import com.userservice.infrastructure.api.mapper.UserContextMapper;
+import com.userservice.infrastructure.reader.port.UserReaderPort;
+import com.userservice.infrastructure.reader.port.dto.UserDescription;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/users")
 public class UserController {
 
+	private final UserReaderPort userReaderPort;
 	private final UserCommandUseCase userCommandUseCase;
 	private final ProfileImageUploadClient profileImageUploadClient;
 
@@ -42,5 +47,10 @@ public class UserController {
 			user.getNickname()
 		),
 			"가입 완료");
+	}
+
+	@GetMapping("/{id}")
+	public UserDescription getUser(@PathVariable String id) {
+		return userReaderPort.getUserDescription(id);
 	}
 }
