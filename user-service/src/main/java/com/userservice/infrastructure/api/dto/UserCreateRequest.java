@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record UserCreateRequest(
 	String email,
-	String password,
 	@NotBlank(message = "연락처를 입력해주세요")
 	String phoneNumber,
 	@NotBlank(message = "거리를 입력해주세요.")

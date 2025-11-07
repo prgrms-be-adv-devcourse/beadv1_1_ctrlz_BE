@@ -11,7 +11,7 @@ public class UserContextMapper {
 			.addressDetails(request.details())
 			.email(request.email())
 			.name(request.name())
-			.password(request.password().isBlank() ? "default" : request.password())
+			.password("default")
 			.state(request.state())
 			.street(request.street())
 			.city(request.city())
