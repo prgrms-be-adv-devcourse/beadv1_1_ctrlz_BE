@@ -1,6 +1,6 @@
 package com.domainservice.domain.reivew.model.dto.request;
 
-public record CreateReviewRequest(
+public record ReviewRequest(
 
 	String contents,
 	Integer userRating,
