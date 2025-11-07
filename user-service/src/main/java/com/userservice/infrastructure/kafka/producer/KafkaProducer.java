@@ -6,8 +6,12 @@ import org.springframework.scheduling.annotation.Async;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 추후 사용 예정
+ */
 @Slf4j
 @RequiredArgsConstructor
+
 // @Component
 public class KafkaProducer {
 
