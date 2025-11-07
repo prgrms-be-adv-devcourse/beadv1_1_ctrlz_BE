@@ -1,0 +1,55 @@
+### 회원가입
+POST http://localhost:8080/api/users
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="profileImage"; filename="test.png"
+Content-Type: image/png
+
+< ./test.png
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "email": "email_c166bd3665aa",
+  "phoneNumber": "phoneNumber_a461870f84fb",
+  "street": "street_f42fa85a43a1",
+  "zipCode": "zipCode_3f828ede8a5d",
+  "state": "state_b33630e89d76",
+  "city": "city_6232d43546ca",
+  "details": "details_2de90f41ec58",
+  "name": "name_435c00db2258",
+  "nickname": "nickname_9ca5bcb1ad24"
+}
+
+> {%
+    client.global.set("id", response.body.data.userId);
+%}
+
+### 회원 정보 조회
+GET localhost:8080/api/users/{{id}}
+
+### 회원가입 null일 경우
+POST http://localhost:8080/api/users
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="profileImage"; filename="test.png"
+Content-Type: image/png
+
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "email": "eail_c166bd3665aa",
+  "phoneNumber": "poneNumber_a461870f84fb",
+  "street": "streetf42fa85a43a1",
+  "zipCode": "zipCde_3f828ede8a5d",
+  "state": "stateb33630e89d76",
+  "city": "city_232d43546ca",
+  "details": "dtails_2de90f41ec58",
+  "name": "name435c00db2258",
+  "nickname": "nicame_9ca5bcb1ad24"
+}
