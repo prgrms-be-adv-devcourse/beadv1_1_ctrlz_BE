@@ -25,28 +25,23 @@ public class OrderItem extends BaseEntity {
 	// @JoinColumn(name = "product_post_id", nullable = false)
 	// private ProductPost productPost;
 	//
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "seller_id", nullable = false)
-	// private User seller;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id", nullable = false)
 	private Order order;
 
-	@Column(name = "price", nullable = false)
-	private Integer price;
-
 	@Column(name = "quantity", nullable = false)
 	private Integer quantity;
 
-	@Column(name = "total_amount", nullable = false)
-	private Integer totalAmount;
+	@Column(nullable = false)
+	private int priceSnapshot;
 
-	/**
-	 * 총 금액 계산 메서드
-	 */
-	public void calculateTotalAmount() {
-		this.totalAmount = this.price * this.quantity;
+	public int getTotalPrice() {
+		return quantity * priceSnapshot;
+	}
+
+	void setOrder(Order order) {
+		this.order = order;
 	}
 
 	@Override

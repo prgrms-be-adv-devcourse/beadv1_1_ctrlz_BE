@@ -1,11 +1,14 @@
 package com.domainservice.domain.order.model.entity;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.common.model.persistence.BaseEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,18 +24,26 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Order extends BaseEntity {
 
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "user_id", nullable = false)
-	// // private UserEntity user;  // 사용자 (FK)
+	@Column(name = "user_id", nullable = false)
+	private String buyerId;  // 구매자id
 
-	@Column(nullable = false)
-	private LocalDateTime orderedAt;  // 주문 일시
-
-	@Column(nullable = false)
-	private Integer totalAmount;  // 총 결제 금액
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+	@Builder.Default
+	private List<OrderItem> orderItems = new ArrayList<>();
 
 	@Column(nullable = false, length = 30)
 	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
+
+	public void addOrderItem(OrderItem item) {
+		this.orderItems.add(item);
+		item.setOrder(this);
+	}
+
+	public int getTotalAmount() {
+		return orderItems.stream()
+			.mapToInt(OrderItem::getTotalPrice)
+			.sum();
+	}
 
 	@Override
 	protected String getEntitySuffix() {
