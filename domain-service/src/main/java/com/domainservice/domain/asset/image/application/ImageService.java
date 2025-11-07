@@ -1,6 +1,6 @@
-package com.common.asset.image.application;
+package com.domainservice.domain.asset.image.application;
 
-import static com.common.asset.image.application.ImageUtils.*;
+import static com.domainservice.domain.asset.image.application.ImageUtils.*;
 import static java.nio.file.Files.*;
 
 import java.io.File;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.asset.image.domain.entity.Image;
-import com.common.asset.image.domain.entity.ImageTarget;
-import com.common.asset.image.domain.repository.ImageRepository;
-import com.common.asset.image.domain.service.AssetService;
+import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.asset.image.domain.repository.ImageRepository;
+import com.domainservice.domain.asset.image.domain.service.AssetService;
 import com.common.exception.CustomException;
 import com.common.exception.vo.FileExceptionCode;
 

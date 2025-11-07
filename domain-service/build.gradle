@@ -38,6 +38,16 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     runtimeOnly 'com.h2database:h2'
+
+
+    //s3
+    implementation 'software.amazon.awssdk:s3:2.37.5'
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
+    // Image Processing
+    implementation "com.sksamuel.scrimage:scrimage-core:4.0.32"
+    implementation "com.sksamuel.scrimage:scrimage-webp:4.0.32"
 }
 
 tasks.named('test') {
