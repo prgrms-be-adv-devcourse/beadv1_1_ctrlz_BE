@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
  * ProductPostService 삭제 기능 테스트
  */
 @ExtendWith(MockitoExtension.class)
-class DeleteProductPostServiceTest {
+class DeleteProductPostTest {
 
     @InjectMocks
     private ProductPostService productPostService;
