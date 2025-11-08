@@ -73,7 +73,7 @@ public class ReviewController {
 		List<ReviewResponse> responseList = reviewService.getReviewListById(userId);
 		return new BaseResponse<>(
 			responseList,
-			ReviewConstant.REVIEW_UPDATED.getMessage()
+			ReviewConstant.REVIEW_FETCHED.getMessage()
 		);
 	}
 
@@ -91,7 +91,7 @@ public class ReviewController {
 
 		return new BaseResponse<>(
 			response,
-			ReviewConstant.REVIEW_UPDATED.getMessage()
+			ReviewConstant.REVIEW_FETCHED.getMessage()
 		);
 	}
 
