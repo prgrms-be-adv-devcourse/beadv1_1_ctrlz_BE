@@ -97,7 +97,7 @@ public class UserApplication implements UserCommandUseCase {
 					.build()
 			)
 			.oauthId(userContext.oauthId())
-			.profileUrl(userContext.profileImageUrl())
+			.profileImageUrl(userContext.profileImageUrl())
 			.build();
 	}
 

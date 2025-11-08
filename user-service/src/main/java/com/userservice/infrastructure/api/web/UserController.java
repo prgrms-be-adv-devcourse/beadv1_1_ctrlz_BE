@@ -59,7 +59,7 @@ public class UserController {
 
 		return new BaseResponse<>(new UserCreateResponse(
 			user.getId(),
-			user.getProfileUrl(),
+			user.getProfileImageUrl(),
 			user.getNickname()
 		),
 			"가입 완료");

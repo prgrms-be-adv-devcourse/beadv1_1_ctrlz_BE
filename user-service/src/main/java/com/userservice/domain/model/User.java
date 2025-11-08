@@ -23,7 +23,7 @@ public class User {
 	private String password;
 	private String nickname;
 	private List<UserRole> roles;
-	private String profileUrl;
+	private String profileImageUrl;
 	private Address address;
 	private String phoneNumber;
 	private String oauthId;
@@ -39,7 +39,7 @@ public class User {
 		String password,
 		String nickname,
 		List<UserRole> roles,
-		String profileUrl,
+		String profileImageUrl,
 		Address address,
 		String phoneNumber,
 		String oauthId,
@@ -53,7 +53,7 @@ public class User {
 		this.password = password;
 		this.nickname = nickname;
 		this.roles = roles;
-		this.profileUrl = profileUrl;
+		this.profileImageUrl = profileImageUrl;
 		this.address = address;
 		this.phoneNumber = phoneNumber;
 		this.oauthId = oauthId;

@@ -170,7 +170,7 @@ class UserControllerTest {
 			.email("minseok@example.com")
 			.name("최민석")
 			.password("default")
-			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
 			.build();
 
@@ -203,7 +203,7 @@ class UserControllerTest {
 			.email("minseok@example.com")
 			.name("최민석")
 			.password("default")
-			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
 			.build();
 
@@ -239,7 +239,7 @@ class UserControllerTest {
 			.email("test@example.com")
 			.name("test_name")
 			.password("default")
-			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
 			.build();
 

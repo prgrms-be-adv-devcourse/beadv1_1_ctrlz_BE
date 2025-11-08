@@ -22,7 +22,7 @@ public class UserEntityMapper {
 			.email(user.getEmail())
 			.name(user.getName())
 			.password(user.getPassword())
-			.profileUrl(user.getProfileUrl())
+			.profileImageUrl(user.getProfileImageUrl())
 			.phoneNumber(user.getPhoneNumber())
 			.build();
 	}
@@ -35,7 +35,7 @@ public class UserEntityMapper {
 			.password(userEntity.getPassword())
 			.email(userEntity.getEmail())
 			.roles(userEntity.getRoles())
-			.profileUrl(userEntity.getProfileUrl())
+			.profileImageUrl(userEntity.getProfileImageUrl())
 			.nickname(userEntity.getNickname())
 			.address(Address.builder()
 				.street(userEntity.getAddress().getStreet())
