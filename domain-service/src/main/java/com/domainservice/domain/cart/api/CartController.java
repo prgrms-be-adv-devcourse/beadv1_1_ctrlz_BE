@@ -2,7 +2,6 @@ package com.domainservice.domain.cart.api;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -83,9 +82,7 @@ public class CartController {
 	 * 사용자별 장바구니 생성 (이미 존재하는 경우 에러 반환)
 	 */
 	@PostMapping
-	public ResponseEntity<?> createCart(@RequestBody CreateCartRequest request) {
-		String userId = "testUser";
-		cartService.addCart(userId);
-		return ResponseEntity.ok().build();
+	public void createCart(@RequestBody CreateCartRequest request) {
+		cartService.addCart(request.userId());
 	}
 }

@@ -13,6 +13,8 @@ import com.domainservice.domain.cart.model.entity.Cart;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.cart.repository.CartJpaRepository;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
+import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class CartService {
 	private final CartJpaRepository cartJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
+	private final ProductPostService productPostService;
 
 	/**
 	 * 1. userid로 장바구니 조회 - 없으면 생성 <p></p>
@@ -33,7 +36,7 @@ public class CartService {
 		Cart cart = getCartByUserId(userId);
 
 		return cartItemJpaRepository.findByCart(cart).stream()
-			.map(x -> new CartItemResponse("title", "name", x.getTotalPrice(), x.getQuantity(), x.isSelected()))
+			.map(x -> new CartItemResponse("title", "name", getTotalPrice(x), x.getQuantity(), x.isSelected()))
 			.toList();
 	}
 
@@ -62,10 +65,8 @@ public class CartService {
 
 		CartItem targetItem = null;
 
-		String testProductId = "test123";
 		for (CartItem item : cartItems) {
-			// TODO: 실제 Product 엔티티가 구현되면 아래 로직으로 수정 필요
-			if (productPostId.equals(testProductId)) {
+			if (productPostId.equals(item.getProductPostId())) {
 				item.updateQuantity(item.getQuantity() + quantity);
 				targetItem = item;
 				break;
@@ -74,7 +75,7 @@ public class CartService {
 		if (targetItem == null) {
 			CartItem newItem = CartItem.builder()
 				.cart(cart)
-				// .productPostId(productPostId)
+				.productPostId(productPostId)
 				.quantity(quantity)
 				.selected(true)
 				.build();
@@ -83,7 +84,7 @@ public class CartService {
 			targetItem = newItem;
 		}
 		cartJpaRepository.save(cart);
-		return new CartItemResponse("title", "name", targetItem.getTotalPrice(), targetItem.getQuantity(),
+		return new CartItemResponse("title", "name", getTotalPrice(targetItem), targetItem.getQuantity(),
 			targetItem.isSelected());
 
 	}
@@ -102,7 +103,7 @@ public class CartService {
 
 		CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
 
-		return new CartItemResponse("title", "name", savedCartItem.getTotalPrice(), savedCartItem.getQuantity(),
+		return new CartItemResponse("title", "name", getTotalPrice(savedCartItem), savedCartItem.getQuantity(),
 			savedCartItem.isSelected());
 	}
 
@@ -118,7 +119,7 @@ public class CartService {
 		cartItem.setSelected(selected);
 
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
-		return new CartItemResponse("title", "name", savedItem.getTotalPrice(), savedItem.getQuantity(),
+		return new CartItemResponse("title", "name", getTotalPrice(savedItem), savedItem.getQuantity(),
 			savedItem.isSelected());
 	}
 
@@ -140,5 +141,13 @@ public class CartService {
 
 		cartJpaRepository.save(cart);
 
+	}
+
+	private int getTotalPrice(CartItem cartItem) {
+		int totalPrice = 0;
+		ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
+		totalPrice += productPostById.price() * cartItem.getQuantity();
+
+		return totalPrice;
 	}
 }

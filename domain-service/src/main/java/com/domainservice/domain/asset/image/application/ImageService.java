@@ -17,31 +17,10 @@ import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.asset.image.domain.entity.ImageType;
 import com.domainservice.domain.asset.image.domain.repository.ImageRepository;
 import com.domainservice.domain.asset.image.domain.service.AssetService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import com.domainservice.domain.asset.image.infrastructure.s3.S3ImageClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import static com.domainservice.domain.asset.image.application.ImageUtils.*;
-import static java.nio.file.Files.probeContentType;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,57 +37,25 @@ public class ImageService implements AssetService<Image> {
 	private final ImageRepository imageRepository;
 	private final ImageCompressor compressor;
 
-    @Transactional
-    public List<Image> uploadProductImages(List<MultipartFile> files) {
-        return IntStream.range(0, files.size())
-                .mapToObj(i -> {
-                    MultipartFile file = files.get(i);
-                    return uploadUserProfile(file, ImageTarget.PRODUCT);
-                })
-                .toList();
-    }
-
-    // ImageTarget 으로 구분하는 경우는 없는 것 같아서 기존 코드는 냅두고 새로 만듬 - 정현
-    public Image uploadUserProfile(MultipartFile file, ImageTarget target) {
-        validateFile(file);
-
-        String originalFileName = file.getOriginalFilename();
-        File compressedFile = compressor.compressToWebp(originalFileName, file);
-
-        String storedFileName = generateFileName(compressedFile.getName());
-        String s3key = generateS3Key(storedFileName, target.name());
-        String s3Url = getS3Url(bucketName, s3key);
-
-        try {
-            uploadToS3(compressedFile, s3key);
-
-            Image image = Image.builder()
-                    .originalFileName(originalFileName)
-                    .storedFileName(storedFileName)
-                    .s3Url(s3Url)
-                    .s3Key(s3key)
-                    .originalFileSize(file.getSize())
-                    .originalContentType(file.getContentType())
-                    .compressedFileSize(compressedFile.length())
-                    .convertedContentType(Files.probeContentType(compressedFile.toPath()))
-                    .imageTarget(target)
-                    .build();
-
-            return imageRepository.save(image);
-        } catch (Exception e) {
-            log.error("이미지 저장 실패 error: {} ", e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
 	@Override
-	public Image uploadUserProfile(MultipartFile file) {
+	public Image uploadProfileImage(MultipartFile file) {
+		return uploadProfileImageByTarget(file, ImageTarget.NONE);
+	}
 
+	/**
+	 * ImageTarget(USER, PRODUCT, REVIEW)을 구분하여 이미지 파일을 업로드합니다.
+	 * 원본 파일을 WEBP 형식으로 압축한 후 S3에 업로드하고, 이미지 정보를 DB에 저장합니다.
+	 *
+	 * @param file   업로드할 이미지 파일
+	 * @param target 이미지 타겟 타입 (USER, PRODUCT, REVIEW)
+	 * @return 업로드된 이미지 엔티티 (S3 URL, 파일 정보 포함)
+	 */
+	public Image uploadProfileImageByTarget(MultipartFile file, ImageTarget target) {
 		validateFile(file);
 
 		File compressedFile = compressor.compressToWebp(file);
 		String storedFileName = generateFileName(compressedFile.getName());
-		String s3key = generateS3Key(storedFileName, ImageTarget.USER.name());
+		String s3key = generateS3Key(storedFileName, target.name());
 
 		String s3Url = s3ImageClient.uploadUserProfileToS3(compressedFile, s3key);
 
@@ -121,33 +68,64 @@ public class ImageService implements AssetService<Image> {
 			.originalContentType(file.getContentType())
 			.compressedFileSize(compressedFile.length())
 			.convertedContentType(ImageType.WEBP)
-			.imageTarget(ImageTarget.USER)
+			.imageTarget(target)
 			.build();
 
 		return imageRepository.save(image);
 	}
 
 	@Override
-	public Image getImage(String id) {
-		return imageRepository.findById(id)
-			.orElseThrow(() -> new CustomException(FileExceptionCode.NO_SUCH_IMAGE.getValue()));
+	public List<Image> uploadProfileImageList(List<MultipartFile> files) {
+		return uploadProfileImageListByTarget(files, ImageTarget.NONE);
+	}
+
+	/**
+	 * 여러 개의 이미지 파일을 동일한 타겟 타입으로 일괄 업로드합니다.
+	 * 각 파일은 개별적으로 압축 및 업로드, DB에 저장되어 리스트로 반환됩니다.
+	 *
+	 * @param files  업로드할 이미지 파일 리스트
+	 * @param target 이미지 타겟 타입 (USER, PRODUCT, REVIEW)
+	 * @return 업로드된 이미지 엔티티 리스트
+	 */
+	public List<Image> uploadProfileImageListByTarget(List<MultipartFile> files, ImageTarget target) {
+		return files.stream()
+			.map(file -> uploadProfileImageByTarget(file, target))
+			.toList();
 	}
 
 	@Override
 	public Image updateProfileImage(MultipartFile profileImage, String imageId) {
+		deleteProfileImageById(imageId);
+		return uploadProfileImage(profileImage);
+	}
 
-		imageRepository.findById(imageId)
-			.ifPresent(image -> {
-				image.delete();
-				s3ImageClient.deleteFileFromS3(image.getS3Url());
-			});
-
-		return uploadUserProfile(profileImage);
+	public Image updateProfileImageByTarget(MultipartFile profileImage, ImageTarget target, String imageId) {
+		deleteProfileImageById(imageId);
+		return uploadProfileImageByTarget(profileImage, target);
 	}
 
 	@Override
-	public void delete(String id) {
-		imageRepository.deleteById(id);
+	public void deleteProfileImageByS3Url(String s3Url) {
+		imageRepository.findByS3Url(s3Url)
+			.ifPresent(image -> {
+				imageRepository.deleteById(image.getId());
+				s3ImageClient.deleteFileFromS3(image.getS3Url());
+			});
+	}
+
+	@Override
+	public void deleteProfileImageById(String imageId) {
+		imageRepository.findById(imageId)
+			.ifPresent(image -> {
+				imageRepository.deleteById(image.getId());
+				s3ImageClient.deleteFileFromS3(image.getS3Url());
+			});
+	}
+
+	@Override
+	public Image getImage(String id) {
+		return imageRepository.findById(id)
+			.orElseThrow(() -> new CustomException(FileExceptionCode.NO_SUCH_IMAGE.getValue()));
 	}
 
 	private void validateFile(MultipartFile file) {
@@ -177,33 +155,4 @@ public class ImageService implements AssetService<Image> {
 		return allowed.stream()
 			.anyMatch(ext -> ext.trim().equalsIgnoreCase(extension));
 	}
-
-    /**
-     * 업로드 후 반환된 URL을 이용해 S3 객체를 삭제합니다.
-     */
-    public void deleteByUrl(String fileUrl) {
-        try {
-            // URL의 path 부분에서 "/" 제거 후 key 추출
-            URI uri = URI.create(fileUrl);
-            String path = uri.getPath();
-            String key = path.startsWith("/") ? path.substring(1) : path;
-
-            deleteByKey(key);
-        } catch (Exception e) {
-            log.error("Failed to delete S3 object from URL: {}", fileUrl, e);
-            throw new RuntimeException("S3 이미지 삭제 실패", e);
-        }
-    }
-
-    /**
-     * S3에 저장된 객체를 key로 삭제합니다.
-     */
-    public void deleteByKey(String key) {
-        s3Client.deleteObject(
-                DeleteObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(key)
-                        .build()
-        );
-    }
 }
