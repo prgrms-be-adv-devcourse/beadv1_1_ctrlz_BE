@@ -68,4 +68,14 @@ public class TagService {
     public long count() {
         return tagRepository.count();
     }
+
+    /**
+     * 전체 태그 id 조회
+     */
+    public List<String> getAllTagIds() {
+        return tagRepository.findAll()
+                .stream()
+                .map(Tag::getId)
+                .toList();
+    }
 }

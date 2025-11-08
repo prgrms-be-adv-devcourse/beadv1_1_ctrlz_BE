@@ -2,12 +2,14 @@ package com.domainservice.domain.post.post.model.dto.request;
 
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 
 import java.util.List;
 
 /**
  * 상품 게시글 생성 요청 DTO
  */
+@Builder
 public record CreateProductPostRequest(
         @NotBlank(message = "제목은 필수입니다.")
         @Size(max = 200, message = "제목은 200자를 초과할 수 없습니다.")

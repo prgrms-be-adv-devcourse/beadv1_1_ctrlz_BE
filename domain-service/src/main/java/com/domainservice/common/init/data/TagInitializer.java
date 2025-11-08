@@ -1,71 +1,18 @@
-package com.domainservice.common.data;
+package com.domainservice.common.init.data;
 
-import com.domainservice.domain.post.category.service.CategoryService;
 import com.domainservice.domain.post.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DataInitializer implements ApplicationRunner {
+public class TagInitializer {
 
-    private final CategoryService categoryService;
     private final TagService tagService;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info("========================================");
-        log.info("데이터 초기화 시작");
-        log.info("========================================");
-
-        initializeCategories();
-        initializeTags();
-
-        log.info("========================================");
-        log.info("데이터 초기화 완료!");
-        log.info("========================================");
-    }
-
-    /**
-     * 카테고리 초기화
-     */
-    private void initializeCategories() {
-        log.info("--- 카테고리 초기화 시작 ---");
-
-        String[] categories = {
-                "가구/인테리어",
-                "가방/지갑",
-                "가전제품",
-                "기타",
-                "도서",
-                "생활용품",
-                "스포츠/레저",
-                "뷰티/미용",
-                "신발",
-                "식품",
-                "유아동",
-                "의류",
-                "전자기기",
-                "취미/게임",
-                "반려동물용품"
-        };
-
-
-        for (String categoryName : categories) {
-            categoryService.createIfNotExists(categoryName);
-        }
-
-        log.info("카테고리 {}개 초기화 완료", categories.length);
-    }
-
-    /**
-     * 태그 초기화
-     */
-    private void initializeTags() {
+    public void init() {
         log.info("--- 태그 초기화 시작 ---");
 
         String[] tags = {

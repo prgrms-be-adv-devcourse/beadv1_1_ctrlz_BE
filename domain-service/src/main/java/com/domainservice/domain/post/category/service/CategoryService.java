@@ -59,4 +59,14 @@ public class CategoryService {
         return categoryRepository.findByName(name).orElseThrow();
     }
 
+    /**
+     * 전체 카테고리 ID 목록 조회 (초기화용)
+     */
+    public List<String> getAllCategoryIds() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(Category::getId)
+                .toList();
+    }
+
 }
