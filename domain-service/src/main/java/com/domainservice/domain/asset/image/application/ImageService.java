@@ -14,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -164,4 +166,33 @@ public class ImageService implements AssetService<Image> {
 		return allowed.stream()
 			.anyMatch(ext -> ext.trim().equalsIgnoreCase(extension));
 	}
+
+    /**
+     * 업로드 후 반환된 URL을 이용해 S3 객체를 삭제합니다.
+     */
+    public void deleteByUrl(String fileUrl) {
+        try {
+            // URL의 path 부분에서 "/" 제거 후 key 추출
+            URI uri = URI.create(fileUrl);
+            String path = uri.getPath();
+            String key = path.startsWith("/") ? path.substring(1) : path;
+
+            deleteByKey(key);
+        } catch (Exception e) {
+            log.error("Failed to delete S3 object from URL: {}", fileUrl, e);
+            throw new RuntimeException("S3 이미지 삭제 실패", e);
+        }
+    }
+
+    /**
+     * S3에 저장된 객체를 key로 삭제합니다.
+     */
+    public void deleteByKey(String key) {
+        s3Client.deleteObject(
+                DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
+    }
 }
