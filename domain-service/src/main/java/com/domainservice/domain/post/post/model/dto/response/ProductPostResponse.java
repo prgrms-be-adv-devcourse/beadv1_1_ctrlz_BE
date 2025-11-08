@@ -21,6 +21,7 @@ public record ProductPostResponse(
         TradeStatus tradeStatus,
         String imageUrl,
         List<String> tags,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

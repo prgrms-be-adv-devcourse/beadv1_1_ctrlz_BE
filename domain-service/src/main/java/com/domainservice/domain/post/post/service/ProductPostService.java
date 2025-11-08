@@ -1,16 +1,21 @@
 package com.domainservice.domain.post.post.service;
 
+import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
+import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,7 +107,33 @@ public class ProductPostService {
         return ProductPostMapper.toProductPostResponse(productPost);
     }
 
-    // TODO: 게시글 목록 조회 (정렬)
+    /**
+     * 상품 게시글 목록 조회 (페이징 + 동적 필터링)
+     */
+    public PageResponse<List<ProductPostResponse>> getProductPostList(
+            Pageable pageable, String categoryId, ProductStatus status,
+            TradeStatus tradeStatus, Integer minPrice, Integer maxPrice
+    ) {
+
+        // Specification 생성
+        Specification<ProductPost> spec = ProductPostSpecification.searchWith(
+                categoryId, status, tradeStatus, minPrice, maxPrice
+        );
+
+        Page<ProductPost> page = productPostRepository.findAll(spec, pageable);
+
+        // PageResponse 생성
+        return new PageResponse<>(
+                page.getNumber(),
+                page.getTotalPages(),
+                page.getSize(),
+                page.hasNext(),
+                page.getContent().stream()
+                        .map(ProductPostMapper::toProductPostResponse)
+                        .toList()
+        );
+    }
+
     // TODO: 상품 판매상태 변경
     // TODO: 내가 구매한 상품 조회
     // TODO: 내가 판매한 상품 조회

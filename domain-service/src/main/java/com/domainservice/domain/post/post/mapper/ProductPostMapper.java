@@ -1,9 +1,9 @@
 package com.domainservice.domain.post.post.mapper;
 
-import java.util.List;
-
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
+
+import java.util.List;
 
 public class ProductPostMapper {
 
@@ -26,7 +26,8 @@ public class ProductPostMapper {
                 productPost.getTradeStatus(),
                 productPost.getImageUrl(),
                 tagNames,
-                productPost.getCreatedAt()
+                productPost.getCreatedAt(),
+                productPost.getUpdatedAt()
         );
 
     }
