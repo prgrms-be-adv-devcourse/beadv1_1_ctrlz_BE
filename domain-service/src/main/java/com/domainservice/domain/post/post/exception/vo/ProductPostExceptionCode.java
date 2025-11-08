@@ -17,10 +17,12 @@ public enum ProductPostExceptionCode {
     // ===== 404 Not Found =====
     TAG_NOT_FOUND(404, "존재하지 않는 태그가 포함되어있습니다."),
     PRODUCT_POST_NOT_FOUND(404, "해당 글은 존재하지 않습니다."),
+    PRODUCT_POST_DELETED(404, "해당 게시글은 삭제되어 조회할 수 없습니다."),
 
     // ===== 409 Conflict =====
     ALREADY_DELETED(409, "이미 삭제된 상품입니다."),
     CANNOT_UPDATE_SOLDOUT(409, "판매 완료된 상품은 수정할 수 없습니다.");
+
 
     private final int code;
     private final String message;

@@ -1,5 +1,8 @@
 package com.domainservice.domain.post.post.service;
 
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+
+import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
@@ -20,9 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.PRODUCT_POST_NOT_FOUND;
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.TAG_NOT_FOUND;
 
 @Service
 @Transactional
@@ -101,6 +101,11 @@ public class ProductPostService {
 
         ProductPost productPost = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+
+        // Soft Delete로 삭제된 상품은 상세 조회 불가
+        if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
+            throw new ProductPostException(PRODUCT_POST_DELETED);
+        }
 
         productPost.incrementViewCount();
 
