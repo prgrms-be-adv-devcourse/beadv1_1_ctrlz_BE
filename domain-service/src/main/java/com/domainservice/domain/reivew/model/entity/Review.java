@@ -21,10 +21,10 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private String contents;
 
-    @Column(name = "user_rating_", nullable = false)
+    @Column(name = "user_rating", nullable = false)
     private Integer userRating;     //판매자에 대한 평점
 
-    @Column(name = "product_rating_", nullable = false)
+    @Column(name = "product_rating", nullable = false)
     private Integer productRating;  //판매자가 판마한 상품에 대한 평점
 
     @Override
