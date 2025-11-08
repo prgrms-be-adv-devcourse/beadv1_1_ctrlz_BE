@@ -3,6 +3,7 @@ package com.domainservice.common.exception;
 
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
+import com.domainservice.domain.post.post.exception.ProductPostException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,23 @@ public class GlobalExceptionHandler {
 
     /**
      * CustomException를 상속받는 모든 예외 처리
+     * 일단 모든 예외를 404 처리함
+     * TODO: CustomException에 int code 필드 생성하는게 좋을지?
      */
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    /**
+     * CustomException를 상속받는 모든 예외 처리
+     */
+    @ExceptionHandler(ProductPostException.class)
+    public ResponseEntity<ErrorResponse> handleProductPostException(ProductPostException e) {
 
         HttpStatus status = HttpStatus.valueOf(e.getCode());
         ErrorResponse response = ErrorResponse.of(e.getCode(), e.getMessage());

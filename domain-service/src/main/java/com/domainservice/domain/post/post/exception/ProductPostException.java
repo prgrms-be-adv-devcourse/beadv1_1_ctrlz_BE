@@ -8,8 +8,15 @@ import com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode;
  */
 public class ProductPostException extends CustomException {
 
+    private final int code;
+
     public ProductPostException(ProductPostExceptionCode exceptionCode) {
-        super(exceptionCode.getCode(), exceptionCode.getMessage());
+        super(exceptionCode.getMessage());
+        this.code = exceptionCode.getCode();
+    }
+
+    public int getCode() {
+        return code;
     }
 
 }
