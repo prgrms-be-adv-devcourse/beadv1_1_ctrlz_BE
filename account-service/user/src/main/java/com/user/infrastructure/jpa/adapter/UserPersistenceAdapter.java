@@ -51,13 +51,17 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void withdraw(String id) {
-		UserEntity userEntity = getUserEntity(id);
-		userEntity.delete();
+	public User findByEmail(String email) {
+		return null;
 	}
 
 	@Override
-	public void delete(String id) {
+	public User findBynickname(String nickname) {
+		return null;
+	}
+
+	@Override
+	public void withdraw(String id) {
 
 	}
 
@@ -69,6 +73,11 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	@Override
 	public boolean existsNickname(String nickname) {
 		return userJpaRepository.existsUserEntitiesByNickname(nickname);
+	}
+
+	@Override
+	public void delete(String id) {
+		userJpaRepository.deleteById(id);
 	}
 
 	@Override
@@ -89,6 +98,14 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
 		return userJpaRepository.findByEmailAndOauthId(email, oAuthId)
 			.map(UserEntityMapper::toDomain);
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public boolean existsByEmail(String email) {
+		// FIXME: UserJpaRepository에 메서드 추가 필요
+		// boolean existsByEmail(String email);
+		return userJpaRepository.existsByEmail(email);
 	}
 
 	private UserEntity getUserEntity(String userId) {

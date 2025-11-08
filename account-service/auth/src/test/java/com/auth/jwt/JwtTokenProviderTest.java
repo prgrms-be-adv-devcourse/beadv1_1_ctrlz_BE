@@ -18,6 +18,7 @@ class JwtTokenProviderTest {
 
 	private String userId;
 	private List<UserRole> roles;
+	private String provider;
 
 	@BeforeEach
 	void setUp() {
@@ -29,32 +30,35 @@ class JwtTokenProviderTest {
 
 		userId = "testUser";
 		roles = List.of(UserRole.USER, UserRole.SELLER);
+		provider = "testProvider";
 	}
 
 	@Test
 	@DisplayName("액세스 토큰 생성 테스트")
 	void createAccessToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
 
 		assertThat(accessToken).isNotNull();
 		assertThat(jwtTokenProvider.getUserIdFromToken(accessToken)).isEqualTo(userId);
 		assertThat(jwtTokenProvider.getRolesFromToken(accessToken)).isEqualTo(roles);
+		assertThat(jwtTokenProvider.getProviderFromToken(accessToken)).isEqualTo(provider);
 	}
 
 	@Test
 	@DisplayName("리프레시 토큰 생성 테스트")
 	void createRefreshToken() {
-		String refreshToken = jwtTokenProvider.createRefreshToken(userId, roles);
+		String refreshToken = jwtTokenProvider.createRefreshToken(userId, roles, provider);
 
 		assertThat(refreshToken).isNotNull();
 		assertThat(jwtTokenProvider.getUserIdFromToken(refreshToken)).isEqualTo(userId);
 		assertThat(jwtTokenProvider.getRolesFromToken(refreshToken)).isEqualTo(roles);
+		assertThat(jwtTokenProvider.getProviderFromToken(refreshToken)).isEqualTo(provider);
 	}
 
 	@Test
 	@DisplayName("토큰에서 사용자 ID 추출 테스트")
 	void getUserIdFromToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
 		String extractedUserId = jwtTokenProvider.getUserIdFromToken(accessToken);
 
 		assertThat(extractedUserId).isEqualTo(userId);
@@ -63,16 +67,25 @@ class JwtTokenProviderTest {
 	@Test
 	@DisplayName("토큰에서 역할 추출 테스트")
 	void getRolesFromToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
 		List<UserRole> extractedRoles = jwtTokenProvider.getRolesFromToken(accessToken);
 
 		assertThat(extractedRoles).isEqualTo(roles);
 	}
 
 	@Test
+	@DisplayName("토큰에서 제공자 추출 테스트")
+	void getProviderFromToken() {
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
+		String extractedProvider = jwtTokenProvider.getProviderFromToken(accessToken);
+
+		assertThat(extractedProvider).isEqualTo(provider);
+	}
+
+	@Test
 	@DisplayName("유효한 토큰 검증 테스트")
 	void validateToken_valid() {
-		String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
 
 		assertThat(jwtTokenProvider.validateToken(accessToken)).isTrue();
 	}
@@ -85,7 +98,7 @@ class JwtTokenProviderTest {
 		ReflectionTestUtils.setField(expiredTokenProvider, "accessTokenExpiration", -1L);
 		expiredTokenProvider.init();
 
-		String expiredToken = expiredTokenProvider.createAccessToken(userId, roles);
+		String expiredToken = expiredTokenProvider.createAccessToken(userId, roles, provider);
 
 		assertThat(jwtTokenProvider.validateToken(expiredToken)).isFalse();
 	}
@@ -99,7 +112,7 @@ class JwtTokenProviderTest {
 		ReflectionTestUtils.setField(anotherProvider, "accessTokenExpiration", 3600L);
 		anotherProvider.init();
 
-		String tokenWithInvalidSignature = anotherProvider.createAccessToken(userId, roles);
+		String tokenWithInvalidSignature = anotherProvider.createAccessToken(userId, roles, provider);
 
 		assertThat(jwtTokenProvider.validateToken(tokenWithInvalidSignature)).isFalse();
 	}
@@ -115,7 +128,7 @@ class JwtTokenProviderTest {
 	@Test
 	@DisplayName("토큰 만료 시간 추출 테스트")
 	void getExpirationFromToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+		String accessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
 		Instant expiration = jwtTokenProvider.getExpirationFromToken(accessToken);
 
 		assertThat(expiration).isAfter(Instant.now());
