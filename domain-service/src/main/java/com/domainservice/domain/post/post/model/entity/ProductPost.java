@@ -1,6 +1,7 @@
 package com.domainservice.domain.post.post.model.entity;
 
 import com.common.model.persistence.BaseEntity;
+import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
@@ -35,6 +37,9 @@ public class ProductPost extends BaseEntity {
     @OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductPostTag> productPostTags = new ArrayList<>();
 
+    @OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductPostImage> productPostImages = new ArrayList<>();
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -49,15 +54,11 @@ public class ProductPost extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private ProductStatus status; // 상품 상태 (NEW, GOOD, FAIR)
+    private ProductStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trade_status", nullable = false, length = 20)
-    private TradeStatus tradeStatus; // 거래 상태 (SELLING, PROCESSING, SOLDOUT)
-
-    // TODO: s3 구현 완료 시 이미지를 여러개 업로드 할 수 있게 수정 필요
-    @Column(name = "image_url", columnDefinition = "TEXT")
-    private String imageUrl;
+    private TradeStatus tradeStatus;
 
     @Column(name = "view_count", nullable = false)
     private Integer viewCount;
@@ -68,7 +69,7 @@ public class ProductPost extends BaseEntity {
     @Builder
     public ProductPost(String userId, String categoryId,
                        String title, String name, Integer price, String description,
-                       ProductStatus status, TradeStatus tradeStatus, String imageUrl) {
+                       ProductStatus status, TradeStatus tradeStatus) {
         this.userId = userId;
         this.categoryId = categoryId;
         this.title = title;
@@ -77,7 +78,6 @@ public class ProductPost extends BaseEntity {
         this.description = description;
         this.status = status;
         this.tradeStatus = tradeStatus != null ? tradeStatus : TradeStatus.SELLING;
-        this.imageUrl = imageUrl;
         this.viewCount = 0;
         this.likedCount = 0;
     }
@@ -101,9 +101,12 @@ public class ProductPost extends BaseEntity {
         if (request.price() != null) this.price = request.price();
         if (request.description() != null) this.description = request.description();
         if (request.status() != null) this.status = request.status();
-        if (request.imageUrl() != null) this.imageUrl = request.imageUrl();
         this.update(); // updatedAt 최신화
     }
+
+    /*
+     =============== 태그 ===============
+    */
 
     public void addTags(List<Tag> tags) {
         List<ProductPostTag> productPostTags = tags.stream()
@@ -117,7 +120,6 @@ public class ProductPost extends BaseEntity {
         this.productPostTags.addAll(productPostTags);
     }
 
-    // 입력 받은 태그 목록으로 교체
     public void replaceTags(List<Tag> newTags) {
         if (!this.productPostTags.isEmpty())
             this.productPostTags.clear();
@@ -128,56 +130,88 @@ public class ProductPost extends BaseEntity {
     }
 
     /*
+     =============== 이미지 ===============
+    */
+
+    /**
+     * 이미지 추가 (여러 개)
+     * 첫 번째 이미지가 대표 이미지
+     */
+    public void addImages(List<Image> images) {
+        if (images == null || images.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < images.size(); i++) {
+            ProductPostImage productPostImage = ProductPostImage.builder()
+                    .productPost(this)
+                    .image(images.get(i))
+                    .displayOrder(i)
+                    .isPrimary(i == 0)  // 첫 번째가 대표 이미지
+                    .build();
+
+            this.productPostImages.add(productPostImage);
+        }
+    }
+
+    /**
+     * 대표 이미지 URL 조회
+     */
+    public String getPrimaryImageUrl() {
+        return this.productPostImages.stream()
+                .filter(ProductPostImage::getIsPrimary)
+                .findFirst()
+                .map(productPostImage -> productPostImage.getImage().getS3Url())
+                .orElse(null);
+    }
+
+    /**
+     * 모든 이미지 URL 조회
+     */
+    public List<String> getAllImageUrls() {
+        return this.productPostImages.stream()
+                .sorted(Comparator.comparing(ProductPostImage::getDisplayOrder))
+                .map(ppi -> ppi.getImage().getS3Url())
+                .toList();
+    }
+
+    /*
     ================ validate ================
      */
 
     public void validateDelete(String userId) {
-
-        // TODO: 1. 요청자가 admin 이라면 통과
-
-        // TODO: 2. 인증된 회원의 요청인지 확인 (auth 관련 추후수정)
         if (userId == null || userId.isBlank()) {
             throw new ProductPostException(UNAUTHORIZED);
         }
 
-        // 삭제 여부 확인
         if (this.getDeleteStatus() == DeleteStatus.D) {
             throw new ProductPostException(ALREADY_DELETED);
         }
 
-        // 거래가 진행중인 상품은 삭제 불가
         if (this.tradeStatus == TradeStatus.PROCESSING) {
             throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
         }
 
-        // 게시글을 삭제하고자 하는 사람이 본인이 맞는지 확인
         if (!this.userId.equals(userId)) {
             throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
         }
-
     }
 
     public void validateUpdate(String userId) {
-
-        // TODO: 1. 인증된 회원의 요청인지 확인 (auth 관련 추후수정)
         if (userId == null || userId.isBlank()) {
             throw new ProductPostException(UNAUTHORIZED);
         }
 
-        // 2. 이미 삭제 요청된 게시글이면 삭제 불가
         if (this.getDeleteStatus() == DeleteStatus.D) {
             throw new ProductPostException(ALREADY_DELETED);
         }
 
-        // 3. 게시글 작성자 본인인지 확인
         if (!this.userId.equals(userId)) {
             throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
         }
 
-        // 4. 판매 완료된 상품은 수정 불가
         if (this.tradeStatus == TradeStatus.SOLDOUT) {
             throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
         }
     }
-
 }

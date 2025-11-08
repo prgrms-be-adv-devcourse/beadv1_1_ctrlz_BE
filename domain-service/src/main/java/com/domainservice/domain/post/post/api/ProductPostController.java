@@ -2,6 +2,8 @@ package com.domainservice.domain.post.post.api;
 
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.asset.image.application.ImageService;
+import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
@@ -14,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,19 +28,29 @@ import java.util.List;
 public class ProductPostController {
 
     private final ProductPostService productPostService;
+    private final ImageService imageService;
 
     /**
-     * 상품 게시글 생성
+    * 상품 게시글 생성 (이미지 포함)
      */
-    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<ProductPostResponse> createProductPost(
             // @AuthenticationPrincipal String userId,
-            @Valid @RequestBody CreateProductPostRequest request
-            // TODO: 실제 파일로 받아오기
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @Valid @RequestPart("request") CreateProductPostRequest request
     ) {
-        String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID를 사용
-        ProductPostResponse response = productPostService.createProductPost(request, userId);
+        String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID
+
+        List<Image> uploadedImages = null;
+        if (images != null && !images.isEmpty()) {
+            uploadedImages = imageService.uploadProductImages(images);
+        }
+
+        ProductPostResponse response = productPostService.createProductPost(
+                request, userId, uploadedImages
+        );
+
         return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
     }
 

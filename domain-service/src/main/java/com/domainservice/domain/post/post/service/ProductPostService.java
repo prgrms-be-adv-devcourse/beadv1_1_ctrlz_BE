@@ -1,9 +1,8 @@
 package com.domainservice.domain.post.post.service;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
-
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
@@ -24,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,9 +34,14 @@ public class ProductPostService {
     private final TagRepository tagRepository;
 
     /**
-     * 상품 게시글 생성
+     * 상품 게시글 생성 (이미지 포함)
      */
-    public ProductPostResponse createProductPost(CreateProductPostRequest request, String userId) {
+    public ProductPostResponse createProductPost(
+            CreateProductPostRequest request, String userId, List<Image> images) {
+
+        if (images != null && images.size() > 10) {
+            throw new ProductPostException(TOO_MANY_IMAGES);
+        }
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
@@ -45,15 +51,16 @@ public class ProductPostService {
                 .price(request.price())
                 .description(request.description())
                 .status(request.status())
-                .tradeStatus(TradeStatus.SELLING)  // 기본값: 판매중
-                .imageUrl(request.imageUrl())
+                .tradeStatus(TradeStatus.SELLING)
                 .build();
+
+        if (images != null && !images.isEmpty()) {
+            productPost.addImages(images);
+        }
 
         addTags(productPost, request.tagIds());
 
         ProductPost saved = productPostRepository.save(productPost);
-        // TODO: 판매자(user)에게 해당 게시글 정보 넣어주기
-
         return ProductPostMapper.toProductPostResponse(saved);
     }
 

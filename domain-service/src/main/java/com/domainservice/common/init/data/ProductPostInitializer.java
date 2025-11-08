@@ -66,7 +66,7 @@ public class ProductPostInitializer {
                             .tagIds(getRandomTagIds(allTagIds))
                             .build();
 
-                    productPostService.createProductPost(request, userId);
+                    productPostService.createProductPost(request, userId, null);
                     totalCount++;
 
                 } catch (Exception e) {

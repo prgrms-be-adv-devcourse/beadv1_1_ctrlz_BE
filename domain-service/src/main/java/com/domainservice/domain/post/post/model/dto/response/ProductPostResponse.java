@@ -19,7 +19,8 @@ public record ProductPostResponse(
         String description,
         ProductStatus status,
         TradeStatus tradeStatus,
-        String imageUrl,
+        List<String> imageUrls,
+        String primaryImageUrl,
         List<String> tags,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

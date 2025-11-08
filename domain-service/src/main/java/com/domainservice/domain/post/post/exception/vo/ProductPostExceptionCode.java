@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ProductPostExceptionCode {
 
+    // ===== 400 Bad Request =====
+    TOO_MANY_IMAGES(400, "이미지는 최대 10개까지 등록 가능합니다."),
+
     // ===== 401 Unauthorized =====
     UNAUTHORIZED(401, "로그인된 회원만 이용 가능합니다."),
 
