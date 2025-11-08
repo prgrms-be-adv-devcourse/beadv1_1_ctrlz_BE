@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -106,5 +107,16 @@ public class UserController {
 			SellerVerificationContext.forSending(request.phoneNumber(), id, user);
 
 		sellerVerificationUseCase.requestVerificationCode(sellerVerificationContext);
+	}
+
+	@PatchMapping("/{id}/images/{imageId}")
+	public BaseResponse<String> updateProfileImage(
+		@PathVariable String id,
+		@PathVariable String imageId,
+		@RequestParam("profileImage") MultipartFile profileImage
+	) {
+		ImageResponse imageResponse = profileImageClient.updateProfileImage(profileImage, imageId);
+		userCommandUseCase.updateImage(id, imageResponse.imageId(), imageResponse.imageUrl());
+		return new BaseResponse<>(imageResponse.imageUrl(), "프로필 이미지 교체 완료");
 	}
 }

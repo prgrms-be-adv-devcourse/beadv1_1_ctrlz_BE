@@ -11,4 +11,5 @@ public interface UserCommandUseCase {
 	void delete(String id);
 	void updateForSeller(String id);
 	void updateUser(String userId, UserUpdateContext userUpdateContext);
+	void updateImage(String userId, String imageId, String profileImageUrl);
 }

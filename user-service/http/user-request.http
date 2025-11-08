@@ -38,6 +38,7 @@ GET localhost:8080/api/users/{{id}}
     client.global.set("currentState", response.body.state);
     client.global.set("currentCity", response.body.city);
     client.global.set("currentDetails", response.body.details);
+    client.global.set("currentImageId", response.body.imageId);
 %}
 
 
@@ -65,6 +66,10 @@ Content-Type: application/json
   "name": "name435c00db2258",
   "nickname": "nicame_9ca5bcb1ad24"
 }
+
+> {%
+    client.global.set("id", response.body.data.userId);
+%}
 
 ### 회원 정보 수정 (전체)
 PATCH http://localhost:8080/api/users/{{id}}
@@ -177,3 +182,13 @@ Content-Type: application/json
   "details": "{{currentDetails}}",
   "zipCode": "new_zipcode"
 }
+
+### 프로필 이미지 수정
+PATCH http://localhost:8080/api/users/{{id}}/images/{{currentImageId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="profileImage"; filename="test.png"
+Content-Type: image/png
+
+< ./test.png

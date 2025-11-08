@@ -103,7 +103,8 @@ public class UserEntity extends BaseEntity {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public void updateProfileImageUrl(String profileImageUrl) {
+	public void changeProfileImage(String imageId, String profileImageUrl) {
+		this.imageId = imageId;
 		this.profileImageUrl = profileImageUrl;
 	}
 }

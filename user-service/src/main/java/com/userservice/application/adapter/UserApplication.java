@@ -70,6 +70,11 @@ public class UserApplication implements UserCommandUseCase {
 	}
 
 	@Override
+	public void updateImage(String userId, String imageId, String profileImageUrl) {
+		userPersistencePort.updateImage(userId, imageId, profileImageUrl);
+	}
+
+	@Override
 	public void delete(String id) {
 		userPersistencePort.withdraw(id);
 	}

@@ -31,17 +31,16 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 		return UserEntityMapper.toDomain(userEntity);
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public User findById(String id) {
-		UserEntity userEntity = userJpaRepository.findById(id)
-			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
+		UserEntity userEntity = getUserEntity(id);
 		return UserEntityMapper.toDomain(userEntity);
 	}
 
 	@Override
 	public void update(User user) {
-		UserEntity userEntity = userJpaRepository.findById(user.getId())
-			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
+		UserEntity userEntity = getUserEntity(user.getId());
 
 		userEntity.updateNickname(user.getNickname());
 		userEntity.updatePhoneNumber(user.getPhoneNumber());
@@ -80,8 +79,18 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
 	@Override
 	public void updateRole(String id, UserRole userRole) {
-		UserEntity userEntity = userJpaRepository.findById(id)
-			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
+		UserEntity userEntity = getUserEntity(id);
 		userEntity.getRoles().add(userRole);
+	}
+
+	@Override
+	public void updateImage(String userId, String imageId, String profileImageUrl) {
+		UserEntity userEntity = getUserEntity(userId);
+		userEntity.changeProfileImage(imageId, profileImageUrl);
+	}
+
+	private UserEntity getUserEntity(String userId) {
+		return userJpaRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
 	}
 }

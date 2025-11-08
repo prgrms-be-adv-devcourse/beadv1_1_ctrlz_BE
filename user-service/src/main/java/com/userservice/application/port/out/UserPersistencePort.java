@@ -14,4 +14,5 @@ public interface UserPersistencePort {
 	boolean existsNickname(String nickname);
 	void delete(String id);
 	void updateRole(String id, UserRole userRole);
+	void updateImage(String userId, String imageId, String profileImageUrl);
 }
