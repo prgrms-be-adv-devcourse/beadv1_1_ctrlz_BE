@@ -1,10 +1,11 @@
 package com.domainservice.domain.reivew.api;
 
+import java.util.List;
+
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.reivew.constant.ReviewConstant;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
-import com.domainservice.domain.reivew.model.entity.Review;
 import com.domainservice.domain.reivew.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,10 @@ public class ReviewController {
 		@RequestBody ReviewRequest request
 		// TODO: 회원 정보를 가져와야함.
 	) {
-		Review review = reviewService.createReview(request);
+		ReviewResponse response = reviewService.createReview(request);
 
 		return new BaseResponse<>(
-			ReviewResponse.from(review),
+			response,
 			ReviewConstant.REVIEW_CREATED.getMessage()
 		);
 	}
@@ -53,10 +54,47 @@ public class ReviewController {
 		@RequestBody ReviewRequest request
 		//TODO: 회원 정보를 가져와야함.
 	) {
-		Review review = reviewService.updateReview(reviewId, request);
+		ReviewResponse response = reviewService.updateReview(reviewId, request);
 		return new BaseResponse<>(
-			ReviewResponse.from(review),
+			response,
 			ReviewConstant.REVIEW_UPDATED.getMessage()
 		);
 	}
+
+	/**
+	 * 특정 사용자의 리뷰 조회
+ 	 * @return
+	 */
+	@GetMapping("/users")
+	@ResponseStatus(HttpStatus.OK)
+	public BaseResponse<List<ReviewResponse>> getReviewListById(
+		String userId //TODO: 회원 정보를 가져와야함.
+	) {
+		List<ReviewResponse> responseList = reviewService.getReviewListById(userId);
+		return new BaseResponse<>(
+			responseList,
+			ReviewConstant.REVIEW_UPDATED.getMessage()
+		);
+	}
+
+	/**
+	 * 특정 상품에 작성된 리뷰 조회 api
+	 * @param productPostId
+	 * @return
+	 */
+	@GetMapping("/{productPostId}")
+	@ResponseStatus(HttpStatus.OK)
+	public BaseResponse<ReviewResponse> getReviewByProductPostId(
+		@PathVariable String productPostId
+	) {
+		ReviewResponse response = reviewService.getReviewByProductPostId(productPostId);
+
+		return new BaseResponse<>(
+			response,
+			ReviewConstant.REVIEW_UPDATED.getMessage()
+		);
+	}
+
+
+
 }
