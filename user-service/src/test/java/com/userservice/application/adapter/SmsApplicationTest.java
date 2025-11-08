@@ -189,7 +189,7 @@ class SmsApplicationTest {
             // given
             getCache(CacheType.VERIFICATION_TRY).put("user123", new AtomicInteger(4));
 
-            // when & then
+            // when then
             assertThatThrownBy(() -> smsApplication.applyVerificationCount("user123"))
                 .isInstanceOf(CustomException.class);
             assertThat(getCache(CacheType.VERIFICATION_TRY).get("user123")).isNull();

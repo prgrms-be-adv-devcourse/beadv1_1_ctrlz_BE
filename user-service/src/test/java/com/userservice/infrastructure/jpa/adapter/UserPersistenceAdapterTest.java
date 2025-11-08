@@ -75,7 +75,6 @@ class UserPersistenceAdapterTest {
 	void test2() throws Exception {
 		//given
 		User save = userPersistenceAdapter.save(mockUser);
-		System.out.println(save.getPhoneNumber());
 
 		//when then
 		assertThat(userPersistenceAdapter.existsPhoneNumber(mockUser.getPhoneNumber())).isTrue();
@@ -86,7 +85,6 @@ class UserPersistenceAdapterTest {
 	void test3() throws Exception {
 		//given
 		User save = userPersistenceAdapter.save(mockUser);
-		System.out.println(save.getPhoneNumber());
 
 		//when then
 		assertThat(userPersistenceAdapter.existsPhoneNumber(mockUser.getPhoneNumber())).isTrue();
