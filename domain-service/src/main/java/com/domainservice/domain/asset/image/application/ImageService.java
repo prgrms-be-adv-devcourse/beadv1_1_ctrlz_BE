@@ -28,8 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ImageService implements AssetService<Image> {
 
-	@Value("${custom.bucket-name}")
-	private String bucketName;
 	@Value("${custom.image.allowed-extension}")
 	private String allowedExtension;
 	@Value("${custom.image.max-size}")
