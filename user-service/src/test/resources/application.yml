@@ -29,3 +29,8 @@ custom:
 
 aes:
   key: 1234567890123456
+
+coolsms:
+  apiKey: aaaaaaaaaaaaaaaa
+  secretKey: aaaaaaaaaaaaaaaa
+  from: 01011111111

@@ -1,7 +1,9 @@
 package com.userservice.infrastructure.kafka.producer;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-
-// @Component
+@Profile("prod")
+@Component
 public class KafkaProducer {
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;

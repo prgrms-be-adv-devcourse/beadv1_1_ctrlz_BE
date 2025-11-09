@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.userservice.infrastructure.writer.dto.CartCreateRequest;
 
-@FeignClient(name = "domain-service", url = "localhost:8080")
+@FeignClient(name = "cart-service", url = "localhost:8080")
 public interface CartClient {
 
 	@PostMapping("/api/carts")
