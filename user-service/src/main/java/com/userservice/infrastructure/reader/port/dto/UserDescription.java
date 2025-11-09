@@ -15,6 +15,8 @@ public record UserDescription(
 	String city,
 	String details,
 	String email,
-	List<String> roles
+	List<String> roles,
+	String profileImageUrl,
+	String imageId
 ) {
 }

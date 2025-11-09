@@ -30,7 +30,20 @@ Content-Type: application/json
 ### 회원 정보 조회
 GET localhost:8080/api/users/{{id}}
 
-### 회원가입 null일 경우
+> {%
+    client.global.set("currentNickname", response.body.nickname);
+    client.global.set("currentPhoneNumber", String(response.body.phoneNumber));
+    client.global.set("currentStreet", response.body.street);
+    client.global.set("currentZipCode", response.body.zipCode);
+    client.global.set("currentState", response.body.state);
+    client.global.set("currentCity", response.body.city);
+    client.global.set("currentDetails", response.body.details);
+    client.global.set("currentImageId", response.body.imageId);
+%}
+
+
+
+### 회원가입 프로필 이미지 null일 경우
 POST http://localhost:8080/api/users
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
@@ -53,3 +66,129 @@ Content-Type: application/json
   "name": "name435c00db2258",
   "nickname": "nicame_9ca5bcb1ad24"
 }
+
+> {%
+    client.global.set("id", response.body.data.userId);
+%}
+
+### 회원 정보 수정 (전체)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "updated_nickname",
+  "phoneNumber": "010-0000-0000",
+  "street": "updated_street",
+  "city": "updated_city",
+  "state": "updated_state",
+  "details": "updated_details",
+  "zipCode": "updated_zipCode"
+}
+
+### 회원 정보 수정 (닉네임)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "new_nickname",
+  "phoneNumber": "{{currentPhoneNumber}}",
+  "street": "{{currentStreet}}",
+  "city": "{{currentCity}}",
+  "state": "{{currentState}}",
+  "details": "{{currentDetails}}",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (연락처)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+   "nickname": "{{currentNickname}}",
+  "phoneNumber": "010-1111-1111",
+  "street": "{{currentStreet}}",
+  "city": "{{currentCity}}",
+  "state": "{{currentState}}",
+  "details": "{{currentDetails}}",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (주소 - 도로명)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "{{currentNickname}}",
+  "phoneNumber": "{{currentPhoneNumber}}",
+  "street": "newStreet",
+  "city": "{{currentCity}}",
+  "state": "{{currentState}}",
+  "details": "{{currentDetails}}",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (주소 - 도시)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+   "nickname": "{{currentNickname}}",
+ "phoneNumber": "{{currentPhoneNumber}}",
+  "street": "{{currentStreet}}",
+  "city": "new_city",
+  "state": "{{currentState}}",
+  "details": "{{currentDetails}}",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (주소 - 군/구/)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "{{currentNickname}}",
+  "phoneNumber": "{{currentPhoneNumber}}",
+  "street": "{{currentStreet}}",
+  "city": "{{currentCity}}",
+  "state": "new_state",
+  "details": "{{currentDetails}}",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (주소 - 상세)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "{{currentNickname}}",
+  "phoneNumber": "{{currentPhoneNumber}}",
+  "street": "{{currentStreet}}",
+  "city": "{{currentCity}}",
+  "state": "{{currentState}}",
+  "details": "new_details",
+  "zipCode": "{{currentZipCode}}"
+}
+
+### 회원 정보 수정 (주소 - 우편번호)
+PATCH http://localhost:8080/api/users/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": "{{currentNickname}}",
+  "phoneNumber": "{{currentPhoneNumber}}",
+ "street": "{{currentStreet}}",
+  "city": "{{currentCity}}",
+  "state": "{{currentState}}",
+  "details": "{{currentDetails}}",
+  "zipCode": "new_zipcode"
+}
+
+### 프로필 이미지 수정
+PATCH http://localhost:8080/api/users/{{id}}/images/{{currentImageId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="profileImage"; filename="test.png"
+Content-Type: image/png
+
+< ./test.png
