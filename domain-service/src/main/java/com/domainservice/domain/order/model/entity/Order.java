@@ -1,8 +1,5 @@
 package com.domainservice.domain.order.model.entity;
 
-import static com.domainservice.domain.order.model.entity.OrderStatus.*;
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +8,6 @@ import com.common.model.persistence.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,58 +24,29 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Order extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
-    private String buyerId;  // 구매자id
+	@Column(name = "user_id", nullable = false)
+	private String buyerId;  // 구매자id
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<OrderItem> orderItems = new ArrayList<>();
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+	@Builder.Default
+	private List<OrderItem> orderItems = new ArrayList<>();
 
-    @Column(nullable = false)
-    private String orderName;
+	@Column(nullable = false, length = 30)
+	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
 
-    @Column(nullable = false, length = 30)
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+	public void addOrderItem(OrderItem item) {
+		this.orderItems.add(item);
+		item.setOrder(this);
+	}
 
-    @Column(name = "payment_id")
-    private String paymentId;
+	public int getTotalAmount() {
+		return orderItems.stream()
+			.mapToInt(OrderItem::getTotalPrice)
+			.sum();
+	}
 
-    public void addOrderItem(OrderItem item) {
-        this.orderItems.add(item);
-        item.setOrder(this);
-    }
-
-    public BigDecimal getTotalAmount() {
-        return orderItems.stream()
-            .map(OrderItem::getTotalPrice)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public void setOrderStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-
-    public void orderConfirmed(String paymentId) {
-        orderStatus = PURCHASE_CONFIRMED;
-        this.paymentId = paymentId;
-        orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED));
-    }
-
-    public void orderCanceled() {
-        orderStatus = CANCELLED;
-        orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.CANCELLED));
-    }
-
-    public void orderRefundedAfterPayment(String paymentId) {
-        orderStatus = REFUND_AFTER_PAYMENT;
-        this.paymentId = paymentId;
-        orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT));
-    }
-
-    @Override
-    protected String getEntitySuffix() {
-        return "order";
-    }
-
+	@Override
+	protected String getEntitySuffix() {
+		return "order";
+	}
 }
