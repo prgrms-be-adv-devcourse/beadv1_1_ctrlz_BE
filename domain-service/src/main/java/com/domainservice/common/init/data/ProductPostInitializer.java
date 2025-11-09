@@ -1,42 +1,27 @@
 package com.domainservice.common.init.data;
 
+import com.domainservice.domain.post.category.service.CategoryService;
+import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
+import com.domainservice.domain.post.post.model.enums.ProductStatus;
+import com.domainservice.domain.post.post.model.enums.TradeStatus;
+import com.domainservice.domain.post.post.service.ProductPostService;
+import com.domainservice.domain.post.tag.service.TagService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
-import com.common.model.vo.ProductStatus;
-import com.common.model.vo.TradeStatus;
-import com.domainservice.domain.asset.image.domain.entity.Image;
-import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
-import com.domainservice.domain.asset.image.domain.entity.ImageType;
-import com.domainservice.domain.asset.image.domain.repository.ImageRepository;
-import com.domainservice.domain.post.category.service.CategoryService;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.tag.model.entity.Tag;
-import com.domainservice.domain.post.tag.repository.TagRepository;
-import com.domainservice.domain.post.tag.service.TagService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
-@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class ProductPostInitializer {
 
     private final CategoryService categoryService;
     private final TagService tagService;
-
-	private final ProductPostRepository productPostRepository;
-	private final ImageRepository imageRepository;
-	private final TagRepository tagRepository;
-
-	private static final String DUMMY_IMAGE_URL = "https://dummy-s3-bucket.com/images/sampleLogo.png";
+    private final ProductPostService productPostService;
 
     private final Random random = new Random();
 
@@ -55,46 +40,34 @@ public class ProductPostInitializer {
             log.warn("태그가 없습니다.");
         }
 
+        // TODO: 실제 userId 필요
         String[] userIds = {"user-001", "user-002", "user-003", "user-004", "user-005"};
         ProductTemplate[] templates = createTemplates();
 
         int totalCount = 0;
 
         for (String categoryId : categoryIds) {
-            for (int i = 0; i < 3; i++) {
+            int productsPerCategory = 5 + random.nextInt(6);
+
+            for (int i = 0; i < productsPerCategory; i++) {
                 try {
-                    ProductTemplate template = templates[random.nextInt(templates.length)];
+                    ProductTemplate template =
+                            templates[random.nextInt(templates.length)];
                     String userId = userIds[random.nextInt(userIds.length)];
 
-					// 1. ProductPost 엔티티 생성
-					ProductPost productPost = ProductPost.builder()
-						.userId(userId)
-						.categoryId(categoryId)
-						.title(template.title())
-						.name(template.name())
-						.price(template.basePrice() + random.nextInt(50000))
-						.description(template.description())
-						.status(getRandomProductStatus())
-						.tradeStatus(TradeStatus.SELLING)
-						.build();
+                    CreateProductPostRequest request = CreateProductPostRequest.builder()
+                            .categoryId(categoryId)
+                            .title(template.title())
+                            .name(template.name())
+                            .price(template.basePrice() + random.nextInt(50000))
+                            .description(template.description())
+                            .status(getRandomProductStatus())
+                            .imageUrl("https://via.placeholder.com/400x300.png?text=" + template.name())
+                            .tagIds(getRandomTagIds(allTagIds))
+                            .build();
 
-					// 2. 태그 연결
-					List<String> randomTagIds = getRandomTagIds(allTagIds);
-					if (!randomTagIds.isEmpty()) {
-						List<Tag> tags = tagRepository.findAllById(randomTagIds);
-						// ProductPost 엔티티에 있는 편의 메서드 활용
-						productPost.replaceTags(tags);
-					}
-
-					// 3. 더미 이미지 생성 및 연결 (파일 업로드 X)
-					List<Image> dummyImages = createDummyImages();
-					// ProductPost 엔티티에 있는 편의 메서드 활용
-					productPost.addImages(dummyImages);
-
-					// 4. 저장
-					productPostRepository.save(productPost);
-
-					totalCount++;
+                    productPostService.createProductPost(request, userId, null);
+                    totalCount++;
 
                 } catch (Exception e) {
                     log.warn("상품 생성 실패: {}", e.getMessage());
@@ -105,32 +78,18 @@ public class ProductPostInitializer {
         log.info("상품 게시글 {}개 초기화 완료", totalCount);
     }
 
-	/**
-	 * S3 업로드 없이 DB에 저장될 더미 Image 엔티티를 생성합니다.
-	 */
-	private List<Image> createDummyImages() {
-		Image dummyImage = Image.builder()
-			.originalFileName("sampleLogo.png")
-			.storedFileName("dummy_sampleLogo.png")
-			.s3Url(DUMMY_IMAGE_URL)
-			.s3Key("PRODUCT/dummy_sampleLogo.png")
-			.originalFileSize(1024L)
-			.originalContentType("image/png")
-			.compressedFileSize(512L)
-			.convertedContentType(ImageType.WEBP)
-			.imageTarget(ImageTarget.PRODUCT)
-			.build();
-
-		// Cascade 설정 여부에 따라 필요할 수도 있고 없을 수도 있음. 안전하게 저장 후 반환
-		Image savedImage = imageRepository.save(dummyImage);
-		return List.of(savedImage);
-	}
-
     private ProductStatus getRandomProductStatus() {
         int rand = random.nextInt(10);
         if (rand < 3) return ProductStatus.NEW;
         if (rand < 8) return ProductStatus.GOOD;
         return ProductStatus.FAIR;
+    }
+
+    private TradeStatus getRandomTradeStatus() {
+        int rand = random.nextInt(10);
+        if (rand < 7) return TradeStatus.SELLING;
+        if (rand < 9) return TradeStatus.PROCESSING;
+        return TradeStatus.SOLDOUT;
     }
 
     private List<String> getRandomTagIds(List<String> allTagIds) {
@@ -157,8 +116,7 @@ public class ProductPostInitializer {
             String name,
             int basePrice,
             String description
-    ) {
-    }
+    ) {}
 
     public ProductTemplate[] createTemplates() {
         return new ProductTemplate[]{
