@@ -1,15 +1,7 @@
 package com.domainservice.domain.reivew.service;
 
 import java.util.List;
-import java.util.Optional;
 
-import com.common.exception.CustomException;
-import com.common.exception.vo.OrderExceptionCode;
-import com.domainservice.common.configuration.feign.client.UserFeignClient;
-import com.domainservice.common.model.user.UserResponse;
-import com.domainservice.domain.order.model.dto.OrderedAt;
-import com.domainservice.domain.order.repository.OrderRepository;
-import com.domainservice.domain.reivew.exception.ReviewNotFoundException;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.model.entity.Review;
@@ -17,8 +9,6 @@ import com.domainservice.domain.reivew.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
-	private final OrderRepository orderRepository;
-	private final UserFeignClient userFeignClient;
 
 	@Transactional
-	public ReviewResponse createReview(ReviewRequest request, String userId) {
-		OrderedAt orderedAt = findOrderedAtByProductPostIdAndUserId(request.productId(), userId);
-
+	public ReviewResponse createReview(ReviewRequest request) {
 		Review newReview = Review.builder()
-			.productPostId(request.productId())
-			.userId(userId)
 			.contents(request.contents())
 			.userRating(request.userRating())
 			.productRating(request.productRating())
@@ -44,75 +28,35 @@ public class ReviewService {
 
 		Review savedReview = reviewRepository.save(newReview);
 
-		return ReviewResponse.from(
-			savedReview,
-			findUserById(userId),
-			orderedAt,
-			userId
-		);
+		return ReviewResponse.from(savedReview);
+
 	}
 
 	@Transactional
-	public ReviewResponse updateReview(String reviewId, ReviewRequest request, String userId) {
+	public ReviewResponse updateReview(String reviewId, ReviewRequest request) {
+		//TODO: 오류 처리 로직을 한번 볼 필요가 있음, 임시로 IllegalArgumentException으로 작성
 		Review findReview = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> ReviewNotFoundException.EXCEPTION);
+			.orElseThrow(() -> new IllegalArgumentException("해당하는 리뷰가 없습니다."));
 
-		findReview.updateReview(request.contents(), request.userRating(), request.productRating(), userId);
+		findReview.updateReview(request.contents(), request.userRating(), request.productRating());
 
-		return ReviewResponse.from(
-			findReview,
-			findUserById(userId),
-			findOrderedAtByProductPostIdAndUserId(request.productId(), userId),
-			userId
-		);
+		return ReviewResponse.from(findReview);
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReviewResponse> getReviewListByUserId(String userId, Integer pageNumber) {
-		UserResponse userResponse = findUserById(userId);
-
-		return reviewRepository.findReviewsByUserId(userId, defaultPageable(pageNumber)).stream()
-			.map(review -> ReviewResponse.from(
-				review,
-				userResponse,
-				findOrderedAtByProductPostIdAndUserId(review.getProductPostId(), review.getUserId()),
-				userId
-			))
+	public List<ReviewResponse> getReviewListById(String userId) {
+		return reviewRepository.findAllByUserId(userId).stream()
+			.map(ReviewResponse::from)
 			.toList();
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public ReviewResponse getReviewByProductPostId(String productPostId) {
-		Optional<Review> findReview = reviewRepository.findByProductPostId(productPostId);
+		Review findrReview = reviewRepository.findByProductPostId(productPostId)
+			.orElseGet(null);
 
-		if(findReview.isEmpty()) return null;
-
-		Review review = findReview.get();
-		String userId = review.getUserId();
-		UserResponse userResponse = findUserById(userId);
-
-		return ReviewResponse.from(
-			review,
-			userResponse,
-			findOrderedAtByProductPostIdAndUserId(productPostId, userId),
-			userId
-		);
-	}
-
-	private UserResponse findUserById(String userId) {
-		return userFeignClient.getUser(userId);
-	}
-
-	private OrderedAt findOrderedAtByProductPostIdAndUserId(String productPostId, String userId) {
-		return orderRepository.findOrderedAtByBuyerIdAndProductPostId(
-			productPostId,
-			userId
-		).orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
-	}
-
-	private Pageable defaultPageable(int pageNumber) {
-		return PageRequest.of(pageNumber, 5);
+		return findrReview == null
+			? null
+			: ReviewResponse.from(findrReview);
 	}
 }
-
-

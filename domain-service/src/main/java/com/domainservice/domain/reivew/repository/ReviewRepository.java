@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ReviewRepository extends JpaRepository<Review, String>, ReviewQueryRepository {
+public interface ReviewRepository extends JpaRepository<Review, String> {
 
     List<Review> findAllByUserId(String userId);
 

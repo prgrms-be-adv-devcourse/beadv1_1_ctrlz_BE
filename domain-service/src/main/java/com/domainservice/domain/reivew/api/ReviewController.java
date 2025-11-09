@@ -8,7 +8,6 @@ import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.service.ReviewService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -32,10 +31,10 @@ public class ReviewController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<ReviewResponse> createReview(
-		@Valid @RequestBody ReviewRequest request,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
+		@RequestBody ReviewRequest request
+		// TODO: 회원 정보를 가져와야함.
 	) {
-		ReviewResponse response = reviewService.createReview(request, userId);
+		ReviewResponse response = reviewService.createReview(request);
 
 		return new BaseResponse<>(
 			response,
@@ -52,10 +51,10 @@ public class ReviewController {
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ReviewResponse> getReview(
 		@PathVariable String reviewId,
-		@Valid @RequestBody ReviewRequest request,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
+		@RequestBody ReviewRequest request
+		//TODO: 회원 정보를 가져와야함.
 	) {
-		ReviewResponse response = reviewService.updateReview(reviewId, request, userId);
+		ReviewResponse response = reviewService.updateReview(reviewId, request);
 		return new BaseResponse<>(
 			response,
 			ReviewConstant.REVIEW_UPDATED.getMessage()
@@ -69,10 +68,9 @@ public class ReviewController {
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ReviewResponse>> getReviewListById(
-		@RequestHeader(value = "X-REQUEST-ID") String userId,
-		@RequestParam Integer pageNumber
+		String userId //TODO: 회원 정보를 가져와야함.
 	) {
-		List<ReviewResponse> responseList = reviewService.getReviewListByUserId(userId, pageNumber);
+		List<ReviewResponse> responseList = reviewService.getReviewListById(userId);
 		return new BaseResponse<>(
 			responseList,
 			ReviewConstant.REVIEW_FETCHED.getMessage()
