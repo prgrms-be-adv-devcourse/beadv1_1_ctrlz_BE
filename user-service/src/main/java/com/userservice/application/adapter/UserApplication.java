@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.userservice.application.adapter.dto.UserContext;
+import com.userservice.application.adapter.dto.UserUpdateContext;
 import com.userservice.application.port.in.UserCommandUseCase;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
@@ -39,11 +40,7 @@ public class UserApplication implements UserCommandUseCase {
 
 		ResponseEntity<?> response = cartClient.createCart(new CartCreateRequest(savedUser.getId()));
 
-		if(!response.getStatusCode().is2xxSuccessful()) {
-			userPersistencePort.delete(savedUser.getId());
-
-			throw new RuntimeException("카트 생성 실패");
-		}
+		rollbackUserTransaction(response, savedUser);
 
 		return savedUser;
 	}
@@ -54,10 +51,27 @@ public class UserApplication implements UserCommandUseCase {
 	}
 
 	@Override
-	public void update(UserContext userContext) {
-		User user = generateUser(userContext);
+	public void updateUser(String userId, UserUpdateContext updateContext) {
+		User user = userPersistencePort.findById(userId);
+
+		Address updatedAddress = Address.builder()
+			.state(updateContext.state())
+			.city(updateContext.city())
+			.street(updateContext.street())
+			.zipCode(updateContext.zipCode())
+			.details(updateContext.details())
+			.build();
+
+		updateAddress(user, updatedAddress);
+		updatePhoneNumber(updateContext, user);
+		updateNickname(updateContext, user);
 
 		userPersistencePort.update(user);
+	}
+
+	@Override
+	public void updateImage(String userId, String imageId, String profileImageUrl) {
+		userPersistencePort.updateImage(userId, imageId, profileImageUrl);
 	}
 
 	@Override
@@ -87,8 +101,9 @@ public class UserApplication implements UserCommandUseCase {
 					.details(userContext.addressDetails())
 					.build()
 			)
+			.imageId(userContext.imageId())
 			.oauthId(userContext.oauthId())
-			.profileUrl(userContext.profileImageUrl())
+			.profileImageUrl(userContext.profileImageUrl())
 			.build();
 	}
 
@@ -101,6 +116,31 @@ public class UserApplication implements UserCommandUseCase {
 	void verifyPhoneNumber(String phoneNumber) {
 		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
 			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
+		}
+	}
+
+	private void updateNickname(UserUpdateContext updateContext, User user) {
+		if (!user.getNickname().equals(updateContext.nickname())) {
+			user.updateNickname(updateContext.nickname());
+		}
+	}
+
+	private void updatePhoneNumber(UserUpdateContext updateContext, User user) {
+		if (!user.getPhoneNumber().equals(updateContext.phoneNumber())) {
+			user.updatePhoneNumber(updateContext.phoneNumber());
+		}
+	}
+
+	private void updateAddress(User user, Address updatedAddress) {
+		if (!user.getAddress().equals(updatedAddress)) {
+			user.updateAddress(updatedAddress);
+		}
+	}
+
+	private void rollbackUserTransaction(ResponseEntity<?> response, User savedUser) {
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			userPersistencePort.delete(savedUser.getId());
+			throw new RuntimeException("카트 생성 실패");
 		}
 	}
 }

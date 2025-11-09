@@ -39,8 +39,9 @@ public class Image extends BaseEntity {
 	@Column(nullable = false)
 	private Long compressedFileSize;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String convertedContentType;
+	private ImageType convertedContentType;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -55,7 +56,7 @@ public class Image extends BaseEntity {
 		Long originalFileSize,
 		String originalContentType,
 		Long compressedFileSize,
-		String convertedContentType,
+		ImageType convertedContentType,
 		ImageTarget imageTarget
 	) {
 		this.originalFileName = originalFileName;

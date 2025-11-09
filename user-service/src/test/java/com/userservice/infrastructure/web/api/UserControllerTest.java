@@ -28,6 +28,7 @@ import com.userservice.application.port.in.SellerVerificationUseCase;
 import com.userservice.domain.vo.UserRole;
 import com.userservice.infrastructure.api.dto.UpdateSellerRequest;
 import com.userservice.infrastructure.api.dto.UserCreateRequest;
+import com.userservice.infrastructure.api.dto.UserUpdateRequest;
 import com.userservice.infrastructure.api.dto.VerificationReqeust;
 import com.userservice.infrastructure.jpa.entity.UserEntity;
 import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
@@ -85,7 +86,7 @@ class UserControllerTest {
 			objectMapper.writeValueAsString(request).getBytes());
 
 		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl"));
+			new ImageResponse("profileImageUrl","imageId"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(200).body(any()));
 
 		// when then
@@ -114,7 +115,7 @@ class UserControllerTest {
 			objectMapper.writeValueAsString(request).getBytes());
 
 		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl"));
+			new ImageResponse("profileImageUrl", "imageId"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(400).body(any()));
 
 		// when then
@@ -139,7 +140,7 @@ class UserControllerTest {
 			objectMapper.writeValueAsString(request).getBytes());
 
 		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl"));
+			new ImageResponse("profileImageUrl", "imageId"));
 
 		// when then
 		mockMvc.perform(multipart("/api/users")
@@ -169,7 +170,7 @@ class UserControllerTest {
 			.email("minseok@example.com")
 			.name("최민석")
 			.password("default")
-			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
 			.build();
 
@@ -202,7 +203,7 @@ class UserControllerTest {
 			.email("minseok@example.com")
 			.name("최민석")
 			.password("default")
-			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
 			.build();
 
@@ -219,5 +220,55 @@ class UserControllerTest {
 
 		assertThat(user.getRoles()).contains(UserRole.SELLER);
 
+	}
+
+	@DisplayName("유저 정보 수정 api")
+	@Test
+	void test6() throws Exception {
+		// given
+		UserEntity userEntity = UserEntity.builder()
+			.address(EmbeddedAddress.builder()
+				.city("old_city")
+				.street("old_street")
+				.zipCode("old_zipCode")
+				.state("old_state")
+				.details("old_details")
+				.build())
+			.nickname("old_nickname")
+			.oauthId("GOOGLE")
+			.email("test@example.com")
+			.name("test_name")
+			.password("default")
+			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.phoneNumber("010-1234-5678")
+			.build();
+
+		UserEntity savedUser = userJpaRepository.save(userEntity);
+
+		UserUpdateRequest updateRequest = new UserUpdateRequest(
+			"new_nickname",
+			"010-1234-5678",
+			"new_street",
+			"new_zipCode",
+			"new_state",
+			"new_city",
+			"new_details"
+		);
+
+		// when
+		mockMvc.perform(patch("/api/users/{userId}", savedUser.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateRequest)))
+			.andDo(print())
+			.andExpect(status().isOk());
+
+		// then
+		UserEntity updatedUser = userJpaRepository.findById(savedUser.getId()).orElseThrow();
+		assertThat(updatedUser.getNickname()).isEqualTo("new_nickname");
+		assertThat(updatedUser.getAddress().getCity()).isEqualTo("new_city");
+		assertThat(updatedUser.getAddress().getStreet()).isEqualTo("new_street");
+		assertThat(updatedUser.getAddress().getZipCode()).isEqualTo("new_zipCode");
+		assertThat(updatedUser.getAddress().getState()).isEqualTo("new_state");
+		assertThat(updatedUser.getAddress().getDetails()).isEqualTo("new_details");
 	}
 }

@@ -50,7 +50,7 @@ public class UserEntity extends BaseEntity {
 	@Column(nullable = false)
 	private List<UserRole> roles = new ArrayList<>();
 
-	private String profileUrl;
+	private String profileImageUrl;
 
 	@Convert(converter = UserInformationConverter.class)
 	@Column(nullable = false)
@@ -59,25 +59,29 @@ public class UserEntity extends BaseEntity {
 	@Embedded
 	private EmbeddedAddress address;
 
+	private String imageId;
+
 	@Builder
 	public UserEntity(
 		String name,
 		String email,
 		String password,
-		String profileUrl,
+		String profileImageUrl,
 		String phoneNumber,
 		EmbeddedAddress address,
 		String oauthId,
-		String nickname
+		String nickname,
+		String imageId
 	) {
 		this.oauthId = oauthId;
 		this.name = name;
 		this.email = email;
 		this.password = password;
-		this.profileUrl = profileUrl;
+		this.profileImageUrl = profileImageUrl;
 		this.address = address;
 		this.phoneNumber = phoneNumber;
 		this.nickname = nickname;
+		this.imageId = imageId;
 
 		this.roles.add(UserRole.USER);
 	}
@@ -85,5 +89,22 @@ public class UserEntity extends BaseEntity {
 	@Override
 	protected String getEntitySuffix() {
 		return UserEntity.class.getAnnotation(Table.class).name();
+	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void updateAddress(EmbeddedAddress address) {
+		this.address = address;
+	}
+
+	public void updatePhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public void changeProfileImage(String imageId, String profileImageUrl) {
+		this.imageId = imageId;
+		this.profileImageUrl = profileImageUrl;
 	}
 }
