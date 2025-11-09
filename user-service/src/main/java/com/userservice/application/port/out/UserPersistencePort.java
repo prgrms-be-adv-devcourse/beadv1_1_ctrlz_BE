@@ -1,6 +1,7 @@
 package com.userservice.application.port.out;
 
 import com.userservice.domain.model.User;
+import com.userservice.domain.vo.UserRole;
 
 public interface UserPersistencePort {
 	User findById(String id);
@@ -12,4 +13,5 @@ public interface UserPersistencePort {
 	boolean existsPhoneNumber(String phoneNumber);
 	boolean existsNickname(String nickname);
 	void delete(String id);
+	void updateRole(String id, UserRole userRole);
 }

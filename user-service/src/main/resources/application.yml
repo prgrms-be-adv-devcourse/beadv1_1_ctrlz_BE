@@ -21,6 +21,11 @@ spring:
     password:
     url: jdbc:h2:mem:user-db
 
+  h2:
+    console:
+      enabled: true
+
+
   kafka:
     bootstrap-servers:
       - localhost:9092

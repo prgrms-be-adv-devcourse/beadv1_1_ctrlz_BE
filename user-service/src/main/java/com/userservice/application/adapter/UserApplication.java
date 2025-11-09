@@ -1,6 +1,5 @@
 package com.userservice.application.adapter;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import com.userservice.application.port.in.UserCommandUseCase;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
 import com.userservice.domain.vo.Address;
+import com.userservice.domain.vo.UserRole;
 import com.userservice.infrastructure.writer.CartClient;
 import com.userservice.infrastructure.writer.dto.CartCreateRequest;
 
@@ -25,19 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserApplication implements UserCommandUseCase {
 
-	@Value("${custom.cart.topic.command}")
-	private String cartTopicCommand;
-
-	@Value("${custom.deposit.topic.command}")
-	private String depositTopicCommand;
-
 	private final UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
 	private final CartClient cartClient;
 
 	@Override
 	public User create(UserContext userContext) {
-
 		verifyNickname(userContext.nickname());
 		verifyPhoneNumber(userContext.phoneNumber());
 
@@ -48,10 +41,16 @@ public class UserApplication implements UserCommandUseCase {
 
 		if(!response.getStatusCode().is2xxSuccessful()) {
 			userPersistencePort.delete(savedUser.getId());
+
 			throw new RuntimeException("카트 생성 실패");
 		}
 
 		return savedUser;
+	}
+
+	@Override
+	public void updateForSeller(String id) {
+		userPersistencePort.updateRole(id, UserRole.SELLER);
 	}
 
 	@Override

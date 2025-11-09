@@ -2,6 +2,7 @@ package com.userservice.application.adapter;
 
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
+import com.userservice.domain.vo.UserRole;
 
 public class FakeRepository implements UserPersistencePort {
 
@@ -47,6 +48,11 @@ public class FakeRepository implements UserPersistencePort {
 
 	@Override
 	public void delete(String id) {
+
+	}
+
+	@Override
+	public void updateRole(String id, UserRole userRole) {
 
 	}
 }
