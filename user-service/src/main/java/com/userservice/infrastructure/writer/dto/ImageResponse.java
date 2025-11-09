@@ -1,4 +1,4 @@
 package com.userservice.infrastructure.writer.dto;
 
-public record ImageResponse(String imageUrl) {
+public record ImageResponse(String imageUrl, String imageId) {
 }

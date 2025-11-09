@@ -1,6 +1,7 @@
 spring:
   application:
     name: user-service
+
   profiles:
     group:
       local:
@@ -63,4 +64,6 @@ custom:
 logging:
   level:
     io.awspring.cloud: DEBUG
+
+
 

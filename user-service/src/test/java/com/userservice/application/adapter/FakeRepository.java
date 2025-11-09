@@ -55,4 +55,9 @@ public class FakeRepository implements UserPersistencePort {
 	public void updateRole(String id, UserRole userRole) {
 
 	}
+
+	@Override
+	public void updateImage(String userId, String imageId, String profileImageUrl) {
+
+	}
 }

@@ -23,10 +23,11 @@ public class User {
 	private String password;
 	private String nickname;
 	private List<UserRole> roles;
-	private String profileUrl;
+	private String profileImageUrl;
 	private Address address;
 	private String phoneNumber;
 	private String oauthId;
+	private String imageId;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private DeleteStatus deleteStatus;
@@ -39,10 +40,10 @@ public class User {
 		String password,
 		String nickname,
 		List<UserRole> roles,
-		String profileUrl,
+		String profileImageUrl,
 		Address address,
 		String phoneNumber,
-		String oauthId,
+		String oauthId, String imageId,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt,
 		DeleteStatus deleteStatus
@@ -53,10 +54,11 @@ public class User {
 		this.password = password;
 		this.nickname = nickname;
 		this.roles = roles;
-		this.profileUrl = profileUrl;
+		this.profileImageUrl = profileImageUrl;
 		this.address = address;
 		this.phoneNumber = phoneNumber;
 		this.oauthId = oauthId;
+		this.imageId = imageId;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.deleteStatus = deleteStatus;
@@ -64,5 +66,17 @@ public class User {
 
 	public List<String> getRolesToString() {
 		return roles.stream().map(Enum::name).toList();
+	}
+
+	public void updateAddress(Address updatedAddress) {
+		this.address = updatedAddress;
+	}
+
+	public void updatePhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
 	}
 }
