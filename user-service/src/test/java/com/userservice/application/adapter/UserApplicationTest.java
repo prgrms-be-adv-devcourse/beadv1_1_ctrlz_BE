@@ -18,8 +18,6 @@ import com.userservice.infrastructure.jpa.converter.AESUtils;
 @DataJpaTest
 class UserApplicationTest {
 
-
-
 	@DisplayName("회원 가입 시, 닉네임이 중복되면 예외를 던진다.")
 	@Test
 	void test1() throws Exception {
@@ -45,7 +43,7 @@ class UserApplicationTest {
 	void test3() throws Exception {
 		//given
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		UserApplication userApplication = new UserApplication(new FakeRepository(), passwordEncoder, cartCreateRequest -> ResponseEntity.badRequest().build() );
+		UserApplication userApplication = new UserApplication(new FakeRepository(), passwordEncoder, cartCreateRequest -> ResponseEntity.badRequest().build());
 		UserContext mockUser = UserContext.builder()
 			.email("mockuser@example.com")
 			.nickname("mockNick")

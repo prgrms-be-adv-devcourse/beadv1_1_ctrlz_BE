@@ -1,5 +1,6 @@
 package com.userservice.infrastructure.web.api;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -21,13 +22,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.asset.image.infrastructure.ProfileImageUploadClient;
-import com.common.asset.image.infrastructure.dto.ImageUrlResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.userservice.application.adapter.command.SellerVerificationContext;
+import com.userservice.application.port.in.SellerVerificationUseCase;
+import com.userservice.domain.vo.UserRole;
+import com.userservice.infrastructure.api.dto.UpdateSellerRequest;
 import com.userservice.infrastructure.api.dto.UserCreateRequest;
+import com.userservice.infrastructure.api.dto.VerificationReqeust;
+import com.userservice.infrastructure.jpa.entity.UserEntity;
 import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
+import com.userservice.infrastructure.jpa.vo.EmbeddedAddress;
 import com.userservice.infrastructure.writer.CartClient;
+import com.userservice.infrastructure.writer.ProfileImageClient;
 import com.userservice.infrastructure.writer.dto.CartCreateRequest;
+import com.userservice.infrastructure.writer.dto.ImageResponse;
 
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -45,14 +53,18 @@ class UserControllerTest {
 
 	@Autowired
 	private UserJpaRepository userJpaRepository;
+
 	@MockitoBean
 	private S3Client s3Client;
 
 	@MockitoBean
-	private ProfileImageUploadClient profileImageUploadClient;
+	private ProfileImageClient profileImageClient;
 
 	@MockitoBean
 	private CartClient cartClient;
+
+	@MockitoBean
+	private SellerVerificationUseCase sellerVerificationUseCase;
 
 	@BeforeEach
 	void setUp() {
@@ -68,14 +80,15 @@ class UserControllerTest {
 
 		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
 			"image content".getBytes());
+
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageUrlResponse("profileImageUrl"));
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
+			new ImageResponse("profileImageUrl"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(200).body(any()));
 
-		// when & then
+		// when then
 		mockMvc.perform(multipart("/api/users")
 				.file(image)
 				.file(requestJson))
@@ -96,14 +109,15 @@ class UserControllerTest {
 
 		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
 			"image content".getBytes());
+
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageUrlResponse("profileImageUrl"));
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
+			new ImageResponse("profileImageUrl"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(400).body(any()));
 
-		// when & then
+		// when then
 		mockMvc.perform(multipart("/api/users")
 				.file(image)
 				.file(requestJson))
@@ -120,13 +134,14 @@ class UserControllerTest {
 
 		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
 			"image content".getBytes());
+
 		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
 
-		when(profileImageUploadClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageUrlResponse("profileImageUrl"));
+		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
+			new ImageResponse("profileImageUrl"));
 
-		// when & then
+		// when then
 		mockMvc.perform(multipart("/api/users")
 				.file(image)
 				.file(requestJson))
@@ -135,5 +150,74 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.customFieldErrors[0].field").value("phoneNumber"))
 			.andExpect(jsonPath("$.customFieldErrors[0].rejectedValue").value(""))
 			.andExpect(jsonPath("$.customFieldErrors[0].reason").value("연락처를 입력해주세요"));
+	}
+
+	@DisplayName("sms 문자 전송 api")
+	@Test
+	void test4() throws Exception {
+		// given
+		UserEntity userEntity = UserEntity.builder()
+			.address(EmbeddedAddress.builder()
+				.city("서울특별시")
+				.street("테헤란로 123")
+				.zipCode("06234")
+				.state("서울특별시")
+				.details("101동 1001호")
+				.build())
+			.nickname("pillivery_dev")
+			.oauthId("GOOGLE")
+			.email("minseok@example.com")
+			.name("최민석")
+			.password("default")
+			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.phoneNumber("010-1234-5678")
+			.build();
+
+		UserEntity user = userJpaRepository.save(userEntity);
+
+		// when then
+		mockMvc.perform(post("/api/users/sellers/verification/{id}", user.getId())
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(new VerificationReqeust("010-1234-5678"))))
+			.andDo(print())
+			.andExpect(status().isOk());
+
+		verify(sellerVerificationUseCase, times(1)).requestVerificationCode(any(SellerVerificationContext.class));
+	}
+
+	@DisplayName("인증 확인 및 seller 추가 api")
+	@Test
+	void test5() throws Exception {
+		// given
+		UserEntity userEntity = UserEntity.builder()
+			.address(EmbeddedAddress.builder()
+				.city("서울특별시")
+				.street("테헤란로 123")
+				.zipCode("06234")
+				.state("서울특별시")
+				.details("101동 1001호")
+				.build())
+			.nickname("pillivery_dev")
+			.oauthId("GOOGLE")
+			.email("minseok@example.com")
+			.name("최민석")
+			.password("default")
+			.profileUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
+			.phoneNumber("010-1234-5678")
+			.build();
+
+		UserEntity user = userJpaRepository.save(userEntity);
+
+		doNothing().when(sellerVerificationUseCase).checkVerificationCode(any(SellerVerificationContext.class));
+
+		mockMvc.perform(post("/api/users/sellers/{id}", user.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new UpdateSellerRequest("010-1234-5678"))))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("판매자 등록이 완료됐습니다."));
+
+		assertThat(user.getRoles()).contains(UserRole.SELLER);
+
 	}
 }

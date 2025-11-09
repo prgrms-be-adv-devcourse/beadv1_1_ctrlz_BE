@@ -9,4 +9,5 @@ public interface UserCommandUseCase {
 	User create(UserContext userContext);
 	void update(UserContext userContext);
 	void delete(String id);
+	void updateForSeller(String id);
 }

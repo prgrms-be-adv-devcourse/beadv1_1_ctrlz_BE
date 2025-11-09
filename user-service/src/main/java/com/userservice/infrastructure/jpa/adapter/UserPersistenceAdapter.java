@@ -6,8 +6,9 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.userservice.application.port.out.UserPersistencePort;
 import com.userservice.domain.model.User;
-import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
+import com.userservice.domain.vo.UserRole;
 import com.userservice.infrastructure.jpa.entity.UserEntity;
+import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,5 +68,12 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	@Override
 	public void delete(String id) {
 		userJpaRepository.deleteById(id);
+	}
+
+	@Override
+	public void updateRole(String id, UserRole userRole) {
+		UserEntity userEntity = userJpaRepository.findById(id)
+			.orElseThrow(() -> new CustomException(UserExceptionCode.USER_NOT_FOUND.getMessage()));
+		userEntity.getRoles().add(userRole);
 	}
 }

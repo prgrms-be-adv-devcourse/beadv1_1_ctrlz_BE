@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Disabled;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Component;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.userservice.application.adapter.event.CartCreatedEvent;
 import com.userservice.application.adapter.event.DepositCreatedEvent;
@@ -16,10 +14,10 @@ import com.userservice.application.adapter.event.DepositCreatedEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 @Disabled("kafka 도입 시 다시 테스트 합니다.")
-@ActiveProfiles("test")
+// @ActiveProfiles("test")
 @Getter
 @Slf4j
-@Component
+// @Component
 @KafkaListener(
 	topics = {"${custom.cart.topic.command}", "${custom.deposit.topic.command}"}
 )
