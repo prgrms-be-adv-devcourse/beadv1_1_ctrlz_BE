@@ -1,6 +1,7 @@
 spring:
   application:
     name: user-service
+
   profiles:
     group:
       local:
@@ -20,6 +21,11 @@ spring:
     username: sa
     password:
     url: jdbc:h2:mem:user-db
+
+  h2:
+    console:
+      enabled: true
+
 
   kafka:
     bootstrap-servers:
@@ -58,4 +64,6 @@ custom:
 logging:
   level:
     io.awspring.cloud: DEBUG
+
+
 

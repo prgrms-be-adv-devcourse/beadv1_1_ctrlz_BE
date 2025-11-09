@@ -8,16 +8,14 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Disabled("kafka 도입 시 다시 테스트 합니다.")
-@Profile("test || local")
-@Configuration
+// @Profile("test || local")
+// @Configuration
 public class TestKafkaConsumerConfiguration {
 
 	@Value("${spring.kafka.bootstrap-servers}")

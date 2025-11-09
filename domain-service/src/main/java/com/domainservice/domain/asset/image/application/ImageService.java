@@ -1,9 +1,20 @@
 package com.domainservice.domain.asset.image.application;
 
+import static com.domainservice.domain.asset.image.application.ImageUtils.*;
+
+import java.io.File;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.common.exception.CustomException;
 import com.common.exception.vo.FileExceptionCode;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.asset.image.domain.entity.ImageType;
 import com.domainservice.domain.asset.image.domain.repository.ImageRepository;
 import com.domainservice.domain.asset.image.domain.service.AssetService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +27,10 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import com.domainservice.domain.asset.image.infrastructure.s3.S3ImageClient;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,14 +49,12 @@ import static java.nio.file.Files.probeContentType;
 @Service
 public class ImageService implements AssetService<Image> {
 
-	@Value("${custom.bucket-name}")
-	private String bucketName;
 	@Value("${custom.image.allowed-extension}")
 	private String allowedExtension;
 	@Value("${custom.image.max-size}")
 	private long maxSize;
 
-	private final S3Client s3Client;
+	private final S3ImageClient s3ImageClient;
 	private final ImageRepository imageRepository;
 	private final ImageCompressor compressor;
 
@@ -93,33 +106,25 @@ public class ImageService implements AssetService<Image> {
 
 		validateFile(file);
 
-		String originalFileName = file.getOriginalFilename();
-		File compressedFile = compressor.compressToWebp(originalFileName, file);
-
+		File compressedFile = compressor.compressToWebp(file);
 		String storedFileName = generateFileName(compressedFile.getName());
 		String s3key = generateS3Key(storedFileName, ImageTarget.USER.name());
-		String s3Url = getS3Url(bucketName, s3key);
 
-		try {
-			uploadToS3(compressedFile, s3key);
+		String s3Url = s3ImageClient.uploadUserProfileToS3(compressedFile, s3key);
 
-			Image image = Image.builder()
-				.originalFileName(originalFileName)
-				.storedFileName(storedFileName)
-				.s3Url(s3Url)
-				.s3Key(s3key)
-				.originalFileSize(file.getSize())
-				.originalContentType(file.getContentType())
-				.compressedFileSize(compressedFile.length())
-				.convertedContentType(Files.probeContentType(compressedFile.toPath()))
-				.imageTarget(ImageTarget.USER)
-				.build();
+		Image image = Image.builder()
+			.originalFileName(file.getOriginalFilename())
+			.storedFileName(storedFileName)
+			.s3Url(s3Url)
+			.s3Key(s3key)
+			.originalFileSize(file.getSize())
+			.originalContentType(file.getContentType())
+			.compressedFileSize(compressedFile.length())
+			.convertedContentType(ImageType.WEBP)
+			.imageTarget(ImageTarget.USER)
+			.build();
 
-			return imageRepository.save(image);
-		} catch (Exception e) {
-			log.error("이미지 저장 실패 error: {} ", e.getMessage());
-			throw new RuntimeException(e);
-		}
+		return imageRepository.save(image);
 	}
 
 	@Override
@@ -128,15 +133,21 @@ public class ImageService implements AssetService<Image> {
 			.orElseThrow(() -> new CustomException(FileExceptionCode.NO_SUCH_IMAGE.getValue()));
 	}
 
-	private void uploadToS3(File file, String s3key) throws IOException {
-		PutObjectRequest request = PutObjectRequest.builder()
-			.bucket(bucketName)
-			.key(s3key)
-			.contentType(probeContentType(file.toPath()))
-			.contentLength(file.length())
-			.build();
+	@Override
+	public Image updateProfileImage(MultipartFile profileImage, String imageId) {
 
-		s3Client.putObject(request, RequestBody.fromInputStream(new FileInputStream(file), file.length()));
+		imageRepository.findById(imageId)
+			.ifPresent(image -> {
+				image.delete();
+				s3ImageClient.deleteFileFromS3(image.getS3Url());
+			});
+
+		return uploadUserProfile(profileImage);
+	}
+
+	@Override
+	public void delete(String id) {
+		imageRepository.deleteById(id);
 	}
 
 	private void validateFile(MultipartFile file) {

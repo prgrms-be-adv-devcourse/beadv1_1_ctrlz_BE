@@ -21,8 +21,9 @@ public class UserEntityMapper {
 			.oauthId(user.getOauthId())
 			.email(user.getEmail())
 			.name(user.getName())
+			.imageId(user.getImageId())
 			.password(user.getPassword())
-			.profileUrl(user.getProfileUrl())
+			.profileImageUrl(user.getProfileImageUrl())
 			.phoneNumber(user.getPhoneNumber())
 			.build();
 	}
@@ -35,7 +36,7 @@ public class UserEntityMapper {
 			.password(userEntity.getPassword())
 			.email(userEntity.getEmail())
 			.roles(userEntity.getRoles())
-			.profileUrl(userEntity.getProfileUrl())
+			.profileImageUrl(userEntity.getProfileImageUrl())
 			.nickname(userEntity.getNickname())
 			.address(Address.builder()
 				.street(userEntity.getAddress().getStreet())
@@ -44,11 +45,22 @@ public class UserEntityMapper {
 				.details(userEntity.getAddress().getDetails())
 				.zipCode(userEntity.getAddress().getZipCode())
 				.build())
+			.imageId(userEntity.getImageId())
 			.phoneNumber(userEntity.getPhoneNumber())
 			.oauthId(userEntity.getOauthId())
 			.createdAt(userEntity.getCreatedAt())
 			.updatedAt(userEntity.getUpdatedAt())
 			.deleteStatus(userEntity.getDeleteStatus())
+			.build();
+	}
+
+	public static EmbeddedAddress toEmbeddedAddress(Address address) {
+		return EmbeddedAddress.builder()
+			.city(address.getCity())
+			.street(address.getStreet())
+			.zipCode(address.getZipCode())
+			.state(address.getState())
+			.details(address.getDetails())
 			.build();
 	}
 }

@@ -15,12 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ImageCompressor {
 
-	public File compressToWebp(String fileName, MultipartFile originalFile) {
-
+	public File compressToWebp( MultipartFile originalFile) {
+		String originalFilename = originalFile.getOriginalFilename();
 		try {
 			return ImmutableImage.loader()
 				.fromBytes(originalFile.getBytes())
-				.output(WebpWriter.DEFAULT.withLossless(), new File(fileName + ".webp"));
+				.output(WebpWriter.DEFAULT.withLossless(), new File(originalFilename + ".webp"));
 		} catch (IOException e) {
 			log.info("이미지 압축 에러 e = {}", e.getMessage());
 			throw new RuntimeException(e);

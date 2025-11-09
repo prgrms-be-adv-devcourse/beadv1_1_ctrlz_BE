@@ -29,7 +29,25 @@ public class ExceptionController {
 	@ExceptionHandler(RuntimeException.class)
 	public BaseResponse<ApiErrorResponse> handleRuntimeException(RuntimeException e) {
 
-		log.error(e.getMessage(), e);
+		Throwable rootCause = e;
+		while (rootCause.getCause() != null) {
+			rootCause = rootCause.getCause();
+		}
+
+		log.error("{}", e.getStackTrace());
+		log.error("Caused by: {}: {}",
+			rootCause.getClass().getSimpleName(),
+			rootCause.getMessage()
+		);
+
+		StackTraceElement top = e.getStackTrace()[0];
+		log.error("Exception at {}.{}({}:{}): {}",
+			top.getClassName(),
+			top.getMethodName(),
+			top.getFileName(),
+			top.getLineNumber(),
+			e.getMessage()
+		);
 		return new BaseResponse<>(
 			ApiErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 에러가 발생했습니다."), "internal server error");
 	}
