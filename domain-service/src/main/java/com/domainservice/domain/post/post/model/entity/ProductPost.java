@@ -179,26 +179,34 @@ public class ProductPost extends BaseEntity {
     ================ validate ================
      */
 
-    /**
-     * 상품 수정, 삭제 시 진행하는 유효성 검사
-     *
-     */
+    public void validateUpdate(String userId) {
+        // 판매 완료된 상품은 수정 불가
+        if (this.tradeStatus == TradeStatus.SOLDOUT) {
+            throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
+        }
+        validate(userId);
+    }
+
+    public void validateDelete(String userId) {
+        validate(userId);
+    }
+
     public void validate(String userId) {
         if (userId == null || userId.isBlank()) {
             throw new ProductPostException(UNAUTHORIZED);
         }
 
-        // soft delete 된 상품은 delete 불가
+        // soft delete 된 상품은 수정 혹은 삭제 불가
         if (this.getDeleteStatus() == DeleteStatus.D) {
             throw new ProductPostException(ALREADY_DELETED);
         }
 
-        // 거래가 진행중인 상품은 delete 불가
+        // 거래가 진행중인 상품은 수정 혹은 삭제 불가
         if (this.tradeStatus == TradeStatus.PROCESSING) {
             throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
         }
 
-        // 본인이 작성한 글만 삭제 가능
+        // 본인이 작성한 글만 수정 혹은 삭제 가능
         if (!this.userId.equals(userId)) {
             throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
         }

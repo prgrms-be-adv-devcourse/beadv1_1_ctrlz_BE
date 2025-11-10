@@ -34,13 +34,21 @@ class GetProductPostTest {
     private ProductPostRepository productPostRepository;
 
     /**
-     * 테스트용 헬퍼 메서드
-     * - viewCount를 조작하기 위해 사용
+     * 테스트용 헬퍼 메서드 - viewCount를 조작하기 위해 사용
      */
     private void setViewCount(ProductPost productPost, int viewCount) throws Exception {
         Field field = productPost.getClass().getDeclaredField("viewCount");
         field.setAccessible(true);
         field.set(productPost, viewCount);
+    }
+
+    /**
+     * 테스트용 헬퍼 메서드 - viewCount를 조회하기 위해 사용
+     */
+    private int getViewCount(ProductPost productPost) throws Exception {
+        Field field = productPost.getClass().getDeclaredField("viewCount");
+        field.setAccessible(true);
+        return (int) field.get(productPost);
     }
 
     @DisplayName("게시글을 조회할 수 있다.")
@@ -69,7 +77,6 @@ class GetProductPostTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.id()).isNull();  // ID는 builder로 설정 안 함
         assertThat(result.userId()).isEqualTo("user-123");
         assertThat(result.title()).isEqualTo("아이폰 15 Pro");
         assertThat(result.name()).isEqualTo("iPhone 15 Pro");
@@ -86,6 +93,7 @@ class GetProductPostTest {
     void test2() throws Exception {
         // given
         String postId = "post-123";
+        int initialViewCount = 100;
 
         ProductPost productPost = ProductPost.builder()
                 .userId("user-123")
@@ -97,7 +105,7 @@ class GetProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        setViewCount(productPost, 100);
+        setViewCount(productPost, initialViewCount);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
@@ -105,8 +113,9 @@ class GetProductPostTest {
         productPostService.getProductPostById(postId);
 
         // then
-        // incrementViewCount() 호출로 조회수 증가 확인
-        // (실제 viewCount는 ProductPost 내부에서 증가하므로 검증 어려움)
+        int currentViewCount = getViewCount(productPost);
+        assertThat(currentViewCount).isEqualTo(initialViewCount + 1);
+
         verify(productPostRepository).findById(postId);
     }
 
@@ -140,7 +149,7 @@ class GetProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        productPost.delete();  // 삭제 처리
+        productPost.delete();
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
@@ -159,11 +168,11 @@ class GetProductPostTest {
         ProductPost productPost = ProductPost.builder()
                 .userId("user-123")
                 .categoryId("category-123")
-                .title("아이폰 15 Pro")
+                .title("아이폰 15 Pro (판매완료)")
                 .name("iPhone 15 Pro")
                 .price(1200000)
                 .status(ProductStatus.GOOD)
-                .tradeStatus(TradeStatus.SOLDOUT)  // 판매 완료
+                .tradeStatus(TradeStatus.SOLDOUT)
                 .build();
 
         setViewCount(productPost, 50);
@@ -189,11 +198,11 @@ class GetProductPostTest {
         ProductPost productPost = ProductPost.builder()
                 .userId("user-123")
                 .categoryId("category-123")
-                .title("아이폰 15 Pro")
+                .title("아이폰 15 Pro (거래중)")
                 .name("iPhone 15 Pro")
                 .price(1200000)
                 .status(ProductStatus.GOOD)
-                .tradeStatus(TradeStatus.PROCESSING)  // 거래 진행 중
+                .tradeStatus(TradeStatus.PROCESSING)
                 .build();
 
         setViewCount(productPost, 30);
@@ -210,7 +219,7 @@ class GetProductPostTest {
         verify(productPostRepository).findById(postId);
     }
 
-    @DisplayName("상품 상태가 NEW인 게시글을 조회할 수 있다.")
+    @DisplayName("조회수가 0인 게시글을 조회할 수 있다.")
     @Test
     void test7() throws Exception {
         // given
@@ -219,7 +228,7 @@ class GetProductPostTest {
         ProductPost productPost = ProductPost.builder()
                 .userId("user-123")
                 .categoryId("category-123")
-                .title("아이폰 15 Pro")
+                .title("새로 등록한 아이폰")
                 .name("iPhone 15 Pro")
                 .price(1200000)
                 .status(ProductStatus.NEW)
@@ -237,36 +246,11 @@ class GetProductPostTest {
         assertThat(result).isNotNull();
         assertThat(result.status()).isEqualTo(ProductStatus.NEW);
 
-        verify(productPostRepository).findById(postId);
-    }
-
-    @DisplayName("상품 상태가 FAIR인 게시글을 조회할 수 있다.")
-    @Test
-    void test8() throws Exception {
-        // given
-        String postId = "post-123";
-
-        ProductPost productPost = ProductPost.builder()
-                .userId("user-123")
-                .categoryId("category-123")
-                .title("아이폰 15 Pro")
-                .name("iPhone 15 Pro")
-                .price(1200000)
-                .status(ProductStatus.FAIR)
-                .tradeStatus(TradeStatus.SELLING)
-                .build();
-
-        setViewCount(productPost, 15);
-
-        given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-
-        // when
-        ProductPostResponse result = productPostService.getProductPostById(postId);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.status()).isEqualTo(ProductStatus.FAIR);
+        // 조회수 증가 확인
+        int currentViewCount = getViewCount(productPost);
+        assertThat(currentViewCount).isEqualTo(1);
 
         verify(productPostRepository).findById(postId);
     }
+
 }

@@ -92,7 +92,7 @@ public class ProductPostService {
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
         // 게시물이 수정 가능한 상태인지 유효성 검사
-        productPost.validate(userId);
+        productPost.validateUpdate(userId);
 
         // 기존 저장된 이미지 삭제하고 새 이미지로 교체
         replaceImages(productPost, imageFiles);
@@ -122,7 +122,7 @@ public class ProductPostService {
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
         // 게시물이 삭제 가능한 상태인지 유효성 검사
-        target.validate(userId);
+        target.validateDelete(userId);
 
         // 테이블에 저장된 이미지 삭제
         deleteProductPostImages(target);
