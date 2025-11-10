@@ -28,6 +28,9 @@ import java.util.List;
 
 import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
 
+/**
+ * 상품 게시글의 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -39,7 +42,13 @@ public class ProductPostService {
     private final ImageService imageService;
 
     /**
-     * 상품 게시글 생성 (이미지 포함)
+     * 상품 게시글을 생성합니다.
+     *
+     * @param request 게시글 생성 요청 정보
+     * @param userId 작성자 ID
+     * @param imageFiles 업로드할 이미지 파일 목록 (최소 1개 필수)
+     * @return 생성된 게시글 정보
+     * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
      */
     public ProductPostResponse createProductPost(
             ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
@@ -67,10 +76,17 @@ public class ProductPostService {
     }
 
     /**
-     * 상품 게시글 수정
+     * 상품 게시글을 수정합니다. 기존 이미지는 삭제되고 새 이미지로 교체됩니다.
+     *
+     * @param request 게시글 수정 요청 정보
+     * @param imageFiles 새로운 이미지 파일 목록 (최소 1개 필수)
+     * @param userId 수정 요청자 ID
+     * @param postId 수정할 게시글 ID
+     * @return 수정된 게시글 정보
+     * @throws ProductPostException 게시글이 존재하지 않거나 수정 권한이 없는 경우
      */
-    public ProductPostResponse updateProductPost
-    (ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
+    public ProductPostResponse updateProductPost(
+            ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
         ProductPost productPost = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
@@ -91,7 +107,12 @@ public class ProductPostService {
     }
 
     /**
-     * 상품 게시글 삭제
+     * 상품 게시글을 삭제합니다. (Soft Delete)
+     *
+     * @param userId 삭제 요청자 ID
+     * @param postId 삭제할 게시글 ID
+     * @return 삭제된 게시글 ID
+     * @throws ProductPostException 게시글이 존재하지 않거나 삭제 권한이 없는 경우
      */
     public String deleteProductPost(String userId, String postId) {
 
@@ -113,7 +134,11 @@ public class ProductPostService {
     }
 
     /**
-     * 단일 상품 게시글 조회
+     * 단일 상품 게시글을 조회합니다. 조회 시 조회수가 증가합니다.
+     *
+     * @param postId 조회할 게시글 ID
+     * @return 게시글 정보
+     * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
      */
     public ProductPostResponse getProductPostById(String postId) {
 
@@ -131,13 +156,20 @@ public class ProductPostService {
     }
 
     /**
-     * 상품 게시글 목록 조회 (페이징 + 동적 필터링)
+     * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링(Specification)을 지원합니다.
+     *
+     * @param pageable 페이징 정보
+     * @param categoryId 카테고리 ID (선택)
+     * @param status 상품 상태 (선택)
+     * @param tradeStatus 거래 상태 (선택)
+     * @param minPrice 최소 가격 (선택)
+     * @param maxPrice 최대 가격 (선택)
+     * @return 페이징된 게시글 목록
      */
     public PageResponse<List<ProductPostResponse>> getProductPostList(
             Pageable pageable, String categoryId, ProductStatus status,
             TradeStatus tradeStatus, Integer minPrice, Integer maxPrice
     ) {
-
         // Specification 생성
         Specification<ProductPost> spec = ProductPostSpecification.searchWith(
                 categoryId, status, tradeStatus, minPrice, maxPrice
@@ -162,10 +194,9 @@ public class ProductPostService {
      */
 
     /**
-     * 기존 이미지를 모두 삭제하고 새로운 이미지로 교체합니다.
+     * 게시글의 이미지를 교체합니다. 기존 이미지는 S3 및 DB에서 삭제됩니다.
      */
     private void replaceImages(ProductPost productPost, List<MultipartFile> imageFiles) {
-
         // 첨부한 이미지 유효성 체크
         validateUploadImage(imageFiles);
 
@@ -174,14 +205,21 @@ public class ProductPostService {
 
         // 새 이미지 업로드 및 productPost에 추가
         uploadAndAddImages(productPost, imageFiles);
-
     }
 
+    /**
+     * 이미지를 S3에 업로드하고 게시글에 추가합니다.
+     */
     private void uploadAndAddImages(ProductPost productPost, List<MultipartFile> imageFiles) {
         List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(imageFiles, ImageTarget.PRODUCT);
         productPost.addImages(uploadedImages);
     }
 
+    /**
+     * 업로드할 이미지의 유효성을 검증합니다.
+     *
+     * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
+     */
     private void validateUploadImage(List<MultipartFile> imageFiles) {
         // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
         if (imageFiles == null || imageFiles.isEmpty()) {
@@ -194,7 +232,9 @@ public class ProductPostService {
         }
     }
 
-    // 저장된 각 이미지를 s3에서 삭제
+    /**
+     * 게시글에 연결된 모든 이미지를 S3 및 DB에서 삭제합니다.
+     */
     private void deleteProductPostImages(ProductPost target) {
         List<String> targetIds = target.getProductPostImages().stream()
                 .map(e -> e.getImage().getId())
@@ -207,6 +247,11 @@ public class ProductPostService {
         targetIds.forEach(imageService::deleteProfileImageById);
     }
 
+    /**
+     * 게시글에 태그를 추가합니다.
+     *
+     * @throws ProductPostException 존재하지 않는 태그 ID가 포함된 경우
+     */
     private void addTags(ProductPost productPost, List<String> tagIds) {
         if (tagIds != null) {
             List<Tag> tags = tagRepository.findAllById(tagIds);

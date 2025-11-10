@@ -19,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * 상품 게시글 관련 REST API를 제공하는 컨트롤러입니다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/product-posts")
@@ -27,7 +30,11 @@ public class ProductPostController {
     private final ProductPostService productPostService;
 
     /**
-     * 상품 게시글 생성 (이미지 포함)
+     * 상품 게시글을 생성합니다.
+     *
+     * @param imageFiles 업로드할 이미지 파일 목록 (최소 1개 필수)
+     * @param request 게시글 생성 요청 정보
+     * @return 생성된 게시글 정보 (201 Created)
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -42,7 +49,12 @@ public class ProductPostController {
     }
 
     /**
-     * 상품 게시글 수정
+     * 상품 게시글을 수정합니다. 기존 이미지는 삭제되고 새 이미지로 교체됩니다.
+     *
+     * @param postId 수정할 게시글 ID
+     * @param imageFiles 새로운 이미지 파일 목록 (필수)
+     * @param request 게시글 수정 요청 정보
+     * @return 수정된 게시글 정보 (200 OK)
      */
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -58,7 +70,10 @@ public class ProductPostController {
     }
 
     /**
-     * 상품 게시글 삭제
+     * 상품 게시글을 삭제합니다. (Soft Delete)
+     *
+     * @param postId 삭제할 게시글 ID
+     * @return 삭제된 게시글 ID (200 OK)
      */
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
@@ -72,7 +87,10 @@ public class ProductPostController {
     }
 
     /**
-     * 단일 게시글 조회
+     * 단일 상품 게시글을 조회합니다. 조회 시 조회수가 증가합니다.
+     *
+     * @param postId 조회할 게시글 ID
+     * @return 게시글 상세 정보 (200 OK)
      */
     @GetMapping("{postId}")
     @ResponseStatus(HttpStatus.OK)
@@ -82,7 +100,15 @@ public class ProductPostController {
     }
 
     /**
-     * 상품 게시글 목록 조회 (페이징 + 필터링)
+     * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링을 지원합니다.
+     *
+     * @param pageable 페이징 정보 (기본값: size=20, sort=createdAt, DESC)
+     * @param categoryId 카테고리 ID (선택)
+     * @param status 상품 상태 (선택)
+     * @param tradeStatus 거래 상태 (선택)
+     * @param minPrice 최소 가격 (선택)
+     * @param maxPrice 최대 가격 (선택)
+     * @return 페이징된 게시글 목록 (200 OK)
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
