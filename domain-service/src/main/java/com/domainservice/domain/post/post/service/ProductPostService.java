@@ -2,6 +2,7 @@ package com.domainservice.domain.post.post.service;
 
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
@@ -9,6 +10,7 @@ import com.domainservice.domain.post.post.model.dto.request.CreateProductPostReq
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
+import com.domainservice.domain.post.post.model.entity.ProductPostImage;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
@@ -32,6 +34,7 @@ public class ProductPostService {
 
     private final ProductPostRepository productPostRepository;
     private final TagRepository tagRepository;
+    private final ImageService imageService;
 
     /**
      * 상품 게시글 생성 (이미지 포함)
@@ -75,7 +78,19 @@ public class ProductPostService {
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
         target.validateDelete(userId);
-        target.delete(); // 상태 변경만을 진행 (SoftDelete)
+
+        List<ProductPostImage> imagesToDelete = target.getProductPostImages();
+
+        // 저장된 각 이미지를 s3에서 삭제
+        imagesToDelete.stream()
+                .map(ProductPostImage::getImage)
+                .forEach(image -> imageService.deleteProfileImageById(image.getId()));
+
+        // clear 하게되면 'orphanRemoval = true' 옵션에 의해 ProductPostImage가 DB에서 자동으로 삭제됨
+        target.getProductPostImages().clear();
+
+        // soft delete 처리
+        target.delete();
 
         return target.getId();
     }
