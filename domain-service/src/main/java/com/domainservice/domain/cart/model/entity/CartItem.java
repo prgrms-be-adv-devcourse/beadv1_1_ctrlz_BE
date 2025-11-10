@@ -25,9 +25,8 @@ public class CartItem extends BaseEntity {
 	@JoinColumn(name = "cart_id", nullable = false)
 	private Cart cart;
 
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "product_post_id", nullable = false)
-	// private ProductPostEntity product;
+	@Column(name = "productPost_id", nullable = false)
+	private String productPostId;
 
 	@Column(nullable = false)
 	private int quantity;
@@ -51,11 +50,9 @@ public class CartItem extends BaseEntity {
 		this.cart = cart;
 	}
 
-	// TODO : 상품 도메인 추가되면 수정 필요
 	// 해당 아이템의 총 가격 계산 (수량 × 상품 가격)
-	public int getTotalPrice() {
-		return 1;
-		// return this.quantity * this.productPost.getPrice();
+	public int getTotalPrice(int price) {
+		return this.quantity * price;
 	}
 
 	@Override

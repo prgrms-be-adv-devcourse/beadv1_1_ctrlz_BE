@@ -83,9 +83,8 @@ public class CartController {
 	 * 사용자별 장바구니 생성 (이미 존재하는 경우 에러 반환)
 	 */
 	@PostMapping
-	public ResponseEntity<?> createCart(@RequestBody CreateCartRequest request) {
-		String userId = "testUser";
-		cartService.addCart(userId);
+	public ResponseEntity<Void> createCart(@RequestBody CreateCartRequest request) {
+		cartService.addCart(request.userId());
 		return ResponseEntity.ok().build();
 	}
 }

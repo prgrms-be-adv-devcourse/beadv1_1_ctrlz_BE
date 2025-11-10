@@ -30,13 +30,6 @@ public class Cart extends BaseEntity {
 	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CartItem> cartItems = new ArrayList<>();
 
-	// 장바구니 총 금액 계산 (실시간 계산)
-	public int calculateTotalAmount() {
-		return cartItems.stream()
-			.mapToInt(CartItem::getTotalPrice)
-			.sum();
-	}
-
 	// 장바구니 아이템 추가
 	public void addCartItem(CartItem cartItem) {
 		cartItems.add(cartItem);
