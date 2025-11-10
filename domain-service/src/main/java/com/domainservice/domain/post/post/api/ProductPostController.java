@@ -2,8 +2,7 @@ package com.domainservice.domain.post.post.api;
 
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
-import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
-import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
@@ -31,11 +30,11 @@ public class ProductPostController {
      * 상품 게시글 생성 (이미지 포함)
      */
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public BaseResponse<ProductPostResponse> createProductPost(
             // @AuthenticationPrincipal String userId,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
-            @Valid @RequestPart("request") CreateProductPostRequest request
+            @Valid @RequestPart("request") ProductPostRequest request
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID
         ProductPostResponse response = productPostService.createProductPost(request, userId, imageFiles);
@@ -65,7 +64,7 @@ public class ProductPostController {
             // @AuthenticationPrincipal String userId,
             @PathVariable String postId,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
-            @Valid @RequestPart("request") UpdateProductPostRequest request
+            @Valid @RequestPart("request") ProductPostRequest request
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID를 사용
         ProductPostResponse response = productPostService.updateProductPost(request, imageFiles, userId, postId);

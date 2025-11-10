@@ -1,7 +1,7 @@
 package com.domainservice.common.init.data;
 
 import com.domainservice.domain.post.category.service.CategoryService;
-import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
@@ -55,14 +55,13 @@ public class ProductPostInitializer {
                             templates[random.nextInt(templates.length)];
                     String userId = userIds[random.nextInt(userIds.length)];
 
-                    CreateProductPostRequest request = CreateProductPostRequest.builder()
+                    ProductPostRequest request = ProductPostRequest.builder()
                             .categoryId(categoryId)
                             .title(template.title())
                             .name(template.name())
                             .price(template.basePrice() + random.nextInt(50000))
                             .description(template.description())
                             .status(getRandomProductStatus())
-                            .imageUrl("https://via.placeholder.com/400x300.png?text=" + template.name())
                             .tagIds(getRandomTagIds(allTagIds))
                             .build();
 

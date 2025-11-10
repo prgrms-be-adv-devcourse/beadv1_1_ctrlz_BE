@@ -3,7 +3,7 @@ package com.domainservice.domain.post.post.model.entity;
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
@@ -95,7 +95,7 @@ public class ProductPost extends BaseEntity {
         this.viewCount++;
     }
 
-    public void update(UpdateProductPostRequest request) {
+    public void update(ProductPostRequest request) {
         this.title = request.title();
         this.name = request.name();
         this.price = request.price();
@@ -124,7 +124,7 @@ public class ProductPost extends BaseEntity {
         if (!this.productPostTags.isEmpty())
             this.productPostTags.clear();
 
-        if (newTags != null && !newTags.isEmpty()) {
+        if (newTags != null) {
             addTags(newTags);
         }
     }
@@ -179,39 +179,28 @@ public class ProductPost extends BaseEntity {
     ================ validate ================
      */
 
-    public void validateDelete(String userId) {
+    /**
+     * 상품 수정, 삭제 시 진행하는 유효성 검사
+     *
+     */
+    public void validate(String userId) {
         if (userId == null || userId.isBlank()) {
             throw new ProductPostException(UNAUTHORIZED);
         }
 
+        // soft delete 된 상품은 delete 불가
         if (this.getDeleteStatus() == DeleteStatus.D) {
             throw new ProductPostException(ALREADY_DELETED);
         }
 
+        // 거래가 진행중인 상품은 delete 불가
         if (this.tradeStatus == TradeStatus.PROCESSING) {
             throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
         }
 
+        // 본인이 작성한 글만 삭제 가능
         if (!this.userId.equals(userId)) {
             throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
-        }
-    }
-
-    public void validateUpdate(String userId) {
-        if (userId == null || userId.isBlank()) {
-            throw new ProductPostException(UNAUTHORIZED);
-        }
-
-        if (this.getDeleteStatus() == DeleteStatus.D) {
-            throw new ProductPostException(ALREADY_DELETED);
-        }
-
-        if (!this.userId.equals(userId)) {
-            throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
-        }
-
-        if (this.tradeStatus == TradeStatus.SOLDOUT) {
-            throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
         }
     }
 }
