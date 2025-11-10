@@ -4,6 +4,7 @@ import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
@@ -31,7 +32,7 @@ public class ProductPostController {
     private final ImageService imageService;
 
     /**
-    * 상품 게시글 생성 (이미지 포함)
+     * 상품 게시글 생성 (이미지 포함)
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -44,7 +45,7 @@ public class ProductPostController {
 
         List<Image> uploadedImages = null;
         if (images != null && !images.isEmpty()) {
-            uploadedImages = imageService.uploadProfileImageList(images);
+            uploadedImages = imageService.uploadProfileImageListByTarget(images, ImageTarget.PRODUCT);
         }
 
         ProductPostResponse response = productPostService.createProductPost(
