@@ -4,6 +4,7 @@ import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,11 +42,7 @@ public class ProductPostService {
      * 상품 게시글 생성 (이미지 포함)
      */
     public ProductPostResponse createProductPost(
-            CreateProductPostRequest request, String userId, List<Image> images) {
-
-        if (images != null && images.size() > 10) {
-            throw new ProductPostException(TOO_MANY_IMAGES);
-        }
+            CreateProductPostRequest request, String userId, List<MultipartFile> images) {
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
@@ -57,13 +55,19 @@ public class ProductPostService {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
+        // 첨부된 이미지가 존재하면 imageService를 통해 s3 업로드 후 productPost에 추가
         if (images != null && !images.isEmpty()) {
-            productPost.addImages(images);
+            if (images.size() > 10) {
+                throw new ProductPostException(TOO_MANY_IMAGES);
+            }
+            List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(images, ImageTarget.PRODUCT);
+            productPost.addImages(uploadedImages);
         }
 
         addTags(productPost, request.tagIds());
 
         ProductPost saved = productPostRepository.save(productPost);
+
         return ProductPostMapper.toProductPostResponse(saved);
     }
 

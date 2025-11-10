@@ -2,9 +2,6 @@ package com.domainservice.domain.post.post.api;
 
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
-import com.domainservice.domain.asset.image.application.ImageService;
-import com.domainservice.domain.asset.image.domain.entity.Image;
-import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
@@ -29,7 +26,6 @@ import java.util.List;
 public class ProductPostController {
 
     private final ProductPostService productPostService;
-    private final ImageService imageService;
 
     /**
      * 상품 게시글 생성 (이미지 포함)
@@ -42,16 +38,7 @@ public class ProductPostController {
             @Valid @RequestPart("request") CreateProductPostRequest request
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID
-
-        List<Image> uploadedImages = null;
-        if (images != null && !images.isEmpty()) {
-            uploadedImages = imageService.uploadProfileImageListByTarget(images, ImageTarget.PRODUCT);
-        }
-
-        ProductPostResponse response = productPostService.createProductPost(
-                request, userId, uploadedImages
-        );
-
+        ProductPostResponse response = productPostService.createProductPost(request, userId, images);
         return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
     }
 
