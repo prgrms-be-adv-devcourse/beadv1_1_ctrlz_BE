@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class UserExceptionHandler {
 
 	/**
 	 * 처리되지 않은 모든 예외
