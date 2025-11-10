@@ -28,7 +28,7 @@ custom:
   image:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
-    default: sdfgsdfgsdfg
+    default: default_image
 
   bucketname: sdfsdf
 

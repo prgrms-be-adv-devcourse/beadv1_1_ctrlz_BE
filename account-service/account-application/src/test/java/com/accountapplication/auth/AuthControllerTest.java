@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.auth.dto.TokenRefreshRequest;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.service.JwtAuthService;
-import com.common.configuration.EmbeddedRedisConfiguration;
+import com.user.infrastructure.redis.configuration.EmbeddedRedisConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")

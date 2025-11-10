@@ -15,12 +15,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.user.application.adapter.command.SellerVerificationContext;
@@ -33,7 +31,6 @@ import com.user.infrastructure.api.dto.VerificationReqeust;
 import com.user.infrastructure.feign.CartClient;
 import com.user.infrastructure.feign.ProfileImageClient;
 import com.user.infrastructure.feign.dto.CartCreateRequest;
-import com.user.infrastructure.feign.dto.ImageResponse;
 import com.user.infrastructure.jpa.entity.UserEntity;
 import com.user.infrastructure.jpa.repository.UserJpaRepository;
 import com.user.infrastructure.jpa.vo.EmbeddedAddress;
@@ -81,25 +78,18 @@ class UserControllerTest {
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
-		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
-			"image content".getBytes());
-
-		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsString(request).getBytes());
-
-		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl","imageId"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(200).body(any()));
 
 		// when then
-		mockMvc.perform(multipart("/api/users")
-				.file(image)
-				.file(requestJson))
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("가입 완료"))
 			.andExpect(jsonPath("$.data.nickname").value("nickname"))
-			.andExpect(jsonPath("$.data.profileUrl").value("profileImageUrl"))
+			.andExpect(jsonPath("$.data.profileUrl").value("default_image"))
 			.andExpect(jsonPath("$.data.userId").value(Matchers.notNullValue()));
 	}
 
@@ -110,20 +100,14 @@ class UserControllerTest {
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
-		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
-			"image content".getBytes());
 
-		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsString(request).getBytes());
-
-		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl", "imageId"));
 		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(400).body(any()));
 
 		// when then
-		mockMvc.perform(multipart("/api/users")
-				.file(image)
-				.file(requestJson))
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
 			.andDo(print())
 			.andExpect(status().isInternalServerError());
 	}
@@ -135,19 +119,10 @@ class UserControllerTest {
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "", "street",
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
-		MockMultipartFile image = new MockMultipartFile("profileImage", "image.jpg", MediaType.IMAGE_JPEG_VALUE,
-			"image content".getBytes());
-
-		MockMultipartFile requestJson = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsString(request).getBytes());
-
-		when(profileImageClient.uploadImage(any(MultipartFile.class))).thenReturn(
-			new ImageResponse("profileImageUrl", "imageId"));
-
-		// when then
-		mockMvc.perform(multipart("/api/users")
-				.file(image)
-				.file(requestJson))
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
 			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.customFieldErrors[0].field").value("phoneNumber"))
