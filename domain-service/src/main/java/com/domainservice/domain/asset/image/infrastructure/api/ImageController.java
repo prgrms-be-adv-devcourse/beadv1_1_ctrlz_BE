@@ -21,8 +21,9 @@ public class ImageController {
 	private final AssetService<Image> assetService;
 
 	@PostMapping
-	public ImageResponse uploadProfileImage(@RequestPart("file") MultipartFile profileImage) {
-		Image image = assetService.uploadUserProfile(profileImage);
+	public ImageResponse uploadProfileImage(
+            @RequestPart("file") MultipartFile profileImage) {
+		Image image = assetService.uploadProfileImage(profileImage);
 		return new ImageResponse(image.getS3Url(), image.getId());
 	}
 
