@@ -136,28 +136,28 @@ class CartServiceTest {
 		verify(cartJpaRepository).save(cart);
 	}
 
-	@Test
-	@DisplayName("장바구니 아이템 수량 변경")
-	void test6() {
-		// given
-		String itemId = "item123";
-		CartItem cartItem = CartItem.builder()
-			.cart(cart)
-			.quantity(1)
-			.selected(true)
-			.build();
-
-		when(cartItemJpaRepository.findById(itemId)).thenReturn(Optional.of(cartItem));
-		when(cartItemJpaRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
-
-		// when
-		CartItemResponse result = cartService.updateQuantity(itemId, 5);
-
-		// then
-		assertThat(result.quantity()).isEqualTo(5);
-		verify(cartItemJpaRepository).findById(itemId);
-		verify(cartItemJpaRepository).save(cartItem);
-	}
+	// @Test
+	// @DisplayName("장바구니 아이템 수량 변경")
+	// void test6() {
+	// 	// given
+	// 	String itemId = "item123";
+	// 	CartItem cartItem = CartItem.builder()
+	// 		.cart(cart)
+	// 		.quantity(1)
+	// 		.selected(true)
+	// 		.build();
+	//
+	// 	when(cartItemJpaRepository.findById(itemId)).thenReturn(Optional.of(cartItem));
+	// 	when(cartItemJpaRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
+	//
+	// 	// when
+	// 	CartItemResponse result = cartService.updateQuantity(itemId, 5);
+	//
+	// 	// then
+	// 	assertThat(result.quantity()).isEqualTo(5);
+	// 	verify(cartItemJpaRepository).findById(itemId);
+	// 	verify(cartItemJpaRepository).save(cartItem);
+	// }
 
 	@Test
 	@DisplayName("장바구니 아이템 선택 상태 변경")

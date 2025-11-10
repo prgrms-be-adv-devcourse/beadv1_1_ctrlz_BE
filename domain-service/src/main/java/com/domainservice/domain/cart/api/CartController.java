@@ -43,21 +43,24 @@ public class CartController {
 	 */
 	@PostMapping("/items")
 	public BaseResponse<CartItemResponse> addItemToCart(
-		@RequestParam("productPostId") String productPostId, @RequestParam("quantity") int quantity) {
+		@RequestParam("productPostId") String productPostId
+		// , @RequestParam("quantity") int quantity
+	) {
 		// TODO 유저 정보는 이후 수정
+		// TODO 우선 상품의 개수는 1개로 고정
 		String userId = "testUser";
-		return new BaseResponse<>(cartService.addItem(userId, productPostId, quantity)
+		return new BaseResponse<>(cartService.addItem(userId, productPostId, 1)
 			, "장바구니 아이템 수량 변경 성공했습니다");
 	}
 
-	/**
-	 *  장바구니 아이템 수량 변경
-	 */
-	@PatchMapping("/items/{itemId}/quantity")
-	public BaseResponse<CartItemResponse> updateItemQuantity(@PathVariable String itemId, @RequestParam int quantity) {
-		return new BaseResponse<>(
-			cartService.updateQuantity(itemId, quantity), "장바구니 아이템 수량 변경 성공했습니다");
-	}
+	// /**
+	//  *  장바구니 아이템 수량 변경
+	//  */
+	// @PatchMapping("/items/{itemId}/quantity")
+	// public BaseResponse<CartItemResponse> updateItemQuantity(@PathVariable String itemId, @RequestParam int quantity) {
+	// 	return new BaseResponse<>(
+	// 		cartService.updateQuantity(itemId, quantity), "장바구니 아이템 수량 변경 성공했습니다");
+	// }
 
 	/**
 	 *  장바구니 아이템 선택/해제
