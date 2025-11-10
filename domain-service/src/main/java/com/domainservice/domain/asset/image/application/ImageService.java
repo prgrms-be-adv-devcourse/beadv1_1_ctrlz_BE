@@ -54,6 +54,9 @@ public class ImageService implements AssetService<Image> {
 	@Value("${custom.image.max-size}")
 	private long maxSize;
 
+	@Value("${custom.bucketname}")
+	private String bucketName;
+
 	private final S3ImageClient s3ImageClient;
 	private final ImageRepository imageRepository;
 	private final ImageCompressor compressor;
@@ -73,14 +76,17 @@ public class ImageService implements AssetService<Image> {
         validateFile(file);
 
         String originalFileName = file.getOriginalFilename();
-        File compressedFile = compressor.compressToWebp(originalFileName, file);
+        // File compressedFile = compressor.compressToWebp(originalFileName, file);
+        File compressedFile = compressor.compressToWebp(file);
 
         String storedFileName = generateFileName(compressedFile.getName());
         String s3key = generateS3Key(storedFileName, target.name());
         String s3Url = getS3Url(bucketName, s3key);
 
         try {
-            uploadToS3(compressedFile, s3key);
+			//S3에 실질적으로 저장하는 코드
+            // uploadToS3(compressedFile, s3key);
+			s3ImageClient.uploadUserProfileToS3(compressedFile, s3key);
 
             Image image = Image.builder()
                     .originalFileName(originalFileName)
@@ -90,7 +96,7 @@ public class ImageService implements AssetService<Image> {
                     .originalFileSize(file.getSize())
                     .originalContentType(file.getContentType())
                     .compressedFileSize(compressedFile.length())
-                    .convertedContentType(Files.probeContentType(compressedFile.toPath()))
+                    .convertedContentType(ImageType.WEBP)
                     .imageTarget(target)
                     .build();
 
@@ -166,6 +172,7 @@ public class ImageService implements AssetService<Image> {
 		}
 
 		String contentType = file.getContentType();
+		log.info("contentType = {}", contentType);
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new CustomException(FileExceptionCode.NOT_IMAGE.getValue());
 		}
@@ -199,11 +206,12 @@ public class ImageService implements AssetService<Image> {
      * S3에 저장된 객체를 key로 삭제합니다.
      */
     public void deleteByKey(String key) {
-        s3Client.deleteObject(
-                DeleteObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(key)
-                        .build()
-        );
+		s3ImageClient.deleteFileFromS3(key);
+        // s3Client.deleteObject(
+        //         DeleteObjectRequest.builder()
+        //                 .bucket(bucketName)
+        //                 .key(key)
+        //                 .build()
+        // );
     }
 }

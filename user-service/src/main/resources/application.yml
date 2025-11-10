@@ -61,8 +61,17 @@ custom:
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
+aes:
+  key: 1234567890123456
+
+coolsms:
+  apiKey: aaaaaaaaaaaaaaaa
+  secretKey: aaaaaaaaaaaaaaaa
+  from: 01011111111
+
 logging:
   level:
+    com.userservice.infrastructure: DEBUG
     io.awspring.cloud: DEBUG
 
 

@@ -28,6 +28,7 @@ import com.userservice.infrastructure.api.mapper.UserContextMapper;
 import com.userservice.infrastructure.reader.port.UserReaderPort;
 import com.userservice.infrastructure.reader.port.dto.UserDescription;
 import com.userservice.infrastructure.writer.ProfileImageClient;
+import com.userservice.infrastructure.writer.ReviewClient;
 import com.userservice.infrastructure.writer.dto.ImageResponse;
 
 import jakarta.validation.Valid;
@@ -45,6 +46,7 @@ public class UserController {
 	private final UserCommandUseCase userCommandUseCase;
 	private final SellerVerificationUseCase sellerVerificationUseCase;
 	private final ProfileImageClient profileImageClient;
+	private final ReviewClient reviewClient;
 
 	@PostMapping
 	public BaseResponse<UserCreateResponse> createUser(
@@ -118,5 +120,12 @@ public class UserController {
 		ImageResponse imageResponse = profileImageClient.updateProfileImage(profileImage, imageId);
 		userCommandUseCase.updateImage(id, imageResponse.imageId(), imageResponse.imageUrl());
 		return new BaseResponse<>(imageResponse.imageUrl(), "프로필 이미지 교체 완료");
+	}
+
+	@GetMapping("/test")
+	public String testApi(
+	) {
+		reviewClient.feignClientErrorTestApi();
+		return "ok";
 	}
 }

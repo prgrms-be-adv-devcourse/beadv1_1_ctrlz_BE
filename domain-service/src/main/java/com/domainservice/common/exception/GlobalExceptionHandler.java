@@ -4,6 +4,8 @@ package com.domainservice.common.exception;
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.reivew.exception.ReviewException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(response);
     }
+
+    /**
+     * CustomException를 상속받는 모든 예외 처리
+     * 일단 모든 예외를 404 처리함
+     * TODO: CustomException에 int code 필드 생성하는게 좋을지?
+     */
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(ReviewException e) {
+
+        HttpStatus status = HttpStatus.resolve(e.getStatus());
+        ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
+
+        return ResponseEntity.status(status).body(response);
+    }
+
 
     /**
      * CustomException를 상속받는 모든 예외 처리

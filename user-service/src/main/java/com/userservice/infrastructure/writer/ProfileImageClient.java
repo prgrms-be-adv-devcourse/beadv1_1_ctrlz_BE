@@ -7,9 +7,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.userservice.infrastructure.feign.configuration.ProfileImageClientConfiguration;
 import com.userservice.infrastructure.writer.dto.ImageResponse;
 
-@FeignClient(name = "profile-image-service", url = "localhost:8081")
+@FeignClient(
+	name = "profile-image-service",
+	url = "localhost:8081",
+	configuration = {ProfileImageClientConfiguration.class}
+)
 public interface ProfileImageClient {
 
 	@PostMapping(value = "/api/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

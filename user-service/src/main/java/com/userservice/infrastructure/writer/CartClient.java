@@ -5,9 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.userservice.infrastructure.feign.configuration.CartClientConfiguration;
 import com.userservice.infrastructure.writer.dto.CartCreateRequest;
 
-@FeignClient(name = "cart-service", url = "localhost:8080")
+@FeignClient(
+	name = "cart-service",
+	url = "localhost:8080",
+	configuration = {CartClientConfiguration.class}
+)
 public interface CartClient {
 
 	@PostMapping("/api/carts")

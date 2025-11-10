@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.reivew.constant.ReviewConstant;
+import com.domainservice.domain.reivew.exception.ReviewException;
+import com.domainservice.domain.reivew.exception.code.ReviewExceptionCode;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.service.ReviewService;
@@ -95,6 +97,11 @@ public class ReviewController {
 		);
 	}
 
+	@GetMapping("/test")
+	public String feignClientErrorTestApi(
+	) {
+		throw new ReviewException(ReviewExceptionCode.BAD_REQUEST);
+	}
 
 
 }

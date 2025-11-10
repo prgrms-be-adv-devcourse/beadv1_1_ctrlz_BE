@@ -1,6 +1,7 @@
 package com.userservice.infrastructure.api.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.common.exception.CustomException;
+import com.common.exception.feign.YeongeunFeignClientException;
 import com.common.model.web.BaseResponse;
 import com.userservice.infrastructure.api.dto.ApiErrorResponse;
 
