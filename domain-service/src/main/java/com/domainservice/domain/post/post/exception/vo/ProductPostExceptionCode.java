@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ProductPostExceptionCode {
 
     // ===== 400 Bad Request =====
+    IMAGE_REQUIRED(400, "이미지는 최소 1개 이상 첨부해야 합니다."),
     TOO_MANY_IMAGES(400, "이미지는 최대 10개까지 등록 가능합니다."),
 
     // ===== 401 Unauthorized =====
@@ -25,7 +26,6 @@ public enum ProductPostExceptionCode {
     // ===== 409 Conflict =====
     ALREADY_DELETED(409, "이미 삭제된 상품입니다."),
     CANNOT_UPDATE_SOLDOUT(409, "판매 완료된 상품은 수정할 수 없습니다.");
-
 
     private final int code;
     private final String message;

@@ -96,11 +96,11 @@ public class ProductPost extends BaseEntity {
     }
 
     public void update(UpdateProductPostRequest request) {
-        if (request.title() != null) this.title = request.title();
-        if (request.name() != null) this.name = request.name();
-        if (request.price() != null) this.price = request.price();
-        if (request.description() != null) this.description = request.description();
-        if (request.status() != null) this.status = request.status();
+        this.title = request.title();
+        this.name = request.name();
+        this.price = request.price();
+        this.description = request.description();
+        this.status = request.status();
         this.update(); // updatedAt 최신화
     }
 

@@ -42,7 +42,7 @@ public class ProductPostService {
      * 상품 게시글 생성 (이미지 포함)
      */
     public ProductPostResponse createProductPost(
-            CreateProductPostRequest request, String userId, List<MultipartFile> images) {
+            CreateProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
@@ -56,13 +56,7 @@ public class ProductPostService {
                 .build();
 
         // 첨부된 이미지가 존재하면 imageService를 통해 s3 업로드 후 productPost에 추가
-        if (images != null && !images.isEmpty()) {
-            if (images.size() > 10) {
-                throw new ProductPostException(TOO_MANY_IMAGES);
-            }
-            List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(images, ImageTarget.PRODUCT);
-            productPost.addImages(uploadedImages);
-        }
+        uploadAndAddImages(productPost, imageFiles);
 
         addTags(productPost, request.tagIds());
 
@@ -99,17 +93,36 @@ public class ProductPostService {
         return target.getId();
     }
 
-    public ProductPostResponse updateProductPost(String userId, String postId, UpdateProductPostRequest request) {
+    public ProductPostResponse updateProductPost
+            (UpdateProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
         ProductPost productPost = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
         productPost.validateUpdate(userId);
 
-        productPost.update(request);
+        uploadAndAddImages(productPost, imageFiles);
         addTags(productPost, request.tagIds());
 
+        productPost.update(request);
+
         return ProductPostMapper.toProductPostResponse(productPost);
+    }
+
+    private void uploadAndAddImages(ProductPost productPost, List<MultipartFile> imageFiles) {
+
+        // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            throw new ProductPostException(IMAGE_REQUIRED);
+        }
+
+        // 10개를 초과해서 등록하더라도 예외처리
+        if (imageFiles.size() > 10) {
+            throw new ProductPostException(TOO_MANY_IMAGES);
+        }
+
+        List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(imageFiles, ImageTarget.PRODUCT);
+        productPost.addImages(uploadedImages);
     }
 
     private void addTags(ProductPost productPost, List<String> tagIds) {

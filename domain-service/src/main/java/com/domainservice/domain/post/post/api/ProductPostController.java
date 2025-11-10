@@ -34,11 +34,11 @@ public class ProductPostController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<ProductPostResponse> createProductPost(
             // @AuthenticationPrincipal String userId,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @Valid @RequestPart("request") CreateProductPostRequest request
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID
-        ProductPostResponse response = productPostService.createProductPost(request, userId, images);
+        ProductPostResponse response = productPostService.createProductPost(request, userId, imageFiles);
         return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
     }
 
@@ -59,16 +59,16 @@ public class ProductPostController {
     /**
      * 상품 게시글 수정
      */
-    @PatchMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
+    @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<ProductPostResponse> updateProductPost(
             // @AuthenticationPrincipal String userId,
             @PathVariable String postId,
-            @Valid @RequestBody UpdateProductPostRequest request
-            // TODO: 실제 파일로 받아오기
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+            @Valid @RequestPart("request") UpdateProductPostRequest request
     ) {
         String userId = "user-id";  // TODO: 실제로는 인증된 사용자 ID를 사용
-        ProductPostResponse response = productPostService.updateProductPost(userId, postId, request);
+        ProductPostResponse response = productPostService.updateProductPost(request, imageFiles, userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 수정되었습니다.");
     }
 
