@@ -41,10 +41,6 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 
-
-    //redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 }
 
 tasks.named('test') {
