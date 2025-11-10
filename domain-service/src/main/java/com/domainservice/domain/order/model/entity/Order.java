@@ -8,6 +8,8 @@ import com.common.model.persistence.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -31,7 +33,11 @@ public class Order extends BaseEntity {
 	@Builder.Default
 	private List<OrderItem> orderItems = new ArrayList<>();
 
+	@Column(nullable = false)
+	private String orderName;
+
 	@Column(nullable = false, length = 30)
+	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
 
 	public void addOrderItem(OrderItem item) {
@@ -43,6 +49,10 @@ public class Order extends BaseEntity {
 		return orderItems.stream()
 			.mapToInt(OrderItem::getTotalPrice)
 			.sum();
+	}
+
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 
 	@Override
