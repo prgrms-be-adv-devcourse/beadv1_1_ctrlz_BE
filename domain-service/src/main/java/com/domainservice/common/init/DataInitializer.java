@@ -26,7 +26,7 @@ public class DataInitializer implements ApplicationRunner {
 
         categoryInitializer.init();
         tagInitializer.init();
-        // productPostInitializer.init(); 이미지 설정 추가하면 s3에 계속 올라갈 것 같아서 나중에 인증/인가 적용되면 수정 예정
+        productPostInitializer.init();
 
         log.info("========================================");
         log.info("데이터 초기화 완료!");
