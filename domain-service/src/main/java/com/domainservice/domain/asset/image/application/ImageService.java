@@ -92,26 +92,38 @@ public class ImageService implements AssetService<Image> {
     }
 
     @Override
-    public Image getImage(String id) {
-        return imageRepository.findById(id)
-                .orElseThrow(() -> new CustomException(FileExceptionCode.NO_SUCH_IMAGE.getValue()));
-    }
-
-    @Override
     public Image updateProfileImage(MultipartFile profileImage, String imageId) {
-
-        imageRepository.findById(imageId)
-                .ifPresent(image -> {
-                    image.delete();
-                    s3ImageClient.deleteFileFromS3(image.getS3Url());
-                });
-
+        deleteProfileImageById(imageId);
         return uploadProfileImage(profileImage);
     }
 
+    public Image updateProfileImageByTarget(MultipartFile profileImage, ImageTarget target, String imageId) {
+        deleteProfileImageById(imageId);
+        return uploadProfileImageByTarget(profileImage, target);
+    }
+
     @Override
-    public void delete(String id) {
-        imageRepository.deleteById(id);
+    public void deleteProfileImageByS3Url(String s3Url) {
+        imageRepository.findByS3Url(s3Url)
+                .ifPresent(image -> {
+                    imageRepository.deleteById(image.getId());
+                    s3ImageClient.deleteFileFromS3(image.getS3Url());
+                });
+    }
+
+    @Override
+    public void deleteProfileImageById(String imageId) {
+        imageRepository.findById(imageId)
+                .ifPresent(image -> {
+                    imageRepository.deleteById(image.getId());
+                    s3ImageClient.deleteFileFromS3(image.getS3Url());
+                });
+    }
+
+    @Override
+    public Image getImage(String id) {
+        return imageRepository.findById(id)
+                .orElseThrow(() -> new CustomException(FileExceptionCode.NO_SUCH_IMAGE.getValue()));
     }
 
     private void validateFile(MultipartFile file) {
@@ -141,33 +153,4 @@ public class ImageService implements AssetService<Image> {
         return allowed.stream()
                 .anyMatch(ext -> ext.trim().equalsIgnoreCase(extension));
     }
-
-//    /**
-//     * 업로드 후 반환된 URL을 이용해 S3 객체를 삭제합니다.
-//     */
-//    public void deleteByUrl(String fileUrl) {
-//        try {
-//            // URL의 path 부분에서 "/" 제거 후 key 추출
-//            URI uri = URI.create(fileUrl);
-//            String path = uri.getPath();
-//            String key = path.startsWith("/") ? path.substring(1) : path;
-//
-//            deleteByKey(key);
-//        } catch (Exception e) {
-//            log.error("Failed to delete S3 object from URL: {}", fileUrl, e);
-//            throw new RuntimeException("S3 이미지 삭제 실패", e);
-//        }
-//    }
-//
-//    /**
-//     * S3에 저장된 객체를 key로 삭제합니다.
-//     */
-//    public void deleteByKey(String key) {
-//        s3Client.deleteObject(
-//                DeleteObjectRequest.builder()
-//                        .bucket(bucketName)
-//                        .key(key)
-//                        .build()
-//        );
-//    }
 }

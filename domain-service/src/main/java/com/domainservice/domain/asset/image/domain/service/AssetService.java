@@ -11,7 +11,8 @@ public interface AssetService<T> {
 
     Image updateProfileImage(MultipartFile profileImage, String imageId);
 
-    T getImage(String id);
+    void deleteProfileImageById(String imageId);
+    void deleteProfileImageByS3Url(String s3Url);
 
-    void delete(String id);
+    T getImage(String id);
 }
