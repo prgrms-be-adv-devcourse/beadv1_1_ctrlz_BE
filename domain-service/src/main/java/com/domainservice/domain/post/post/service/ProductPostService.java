@@ -10,7 +10,6 @@ import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.entity.ProductPostImage;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
@@ -68,36 +67,10 @@ public class ProductPostService {
     }
 
     /**
-     * 상품 게시글 삭제
+     * 상품 게시글 수정
      */
-    public String deleteProductPost(String userId, String postId) {
-
-        // TODO: 유저가 실제로 존재하는지 정보 확인
-
-        ProductPost target = productPostRepository.findById(postId)
-                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-
-        // 게시물이 삭제 가능한 상태인지 유효성 검사
-        target.validate(userId);
-
-        // 저장된 각 이미지를 s3에서 삭제
-        List<ProductPostImage> imagesToDelete = target.getProductPostImages();
-
-        imagesToDelete.stream()
-                .map(ProductPostImage::getImage)
-                .forEach(image -> imageService.deleteProfileImageById(image.getId()));
-
-        // clear 하게되면 'orphanRemoval = true' 옵션에 의해 ProductPostImage가 DB에서 자동으로 삭제됨
-        target.getProductPostImages().clear();
-
-        // soft delete 처리
-        target.delete();
-
-        return target.getId();
-    }
-
     public ProductPostResponse updateProductPost
-            (ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
+    (ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
         ProductPost productPost = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
@@ -118,56 +91,30 @@ public class ProductPostService {
     }
 
     /**
-     * 기존 이미지를 모두 삭제하고 새로운 이미지로 교체합니다.
+     * 상품 게시글 삭제
      */
-    private void replaceImages(ProductPost productPost, List<MultipartFile> imageFiles) {
+    public String deleteProductPost(String userId, String postId) {
 
-        // 첨부한 이미지 유효성 체크
-        validateUploadImage(imageFiles);
+        // TODO: 유저가 실제로 존재하는지 정보 확인
 
-        // 2. 기존 이미지 id 저장
-        List<String> targetIds = productPost.getProductPostImages().stream()
-                .map(e -> e.getImage().getId())
-                .toList();
+        ProductPost target = productPostRepository.findById(postId)
+                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
-        // 기존 이미지 삭제
-        productPost.getProductPostImages().clear();
-        productPostRepository.flush();
-        targetIds.forEach(imageService::deleteProfileImageById);
+        // 게시물이 삭제 가능한 상태인지 유효성 검사
+        target.validate(userId);
 
-        // 새 이미지 업로드 및 productPost에 추가
-        uploadAndAddImages(productPost, imageFiles);
+        // 테이블에 저장된 이미지 삭제
+        deleteProductPostImages(target);
 
+        // soft delete 처리
+        target.delete();
+
+        return target.getId();
     }
 
-    private void uploadAndAddImages(ProductPost productPost, List<MultipartFile> imageFiles) {
-        List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(imageFiles, ImageTarget.PRODUCT);
-        productPost.addImages(uploadedImages);
-    }
-
-    private void validateUploadImage(List<MultipartFile> imageFiles) {
-        // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
-        if (imageFiles == null || imageFiles.isEmpty()) {
-            throw new ProductPostException(IMAGE_REQUIRED);
-        }
-
-        // 10개를 초과해서 등록하더라도 예외처리
-        if (imageFiles.size() > 10) {
-            throw new ProductPostException(TOO_MANY_IMAGES);
-        }
-    }
-
-    private void addTags(ProductPost productPost, List<String> tagIds) {
-        if (tagIds != null) {
-            List<Tag> tags = tagRepository.findAllById(tagIds);
-
-            if (tags.size() != tagIds.size()) {
-                throw new ProductPostException(TAG_NOT_FOUND);
-            }
-            productPost.replaceTags(tags);
-        }
-    }
-
+    /**
+     * 단일 상품 게시글 조회
+     */
     public ProductPostResponse getProductPostById(String postId) {
 
         ProductPost productPost = productPostRepository.findById(postId)
@@ -208,6 +155,67 @@ public class ProductPostService {
                         .map(ProductPostMapper::toProductPostResponse)
                         .toList()
         );
+    }
+
+    /*
+    ================= private Method =================
+     */
+
+    /**
+     * 기존 이미지를 모두 삭제하고 새로운 이미지로 교체합니다.
+     */
+    private void replaceImages(ProductPost productPost, List<MultipartFile> imageFiles) {
+
+        // 첨부한 이미지 유효성 체크
+        validateUploadImage(imageFiles);
+
+        // 테이블에서 기존 이미지 삭제
+        deleteProductPostImages(productPost);
+
+        // 새 이미지 업로드 및 productPost에 추가
+        uploadAndAddImages(productPost, imageFiles);
+
+    }
+
+    private void uploadAndAddImages(ProductPost productPost, List<MultipartFile> imageFiles) {
+        List<Image> uploadedImages = imageService.uploadProfileImageListByTarget(imageFiles, ImageTarget.PRODUCT);
+        productPost.addImages(uploadedImages);
+    }
+
+    private void validateUploadImage(List<MultipartFile> imageFiles) {
+        // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            throw new ProductPostException(IMAGE_REQUIRED);
+        }
+
+        // 10개를 초과해서 등록하더라도 예외처리
+        if (imageFiles.size() > 10) {
+            throw new ProductPostException(TOO_MANY_IMAGES);
+        }
+    }
+
+    // 저장된 각 이미지를 s3에서 삭제
+    private void deleteProductPostImages(ProductPost target) {
+        List<String> targetIds = target.getProductPostImages().stream()
+                .map(e -> e.getImage().getId())
+                .toList();
+
+        // clear 하게되면 'orphanRemoval = true' 옵션에 의해 ProductPostImage를 DB에 DELETE 요청함
+        target.getProductPostImages().clear();
+        productPostRepository.flush();
+
+        targetIds.forEach(imageService::deleteProfileImageById);
+    }
+
+    private void addTags(ProductPost productPost, List<String> tagIds) {
+        if (tagIds != null) {
+            List<Tag> tags = tagRepository.findAllById(tagIds);
+
+            if (tags.size() != tagIds.size()) {
+                throw new ProductPostException(TAG_NOT_FOUND);
+            }
+            productPost.replaceTags(tags);
+        }
     }
 
     // TODO: 상품 판매상태 변경
