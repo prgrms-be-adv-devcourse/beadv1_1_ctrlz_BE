@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.sms.adapter;
+package com.accountapplication.user.infrastructure.sms.adapter;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.common.exception.CustomException;
 import com.solapi.sdk.message.model.Message;
 import com.solapi.sdk.message.service.DefaultMessageService;
+import com.user.infrastructure.sms.adapter.SmsClientAdapter;
 
 class SmsClientAdapterTest {
 

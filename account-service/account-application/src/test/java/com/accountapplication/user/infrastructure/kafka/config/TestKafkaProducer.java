@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.kafka.config;
+package com.accountapplication.user.infrastructure.kafka.config;
 
 import org.junit.jupiter.api.Disabled;
 import org.springframework.kafka.core.KafkaTemplate;

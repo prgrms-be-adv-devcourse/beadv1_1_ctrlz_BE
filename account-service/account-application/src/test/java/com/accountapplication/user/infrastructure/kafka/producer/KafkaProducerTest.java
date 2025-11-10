@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.kafka.producer;
+package com.accountapplication.user.infrastructure.kafka.producer;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -11,10 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.userservice.application.adapter.event.CartCreatedEvent;
-import com.userservice.application.adapter.event.DepositCreatedEvent;
-import com.userservice.infrastructure.kafka.TestKafkaConsumer;
-import com.userservice.infrastructure.kafka.config.TestKafkaProducer;
+import com.user.application.adapter.event.CartCreatedEvent;
+import com.user.application.adapter.event.DepositCreatedEvent;
+import com.accountapplication.user.infrastructure.kafka.TestKafkaConsumer;
+import com.accountapplication.user.infrastructure.kafka.config.TestKafkaProducer;
 
 import software.amazon.awssdk.services.s3.S3Client;
 

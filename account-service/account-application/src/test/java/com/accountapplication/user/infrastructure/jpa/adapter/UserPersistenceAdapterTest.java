@@ -1,25 +1,26 @@
-package com.userservice.infrastructure.jpa.adapter;
+package com.accountapplication.user.infrastructure.jpa.adapter;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
-import org.junit.jupiter.api.Nested;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
 import com.common.model.persistence.BaseEntity;
-import com.userservice.domain.model.User;
-import com.userservice.domain.vo.Address;
-import com.userservice.domain.vo.UserRole;
-import com.userservice.infrastructure.jpa.converter.AESUtils;
-import com.userservice.infrastructure.jpa.repository.UserJpaRepository;
+import com.user.domain.model.User;
+import com.user.domain.vo.Address;
+import com.user.domain.vo.UserRole;
+import com.user.infrastructure.jpa.adapter.UserPersistenceAdapter;
+import com.user.infrastructure.jpa.converter.AESUtils;
+import com.user.infrastructure.jpa.repository.UserJpaRepository;
 
-@Import(AESUtils.class)
+@Import({AESUtils.class})
 @DataJpaTest
 class UserPersistenceAdapterTest {
 

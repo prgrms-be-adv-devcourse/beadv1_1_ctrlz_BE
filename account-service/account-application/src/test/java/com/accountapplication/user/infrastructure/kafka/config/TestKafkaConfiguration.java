@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.kafka.config;
+package com.accountapplication.user.infrastructure.kafka.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.Disabled;

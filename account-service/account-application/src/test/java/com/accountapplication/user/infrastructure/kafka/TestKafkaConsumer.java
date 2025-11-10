@@ -1,4 +1,4 @@
-package com.userservice.infrastructure.kafka;
+package com.accountapplication.user.infrastructure.kafka;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,8 @@ import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 
-import com.userservice.application.adapter.event.CartCreatedEvent;
-import com.userservice.application.adapter.event.DepositCreatedEvent;
+import com.user.application.adapter.event.CartCreatedEvent;
+import com.user.application.adapter.event.DepositCreatedEvent;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,0 +1,45 @@
+spring:
+  profiles:
+    active:
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+custom:
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: sdfgsdfgsdfg
+
+  bucketname: sdfsdf
+
+aes:
+  key: 1234567890123456
+
+coolsms:
+  apiKey: aaaaaaaaaaaaaaaa
+  secretKey: aaaaaaaaaaaaaaaa
+  from: 01011111111
+
+
+jwt:
+  secret: dddddddddddddddddddddddddddddddddddddddd
+  expiration: 100
+  refresh-expiration: 1000

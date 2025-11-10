@@ -1,8 +1,11 @@
-package com.userservice.application.adapter;
+package com.accountapplication.user.application.adapter;
 
-import com.userservice.application.port.out.UserPersistencePort;
-import com.userservice.domain.model.User;
-import com.userservice.domain.vo.UserRole;
+import java.util.Optional;
+
+import com.user.application.port.out.UserPersistencePort;
+import com.user.domain.model.User;
+import com.user.domain.vo.OAuthId;
+import com.user.domain.vo.UserRole;
 
 public class FakeRepository implements UserPersistencePort {
 
@@ -59,5 +62,15 @@ public class FakeRepository implements UserPersistencePort {
 	@Override
 	public void updateImage(String userId, String imageId, String profileImageUrl) {
 
+	}
+
+	@Override
+	public Optional<User> findByEmailAndOAuthId(String email, OAuthId oAuthId) {
+		return Optional.empty();
+	}
+
+	@Override
+	public boolean existsByEmail(String email) {
+		return false;
 	}
 }

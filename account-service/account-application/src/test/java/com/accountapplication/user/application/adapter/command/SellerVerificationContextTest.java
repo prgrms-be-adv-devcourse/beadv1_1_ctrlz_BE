@@ -1,4 +1,4 @@
-package com.userservice.application.adapter.command;
+package com.accountapplication.user.application.adapter.command;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -8,8 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.common.exception.CustomException;
-import com.userservice.domain.model.User;
-import com.userservice.domain.vo.UserRole;
+import com.user.application.adapter.command.SellerVerificationContext;
+import com.user.domain.model.User;
+import com.user.domain.vo.UserRole;
 
 class SellerVerificationContextTest {
 
