@@ -69,6 +69,7 @@ public class OrderService {
 			}
 
 			OrderItem orderItem = OrderItem.builder()
+				.productPostId(product.id())
 				.quantity(cartItem.getQuantity())
 				.priceSnapshot(product.price())
 				.build();

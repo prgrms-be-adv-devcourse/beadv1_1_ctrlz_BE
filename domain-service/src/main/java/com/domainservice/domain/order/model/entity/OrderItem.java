@@ -21,10 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderItem extends BaseEntity {
 
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "product_post_id", nullable = false)
-	// private ProductPost productPost;
-	//
+	@Column(name = "productPost_id", nullable = false)
+	private String productPostId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id", nullable = false)
