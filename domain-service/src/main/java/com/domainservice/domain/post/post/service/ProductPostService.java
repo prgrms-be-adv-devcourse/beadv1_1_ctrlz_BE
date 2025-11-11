@@ -139,30 +139,35 @@ public class ProductPostService {
     }
 
     /**
-     * 단일 상품 게시글을 조회합니다. 조회 시 조회수가 증가합니다.
+     * 단일 상품 게시글을 조회합니다.
+     * 비회원 조회 (userId X)
+     * 조회 시 조회수가 증가합니다.
      *
      * @param postId 조회할 게시글 ID
      * @return 게시글 정보
      * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
      */
     public ProductPostResponse getProductPostById(String postId) {
+        ProductPost productPost = getPostAndIncrementViewCount(postId);
+        return ProductPostMapper.toProductPostResponse(productPost);
+    }
 
-        // TODO: 추후 진짜 사용자 id controller에서 매게변수로 받아오고 (userId, postId) 로 매개변수 변경
-        String userId = "user-001"; // 임시로 더미값 사용중
+    /**
+     * 단일 상품 게시글을 조회합니다.
+     * 로그인 된 회원 조회 (userId 필요)
+     * 조회 시 조회수가 증가하며 redis에 최근 본 상품으로 등록됩니다.
+     *
+     * @param postId 조회할 게시글 ID
+     * @return 게시글 정보
+     * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
+     */
+    public ProductPostResponse getProductPostById(String userId, String postId) {
 
-        ProductPost productPost = productPostRepository.findById(postId)
-                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-
-        // Soft Delete로 삭제된 상품은 상세 조회 불가
-        if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
-            throw new ProductPostException(PRODUCT_POST_DELETED);
-        }
-
-        productPost.incrementViewCount();
-
+        ProductPost productPost = getPostAndIncrementViewCount(postId);
         recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
 
         return ProductPostMapper.toProductPostResponse(productPost);
+
     }
 
     /**
@@ -289,10 +294,22 @@ public class ProductPostService {
         }
     }
 
+    private ProductPost getPostAndIncrementViewCount(String postId){
+        ProductPost productPost = productPostRepository.findById(postId)
+                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+
+        // Soft Delete로 삭제된 상품은 상세 조회 불가
+        if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
+            throw new ProductPostException(PRODUCT_POST_DELETED);
+        }
+
+        productPost.incrementViewCount();
+        return productPost;
+    }
+
     // TODO: 상품 판매상태 변경
     // TODO: 내가 구매한 상품 조회
     // TODO: 내가 판매한 상품 조회
     // TODO: 좋아요 로직 구현
     // TODO: 찜한 게시물
-    // TODO: 최근 본 상품 redis?
 }

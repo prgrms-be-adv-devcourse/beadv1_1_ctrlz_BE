@@ -92,14 +92,14 @@ public class ProductPostController {
      * @param postId 조회할 게시글 ID
      * @return 게시글 상세 정보 (200 OK)
      */
-    @GetMapping("{postId}") // / 없음
+    @GetMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ProductPostResponse> getProductPostById(
             @PathVariable String postId
             // @AuthenticationPrincipal String userId,
     ) {
-        // TODO: 인증인가 완료되면 매게변수에 추후 userId 넣어주기 (현재는 user-001 더미값 사용중)
-        ProductPostResponse response = productPostService.getProductPostById(postId);
+        String userId = "user-001"; // TODO: 인증인가 완료되면 매게변수에 추후 userId 넣어주기
+        ProductPostResponse response = productPostService.getProductPostById(userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
     }
 
