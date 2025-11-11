@@ -76,9 +76,11 @@ public class CartService {
 
 		for (CartItem item : cartItems) {
 			if (productPostId.equals(item.getProductPostId())) {
-				item.updateQuantity(item.getQuantity() + quantity);
+
+				// 재고가 있을 때의 경우임
+				// item.updateQuantity(item.getQuantity() + quantity);
 				targetItem = item;
-				break;
+				throw new CustomException(CartExceptionCode.CARTITEM_ALREADY_ADDED.getMessage());
 			}
 		}
 		if (targetItem == null) {

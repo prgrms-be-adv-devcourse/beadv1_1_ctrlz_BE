@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CartController {
 	private final CartService cartService;
+	String USERID = "user-001";
 
 	/**
 	 *  장바구니 조회
@@ -33,13 +34,14 @@ public class CartController {
 	@GetMapping
 	public BaseResponse<List<CartItemResponse>> getMyCart() {
 		// TODO 유저 정보는 이후 수정
-		String userId = "test";
+		String userId = USERID;
 		return new BaseResponse<>(cartService.getCartItemList(userId), "장바구니 아이템 리스트 조회 성공했습니다");
 	}
 
 	/**
 	 *  장바구니에 상품 추가
 	 * - 기존 아이템이 있으면 수량만 증가
+	 * 현재는 재고 적용 X, 기존 아이템 있으면 에러발생
 	 */
 	@PostMapping("/items")
 	public BaseResponse<CartItemResponse> addItemToCart(
@@ -48,7 +50,7 @@ public class CartController {
 	) {
 		// TODO 유저 정보는 이후 수정
 		// TODO 우선 상품의 개수는 1개로 고정
-		String userId = "testUser";
+		String userId = USERID;
 		return new BaseResponse<>(cartService.addItem(userId, productPostId, 1)
 			, "장바구니 아이템 수량 변경 성공했습니다");
 	}
@@ -69,7 +71,7 @@ public class CartController {
 	public BaseResponse<CartItemResponse> toggleItemSelection(@PathVariable String itemId,
 		@RequestParam boolean selected) {
 		return new BaseResponse<>(
-			cartService.setItemSelected(itemId, selected), "장바구니 아이템 수량 변경 성공했습니다");
+			cartService.setItemSelected(itemId, selected), selected ? "장바구니에서 체크선택 했습니다" : "장바구니에서 체크해제했습니다");
 	}
 
 	/**
