@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.model.User;
-import com.auth.oauth2.OAuthId;
 import com.user.domain.vo.UserRole;
 
 public class FakeRepository implements UserPersistencePort {
@@ -26,6 +25,11 @@ public class FakeRepository implements UserPersistencePort {
 
 	@Override
 	public void withdraw(String id) {
+
+	}
+
+	@Override
+	public void delete(String id) {
 
 	}
 
