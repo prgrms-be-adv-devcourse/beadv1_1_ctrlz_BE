@@ -15,6 +15,7 @@ spring:
               predicates:
                 - Path=/api/users
                 - Method=POST
+
             - id: user-info-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:

@@ -1,6 +1,7 @@
 package com.user.infrastructure.api.web;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,7 +62,6 @@ public class UserController {
 			"가입 완료");
 	}
 
-
 	@PatchMapping("/{id}")
 	public void updateUser(
 		@PathVariable("id") String id,
@@ -113,5 +113,12 @@ public class UserController {
 		ImageResponse imageResponse = profileImageClient.updateProfileImage(profileImage, imageId);
 		userCommandUseCase.updateImage(id, imageResponse.imageId(), imageResponse.imageUrl());
 		return new BaseResponse<>(imageResponse.imageUrl(), "프로필 이미지 교체 완료");
+	}
+
+	@DeleteMapping("/{id}")
+	public void deleteUser(
+		@PathVariable("id") String id
+	) {
+		userCommandUseCase.delete(id);
 	}
 }
