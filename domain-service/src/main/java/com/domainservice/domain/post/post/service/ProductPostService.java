@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Set;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 게시글의 비즈니스 로직을 처리하는 서비스 클래스입니다.
