@@ -21,38 +21,46 @@ spring:
               predicates:
                 - Path=/api/users/**
                 - Method=GET,PATCH,DELETE
-              filters:
-                - name: AuthenticationFilter
-                  args:
-                    requiredRole: USER
+#              filters:
+#                - name: AuthenticationFilter
+#                  args:
+#                    requiredRole: USER
 
             - id: post-search-public
-              uri: lb://DOMAIN_SERVICE
+              uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/product-posts
                 - Method=GET
 
             - id: post-api-protected
-              uri: lb://DOMAIN_SERVICE
+              uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/product-posts/**
                 - Method=POST,PUT,DELETE,PATCH
-              filters:
-                - name: AuthenticationFilter
-                  args:
-                    requiredRole: SELLER
+#              filters:
+#                - name: AuthenticationFilter
+#                  args:
+#                    requiredRole: SELLER
 
             - id: cart-api-protected
-              uri: lb://DOMAIN_SERVICE
+              uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/carts/**
                 - Method=GET,PATCH,DELETE,POST
-              filters:
-                - name: AuthenticationFilter
-                  args:
-                    requiredRole: USER
+#              filters:
+#                - name: AuthenticationFilter
+#                  args:
+#                    requiredRole: USER
+
+            - id: deposit-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/deposits/**
+                - Method=GET
+#              filters:
+#                - name: AuthenticationFilter
+#                  args:
+#                    requiredRole: USER
 
 
 
-jwt:
-  secret: sdglekfbdkfpgodkdfnisdlfk30499393e9f0dlskdfd90ie99fndf
