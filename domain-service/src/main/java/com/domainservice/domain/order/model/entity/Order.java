@@ -1,5 +1,7 @@
 package com.domainservice.domain.order.model.entity;
 
+import static com.domainservice.domain.order.model.entity.OrderStatus.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class Order extends BaseEntity {
 
 	@Column(nullable = false, length = 30)
 	@Enumerated(EnumType.STRING)
-	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
+	private OrderStatus orderStatus;
 
 	public void addOrderItem(OrderItem item) {
 		this.orderItems.add(item);
@@ -53,6 +55,21 @@ public class Order extends BaseEntity {
 
 	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
+	}
+
+	public void orderConfirmed() {
+		orderStatus = PURCHASE_CONFIRMED;
+		orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED));
+	}
+
+	public void orderCanceled() {
+		orderStatus = CANCELLED;
+		orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.CANCELLED));
+	}
+
+	public void orderRefundedAfterPayment() {
+		orderStatus = REFUND_AFTER_PAYMENT;
+		orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT));
 	}
 
 	@Override
