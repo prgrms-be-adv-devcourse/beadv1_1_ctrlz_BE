@@ -4,20 +4,29 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.user.infrastructure.redis.vo.CacheType;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -27,6 +36,7 @@ import redis.embedded.core.RedisServerBuilder;
 
 @Slf4j
 @Profile("test || local")
+@EnableCaching
 @Configuration
 public class EmbeddedRedisConfiguration {
 
@@ -59,6 +69,38 @@ public class EmbeddedRedisConfiguration {
 		return template;
 	}
 
+	@Bean
+	public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+		RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+			.serializeKeysWith(
+				RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())
+			)
+			.serializeValuesWith(
+				RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())
+			);
+
+		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+		cacheConfigurations.put(
+			CacheType.VERIFICATION_TRY.name(),
+			defaultConfig.entryTtl(Duration.ofMinutes(2))
+		);
+
+		cacheConfigurations.put(
+			CacheType.VERIFICATION_CODE.name(),
+			defaultConfig.entryTtl(Duration.ofMinutes(1))
+		);
+
+		cacheConfigurations.put(
+			CacheType.VERIFICATION_BAN_ONE_DAY.name(),
+			defaultConfig.entryTtl(Duration.ofDays(1))
+		);
+
+		return RedisCacheManager.builder(connectionFactory)
+			.cacheDefaults(defaultConfig)
+			.withInitialCacheConfigurations(cacheConfigurations)
+			.build();
+	}
 
 	@PostConstruct
 	public void startRedis() {

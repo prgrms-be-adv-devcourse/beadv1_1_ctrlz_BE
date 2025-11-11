@@ -20,7 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.common.exception.CustomException;
 import com.user.application.adapter.SmsApplication;
 import com.user.application.adapter.command.SellerVerificationContext;
-import com.user.infrastructure.cache.vo.CacheType;
+import com.user.infrastructure.redis.vo.CacheType;
 import com.user.infrastructure.sms.adapter.SmsClientAdapter;
 
 import software.amazon.awssdk.services.s3.S3Client;

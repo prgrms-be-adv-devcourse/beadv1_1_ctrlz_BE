@@ -10,7 +10,7 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.command.SellerVerificationContext;
 import com.user.application.port.in.SellerVerificationUseCase;
-import com.user.infrastructure.cache.vo.CacheType;
+import com.user.infrastructure.redis.vo.CacheType;
 import com.user.infrastructure.sms.adapter.SmsClientAdapter;
 import com.user.infrastructure.sms.utils.VerificationCodeSupplier;
 
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * - 재시도 캐시 유효 시간: 2분
  * - 인증 제한 시간: 1일
  *
- * 설정: {@link com.user.infrastructure.cache.Configuration.CacheConfiguration}
+ * 설정: {@link com.user.infrastructure.redis}
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class SmsApplication implements SellerVerificationUseCase {
 	private Cache verificationCodeCache;
 	private Cache verificationBanCache;
 
-	private static final int MAX_VERIFICATION_ATTEMPTS = 5;
+	private static final int MAX_VERIFICATION_ATTEMPTS = 10;
 
 	@PostConstruct
 	public void init() {
