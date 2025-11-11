@@ -36,9 +36,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto'
 
 
-    //cache
+    //cache redis
     implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     //sms
     implementation 'com.solapi:sdk:1.0.3'
