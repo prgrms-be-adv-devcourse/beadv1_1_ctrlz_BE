@@ -52,6 +52,17 @@ public class OrderController {
 			"주문 확정 성공했습니다");
 	}
 
+	@PatchMapping("/{orderId}/items/{orderItemId}/cancel")
+	public BaseResponse<OrderResponse> cancelOrderItem(
+		// @RequestHeader("X-USER-ID") String userId,
+		@PathVariable String orderId,
+		@PathVariable String orderItemId
+	) {
+		return new BaseResponse<>(
+			orderService.cancelOrderItem(orderId, USERID, orderItemId),
+			"주문 일부 취소 성공했습니다"
+		);
+	}
 	// TODO: 주문 목록 조회
 	// TODO: 주문 상세 조회
 }
