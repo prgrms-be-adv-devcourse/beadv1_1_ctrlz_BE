@@ -44,7 +44,7 @@ public class ProductPostController {
 
         List<Image> uploadedImages = null;
         if (images != null && !images.isEmpty()) {
-            uploadedImages = imageService.uploadProductImages(images);
+            uploadedImages = imageService.uploadProfileImageList(images);
         }
 
         ProductPostResponse response = productPostService.createProductPost(
