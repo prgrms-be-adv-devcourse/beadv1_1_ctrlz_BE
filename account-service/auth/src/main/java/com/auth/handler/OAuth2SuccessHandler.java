@@ -76,9 +76,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			response.addHeader("Set-Cookie", accessTokenCookie.toString());
 			response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
+			LinkedMultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+			queryParams.add("profile_image", customOAuth2User.profileUrl());
+			queryParams.add("nickname", customOAuth2User.nickname());
+
+			String uriString = UriComponentsBuilder.fromUriString(redirectUrl)
+				.queryParams(queryParams)
+				.encode(StandardCharsets.UTF_8)
+				.build()
+				.toUriString();
 			log.info("OAuth2 로그인 성공 - 리다이렉트");
 
-			getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+			getRedirectStrategy().sendRedirect(request, response, uriString);
 
 		} catch (Exception e) {
 			log.error("OAuth2 로그인 처리 중 오류 발생", e);
