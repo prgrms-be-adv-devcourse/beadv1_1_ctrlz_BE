@@ -16,7 +16,7 @@ spring:
                 - Path=/api/users
                 - Method=POST
 
-            - id: user-info-protected
+            - id: user-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users/**
@@ -25,6 +25,33 @@ spring:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
+
+            - id: post-search-public
+              uri: lb://DOMAIN_SERVICE
+              predicates:
+                - Path=/api/product-posts
+                - Method=GET
+
+            - id: post-api-protected
+              uri: lb://DOMAIN_SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=POST,PUT,DELETE,PATCH
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: SELLER
+
+            - id: cart-api-protected
+              uri: lb://DOMAIN_SERVICE
+              predicates:
+                - Path=/api/carts/**
+                - Method=GET,PATCH,DELETE,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
 
 
 jwt:
