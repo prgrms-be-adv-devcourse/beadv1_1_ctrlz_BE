@@ -1,4 +1,4 @@
-package com.domainservice.common.config.redis;
+package com.common.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
