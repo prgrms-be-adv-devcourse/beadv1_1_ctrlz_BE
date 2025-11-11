@@ -52,7 +52,7 @@ public class CartController {
 		// TODO 우선 상품의 개수는 1개로 고정
 		String userId = USERID;
 		return new BaseResponse<>(cartService.addItem(userId, productPostId, 1)
-			, "장바구니 아이템 수량 변경 성공했습니다");
+			, "장바구니 아이템 추가 성공했습니다");
 	}
 
 	// /**

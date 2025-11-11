@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
+	String USERID = "user-001";
 
 	private final OrderService orderService;
 
@@ -28,9 +29,8 @@ public class OrderController {
 		@RequestBody CreateOrderRequest orderRequest) {
 
 		// TODO 유저아이디
-		String userId = "TESTUSER";
 		return ResponseEntity.ok(
-			orderService.createOrder(userId, orderRequest.cartItemIds())
+			orderService.createOrder(USERID, orderRequest.cartItemIds())
 		);
 	}
 
@@ -39,9 +39,8 @@ public class OrderController {
 	public ResponseEntity<OrderResponse> cancelOrder(
 		// @RequestHeader("X-USER-ID") String userId,
 		@PathVariable String orderId) {
-		String userId = "TESTUSER";
 		return ResponseEntity.ok(
-			orderService.cancelOrder(orderId, userId)
+			orderService.cancelOrder(orderId, USERID)
 		);
 	}
 
@@ -50,9 +49,8 @@ public class OrderController {
 	public ResponseEntity<OrderResponse> confirmPurchase(
 		// @RequestHeader("X-USER-ID") String userId,
 		@PathVariable String orderId) {
-		String userId = "TESTUSER";
 		return ResponseEntity.ok(
-			orderService.confirmPurchase(orderId, userId)
+			orderService.confirmPurchase(orderId, USERID)
 		);
 	}
 
