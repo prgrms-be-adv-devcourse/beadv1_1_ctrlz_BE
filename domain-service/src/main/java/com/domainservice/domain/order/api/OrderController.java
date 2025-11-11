@@ -1,6 +1,5 @@
 package com.domainservice.domain.order.api;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.common.model.web.BaseResponse;
 import com.domainservice.domain.order.model.dto.CreateOrderRequest;
 import com.domainservice.domain.order.model.dto.OrderResponse;
 import com.domainservice.domain.order.service.OrderService;
@@ -24,34 +24,32 @@ public class OrderController {
 
 	// 주문 생성
 	@PostMapping
-	public ResponseEntity<OrderResponse> createOrder(
+	public BaseResponse<OrderResponse> createOrder(
 		// @RequestHeader("X-USER-ID") String userId,
 		@RequestBody CreateOrderRequest orderRequest) {
 
 		// TODO 유저아이디
-		return ResponseEntity.ok(
-			orderService.createOrder(USERID, orderRequest.cartItemIds())
-		);
+		return new BaseResponse<>(
+			orderService.createOrder(USERID, orderRequest.cartItemIds()),
+			"주문 생성 성공했습니다");
 	}
 
 	// 주문 취소
 	@PatchMapping("/{orderId}/cancel")
-	public ResponseEntity<OrderResponse> cancelOrder(
+	public BaseResponse<OrderResponse> cancelOrder(
 		// @RequestHeader("X-USER-ID") String userId,
 		@PathVariable String orderId) {
-		return ResponseEntity.ok(
-			orderService.cancelOrder(orderId, USERID)
-		);
+		return new BaseResponse<>(
+			orderService.cancelOrder(orderId, USERID), "주문 취소 성공했습니다");
 	}
 
 	// 주문 확정
 	@PatchMapping("/{orderId}/confirm")
-	public ResponseEntity<OrderResponse> confirmPurchase(
+	public BaseResponse<OrderResponse> confirmPurchase(
 		// @RequestHeader("X-USER-ID") String userId,
 		@PathVariable String orderId) {
-		return ResponseEntity.ok(
-			orderService.confirmPurchase(orderId, USERID)
-		);
+		return new BaseResponse(orderService.confirmPurchase(orderId, USERID),
+			"주문 확정 성공했습니다");
 	}
 
 	// TODO: 주문 목록 조회
