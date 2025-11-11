@@ -94,7 +94,7 @@ public class OrderService {
 	 * 주문 취소
 	 * 주문 ID와 사용자 ID를 받아 해당 주문을 취소
 	 * 주문 상태가 '결제대기' 또는 '결제완료' 상태인 경우에만 취소 가능
-	 * 취소된 주문은 '환불' 상태로 변경
+	 * 취소된 주문은 결제 대기 시 취소, 결제완료에서는 환불로 상태 변경
 	 */
 	public OrderResponse cancelOrder(String orderId, String userId) {
 		Order order = orderJpaRepository.findById(orderId)
@@ -109,7 +109,7 @@ public class OrderService {
 			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
 		}
 
-		order.setOrderStatus(OrderStatus.REFUNDED);
+		order.setOrderStatus(OrderStatus.CANCEL);
 
 		// TODO
 		// 결제 완료 상태였던 경우 추가 처리 (결제 시스템에 환불 요청)
