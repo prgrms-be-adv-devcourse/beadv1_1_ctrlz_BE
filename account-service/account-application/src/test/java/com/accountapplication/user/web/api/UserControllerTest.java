@@ -100,7 +100,7 @@ class UserControllerTest {
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
 
-		doThrow().when(cartClient).createCart(any(CartCreateRequest.class));
+		doThrow(RuntimeException.class).when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")
