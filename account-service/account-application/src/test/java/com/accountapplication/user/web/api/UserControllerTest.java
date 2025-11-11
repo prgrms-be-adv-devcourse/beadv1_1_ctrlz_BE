@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -78,7 +77,7 @@ class UserControllerTest {
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
-		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(200).body(any()));
+		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")
@@ -101,7 +100,7 @@ class UserControllerTest {
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
 
-		when(cartClient.createCart(any(CartCreateRequest.class))).thenReturn(ResponseEntity.status(400).body(any()));
+		doThrow().when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")

@@ -38,7 +38,7 @@ public class JwtTokenProvider {
 		this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
 	}
 
-	public String createAccessToken(String userId, List<UserRole> roles, String provider) {
+	public String createAccessToken(String userId, List<UserRole> roles) {
 
 		Instant now = Instant.now();
 		Instant expiry = now.plusSeconds(accessTokenExpiration);
@@ -46,7 +46,6 @@ public class JwtTokenProvider {
 		return Jwts.builder()
 			.subject(userId)
 			.claim("userId", userId)
-			.claim("provider", provider)
 			.claim("roles", roles)
 			.issuedAt(Date.from(now))
 			.expiration(Date.from(expiry))
@@ -54,7 +53,7 @@ public class JwtTokenProvider {
 			.compact();
 	}
 
-	public String createRefreshToken(String userId, List<UserRole> roles, String provider) {
+	public String createRefreshToken(String userId, List<UserRole> roles) {
 
 		Instant now = Instant.now();
 		Instant expiry = now.plusSeconds(refreshTokenExpiration);
@@ -62,7 +61,6 @@ public class JwtTokenProvider {
 		return Jwts.builder()
 			.subject(userId)
 			.claim("userId", userId)
-			.claim("provider", provider)
 			.claim("roles", roles)
 			.issuedAt(Date.from(now))
 			.expiration(Date.from(expiry))
@@ -73,11 +71,6 @@ public class JwtTokenProvider {
 	public String getUserIdFromToken(String token) {
 		Claims claims = parseClaims(token);
 		return claims.get("userId").toString();
-	}
-
-	public String getProviderFromToken(String token) {
-		Claims claims = parseClaims(token);
-		return claims.get("provider").toString();
 	}
 
 	public List<UserRole> getRolesFromToken(String token) {
