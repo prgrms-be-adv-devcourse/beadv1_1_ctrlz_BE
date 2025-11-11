@@ -4,6 +4,8 @@ import com.common.model.persistence.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -34,12 +36,25 @@ public class OrderItem extends BaseEntity {
 	@Column(nullable = false)
 	private int priceSnapshot;
 
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private OrderItemStatus orderItemStatus;
+
 	public int getTotalPrice() {
+		if (orderItemStatus == OrderItemStatus.CANCELLED
+			|| orderItemStatus == OrderItemStatus.REFUND_AFTER_PAYMENT
+			|| orderItemStatus == OrderItemStatus.REFUND_BEFORE_SETTLEMENT) {
+			return 0;
+		}
 		return quantity * priceSnapshot;
 	}
 
-	void setOrder(Order order) {
+	public void setOrder(Order order) {
 		this.order = order;
+	}
+
+	public void setOrderItemStatus(OrderItemStatus orderItemStatus) {
+		this.orderItemStatus = orderItemStatus;
 	}
 
 	@Override
