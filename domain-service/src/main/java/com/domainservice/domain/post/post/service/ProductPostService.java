@@ -3,7 +3,7 @@ package com.domainservice.domain.post.post.service;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
-import com.domainservice.common.configuration.UserClient;
+import com.domainservice.common.configuration.feignclient.user.UserClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
@@ -64,6 +64,14 @@ public class ProductPostService {
      */
     public ProductPostResponse createProductPost(
             ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
+
+//        // FeignClient 를 통해 user-service에 사용자 정보 요청
+//        UserView user = userClient.getUserById(userId);
+//
+//        // 단순히 "USER" 라면 판매글 등록 불가, 예외처리
+//        if (!user.roles().contains("ADMIN")&& !user.roles().contains("SELLER")) {
+//            throw new ProductPostException(PRODUCT_POST_NOT_FOUND);
+//        }
 
         try {
             // FeignClient 를 통해 user-service에 사용자 정보 요청
