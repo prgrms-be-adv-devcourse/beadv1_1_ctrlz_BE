@@ -1,11 +1,13 @@
 package com.domainservice.domain.post.post.exception;
 
 import com.common.exception.CustomException;
-import com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode;
+import com.common.exception.vo.ProductPostExceptionCode;
+import lombok.Getter;
 
 /**
  * 상품 게시글 관련 예외
  */
+@Getter
 public class ProductPostException extends CustomException {
 
     private final int code;
@@ -13,10 +15,6 @@ public class ProductPostException extends CustomException {
     public ProductPostException(ProductPostExceptionCode exceptionCode) {
         super(exceptionCode.getMessage());
         this.code = exceptionCode.getCode();
-    }
-
-    public int getCode() {
-        return code;
     }
 
 }
