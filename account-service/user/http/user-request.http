@@ -41,6 +41,9 @@ GET localhost:8080/api/users/{{id}}
     client.global.set("currentImageId", response.body.imageId);
 %}
 
+### 로그아웃
+GET localhost:8080/api/auth/logout
+Authorization: Bearer
 
 
 ### 회원가입 프로필 이미지 null일 경우
