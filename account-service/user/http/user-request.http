@@ -1,5 +1,5 @@
 ### 회원가입
-POST http://localhost:8080/api/users
+POST http://localhost:8000/api/users
 Content-Type: application/json
 #--WebAppBoundary
 #Content-Disposition: form-data; name="profileImage"; filename="test.png"

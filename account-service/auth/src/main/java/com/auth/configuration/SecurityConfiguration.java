@@ -88,7 +88,8 @@ public class SecurityConfiguration {
 				).permitAll()
 				// H2 콘솔
 				.requestMatchers("/h2-console/**").permitAll()
-				// .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+				.requestMatchers(HttpMethod.GET, "/api/users/**")
+				.authenticated()
 
 				.anyRequest().permitAll()
 			)

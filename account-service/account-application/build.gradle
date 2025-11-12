@@ -65,6 +65,9 @@ dependencies {
 
 
     runtimeOnly 'com.h2database:h2'
+
+    //eureka
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
 
 dependencyManagement {
