@@ -48,10 +48,9 @@ public class JwtAuthService implements AuthService {
 			throw new AuthorizationDeniedException("재 로그인이 필요합니다.");
 		}
 
-		String provider = jwtTokenProvider.getProviderFromToken(findRefreshToken);
 		List<UserRole> roles = jwtTokenProvider.getRolesFromToken(findRefreshToken);
 
-		String newAccessToken = jwtTokenProvider.createAccessToken(userId, roles, provider);
+		String newAccessToken = jwtTokenProvider.createAccessToken(userId, roles);
 
 		log.info("토큰 갱신 완료 - userId: {}", userId);
 

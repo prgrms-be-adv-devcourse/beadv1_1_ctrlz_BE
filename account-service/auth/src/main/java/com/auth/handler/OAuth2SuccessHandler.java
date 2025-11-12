@@ -59,7 +59,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 			CustomOAuth2User customOAuth2User = (CustomOAuth2User)authentication.getPrincipal();
 			String email = customOAuth2User.email();
-			String provider = customOAuth2User.getName();
 			String userId = customOAuth2User.userId();
 			List<UserRole> roles = customOAuth2User.roles();
 
@@ -67,12 +66,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 				return;
 			}
 
-			String accessToken = jwtTokenProvider.createAccessToken(
-				userId,
-				roles,
-				provider
-			);
-			String refreshToken = jwtTokenProvider.createRefreshToken(userId, roles, provider);
+			String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
+			String refreshToken = jwtTokenProvider.createRefreshToken(userId, roles);
 			jwtAuthService.saveRefreshToken(userId, refreshToken);
 
 			ResponseCookie accessTokenCookie = CookieProvider.to("accessToken", accessToken, Duration.ofMinutes(15));

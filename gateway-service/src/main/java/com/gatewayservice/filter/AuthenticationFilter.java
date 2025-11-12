@@ -1,7 +1,6 @@
 package com.gatewayservice.filter;
 
-import static com.gatewayservice.common.JwtClaimsConst.*;
-import static com.gatewayservice.common.ServeletConst.*;
+import static java.util.Optional.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,12 +19,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gatewayservice.dto.TokenAuthorizationResponse;
-import com.gatewayservice.handler.UserVerificationHandler;
-import com.gatewayservice.utils.ServletRequestUtils;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -33,25 +29,24 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
-@Slf4j
+//TODO: 로그아웃 체크
 @Component
+@Slf4j
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
 	@Value("${jwt.secret}")
 	private String secretKey;
 
 	private final ObjectMapper objectMapper;
-	private final UserVerificationHandler userVerificationHandler;
 
 	@Data
 	public static class Config {
 		private String requiredRole;
 	}
 
-	public AuthenticationFilter(UserVerificationHandler userVerificationHandler) {
+	public AuthenticationFilter() {
 		super(Config.class);
 		this.objectMapper = new ObjectMapper();
-		this.userVerificationHandler = userVerificationHandler;
 	}
 
 	@Override
@@ -61,31 +56,19 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			ServerHttpRequest request = exchange.getRequest();
 			ServerHttpResponse response = exchange.getResponse();
 
-			Optional<String> tokenOptional = ServletRequestUtils.resolveToken(request);
-			if (tokenOptional.isEmpty()) {
-				log.info("Authorization token not found in header or cookie");
+			if (!request.getHeaders().containsKey("Authorization")
+				&& !request.getHeaders().containsKey("accessToken")
+			) {
+				log.info("Authorization header not found");
 				return response.writeWith(
 					Flux.just(writeUnAuthorizationResponseBody(response))
 				);
 			}
-			String token = tokenOptional.get();
 
-			try {
-				if (!isValidToken(token)) {
-					return response.writeWith(
-						Flux.just(writeUnAuthorizationResponseBody(response))
-					);
-				}
-			} catch (ExpiredJwtException e) {
-				return response.writeWith(
-					Flux.just(writeJwtExpiredResponseBody(response))
-				);
-			}
+			Optional<String> tokenOptional = resolveToken(request);
+			String token = tokenOptional.orElseThrow(() -> new JwtException("토큰이 필요합니다!"));
 
-			boolean isInvalid
-				= userVerificationHandler.verifyTokenWithIp(ServletRequestUtils.extractIp(request), token);
-			if (isInvalid) {
-				log.info("accessToken과 ip가 일치하지 않습니다.");
+			if (!isValidToken(token)) {
 				return response.writeWith(
 					Flux.just(writeUnAuthorizationResponseBody(response))
 				);
@@ -93,29 +76,46 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
 			Jws<Claims> claims = getClaims(token);
 
-			List<Object> roles = claims.getPayload().get(ROLES, List.class);
+			List<Object> roles = claims.getPayload().get("roles", List.class);
 
-			if (roles.isEmpty()) {
+			if(roles.isEmpty()) {
 				throw new JwtException("권한이 없습니다.");
 			}
 
 			List<String> list = roles.stream().map(Object::toString).toList();
-
 			if (list.isEmpty() || !list.contains(config.getRequiredRole())) {
 				return response.writeWith(
 					Flux.just(writeForbiddenResponseBody(response))
 				);
 			}
 
-			String userId = claims.getPayload().get(USER_ID).toString();
+			String userId = claims.getPayload().get("userId").toString();
 			ServerHttpRequest authorizedRequest = request.mutate()
-				.header(X_REQUEST_ID, userId)
+				.header("X-REQUEST-ID", userId)
+				.header("X-ROLE", list.toArray(String[]::new))
 				.build();
 
 			log.warn("AuthenticationFilter userId = {}", userId);
 
 			return chain.filter(exchange.mutate().request(authorizedRequest).build());
 		};
+	}
+
+	private Optional<String> resolveToken(ServerHttpRequest request) {
+		String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+			log.info("bearerToken.substring(7) = {}", bearerToken.substring(7));
+			return of(bearerToken.replace("Bearer ", ""));
+		}
+
+		HttpCookie tokenCookie = request.getCookies().getFirst("accessToken");
+		if (tokenCookie != null) {
+			log.info("Optional.of(tokenCookie.getValue()) = {}", of(tokenCookie.getValue()));
+			return of(tokenCookie.getValue());
+		}
+
+		return Optional.empty();
 	}
 
 	private byte[] writeResponseBody(TokenAuthorizationResponse body) {
@@ -125,14 +125,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			log.info("JsonProcessingException e : {}", e.getMessage());
 			throw new RuntimeException(e);
 		}
-	}
-
-	private DataBuffer writeJwtExpiredResponseBody(ServerHttpResponse response) {
-		response.setStatusCode(HttpStatus.UNAUTHORIZED);
-		response.setRawStatusCode(456);
-		response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-		TokenAuthorizationResponse body = new TokenAuthorizationResponse("토큰 유효시간이 만료되었습니다.");
-		return response.bufferFactory().wrap(writeResponseBody(body));
 	}
 
 	private DataBuffer writeUnAuthorizationResponseBody(ServerHttpResponse response) {
@@ -155,9 +147,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 		try {
 			getClaims(token);
 			return true;
-		} catch (ExpiredJwtException e) {
-			log.info("토큰 시간 만료. : {}", e.getMessage());
-			throw e;
 		} catch (JwtException e) {
 			log.info("Invalid JWT Token was detected: {}  msg : {}", token, e.getMessage());
 		} catch (IllegalArgumentException e) {
@@ -175,5 +164,4 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			.build()
 			.parseSignedClaims(token);
 	}
-
 }
