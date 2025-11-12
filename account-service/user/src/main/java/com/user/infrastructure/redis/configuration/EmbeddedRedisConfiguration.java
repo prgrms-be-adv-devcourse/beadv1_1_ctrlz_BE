@@ -55,7 +55,6 @@ public class EmbeddedRedisConfiguration {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 
-
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
@@ -104,6 +103,11 @@ public class EmbeddedRedisConfiguration {
 
 	@PostConstruct
 	public void startRedis() {
+		String osName = System.getProperty("os.name").toLowerCase();
+		if (osName.contains("win")) {
+			log.warn("Embedded Redis is not supported on Windows. Skipping Redis startup.");
+			return;
+		}
 		try {
 			int defaultRedisPort = 6380;
 			try {
@@ -126,12 +130,13 @@ public class EmbeddedRedisConfiguration {
 					.build();
 
 				redisServer.start();
-				log.info("✅ Embedded Redis started on port {}", port);
+				log.info("Embedded Redis started on port {}", port);
 			} catch (Exception e) {
-				log.error("❌ Failed to start embedded Redis server. Tests will continue without Redis. Error: {}", e.getMessage());
+				log.error(" Failed to start embedded Redis server. Tests will continue without Redis. Error: {}",
+					e.getMessage());
 			}
 		} catch (Exception e) {
-			log.error("❌ Error during Redis server initialization: {}", e.getMessage());
+			log.error("Error during Redis server initialization: {}", e.getMessage());
 		}
 	}
 
@@ -140,13 +145,12 @@ public class EmbeddedRedisConfiguration {
 		try {
 			if (redisServer != null) {
 				redisServer.stop();
-				log.info("🛑 Embedded Redis stopped");
+				log.info("Embedded Redis stopped");
 			}
 		} catch (Exception e) {
 			log.error("Error stopping Redis server: {}", e.getMessage());
 		}
 	}
-
 
 	public int findAvailablePort() throws IOException {
 		for (int port = 10000; port <= 65535; port++) {
