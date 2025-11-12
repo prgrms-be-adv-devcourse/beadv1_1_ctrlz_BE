@@ -1,15 +1,19 @@
 package com.domainservice.common.init.data;
 
+import com.domainservice.common.init.data.util.ResourceMultipartFile;
 import com.domainservice.domain.post.category.service.CategoryService;
-import com.domainservice.domain.post.post.model.dto.request.CreateProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
 import com.domainservice.domain.post.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -40,33 +44,32 @@ public class ProductPostInitializer {
             log.warn("태그가 없습니다.");
         }
 
-        // TODO: 실제 userId 필요
+        // TODO: 테스트용 user 생성 가능해지면 실제 id로 연결
         String[] userIds = {"user-001", "user-002", "user-003", "user-004", "user-005"};
         ProductTemplate[] templates = createTemplates();
 
         int totalCount = 0;
 
         for (String categoryId : categoryIds) {
-            int productsPerCategory = 5 + random.nextInt(6);
-
-            for (int i = 0; i < productsPerCategory; i++) {
+            for (int i = 0; i < 3; i++) {
                 try {
-                    ProductTemplate template =
-                            templates[random.nextInt(templates.length)];
+                    ProductTemplate template = templates[random.nextInt(templates.length)];
                     String userId = userIds[random.nextInt(userIds.length)];
 
-                    CreateProductPostRequest request = CreateProductPostRequest.builder()
+                    ProductPostRequest request = ProductPostRequest.builder()
                             .categoryId(categoryId)
                             .title(template.title())
                             .name(template.name())
                             .price(template.basePrice() + random.nextInt(50000))
                             .description(template.description())
                             .status(getRandomProductStatus())
-                            .imageUrl("https://via.placeholder.com/400x300.png?text=" + template.name())
                             .tagIds(getRandomTagIds(allTagIds))
                             .build();
 
-                    productPostService.createProductPost(request, userId, null);
+                    // 샘플 이미지 로드 및 업로드
+                    MultipartFile sampleImage = loadSampleImage();
+                    productPostService.createProductPost(request, userId, List.of(sampleImage));
+
                     totalCount++;
 
                 } catch (Exception e) {
@@ -78,18 +81,33 @@ public class ProductPostInitializer {
         log.info("상품 게시글 {}개 초기화 완료", totalCount);
     }
 
+    /**
+     * resources/static/images/sampleLogo.png 파일을 MultipartFile로 로드합니다.
+     */
+    private MultipartFile loadSampleImage() throws IOException {
+        ClassPathResource resource = new ClassPathResource("static/images/sampleLogo.png");
+
+        if (!resource.exists()) {
+            throw new IOException("샘플 이미지 파일이 존재하지 않습니다: static/images/sampleLogo.png");
+        }
+
+        try (InputStream inputStream = resource.getInputStream()) {
+            byte[] content = inputStream.readAllBytes();
+
+            return new ResourceMultipartFile(
+                    "images",
+                    "sampleLogo.png",
+                    "image/png",
+                    content
+            );
+        }
+    }
+
     private ProductStatus getRandomProductStatus() {
         int rand = random.nextInt(10);
         if (rand < 3) return ProductStatus.NEW;
         if (rand < 8) return ProductStatus.GOOD;
         return ProductStatus.FAIR;
-    }
-
-    private TradeStatus getRandomTradeStatus() {
-        int rand = random.nextInt(10);
-        if (rand < 7) return TradeStatus.SELLING;
-        if (rand < 9) return TradeStatus.PROCESSING;
-        return TradeStatus.SOLDOUT;
     }
 
     private List<String> getRandomTagIds(List<String> allTagIds) {
@@ -116,7 +134,8 @@ public class ProductPostInitializer {
             String name,
             int basePrice,
             String description
-    ) {}
+    ) {
+    }
 
     public ProductTemplate[] createTemplates() {
         return new ProductTemplate[]{
