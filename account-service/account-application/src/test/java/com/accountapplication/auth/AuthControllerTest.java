@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.auth.dto.TokenRefreshRequest;
 import com.auth.jwt.JwtTokenProvider;
+import com.auth.jwt.TokenType;
 import com.auth.service.JwtAuthService;
 import com.user.infrastructure.redis.configuration.EmbeddedRedisConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,29 +62,31 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(cookie().exists("accessToken"))
-            .andExpect(cookie().value("accessToken", newAccessToken))
-            .andExpect(cookie().httpOnly("accessToken", true))
-            .andExpect(cookie().secure("accessToken", false))
-            .andExpect(cookie().path("accessToken", "/"))
-            .andExpect(cookie().sameSite("accessToken", "Lax"));
+            .andExpect(cookie().exists(TokenType.ACCESS_TOKEN.name()))
+            .andExpect(cookie().value(TokenType.ACCESS_TOKEN.name(), newAccessToken))
+            .andExpect(cookie().httpOnly(TokenType.ACCESS_TOKEN.name(), true))
+            .andExpect(cookie().secure(TokenType.ACCESS_TOKEN.name(), false))
+            .andExpect(cookie().path(TokenType.ACCESS_TOKEN.name(), "/"))
+            .andExpect(cookie().sameSite(TokenType.ACCESS_TOKEN.name(), "Lax"));
     }
 
     @DisplayName("로그아웃 테스트")
-    @Test
-    void logout() throws Exception {
-        // given
-        String token = "valid-access-token";
-        String userId = "testUser";
+	@Test
+	void logout() throws Exception {
+		// given
+		String token = "valid-access-token";
+		String userId = "testUser";
 
-        given(jwtTokenProvider.getUserIdFromToken(token)).willReturn(userId);
+		given(jwtTokenProvider.getUserIdFromToken(token)).willReturn(userId);
 
-        // when then
-        mockMvc.perform(post("/api/auth/logout")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-            .andDo(print())
-            .andExpect(status().isOk());
+		// when then
+		mockMvc.perform(post("/api/auth/logout")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+			.andDo(print())
+			.andExpect(cookie().maxAge("ACCESS_TOKEN", 0))
+			.andExpect(cookie().value("ACCESS_TOKEN", "logout"))
+			.andExpect(status().isOk());
 
-        verify(jwtAuthService).logout(userId, token);
-    }
+		verify(jwtAuthService).logout(userId);
+	}
 }
