@@ -1,0 +1,5 @@
+rootProject.name = 'account-service'
+
+include("auth", "user", "account-application")
+include(":common")
+project(":common").projectDir = file("./../common")
