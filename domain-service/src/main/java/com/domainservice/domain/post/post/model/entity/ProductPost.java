@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 엔티티 (Product_posts 테이블)

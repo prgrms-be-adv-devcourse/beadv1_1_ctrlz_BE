@@ -1,4 +1,4 @@
-package com.domainservice.domain.post.post.exception.vo;
+package com.common.exception.vo;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
