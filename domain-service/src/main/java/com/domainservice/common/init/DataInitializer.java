@@ -26,7 +26,7 @@ public class DataInitializer implements ApplicationRunner {
 
         categoryInitializer.init();
         tagInitializer.init();
-        productPostInitializer.init();
+        // productPostInitializer.init(); 유저 더미데이터는 없음, 임시 주석처리함
 
         log.info("========================================");
         log.info("데이터 초기화 완료!");

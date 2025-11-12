@@ -1,22 +1,6 @@
 package com.domainservice.domain.post.post.service;
 
-import static com.common.exception.vo.ProductPostExceptionCode.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
+import com.domainservice.common.configuration.feignclient.user.UserClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
@@ -29,6 +13,26 @@ import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
+import feign.FeignException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.UserExceptionCode.SELLER_PERMISSION_REQUIRED;
+import static com.common.exception.vo.UserExceptionCode.USER_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * ProductPostService 생성 기능 테스트
@@ -49,9 +53,12 @@ class CreateProductPostTest {
     private ImageService imageService;
 
     @Mock
+    private UserClient userClient;
+
+    @Mock
     private MultipartFile mockImageFile;
 
-    @DisplayName("상품 게시글을 생성할 수 있다.")
+    @DisplayName("판매자는 상품 게시글을 생성할 수 있다.")
     @Test
     void test1() {
         // given
@@ -89,6 +96,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(tagIds)).willReturn(tags);
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -106,16 +114,17 @@ class CreateProductPostTest {
         assertThat(result.description()).isEqualTo(request.description());
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SELLING);
 
+        verify(userClient).getUserById(userId);
         verify(tagRepository).findAllById(tagIds);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
     }
 
-    @DisplayName("태그 없이도 상품 게시글을 생성할 수 있다.")
+    @DisplayName("ADMIN은 상품 게시글을 생성할 수 있다.")
     @Test
     void test2() {
         // given
-        String userId = "user-123";
+        String userId = "admin-123";
         List<MultipartFile> imageFiles = List.of(mockImageFile);
 
         ProductPostRequest request = ProductPostRequest.builder()
@@ -125,7 +134,7 @@ class CreateProductPostTest {
                 .description("거의 새것입니다.")
                 .categoryId("category-123")
                 .status(ProductStatus.GOOD)
-                .tagIds(null)  // 태그 없음
+                .tagIds(null)
                 .build();
 
         Image mockImage = Image.builder()
@@ -142,6 +151,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createAdmin(userId));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
         given(productPostRepository.save(any(ProductPost.class))).willReturn(savedProductPost);
@@ -154,14 +164,69 @@ class CreateProductPostTest {
         assertThat(result.userId()).isEqualTo(userId);
         assertThat(result.title()).isEqualTo(request.title());
 
+        verify(userClient).getUserById(userId);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
         verify(tagRepository, never()).findAllById(anyList());
     }
 
-    @DisplayName("존재하지 않는 태그가 포함되면 예외가 발생한다.")
+    @DisplayName("일반 USER는 상품 게시글을 생성할 수 없다.")
     @Test
     void test3() {
+        // given
+        String userId = "user-123";
+        List<MultipartFile> imageFiles = List.of(mockImageFile);
+
+        ProductPostRequest request = ProductPostRequest.builder()
+                .title("아이폰 15 Pro")
+                .name("iPhone 15 Pro")
+                .price(1200000)
+                .categoryId("category-123")
+                .status(ProductStatus.GOOD)
+                .build();
+
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+
+        // when & then
+        assertThatThrownBy(() -> productPostService.createProductPost(request, userId, imageFiles))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining(SELLER_PERMISSION_REQUIRED.getMessage());
+
+        verify(userClient).getUserById(userId);
+        verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
+        verify(productPostRepository, never()).save(any());
+    }
+
+    @DisplayName("존재하지 않는 사용자는 게시글을 생성할 수 없다.")
+    @Test
+    void test4() {
+        // given
+        String userId = "invalid-user-id";
+        List<MultipartFile> imageFiles = List.of(mockImageFile);
+
+        ProductPostRequest request = ProductPostRequest.builder()
+                .title("아이폰 15 Pro")
+                .name("iPhone 15 Pro")
+                .price(1200000)
+                .categoryId("category-123")
+                .status(ProductStatus.GOOD)
+                .build();
+
+        given(userClient.getUserById(userId)).willThrow(FeignException.NotFound.class);
+
+        // when & then
+        assertThatThrownBy(() -> productPostService.createProductPost(request, userId, imageFiles))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining(USER_NOT_FOUND.getMessage());
+
+        verify(userClient).getUserById(userId);
+        verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
+        verify(productPostRepository, never()).save(any());
+    }
+
+    @DisplayName("존재하지 않는 태그가 포함되면 예외가 발생한다.")
+    @Test
+    void test5() {
         // given
         String userId = "user-123";
         List<String> tagIds = Arrays.asList("tag-1", "tag-2", "invalid-tag");
@@ -177,12 +242,12 @@ class CreateProductPostTest {
                 .tagIds(tagIds)
                 .build();
 
-        // 요청한 태그 3개 중 2개만 조회됨
         List<Tag> tags = Arrays.asList(
                 Tag.builder().name("거의새것").build(),
                 Tag.builder().name("256GB").build()
         );
 
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(tagIds)).willReturn(tags);
 
         // when & then
@@ -190,6 +255,7 @@ class CreateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TAG_NOT_FOUND.getMessage());
 
+        verify(userClient).getUserById(userId);
         verify(tagRepository).findAllById(tagIds);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
@@ -197,7 +263,7 @@ class CreateProductPostTest {
 
     @DisplayName("빈 태그 리스트로 상품 게시글을 생성할 수 있다.")
     @Test
-    void test4() {
+    void test6() {
         // given
         String userId = "user-123";
         List<String> emptyTagIds = Collections.emptyList();
@@ -226,6 +292,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(emptyTagIds)).willReturn(Collections.emptyList());
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -238,6 +305,7 @@ class CreateProductPostTest {
         assertThat(result).isNotNull();
         assertThat(result.userId()).isEqualTo(userId);
 
+        verify(userClient).getUserById(userId);
         verify(tagRepository).findAllById(emptyTagIds);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
@@ -245,7 +313,7 @@ class CreateProductPostTest {
 
     @DisplayName("이미지 없이 게시글을 생성하면 예외가 발생한다.")
     @Test
-    void test5() {
+    void test7() {
         // given
         String userId = "user-123";
 
@@ -256,6 +324,8 @@ class CreateProductPostTest {
                 .categoryId("category-123")
                 .status(ProductStatus.GOOD)
                 .build();
+
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, null))
@@ -266,19 +336,20 @@ class CreateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(IMAGE_REQUIRED.getMessage());
 
+        verify(userClient, times(2)).getUserById(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }
 
     @DisplayName("이미지가 10개를 초과하면 예외가 발생한다.")
     @Test
-    void test6() {
+    void test8() {
         // given
         String userId = "user-123";
         List<MultipartFile> tooManyImages = Arrays.asList(
                 mockImageFile, mockImageFile, mockImageFile, mockImageFile, mockImageFile,
                 mockImageFile, mockImageFile, mockImageFile, mockImageFile, mockImageFile,
-                mockImageFile  // 11개
+                mockImageFile
         );
 
         ProductPostRequest request = ProductPostRequest.builder()
@@ -289,13 +360,15 @@ class CreateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
+        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, tooManyImages))
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TOO_MANY_IMAGES.getMessage());
 
+        verify(userClient).getUserById(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }
-
 }

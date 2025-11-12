@@ -181,3 +181,5 @@ Temporary Items
 
 # Application specific
 application-secret.yml
+*.webp
+common/out/
