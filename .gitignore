@@ -579,3 +579,4 @@ fabric.properties
 
 
 application-secret.yml
+*.webp
