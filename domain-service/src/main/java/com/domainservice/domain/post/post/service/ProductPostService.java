@@ -327,12 +327,31 @@ public class ProductPostService {
     private UserView getUserInfo(String userId) {
         try {
             return userClient.getUserById(userId);
-        } catch (FeignException.NotFound e) {  // user가 존재하지 않아 예외가 날라올 경우
+
+        } catch (FeignException.NotFound e) {
+            // 404 - 사용자 없음
+            log.error("사용자를 찾을 수 없음 - userId: {}", userId);
             throw new CustomException(USER_NOT_FOUND.getMessage());
-        } catch (FeignException e) { // 기타  Feign 통신상의 오류 발생 시 예외 처리
+
+        } catch (FeignException.Unauthorized e) {
+            // 401 - 인증 실패
+            log.error("인증 실패 - userId: {}, status: {}, message: {}",
+                    userId, e.status(), e.contentUTF8());
+            throw new ProductPostException(EXTERNAL_API_ERROR);
+
+        } catch (FeignException.Forbidden e) {
+            // 403 - 권한 없음
+            log.error("권한 없음 - userId: {}, message: {}", userId, e.contentUTF8());
+            throw new ProductPostException(EXTERNAL_API_ERROR);
+
+        } catch (FeignException e) {
+            // 기타 Feign 통신 오류
+            log.error("Feign 통신 오류 - userId: {}, status: {}, message: {}",
+                    userId, e.status(), e.contentUTF8());
             throw new ProductPostException(EXTERNAL_API_ERROR);
         }
     }
+
 
     // 사용자 정보를 통해 판매자 인증 여부를 검증합니다.
     private void validateSellerPermission(UserView user) {
