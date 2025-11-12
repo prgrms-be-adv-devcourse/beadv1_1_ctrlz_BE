@@ -25,9 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.common.exception.vo.ProductPostExceptionCode.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;

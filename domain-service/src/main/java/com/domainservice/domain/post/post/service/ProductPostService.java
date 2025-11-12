@@ -25,9 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Set;
 
-import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 게시글의 비즈니스 로직을 처리하는 서비스 클래스입니다.
@@ -38,19 +37,15 @@ import static com.common.exception.vo.ProductPostExceptionCode.*;
 @RequiredArgsConstructor
 public class ProductPostService {
 
-    private final TagRepository tagRepository;
     private final ProductPostRepository productPostRepository;
-
+    private final TagRepository tagRepository;
     private final ImageService imageService;
-    private final RecentlyViewedService recentlyViewedService;
-
-    private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
 
     /**
      * 상품 게시글을 생성합니다.
      *
-     * @param request    게시글 생성 요청 정보
-     * @param userId     작성자 ID
+     * @param request 게시글 생성 요청 정보
+     * @param userId 작성자 ID
      * @param imageFiles 업로드할 이미지 파일 목록 (최소 1개 필수)
      * @return 생성된 게시글 정보
      * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
@@ -83,10 +78,10 @@ public class ProductPostService {
     /**
      * 상품 게시글을 수정합니다. 기존 이미지는 삭제되고 새 이미지로 교체됩니다.
      *
-     * @param request    게시글 수정 요청 정보
+     * @param request 게시글 수정 요청 정보
      * @param imageFiles 새로운 이미지 파일 목록 (최소 1개 필수)
-     * @param userId     수정 요청자 ID
-     * @param postId     수정할 게시글 ID
+     * @param userId 수정 요청자 ID
+     * @param postId 수정할 게시글 ID
      * @return 수정된 게시글 정보
      * @throws ProductPostException 게시글이 존재하지 않거나 수정 권한이 없는 경우
      */
@@ -139,46 +134,36 @@ public class ProductPostService {
     }
 
     /**
-     * 단일 상품 게시글을 조회합니다.
-     * 비회원 조회 (userId X)
-     * 조회 시 조회수가 증가합니다.
+     * 단일 상품 게시글을 조회합니다. 조회 시 조회수가 증가합니다.
      *
      * @param postId 조회할 게시글 ID
      * @return 게시글 정보
      * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
      */
     public ProductPostResponse getProductPostById(String postId) {
-        ProductPost productPost = getPostAndIncrementViewCount(postId);
-        return ProductPostMapper.toProductPostResponse(productPost);
-    }
 
-    /**
-     * 단일 상품 게시글을 조회합니다.
-     * 로그인 된 회원 조회 (userId 필요)
-     * 조회 시 조회수가 증가하며 redis에 최근 본 상품으로 등록됩니다.
-     *
-     * @param postId 조회할 게시글 ID
-     * @return 게시글 정보
-     * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
-     */
-    public ProductPostResponse getProductPostById(String userId, String postId) {
+        ProductPost productPost = productPostRepository.findById(postId)
+                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
-        ProductPost productPost = getPostAndIncrementViewCount(postId);
-        recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
+        // Soft Delete로 삭제된 상품은 상세 조회 불가
+        if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
+            throw new ProductPostException(PRODUCT_POST_DELETED);
+        }
+
+        productPost.incrementViewCount();
 
         return ProductPostMapper.toProductPostResponse(productPost);
-
     }
 
     /**
      * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링(Specification)을 지원합니다.
      *
-     * @param pageable    페이징 정보
-     * @param categoryId  카테고리 ID (선택)
-     * @param status      상품 상태 (선택)
+     * @param pageable 페이징 정보
+     * @param categoryId 카테고리 ID (선택)
+     * @param status 상품 상태 (선택)
      * @param tradeStatus 거래 상태 (선택)
-     * @param minPrice    최소 가격 (선택)
-     * @param maxPrice    최대 가격 (선택)
+     * @param minPrice 최소 가격 (선택)
+     * @param maxPrice 최대 가격 (선택)
      * @return 페이징된 게시글 목록
      */
     public PageResponse<List<ProductPostResponse>> getProductPostList(
@@ -202,22 +187,6 @@ public class ProductPostService {
                         .map(ProductPostMapper::toProductPostResponse)
                         .toList()
         );
-    }
-
-    /**
-     * 사용자가 최근 본 게시물 목록을 조회합니다.
-     * Redis에서 게시물 ID를 가져온 후 DB에서 실제 게시물 정보를 조회합니다.
-     *
-     * @param userId 사용자 ID
-     * @return 최근 본 게시물 응답 목록
-     */
-    public List<ProductPostResponse> getRecentlyViewedPosts(String userId) {
-        Set<String> viewedPostIds = recentlyViewedService.getRecentlyViewedPostIds(userId, MAX_COUNT);
-
-        return productPostRepository.findAllById(viewedPostIds)
-                .stream()
-                .map(ProductPostMapper::toProductPostResponse)
-                .toList();
     }
 
     /*
@@ -294,22 +263,10 @@ public class ProductPostService {
         }
     }
 
-    private ProductPost getPostAndIncrementViewCount(String postId){
-        ProductPost productPost = productPostRepository.findById(postId)
-                .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-
-        // Soft Delete로 삭제된 상품은 상세 조회 불가
-        if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
-            throw new ProductPostException(PRODUCT_POST_DELETED);
-        }
-
-        productPost.incrementViewCount();
-        return productPost;
-    }
-
     // TODO: 상품 판매상태 변경
     // TODO: 내가 구매한 상품 조회
     // TODO: 내가 판매한 상품 조회
     // TODO: 좋아요 로직 구현
     // TODO: 찜한 게시물
+    // TODO: 최근 본 상품 redis?
 }
