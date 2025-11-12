@@ -9,7 +9,7 @@ import java.util.List;
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.post.post.model.dto.request.UpdateProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
@@ -25,6 +25,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 엔티티 (Product_posts 테이블)
@@ -97,23 +103,14 @@ public class ProductPost extends BaseEntity {
      =============== 비즈니스 로직 ===============
     */
 
-	public void incrementViewCount() {
-		this.viewCount++;
-	}
-
-	public void update(UpdateProductPostRequest request) {
-		if (request.title() != null)
-			this.title = request.title();
-		if (request.name() != null)
-			this.name = request.name();
-		if (request.price() != null)
-			this.price = request.price();
-		if (request.description() != null)
-			this.description = request.description();
-		if (request.status() != null)
-			this.status = request.status();
-		this.update(); // updatedAt 최신화
-	}
+    public void update(ProductPostRequest request) {
+        this.title = request.title();
+        this.name = request.name();
+        this.price = request.price();
+        this.description = request.description();
+        this.status = request.status();
+        this.update(); // updatedAt 최신화
+    }
 
 	/**
 	 * 상품 거래 상태 변경 메서드들
@@ -132,6 +129,7 @@ public class ProductPost extends BaseEntity {
 		this.tradeStatus = TradeStatus.SELLING;
 		this.updateTime();
 	}
+
     /*
      =============== 태그 ===============
     */
@@ -152,10 +150,10 @@ public class ProductPost extends BaseEntity {
 		if (!this.productPostTags.isEmpty())
 			this.productPostTags.clear();
 
-		if (newTags != null && !newTags.isEmpty()) {
-			addTags(newTags);
-		}
-	}
+        if (newTags != null) {
+            addTags(newTags);
+        }
+    }
 
     /*
      =============== 이미지 ===============
@@ -207,39 +205,36 @@ public class ProductPost extends BaseEntity {
     ================ validate ================
      */
 
-	public void validateDelete(String userId) {
-		if (userId == null || userId.isBlank()) {
-			throw new ProductPostException(UNAUTHORIZED);
-		}
+    public void validateUpdate(String userId) {
+        // 판매 완료된 상품은 수정 불가
+        if (this.tradeStatus == TradeStatus.SOLDOUT) {
+            throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
+        }
+        validate(userId);
+    }
 
-		if (this.getDeleteStatus() == DeleteStatus.D) {
-			throw new ProductPostException(ALREADY_DELETED);
-		}
+    public void validateDelete(String userId) {
+        validate(userId);
+    }
 
-		if (this.tradeStatus == TradeStatus.PROCESSING) {
-			throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
-		}
+    public void validate(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new ProductPostException(UNAUTHORIZED);
+        }
 
-		if (!this.userId.equals(userId)) {
-			throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
-		}
-	}
+        // soft delete 된 상품은 수정 혹은 삭제 불가
+        if (this.getDeleteStatus() == DeleteStatus.D) {
+            throw new ProductPostException(ALREADY_DELETED);
+        }
 
-	public void validateUpdate(String userId) {
-		if (userId == null || userId.isBlank()) {
-			throw new ProductPostException(UNAUTHORIZED);
-		}
+        // 거래가 진행중인 상품은 수정 혹은 삭제 불가
+        if (this.tradeStatus == TradeStatus.PROCESSING) {
+            throw new ProductPostException(PRODUCT_POST_IN_PROGRESS);
+        }
 
-		if (this.getDeleteStatus() == DeleteStatus.D) {
-			throw new ProductPostException(ALREADY_DELETED);
-		}
-
-		if (!this.userId.equals(userId)) {
-			throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
-		}
-
-		if (this.tradeStatus == TradeStatus.SOLDOUT) {
-			throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
-		}
-	}
+        // 본인이 작성한 글만 수정 혹은 삭제 가능
+        if (!this.userId.equals(userId)) {
+            throw new ProductPostException(PRODUCT_POST_FORBIDDEN);
+        }
+    }
 }
