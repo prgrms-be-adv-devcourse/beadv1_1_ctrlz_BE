@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.domainservice.domain.payment.model.dto.PaymentReadyResponse;
 import com.domainservice.domain.payment.service.PaymentService;
@@ -15,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller // View 렌더링을 위한 @Controller
-@RequestMapping("/payments") // 일반적인 View 경로 (api 접두사 없음)
+@RequestMapping("/api/payments") // 일반적인 View 경로 (api 접두사 없음)
 @RequiredArgsConstructor
 public class PaymentViewController {
 
@@ -24,9 +25,11 @@ public class PaymentViewController {
     /** 결제 페이지 렌더링 */
     @GetMapping("/checkout/{orderId}")
     public String showCheckout(@PathVariable("orderId") String orderId, Model model) {
-        log.info("orderId{}:", orderId);
+
+		log.info("Showing checkout for order {}", orderId);
         PaymentReadyResponse paymentReady = paymentService.getPaymentReadyInfo(orderId);
-        model.addAttribute("orderId", orderId);
+
+        model.addAttribute("orderId", paymentReady.orderId());
         model.addAttribute("orderName", paymentReady.orderName());
         model.addAttribute("amount", paymentReady.amount());
         model.addAttribute("depositBalance", paymentReady.depositBalance());

@@ -47,6 +47,7 @@ public class ProductPostInitializer {
         int totalCount = 0;
 
         for (String categoryId : categoryIds) {
+
             int productsPerCategory = 5 + random.nextInt(6);
 
             for (int i = 0; i < productsPerCategory; i++) {

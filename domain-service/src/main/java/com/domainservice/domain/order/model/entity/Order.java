@@ -32,6 +32,7 @@ public class Order extends BaseEntity {
 	private List<OrderItem> orderItems = new ArrayList<>();
 
 	@Column(nullable = false, length = 30)
+	@Builder.Default
 	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
 
 	@Column(nullable = false)

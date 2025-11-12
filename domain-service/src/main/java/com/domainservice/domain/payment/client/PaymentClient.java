@@ -11,7 +11,7 @@ import com.domainservice.domain.payment.model.dto.PaymentConfirmRequest;
 import com.domainservice.domain.payment.model.dto.PaymentReadyResponse;
 
 
-@FeignClient(name = "tossPaymentClient", url = "${payment.toss.targetUrl}")
+@FeignClient(name = "tossPaymentClient", url = "https://api.tosspayments.com/v1/payments/confirm")
 public interface PaymentClient {
 
     @PostMapping
