@@ -42,8 +42,7 @@ public class OrderItem extends BaseEntity {
 
 	public int getTotalPrice() {
 		if (orderItemStatus == OrderItemStatus.CANCELLED
-			|| orderItemStatus == OrderItemStatus.REFUND_AFTER_PAYMENT
-			|| orderItemStatus == OrderItemStatus.REFUND_BEFORE_SETTLEMENT) {
+			|| orderItemStatus == OrderItemStatus.REFUND_AFTER_PAYMENT) {
 			return 0;
 		}
 		return quantity * priceSnapshot;

@@ -52,6 +52,7 @@ public class OrderController {
 			"주문 확정 성공했습니다");
 	}
 
+	// 주문 일부 취소
 	@PatchMapping("/{orderId}/items/{orderItemId}/cancel")
 	public BaseResponse<OrderResponse> cancelOrderItem(
 		// @RequestHeader("X-USER-ID") String userId,

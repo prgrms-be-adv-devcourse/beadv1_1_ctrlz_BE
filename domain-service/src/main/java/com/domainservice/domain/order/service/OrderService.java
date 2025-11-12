@@ -38,6 +38,8 @@ public class OrderService {
 	 * 주문 엔티티 생성
 	 * 주문 아이템 생성 및 주문에 추가
 	 * 주문 저장
+	 * Order -> PAYMENT_PENDING
+	 * OrderItem -> PAYMENT_PENDING
 	 */
 	public OrderResponse createOrder(String userId, List<String> cartItemIds) {
 
@@ -67,7 +69,6 @@ public class OrderService {
 			if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
 				throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
 			}
-
 			productPostService.updateTradeStatusToProcessing(cartItem.getProductPostId());
 
 			OrderItem orderItem = OrderItem.builder()
@@ -89,6 +90,8 @@ public class OrderService {
 	/**
 	 * 주문 취소 요청
 	 * - 결제 상태에 따라 결제전/결제후 취소 메서드 분기
+	 * Order -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
+	 * OrderItem -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
 	 */
 	public OrderResponse cancelOrder(String orderId, String userId) {
 		Order order = orderJpaRepository.findById(orderId)
@@ -97,43 +100,22 @@ public class OrderService {
 		if (!order.getBuyerId().equals(userId)) {
 			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
 		}
-
-		if (order.getOrderStatus() == OrderStatus.PAYMENT_PENDING) {
-			return cancelBeforePayment(order);
-		} else if (order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED) {
-			return cancelAfterPayment(order);
-		} else {
-			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
+		switch (order.getOrderStatus()) {
+			case PAYMENT_PENDING -> {
+				order.orderCanceled();
+			}
+			case PAYMENT_COMPLETED -> {
+				// TODO PG사 환불 처리
+				// paymentService.refund(order);
+				order.orderRefundedAfterPayment();
+			}
+			default -> throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
 		}
-	}
 
-	/**
-	 * 결제 전 취소 (PAYMENT_PENDING → CANCELLED)
-	 */
-	private OrderResponse cancelBeforePayment(Order order) {
 		for (OrderItem item : order.getOrderItems()) {
 			productPostService.updateTradeStatusToSelling(item.getProductPostId());
 		}
-		order.orderCanceled();
-		Order savedOrder = orderJpaRepository.save(order);
-
-		return toOrderResponse(savedOrder);
-	}
-
-	/**
-	 * 결제 후 전체 취소 (PAYMENT_COMPLETED → REFUNDED)
-	 * - PG 환불 및 정산 취소 로직 포함 가능
-	 */
-	private OrderResponse cancelAfterPayment(Order order) {
-		for (OrderItem item : order.getOrderItems()) {
-			productPostService.updateTradeStatusToSelling(item.getProductPostId());
-		}
-		// TODO PG사 환불 처리
-		// paymentService.refund(order);
-		order.orderRefundedAfterPayment();
-		Order savedOrder = orderJpaRepository.save(order);
-
-		return toOrderResponse(savedOrder);
+		return toOrderResponse(orderJpaRepository.save(order));
 	}
 
 	/**
@@ -155,7 +137,6 @@ public class OrderService {
 			.findFirst()
 			.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDERITEM_NOT_FOUND.getMessage()));
 
-		// 4. 상태에 따른 분기 처리
 		switch (order.getOrderStatus()) {
 			case PAYMENT_PENDING:
 				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
@@ -166,23 +147,24 @@ public class OrderService {
 				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
 				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
 				break;
-			case PURCHASE_CONFIRMED:
-				// TODO 구매확정 후, 정산 전
-				// paymentService.refundItem(targetItem);
-				// settlementService.cancelByOrderItemId(targetItem.getId());
-				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_BEFORE_SETTLEMENT);
-				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
-				
-				break;
-			case SETTLED:
-				// TODO 정산 후 취소에 대해 생각해봐야함
-				throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
 			default:
 				throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
 		}
 
-		Order savedOrder = orderJpaRepository.save(order);
+		boolean allCanceledOrRefunded = order.getOrderItems().stream()
+			.allMatch(item -> item.getOrderItemStatus() == OrderItemStatus.CANCELLED
+				|| item.getOrderItemStatus() == OrderItemStatus.REFUND_AFTER_PAYMENT);
 
+		// 모든 아이템이 취소/환불이면 주문 상태도 변경
+		if (allCanceledOrRefunded) {
+			if (order.getOrderStatus() == OrderStatus.PAYMENT_PENDING) {
+				order.setOrderStatus(OrderStatus.CANCELLED);
+			} else if (order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED) {
+				order.setOrderStatus(OrderStatus.REFUND_AFTER_PAYMENT);
+			}
+		}
+
+		Order savedOrder = orderJpaRepository.save(order);
 		return toOrderResponse(savedOrder);
 
 	}
@@ -194,6 +176,8 @@ public class OrderService {
 	 * 주문 상태를 구매확정으로 변경
 	 * 변경된 주문 저장
 	 * 응답 데이터 구성 및 반환
+	 * ORDER -> PURCHASE_CONFIRMED
+	 * ORDERItem -> PURCHASE_CONFIRMED
 	 */
 	public OrderResponse confirmPurchase(String orderId, String userId) {
 		Order order = orderJpaRepository.findById(orderId)
@@ -206,11 +190,16 @@ public class OrderService {
 		if (order.getOrderStatus() != OrderStatus.PAYMENT_COMPLETED) {
 			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
 		}
-
+		
+		// 주문 상태만 변경
+		order.setOrderStatus(OrderStatus.PURCHASE_CONFIRMED);
+		// 각 아이템 상태는 부분취소 여부에 따라 조건부 변경
 		for (OrderItem item : order.getOrderItems()) {
-			productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
+				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
+				productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+			}
 		}
-		order.orderConfirmed();
 
 		Order savedOrder = orderJpaRepository.save(order);
 
@@ -245,7 +234,8 @@ public class OrderService {
 					x.getId(),
 					x.getQuantity(),
 					x.getPriceSnapshot(),
-					x.getTotalPrice()))
+					x.getTotalPrice(),
+					x.getOrderItemStatus()))
 				.toList()
 		);
 	}
