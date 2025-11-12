@@ -66,7 +66,8 @@ public class ProductPostService {
     public ProductPostResponse createProductPost(
             ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-        validateSellerPermission(userId);
+        UserView userInfo = getUserInfo(userId);
+        validateSellerPermission(userInfo);
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
@@ -103,6 +104,9 @@ public class ProductPostService {
     public ProductPostResponse updateProductPost(
             ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
+        UserView userInfo = getUserInfo(userId);
+        validateSellerPermission(userInfo);
+
         ProductPost productPost = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
@@ -131,7 +135,8 @@ public class ProductPostService {
      */
     public String deleteProductPost(String userId, String postId) {
 
-        // TODO: 유저가 실제로 존재하는지 정보 확인
+        UserView userInfo = getUserInfo(userId);
+        validateSellerPermission(userInfo);
 
         ProductPost target = productPostRepository.findById(postId)
                 .orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
@@ -222,6 +227,7 @@ public class ProductPostService {
      * @return 최근 본 게시물 응답 목록
      */
     public List<ProductPostResponse> getRecentlyViewedPosts(String userId) {
+        getUserInfo(userId); // 사용자 정보가 조회되지 않으면 예외 발생
         Set<String> viewedPostIds = recentlyViewedService.getRecentlyViewedPostIds(userId, MAX_COUNT);
 
         return productPostRepository.findAllById(viewedPostIds)
@@ -317,33 +323,21 @@ public class ProductPostService {
         return productPost;
     }
 
-    /**
-     * FeignClient를 통해 사용자 정보를 조회하고 판매자 인증 여부를 검증합니다.
-     *
-     * @param userId 사용자 ID
-     * @return 판매 권한이 있는 사용자 정보
-     * @throws CustomException 사용자를 찾을 수 없는 경우
-     * @throws ProductPostException 판매 권한이 없거나 외부 API 오류 발생 시
-     */
-    private UserView validateSellerPermission(String userId) {
+    // FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
+    private UserView getUserInfo(String userId) {
         try {
-            // FeignClient 를 통해 user-service에 사용자 정보 요청
-            UserView user = userClient.getUserById(userId);
-            List<String> roles = user.roles();
-
-            // 판매자 권한이 없는 단순 "USER" 라면 판매글 등록 불가, 예외처리
-            if (!roles.contains("ADMIN") && !roles.contains("SELLER")) {
-                throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
-            }
-
-            return user;
-
-        } catch (FeignException.NotFound e) {
-            // 통신 과정에서 user가 존재하지 않아 예외가 날라올 경우 처리 (404)
+            return userClient.getUserById(userId);
+        } catch (FeignException.NotFound e) {  // user가 존재하지 않아 예외가 날라올 경우
             throw new CustomException(USER_NOT_FOUND.getMessage());
-        } catch (FeignException e) {
-            // 기타  Feign 통신상의 오류 발생 시 예외 처리
+        } catch (FeignException e) { // 기타  Feign 통신상의 오류 발생 시 예외 처리
             throw new ProductPostException(EXTERNAL_API_ERROR);
+        }
+    }
+
+    // 사용자 정보를 통해 판매자 인증 여부를 검증합니다.
+    private void validateSellerPermission(UserView user) {
+        if (!user.roles().contains("ADMIN") && !user.roles().contains("SELLER")) {
+            throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
         }
     }
 
