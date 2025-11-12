@@ -40,7 +40,7 @@ public class OrderItem extends BaseEntity {
 		return quantity * priceSnapshot;
 	}
 
-	void setOrder(Order order) {
+	public void setOrder(Order order) {
 		this.order = order;
 	}
 

@@ -34,6 +34,9 @@ public class Order extends BaseEntity {
 	@Column(nullable = false, length = 30)
 	private OrderStatus orderStatus = OrderStatus.PAYMENT_PENDING;
 
+	@Column(nullable = false)
+	private String orderName;
+
 	public void addOrderItem(OrderItem item) {
 		this.orderItems.add(item);
 		item.setOrder(this);
