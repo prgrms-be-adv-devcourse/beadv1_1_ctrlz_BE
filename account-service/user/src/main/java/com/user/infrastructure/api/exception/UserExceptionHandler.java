@@ -27,7 +27,7 @@ public class UserExceptionHandler {
 	 * @return  the api error response
 	 */
 	@ExceptionHandler(FeignClientException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ApiErrorResponse handleFeignClientException(FeignClientException e) {
 		log.info("FeignClientException:{}", e.getMessage(), e);
 

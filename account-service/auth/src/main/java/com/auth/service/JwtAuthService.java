@@ -1,14 +1,11 @@
 package com.auth.service;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.auth.jwt.JwtTokenProvider;
-import com.auth.repository.LogoutRedisDao;
 import com.auth.repository.TokenRepository;
 import com.user.domain.vo.UserRole;
 
@@ -26,7 +23,6 @@ public class JwtAuthService implements AuthService {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final TokenRepository refreshTokenRedisRepository;
-	private final LogoutRedisDao logoutRedisDao;
 
 	@Override
 	public void saveRefreshToken(String userId, String refreshToken) {
@@ -58,17 +54,8 @@ public class JwtAuthService implements AuthService {
 	}
 
 	@Override
-	public void logout(String userId, String accessToken) {
-		Instant expiration = jwtTokenProvider.getExpirationFromToken(accessToken);
-		long expireTime = Date.from(expiration).getTime();
-
-		logoutRedisDao.addLogoutList(accessToken, expireTime);
+	public void logout(String userId) {
 		refreshTokenRedisRepository.deleteByUserId(userId);
 		log.info("로그아웃 완료 - userId: {}", userId);
-	}
-
-	public boolean exists(String token) {
-		String findToken = logoutRedisDao.findByToken(token);
-		return findToken != null && !findToken.isBlank();
 	}
 }

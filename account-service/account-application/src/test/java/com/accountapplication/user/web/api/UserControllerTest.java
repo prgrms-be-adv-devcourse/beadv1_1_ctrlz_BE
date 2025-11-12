@@ -34,8 +34,6 @@ import com.user.infrastructure.jpa.entity.UserEntity;
 import com.user.infrastructure.jpa.repository.UserJpaRepository;
 import com.user.infrastructure.jpa.vo.EmbeddedAddress;
 
-import software.amazon.awssdk.services.s3.S3Client;
-
 @ActiveProfiles("test")
 @Transactional
 @SpringBootTest(
@@ -52,9 +50,6 @@ class UserControllerTest {
 
 	@Autowired
 	private UserJpaRepository userJpaRepository;
-
-	@MockitoBean
-	private S3Client s3Client;
 
 	@MockitoBean
 	private ProfileImageClient profileImageClient;
@@ -100,7 +95,7 @@ class UserControllerTest {
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
 
 
-		doThrow().when(cartClient).createCart(any(CartCreateRequest.class));
+		doThrow(RuntimeException.class).when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")
