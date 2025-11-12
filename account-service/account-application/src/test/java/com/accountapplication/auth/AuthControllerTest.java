@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.Instant;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,69 +15,75 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.auth.dto.TokenRefreshRequest;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.service.JwtAuthService;
 import com.user.infrastructure.redis.configuration.EmbeddedRedisConfiguration;
-
-import jakarta.servlet.http.Cookie;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")
-@Import({EmbeddedRedisConfiguration.class})
+@Import(EmbeddedRedisConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class AuthControllerTest {
 
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-	@MockitoBean
-	private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@MockitoBean
-	private JwtAuthService jwtAuthService;
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
-	@DisplayName("토큰 재발급 테스트")
-	@Test
-	void test1() throws Exception {
-		// given
-		String userId = "testUser";
-		String refreshToken = "valid-refresh-token";
-		String newAccessToken = "new-access-token";
+    @MockitoBean
+    private JwtAuthService jwtAuthService;
 
-		given(jwtAuthService.reissueAccessToken(eq(userId), eq(refreshToken))).willReturn(newAccessToken);
+    @DisplayName("토큰 재발급 테스트")
+    @Test
+    void refreshToken() throws Exception {
+        // given
+        TokenRefreshRequest request = new TokenRefreshRequest("testUser", "valid-refresh-token");
+        String newAccessToken = "new-access-token";
+        long expiration = Instant.now().getEpochSecond() + 3600;
 
-		// when then
-		mockMvc.perform(post("/api/auth/reissue")
-				.header("X-REQUEST-ID", userId)
-				.cookie(new Cookie("REFRESH_TOKEN", refreshToken)))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(header().exists("Set-Cookie"));
+        given(jwtAuthService.reissueAccessToken(anyString(), anyString())).willReturn(newAccessToken);
+        given(jwtTokenProvider.getExpirationFromToken(newAccessToken)).willReturn(Instant.ofEpochSecond(expiration));
 
-		verify(jwtAuthService).reissueAccessToken(userId, refreshToken);
-	}
+        // when then
+        mockMvc.perform(post("/api/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(cookie().exists("accessToken"))
+            .andExpect(cookie().value("accessToken", newAccessToken))
+            .andExpect(cookie().httpOnly("accessToken", true))
+            .andExpect(cookie().secure("accessToken", false))
+            .andExpect(cookie().path("accessToken", "/"))
+            .andExpect(cookie().sameSite("accessToken", "Lax"));
+    }
 
-	@DisplayName("로그아웃 테스트")
-	@Test
-	void test2() throws Exception {
-		// given
-		String token = "valid-access-token";
-		String userId = "testUser";
+    @DisplayName("로그아웃 테스트")
+    @Test
+    void logout() throws Exception {
+        // given
+        String token = "valid-access-token";
+        String userId = "testUser";
 
-		given(jwtTokenProvider.getUserIdFromToken(token)).willReturn(userId);
+        given(jwtTokenProvider.getUserIdFromToken(token)).willReturn(userId);
 
-		// when then
-		mockMvc.perform(get("/api/auth/logout")
-				.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(header().exists("Set-Cookie"));
+        // when then
+        mockMvc.perform(post("/api/auth/logout")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+            .andDo(print())
+            .andExpect(status().isOk());
 
-		verify(jwtAuthService).logout(userId);
-		verify(jwtTokenProvider).getUserIdFromToken(token);
-	}
+        verify(jwtAuthService).logout(userId, token);
+    }
 }

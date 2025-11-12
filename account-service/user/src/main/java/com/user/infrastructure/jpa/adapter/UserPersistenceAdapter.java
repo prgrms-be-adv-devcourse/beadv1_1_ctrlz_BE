@@ -24,9 +24,10 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	private final UserJpaRepository userJpaRepository;
 
 	@Override
-	public User save(User user) {
+	public User save(com.user.domain.model.User user) {
 
-		UserEntity entity =UserEntityMapper.toEntity(user);
+		UserEntity entity =UserEntityMapper.toEntity(
+			user);
 		UserEntity userEntity = userJpaRepository.save(entity);
 
 		return UserEntityMapper.toDomain(userEntity);
@@ -50,14 +51,18 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void withdraw(User user) {
-		UserEntity userEntity = getUserEntity(user.getId());
-		userEntity.delete();
+	public User findByEmail(String email) {
+		return null;
 	}
 
 	@Override
-	public void delete(String id) {
-		userJpaRepository.deleteById(id);
+	public User findBynickname(String nickname) {
+		return null;
+	}
+
+	@Override
+	public void withdraw(String id) {
+
 	}
 
 	@Override
@@ -71,22 +76,36 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void updateRolesForSeller(User user) {
-		UserEntity userEntity = getUserEntity(user.getId());
-		userEntity.addSellerRoles();
+	public void delete(String id) {
+		userJpaRepository.deleteById(id);
 	}
 
 	@Override
-	public void updateImage(User user) {
-		UserEntity userEntity = getUserEntity(user.getId());
-		userEntity.changeProfileImage(user.getImageId(), user.getProfileImageUrl());
+	public void updateRole(String id, com.user.domain.vo.UserRole userRole) {
+		UserEntity userEntity = getUserEntity(id);
+		userEntity.getRoles().add(userRole);
+	}
+
+	@Override
+	public void updateImage(String userId, String imageId, String profileImageUrl) {
+		UserEntity userEntity = getUserEntity(userId);
+		userEntity.changeProfileImage(imageId, profileImageUrl);
 	}
 
 	@Transactional(readOnly = true)
 	@Override
 	public Optional<User> findByEmailAndOAuthId(String email, String oAuthId) {
+
 		return userJpaRepository.findByEmailAndOauthId(email, oAuthId)
 			.map(UserEntityMapper::toDomain);
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public boolean existsByEmail(String email) {
+		// FIXME: UserJpaRepository에 메서드 추가 필요
+		// boolean existsByEmail(String email);
+		return userJpaRepository.existsByEmail(email);
 	}
 
 	private UserEntity getUserEntity(String userId) {

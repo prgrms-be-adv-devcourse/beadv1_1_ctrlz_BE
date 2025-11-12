@@ -6,7 +6,6 @@ import lombok.Builder;
 
 @Builder
 public record UserDescription(
-	String userId,
 	String name,
 	String nickname,
 	String phoneNumber,

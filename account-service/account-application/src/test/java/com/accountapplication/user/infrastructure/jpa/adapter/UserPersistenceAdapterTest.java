@@ -51,8 +51,6 @@ class UserPersistenceAdapterTest {
 			.roles(List.of(UserRole.USER))
 			.phoneNumber("010-1234-5678")
 			.oauthId("kakao_1234567890")
-			.age(28)
-			.gender("MALE")
 			.build();
 
 		userPersistenceAdapter = new UserPersistenceAdapter(userJpaRepository);

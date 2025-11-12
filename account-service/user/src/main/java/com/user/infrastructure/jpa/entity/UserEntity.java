@@ -61,12 +61,6 @@ public class UserEntity extends BaseEntity {
 
 	private String imageId;
 
-	@Column(nullable = false)
-	private int age;
-
-	@Column(nullable = false)
-	private String gender;
-
 	@Builder
 	public UserEntity(
 		String name,
@@ -77,10 +71,7 @@ public class UserEntity extends BaseEntity {
 		EmbeddedAddress address,
 		String oauthId,
 		String nickname,
-		String imageId,
-		List<UserRole> roles,
-		int age,
-		String gender
+		String imageId
 	) {
 		this.oauthId = oauthId;
 		this.name = name;
@@ -91,9 +82,8 @@ public class UserEntity extends BaseEntity {
 		this.phoneNumber = phoneNumber;
 		this.nickname = nickname;
 		this.imageId = imageId;
-		this.roles.add(UserRole.USER);
-		this.age = age;
-		this.gender = gender;
+
+		this.roles.add(com.user.domain.vo.UserRole.USER);
 	}
 
 	@Override
@@ -117,13 +107,4 @@ public class UserEntity extends BaseEntity {
 		this.imageId = imageId;
 		this.profileImageUrl = profileImageUrl;
 	}
-
-	public void addSellerRoles() {
-		this.roles.add(UserRole.SELLER);
-	}
-
-	public void addAdminRoles() {
-		this.roles.add(UserRole.ADMIN);
-	}
-
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.common.model.persistence.BaseEntity.DeleteStatus;
 import com.user.domain.vo.Address;
-import com.user.domain.vo.UserRole;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -22,14 +21,12 @@ public class User {
 	private String email;
 	private String password;
 	private String nickname;
-	private List<UserRole> roles;
+	private List<com.user.domain.vo.UserRole> roles;
 	private String profileImageUrl;
 	private Address address;
 	private String phoneNumber;
 	private String oauthId;
 	private String imageId;
-	private int age;
-	private String gender;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private DeleteStatus deleteStatus;
@@ -41,13 +38,11 @@ public class User {
 		String email,
 		String password,
 		String nickname,
-		List<UserRole> roles,
+		List<com.user.domain.vo.UserRole> roles,
 		String profileImageUrl,
 		Address address,
 		String phoneNumber,
 		String oauthId, String imageId,
-		int age,
-		String gender,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt,
 		DeleteStatus deleteStatus
@@ -63,8 +58,6 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.oauthId = oauthId;
 		this.imageId = imageId;
-		this.age = age;
-		this.gender = gender;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.deleteStatus = deleteStatus;
@@ -84,18 +77,5 @@ public class User {
 
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	public void updateImage(String imageId, String profileImageUrl) {
-		this.imageId = imageId;
-		this.profileImageUrl = profileImageUrl;
-	}
-
-	public void withdraw() {
-		this.deleteStatus = DeleteStatus.D;
-	}
-
-	public void updateRolesForSeller() {
-		this.roles.add(UserRole.SELLER);
 	}
 }

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Converter
 public class UserInformationConverter implements AttributeConverter<String, String> {
 
-	private final AESUtils aesUtils;
+	private final com.user.infrastructure.jpa.converter.AESUtils aesUtils;
 
 	@Override
 	public String convertToDatabaseColumn(String attribute) {

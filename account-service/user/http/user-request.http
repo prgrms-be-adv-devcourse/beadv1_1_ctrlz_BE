@@ -1,5 +1,5 @@
 ### 회원가입
-POST http://localhost:8082/api/users
+POST http://localhost:8080/api/users
 Content-Type: application/json
 #--WebAppBoundary
 #Content-Disposition: form-data; name="profileImage"; filename="test.png"
@@ -13,16 +13,14 @@ Content-Type: application/json
 {
   "oauthId" : "google",
   "email": "choizz156@gmail.com",
-  "phoneNumber": "01096395588",
+  "phoneNumber": "phoneNumber_a461870f84fb",
   "street": "street_f42fa85a43a1",
   "zipCode": "zipCode_3f828ede8a5d",
   "state": "state_b33630e89d76",
   "city": "city_6232d43546ca",
   "details": "details_2de90f41ec58",
   "name": "name_435c00db2258",
-  "nickname": "nickname_9ca5bcb1ad24",
-  "gender" : "male",
-  "age" : 45
+  "nickname": "nickname_9ca5bcb1ad24"
 }
 
 > {%
@@ -43,9 +41,6 @@ GET localhost:8080/api/users/{{id}}
     client.global.set("currentImageId", response.body.imageId);
 %}
 
-### 로그아웃
-GET localhost:8080/api/auth/logout
-Authorization: Bearer
 
 
 ### 회원가입 프로필 이미지 null일 경우

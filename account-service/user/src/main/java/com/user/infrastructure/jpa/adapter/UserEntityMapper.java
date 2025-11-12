@@ -25,8 +25,6 @@ public class UserEntityMapper {
 			.password(user.getPassword())
 			.profileImageUrl(user.getProfileImageUrl())
 			.phoneNumber(user.getPhoneNumber())
-			.age(user.getAge())
-			.gender(user.getGender())
 			.build();
 	}
 
@@ -50,8 +48,6 @@ public class UserEntityMapper {
 			.imageId(userEntity.getImageId())
 			.phoneNumber(userEntity.getPhoneNumber())
 			.oauthId(userEntity.getOauthId())
-			.age(userEntity.getAge())
-			.gender(userEntity.getGender())
 			.createdAt(userEntity.getCreatedAt())
 			.updatedAt(userEntity.getUpdatedAt())
 			.deleteStatus(userEntity.getDeleteStatus())

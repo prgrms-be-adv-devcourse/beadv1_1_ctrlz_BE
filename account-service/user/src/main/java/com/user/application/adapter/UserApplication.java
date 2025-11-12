@@ -1,8 +1,5 @@
 package com.user.application.adapter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,25 +8,25 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.dto.UserContext;
 import com.user.application.adapter.dto.UserUpdateContext;
-import com.user.application.adapter.vo.EventType;
 import com.user.application.port.in.UserCommandUseCase;
-import com.user.application.port.out.UserPersistencePort;
-import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
+import com.user.infrastructure.feign.CartClient;
+import com.user.infrastructure.feign.dto.CartCreateRequest;
+import com.user.infrastructure.feign.exception.FeignClientException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class UserApplication implements UserCommandUseCase {
 
-	private static final Logger log = LoggerFactory.getLogger("API." + UserApplication.class.getName());
-
-	private final UserPersistencePort userPersistencePort;
+	private final com.user.application.port.out.UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
-	private final ApplicationEventPublisher applicationEventPublisher;
+	private final CartClient cartClient;
 
 	@Override
 	public UserContext create(UserContext userContext) {
@@ -38,37 +35,32 @@ public class UserApplication implements UserCommandUseCase {
 
 		User user = generateUser(userContext);
 		User savedUser = userPersistencePort.save(user);
-		log.info("회원 저장 완료 userId = {}", savedUser.getId());
 
-		log.info("이벤트 저장 시작: topic=user-registered, userId={}", savedUser.getId());
-		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATED));
+		requestCartCreate(savedUser);
 
 		return UserContext.builder()
-				.nickname(savedUser.getNickname())
-				.profileImageUrl(savedUser.getProfileImageUrl())
-				.userId(savedUser.getId())
-				.build();
+			.nickname(savedUser.getNickname())
+			.profileImageUrl(savedUser.getProfileImageUrl())
+			.userId(savedUser.getId())
+			.build();
 	}
 
 	@Override
 	public void updateForSeller(String id) {
-		User user = userPersistencePort.findById(id);
-		user.updateRolesForSeller();
-		userPersistencePort.updateRolesForSeller(user);
-		log.info("판매자 권한 업데이트 완료 userId = {}", id);
+		userPersistencePort.updateRole(id, com.user.domain.vo.UserRole.SELLER);
 	}
 
 	@Override
 	public void updateUser(String userId, UserUpdateContext updateContext) {
 		User user = userPersistencePort.findById(userId);
 
-		Address updatedAddress = Address.builder()
-				.state(updateContext.state())
-				.city(updateContext.city())
-				.street(updateContext.street())
-				.zipCode(updateContext.zipCode())
-				.details(updateContext.details())
-				.build();
+		com.user.domain.vo.Address updatedAddress = com.user.domain.vo.Address.builder()
+			.state(updateContext.state())
+			.city(updateContext.city())
+			.street(updateContext.street())
+			.zipCode(updateContext.zipCode())
+			.details(updateContext.details())
+			.build();
 
 		updateAddress(user, updatedAddress);
 		updatePhoneNumber(updateContext, user);
@@ -79,18 +71,12 @@ public class UserApplication implements UserCommandUseCase {
 
 	@Override
 	public void updateImage(String userId, String imageId, String profileImageUrl) {
-		User user = userPersistencePort.findById(userId);
-		user.updateImage(imageId, profileImageUrl);
-
-		userPersistencePort.updateImage(user);
+		userPersistencePort.updateImage(userId, imageId, profileImageUrl);
 	}
 
 	@Override
 	public void delete(String id) {
-		User user = userPersistencePort.findById(id);
-		user.withdraw();
-
-		userPersistencePort.withdraw(user);
+		userPersistencePort.withdraw(id);
 	}
 
 	@Transactional(readOnly = true)
@@ -101,25 +87,36 @@ public class UserApplication implements UserCommandUseCase {
 
 	private User generateUser(UserContext userContext) {
 		return User.builder()
-				.email(userContext.email())
-				.password(passwordEncoder.encode(userContext.password()))
-				.name(userContext.name())
-				.phoneNumber(userContext.phoneNumber())
-				.nickname(userContext.nickname())
-				.address(
-						Address.builder()
-								.state(userContext.state())
-								.city(userContext.city())
-								.street(userContext.street())
-								.zipCode(userContext.zipCode())
-								.details(userContext.addressDetails())
-								.build())
-				.imageId(userContext.imageId())
-				.oauthId(userContext.oauthId())
-				.profileImageUrl(userContext.profileImageUrl())
-				.age(userContext.age())
-				.gender(userContext.gender())
-				.build();
+			.email(userContext.email())
+			.password(passwordEncoder.encode(userContext.password()))
+			.name(userContext.name())
+			.phoneNumber(userContext.phoneNumber())
+			.nickname(userContext.nickname())
+			.address(
+				com.user.domain.vo.Address.builder()
+					.state(userContext.state())
+					.city(userContext.city())
+					.street(userContext.street())
+					.zipCode(userContext.zipCode())
+					.details(userContext.addressDetails())
+					.build()
+			)
+			.imageId(userContext.imageId())
+			.oauthId(userContext.oauthId())
+			.profileImageUrl(userContext.profileImageUrl())
+			.build();
+	}
+
+	private void verifyNickname(String nickname) {
+		if (userPersistencePort.existsNickname(nickname)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_NICKNAME.getMessage());
+		}
+	}
+
+	private void verifyPhoneNumber(String phoneNumber) {
+		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
+		}
 	}
 
 	private void updateNickname(com.user.application.adapter.dto.UserUpdateContext updateContext, User user) {
@@ -140,16 +137,11 @@ public class UserApplication implements UserCommandUseCase {
 		}
 	}
 
-	private void verifyNickname(String nickname) {
-		if (userPersistencePort.existsNickname(nickname)) {
-			throw new CustomException(UserExceptionCode.DUPLICATED_NICKNAME.getMessage());
-		}
-	}
-
-	private void verifyPhoneNumber(String phoneNumber) {
-		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
-			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
+	private void requestCartCreate(User savedUser) {
+		try {
+			cartClient.createCart(new CartCreateRequest(savedUser.getId()));
+		} catch (Exception e) {
+			throw new FeignClientException(e.getMessage(), e);
 		}
 	}
 }
-
