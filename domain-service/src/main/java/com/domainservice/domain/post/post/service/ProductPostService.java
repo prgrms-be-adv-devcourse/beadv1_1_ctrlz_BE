@@ -1,12 +1,15 @@
 package com.domainservice.domain.post.post.service;
 
+import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
+import com.domainservice.common.configuration.UserClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
+import com.domainservice.domain.post.post.model.dto.UserView;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
@@ -15,6 +18,7 @@ import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.UserExceptionCode.USER_NOT_FOUND;
 
 /**
  * 상품 게시글의 비즈니스 로직을 처리하는 서비스 클래스입니다.
@@ -44,6 +49,8 @@ public class ProductPostService {
     private final ImageService imageService;
     private final RecentlyViewedService recentlyViewedService;
 
+    private final UserClient userClient;
+
     private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
 
     /**
@@ -57,6 +64,23 @@ public class ProductPostService {
      */
     public ProductPostResponse createProductPost(
             ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
+
+        try {
+            // FeignClient 를 통해 user-service에 사용자 정보 요청
+            UserView user = userClient.getUserById(userId);
+
+            // 단순히 "USER" 라면 판매글 등록 불가, 예외처리
+            if (!user.roles().contains("ADMIN")&& !user.roles().contains("SELLER")) {
+                throw new ProductPostException(PRODUCT_POST_NOT_FOUND);
+            }
+        } catch (FeignException.NotFound e) {
+            // 통신 과정에서 user가 존재하지 않아 예외가 날라올 경우 처리
+            throw new CustomException(USER_NOT_FOUND.getMessage());
+        }
+        catch (FeignException e) {
+            // 기타 통신상의 오류 발생 시 예외 처리
+            throw new ProductPostException(EXTERNAL_API_ERROR);
+        }
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
