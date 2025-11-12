@@ -3,7 +3,6 @@ spring:
     active:
   autoconfigure:
     exclude:
-      - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
