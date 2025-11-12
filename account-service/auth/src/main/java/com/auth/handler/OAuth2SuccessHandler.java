@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.auth.jwt.JwtTokenProvider;
+import com.auth.jwt.TokenType;
 import com.auth.oauth2.CustomOAuth2User;
 import com.auth.service.JwtAuthService;
 import com.user.domain.vo.UserRole;
@@ -70,8 +71,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			String refreshToken = jwtTokenProvider.createRefreshToken(userId, roles);
 			jwtAuthService.saveRefreshToken(userId, refreshToken);
 
-			ResponseCookie accessTokenCookie = CookieProvider.to("accessToken", accessToken, Duration.ofMinutes(15));
-			ResponseCookie refreshTokenCookie = CookieProvider.to("refreshToken", refreshToken, Duration.ofDays(7));
+			ResponseCookie accessTokenCookie = CookieProvider.to(
+				TokenType.ACCESS_TOKEN.name(),
+				accessToken,
+				Duration.ofMinutes(15)
+			);
+
+			ResponseCookie refreshTokenCookie = CookieProvider.to(
+				TokenType.REFRESH_TOKEN.name(),
+				refreshToken,
+				Duration.ofDays(7)
+			);
 
 			response.addHeader("Set-Cookie", accessTokenCookie.toString());
 			response.addHeader("Set-Cookie", refreshTokenCookie.toString());
