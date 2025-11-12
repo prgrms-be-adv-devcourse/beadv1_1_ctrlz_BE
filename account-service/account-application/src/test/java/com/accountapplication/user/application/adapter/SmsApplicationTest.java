@@ -117,80 +117,125 @@ class SmsApplicationTest {
         }
     }
 
+    @DisplayName("인증 코드 요청")
     @Nested
-    @DisplayName("인증 확인")
-    class CheckCode {
+    class AdditionalRequestVerificationCode {
 
-        // @DisplayName("기존 코드가 없으면 정상 처리된다")
-        // @Test
-        // void test1() {
-        //     // given
-        //     SellerVerificationContext context = mock(SellerVerificationContext.class);
-        //     given(context.getUserId()).willReturn("user123");
-		//
-        //     // when then
-        //     assertThatCode(() -> smsApplication.checkExistingCode(context))
-        //         .doesNotThrowAnyException();
-        // }
-		//
-        // @DisplayName("기존 코드가 있으면 예외가 발생한다")
-        // @Test
-        // void test2() {
-        //     // given
-        //     SellerVerificationContext context = mock(SellerVerificationContext.class);
-        //     given(context.getUserId()).willReturn("user123");
-        //     getCache(CacheType.VERIFICATION_CODE).put("user123", "oldCode");
-		//
-        //     // when then
-        //     assertThatThrownBy(() -> smsApplication.checkExistingCode(context))
-        //         .isInstanceOf(CustomException.class);
-		//
-        //     assertThat(getCache(CacheType.VERIFICATION_CODE).get("user123", String.class)).isEqualTo("oldCode");
-        // }
+        @DisplayName("이미 발송된 인증 코드가 있으면 예외가 발생한다")
+        @Test
+        void test1() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user123");
+            given(context.getPhoneNumber()).willReturn("01012345678");
+            
+            getCache(CacheType.VERIFICATION_CODE).put("user123", "code");
+
+            // when then
+            assertThatThrownBy(() -> smsApplication.requestVerificationCode(context))
+                .isInstanceOf(CustomException.class);
+        }
+
+        @DisplayName("인증 코드 발송 시 캐시에 저장된다")
+        @Test
+        void test2() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user456");
+            given(context.getPhoneNumber()).willReturn("01098765432");
+
+            // when
+            smsApplication.requestVerificationCode(context);
+
+            // then
+            String cachedCode = getCache(CacheType.VERIFICATION_CODE).get("user456", String.class);
+            assertThat(cachedCode).isNotNull();
+            assertThat(cachedCode).hasSize(6);
+        }
     }
 
-    @DisplayName("인증 횟수 관리")
+    @DisplayName("인증 코드 확인")
     @Nested
-    class VerificationCount {
+    class AdditionalCheckVerificationCode {
 
-        // @DisplayName("첫 번째 실패 시 카운트가 1로 설정된다")
-        // @Test
-        // void test1() {
-        //     // when
-        //     smsApplication.applyVerificationCount("user123");
-		//
-        //     // then
-        //     AtomicInteger count = getCache(CacheType.VERIFICATION_TRY).get("user123", AtomicInteger.class);
-        //     assertThat(count).isNotNull();
-        //     assertThat(count.get()).isEqualTo(1);
-        // }
-		//
-        // @DisplayName("기존 카운트가 있으면 증가한다")
-        // @Test
-        // void test2() {
-        //     // given
-        //     getCache(CacheType.VERIFICATION_TRY).put("user123", new AtomicInteger(2));
-		//
-        //     // when
-        //     smsApplication.applyVerificationCount("user123");
-		//
-        //     // then
-        //     AtomicInteger count = getCache(CacheType.VERIFICATION_TRY).get("user123", AtomicInteger.class);
-        //     assertThat(count).isNotNull();
-        //     assertThat(count.get()).isEqualTo(3);
-        // }
-		//
-        // @DisplayName("실패: 5회 실패 시 차단되고 예외가 발생한다")
-        // @Test
-        // void test3() {
-        //     // given
-        //     getCache(CacheType.VERIFICATION_TRY).put("user123", new AtomicInteger(4));
-		//
-        //     // when then
-        //     assertThatThrownBy(() -> smsApplication.applyVerificationCount("user123"))
-        //         .isInstanceOf(CustomException.class);
-        //     assertThat(getCache(CacheType.VERIFICATION_TRY).get("user123")).isNull();
-        //     assertThat(getCache(CacheType.VERIFICATION_BAN_ONE_DAY).get("ban_user", String.class)).isEqualTo("user123");
-        // }
+        @DisplayName("인증 성공 시 캐시가 삭제된다")
+        @Test
+        void test1() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user123");
+            given(context.getVerificationCode()).willReturn("123456");
+            
+            getCache(CacheType.VERIFICATION_CODE).put("user123", "123456");
+            getCache(CacheType.VERIFICATION_TRY).put("user123", new AtomicInteger(2));
+
+            // when
+            smsApplication.checkVerificationCode(context);
+
+            // then
+            assertThat(getCache(CacheType.VERIFICATION_CODE).get("user123")).isNull();
+            assertThat(getCache(CacheType.VERIFICATION_TRY).get("user123")).isNull();
+        }
+
+        @DisplayName("빈 문자열 인증 코드는 실패한다")
+        @Test
+        void test2() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user123");
+            given(context.getVerificationCode()).willReturn("123456");
+            
+            getCache(CacheType.VERIFICATION_CODE).put("user123", "");
+
+            // when then
+            assertThatThrownBy(() -> smsApplication.checkVerificationCode(context))
+                .isInstanceOf(CustomException.class);
+        }
+
+        @DisplayName("10회 실패 시 사용자가 차단된다")
+        @Test
+        void test3() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user123");
+            given(context.getVerificationCode()).willReturn("code");
+            
+            getCache(CacheType.VERIFICATION_CODE).put("user123", "123456");
+            getCache(CacheType.VERIFICATION_TRY).put("user123", new AtomicInteger(9));
+
+            // when then
+            assertThatThrownBy(() -> smsApplication.checkVerificationCode(context))
+                .isInstanceOf(CustomException.class);
+
+            
+            assertThat(getCache(CacheType.VERIFICATION_TRY).get("user123")).isNull();
+            assertThat(getCache(CacheType.VERIFICATION_BAN_ONE_DAY).get("ban_user", String.class))
+                .isEqualTo("user123");
+        }
+
+        @DisplayName("연속된 실패 시 카운트가 누적된다")
+        @Test
+        void test4() {
+            // given
+            SellerVerificationContext context = mock(SellerVerificationContext.class);
+            given(context.getUserId()).willReturn("user123");
+            given(context.getVerificationCode()).willReturn("code");
+            
+            getCache(CacheType.VERIFICATION_CODE).put("user123", "123456");
+
+            // when
+            for (int i = 0; i < 5; i++) {
+                try {
+                    smsApplication.checkVerificationCode(context);
+                } catch (CustomException e) {
+
+                }
+            }
+
+            // then
+            AtomicInteger count = getCache(CacheType.VERIFICATION_TRY).get("user123", AtomicInteger.class);
+            assertThat(count).isNotNull();
+            assertThat(count.get()).isEqualTo(5);
+        }
     }
 }
