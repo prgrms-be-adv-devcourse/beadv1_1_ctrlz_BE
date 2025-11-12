@@ -1,14 +1,10 @@
 package com.domainservice.domain.post.post.model.dto.request;
 
-import java.util.List;
-
-import com.common.model.vo.ProductStatus;
-
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.domainservice.domain.post.post.model.enums.ProductStatus;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
+
+import java.util.List;
 
 /**
  * 상품 게시글 생성 요청 DTO
@@ -34,7 +30,7 @@ public record ProductPostRequest(
         String categoryId,
 
         @NotNull(message = "상품 상태는 필수입니다.")
-		ProductStatus status,
+        ProductStatus status,
 
         List<String> tagIds
 ) {
