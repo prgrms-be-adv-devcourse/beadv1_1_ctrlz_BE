@@ -16,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.common.exception.vo.ProductPostExceptionCode.PRODUCT_POST_DELETED;
+import static com.common.exception.vo.ProductPostExceptionCode.PRODUCT_POST_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
