@@ -1,6 +1,7 @@
 package com.domainservice.common.init;
 
 import com.domainservice.common.init.data.CategoryInitializer;
+import com.domainservice.common.init.data.OrderInitializer;
 import com.domainservice.common.init.data.ProductPostInitializer;
 import com.domainservice.common.init.data.TagInitializer;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class DataInitializer implements ApplicationRunner {
     private final CategoryInitializer categoryInitializer;
     private final TagInitializer tagInitializer;
     private final ProductPostInitializer productPostInitializer;
+	private final OrderInitializer orderInitializer;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -27,9 +29,11 @@ public class DataInitializer implements ApplicationRunner {
         categoryInitializer.init();
         tagInitializer.init();
         productPostInitializer.init();
+        orderInitializer.init();
 
         log.info("========================================");
         log.info("데이터 초기화 완료!");
         log.info("========================================");
+
     }
 }

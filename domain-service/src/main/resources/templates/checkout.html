@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 확인</title>
+    <link rel="stylesheet" href="/modal-page.css"/>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+
+<body>
+<div class="wrapper">
+
+    <div class="product-section">
+
+        <div class="product-info">
+            <div class="product-details">
+                <h2>[[ ${orderName} ]]</h2>
+                <p>주문번호: [[ ${orderId} ]]</p>
+            </div>
+            <div class="product-price">
+                <p class="price-final">
+                    <span class="currency">₩ </span>
+                    [[ ${amount} ]]
+                </p>
+            </div>
+
+        </div>
+
+        <div class="product-summary">
+
+            <div class="summary-row">
+                <span class="summary-label">상품금액</span>
+                <span class="summary-value">₩ [[ ${amount} ]]</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">현재 보유중인 예치금</span>
+                <span id="deposit-balance" class="summary-value">₩ [[ ${depositBalance} ]]</span>
+            </div>
+            <div class="summary-row">
+                <span></span>
+                <span class="summary-value">
+                    <label for="use-deposit-toggle">
+                        <input
+                                type="checkbox"
+                                id="use-deposit-toggle"
+                                value="예치금 사용하기"
+                                onclick={(e) => toggleUsingDeposit(e)}
+                        />
+                    </label>
+                </span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">사용한 예치금 금액</span>
+                <span id="paid-deposit" class="summary-value"></span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">배송비</span>
+                <span class="summary-value">무료</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">총 결제금액</span>
+                <span id="final-price" class="summary-value">₩ [[ ${amount} ]] </span>
+            </div>
+
+            <div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="box_section">
+
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+
+        <div class="result wrapper">
+            <button class="button" id="payment-button" style="margin-top: 30px">
+                결제하기
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+    const currentDeposit = [[ ${depositBalance} ]];
+    const amount = [[ ${amount} ]];
+    main();
+
+    async function main() {
+        const button = document.getElementById("payment-button");
+        const amount = {
+            currency: "KRW",
+            value: 100,
+        };
+
+        const clientKey = '[[ ${@environment.getProperty("payment.toss.test_client_api_key")} ]]';
+        const tossPayments = TossPayments(clientKey);
+
+        const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+        await widgets.setAmount(amount);
+
+        await widgets.renderPaymentMethods({
+            selector: "#payment-method",
+            variantKey: "DEFAULT",
+        });
+
+        await widgets.renderAgreement({selector: "#agreement", variantKey: "AGREEMENT"});
+
+        button.addEventListener("click", async function () {
+            await widgets.requestPayment({
+                orderId: '[[ ${orderId} ]]',
+                orderName: `[[ ${productName} ]]`,
+                successUrl: window.location.origin + "/success",
+                failUrl: window.location.origin + "/fail",
+                customerEmail: "email@email.com",
+                customerName: "익명",
+            });
+        });
+    }
+
+    const toggleUsingDeposit = (e) => {
+        const depositBalanceEl = document.getElementById('depositBalance');
+        const paidDepositEl = document.getElementById('paid-deposit');
+        const finalPriceEl = document.getElementById('final-price');
+
+        if (e.target.checked) {
+            // 사용할 예치금 = min(보유 예치금, 상품금액)
+            const usedDeposit = Math.min(currentDeposit, totalAmount);
+            const remainingDeposit = currentDeposit - usedDeposit;
+            const finalAmount = totalAmount - usedDeposit;
+
+            depositBalanceEl.innerText = `₩ ${remainingDeposit.toLocaleString()}`;
+            paidDepositEl.innerText = `₩ ${usedDeposit.toLocaleString()}`;
+            finalPriceEl.innerText = `₩ ${finalAmount.toLocaleString()}`;
+        } else {
+            // 예치금 미사용
+            depositBalanceEl.innerText = `₩ ${currentDeposit.toLocaleString()}`;
+            paidDepositEl.innerText = `₩ 0`;
+            finalPriceEl.innerText = `₩ ${totalAmount.toLocaleString()}`;
+        }
+    };
+</script>
+</body>
+</html>

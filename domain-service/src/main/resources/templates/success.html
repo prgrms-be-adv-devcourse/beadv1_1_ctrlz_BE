@@ -1,0 +1,149 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ko">-->
+<!--<head>-->
+<!--    <meta charset="utf-8" />-->
+<!--</head>-->
+<!--<body>-->
+<!--<h2>결제 성공</h2>-->
+<!--<p id="paymentKey"></p>-->
+<!--<p id="orderId"></p>-->
+<!--<p id="amount"></p>-->
+
+<!--<script>-->
+<!--    // 쿼리 파라미터에서 결제 정보 추출-->
+<!--    const urlParams = new URLSearchParams(window.location.search);-->
+<!--    const paymentKey = urlParams.get("paymentKey");-->
+<!--    const orderId = urlParams.get("orderId");-->
+<!--    const amount = urlParams.get("amount");-->
+<!--    const depositUsed = urlParams.get("depositUsed") === 'true';-->
+<!--    const userId = localStorage.getItem("userId"); // 로그인 정보-->
+
+<!--    // 서버로 결제 승인 요청-->
+<!--    async function confirm() {-->
+<!--        const requestData = {-->
+<!--            userId: userId,-->
+<!--            paymentKey: paymentKey,-->
+<!--            orderId: orderId,-->
+<!--            amount: Number(amount),-->
+<!--            depositUsed: depositUsed-->
+<!--        };-->
+
+<!--        try {-->
+<!--            const response = await fetch("/api/payments/confirm", {-->
+<!--                method: "POST",-->
+<!--                headers: {-->
+<!--                    "Content-Type": "application/json",-->
+<!--                },-->
+<!--                body: JSON.stringify(requestData),-->
+<!--            });-->
+
+<!--            const json = await response.json();-->
+
+<!--            if (!response.ok) {-->
+<!--                console.error("결제 승인 실패:", json);-->
+<!--                window.location.href = `/fail?message=${json.message}&code=${json.code}`;-->
+<!--                return;-->
+<!--            }-->
+
+<!--            console.log("결제 승인 성공:", json);-->
+<!--        } catch (error) {-->
+<!--            console.error("결제 승인 요청 중 오류 발생:", error);-->
+<!--            window.location.href = `/fail?message=${error.message}&code=NETWORK_ERROR`;-->
+<!--        }-->
+
+<!--        confirm();-->
+
+<!--        // 결제 정보 표시-->
+<!--        document.getElementById("orderId").textContent = "주문 번호: " + orderId;-->
+<!--        document.getElementById("amount").textContent = "결제 금액: " + amount + "원";-->
+<!--        document.getElementById("paymentKey").textContent = "결제 키: " + paymentKey;-->
+<!--    }-->
+
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/success-page.css">
+    <title>결제 완료</title>
+</head>
+<body>
+<div class="success-container">
+
+    <div class="loading" id="loading">
+        결제 정보를 확인 중입니다...
+    </div>
+
+    <div id="success-content" style="display: none;">
+        <div class="success-icon">✓</div>
+
+        <h1 class="success-title">결제가 완료되었습니다</h1>
+        <p class="success-subtitle">주문이 정상적으로 처리되었습니다.</p>
+
+        <div class="order-info">
+
+            <h3>주문 정보</h3>
+
+            <div class="info-row">
+                <span class="info-label">주문번호</span>
+                <span class="info-value" id="orderId"> [[ ${orderId} ]] </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">상품명</span>
+                <span class="info-value" id="orderName"> [[ ${productName} ]] </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">결제금액</span>
+                <span class="info-value" id="amount"> [[ ${amount} ]] </span>
+            </div>
+
+        </div>
+
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">확인</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    document.getElementById('loading').style.display = 'block';
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    var requestData = {
+        paymentKey: urlParams.get("paymentKey"),
+        orderId: urlParams.get("orderId"),
+        amount: urlParams.get("amount"),
+    };
+
+    fetch('/confirm', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestData)
+    }).then(response => response.text())
+        .then(
+            t => {
+                if ( t === "success" ) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('success-content').style.display = 'block';
+                } else {
+                    location.href = "/fail";
+                }
+            }
+        )
+
+</script>
+</body>
+</html>

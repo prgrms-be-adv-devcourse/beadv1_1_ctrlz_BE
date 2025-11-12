@@ -43,6 +43,9 @@ public class Order extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus;
 
+	@Column(nullable = false)
+	private String orderName;
+
 	public void addOrderItem(OrderItem item) {
 		this.orderItems.add(item);
 		item.setOrder(this);
