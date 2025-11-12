@@ -141,6 +141,7 @@ public class UserApplication implements UserCommandUseCase {
 		try {
 			cartClient.createCart(new CartCreateRequest(savedUser.getId()));
 		} catch (Exception e) {
+			userPersistencePort.delete(savedUser.getId());
 			throw new FeignClientException(e.getMessage(), e);
 		}
 	}

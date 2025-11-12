@@ -58,7 +58,7 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
 	@Override
 	public void delete(String id) {
-
+		userJpaRepository.deleteById(id);
 	}
 
 	@Override

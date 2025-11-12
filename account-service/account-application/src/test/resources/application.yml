@@ -42,6 +42,6 @@ coolsms:
 
 
 jwt:
-  test-secret: dddddddddddddddddddddddddddddddddddddddd
-  test-expiration: 100
-  test-refresh-expiration: 1000
+  secret: dddddddddddddddddddddddddddddddddddddddd
+  expiration: 100
+  refresh-expiration: 1000

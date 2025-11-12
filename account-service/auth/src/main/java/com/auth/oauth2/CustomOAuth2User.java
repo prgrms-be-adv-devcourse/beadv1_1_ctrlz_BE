@@ -20,6 +20,7 @@ public record CustomOAuth2User(
 	String email,
 	List<UserRole> roles,
 	String nickname,
+	String profileUrl,
 	Map<String, Object> attributes
 )
 	implements OAuth2User {
@@ -30,6 +31,7 @@ public record CustomOAuth2User(
 			user.getEmail(),
 			user.getRoles(),
 			user.getNickname(),
+			user.getProfileImageUrl(),
 			attributes
 		);
 	}
