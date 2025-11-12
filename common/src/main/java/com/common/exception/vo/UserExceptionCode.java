@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum UserExceptionCode {
 
+    SELLER_PERMISSION_REQUIRED(403, "판매자 권한이 없습니다. 판매자 등록을 완료해주세요."),
 	USER_NOT_FOUND(404, "존재하지 않는 유저입니다."),
 	DUPLICATED_PHONE_NUMBER(409, "이미 존재하는 연락처입니다."),
 	DUPLICATED_NICKNAME(409, "이미 존재하는 닉네임입니다."),

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.UserExceptionCode.SELLER_PERMISSION_REQUIRED;
 import static com.common.exception.vo.UserExceptionCode.USER_NOT_FOUND;
 
 /**
@@ -65,30 +66,7 @@ public class ProductPostService {
     public ProductPostResponse createProductPost(
             ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-//        // FeignClient 를 통해 user-service에 사용자 정보 요청
-//        UserView user = userClient.getUserById(userId);
-//
-//        // 단순히 "USER" 라면 판매글 등록 불가, 예외처리
-//        if (!user.roles().contains("ADMIN")&& !user.roles().contains("SELLER")) {
-//            throw new ProductPostException(PRODUCT_POST_NOT_FOUND);
-//        }
-
-        try {
-            // FeignClient 를 통해 user-service에 사용자 정보 요청
-            UserView user = userClient.getUserById(userId);
-
-            // 단순히 "USER" 라면 판매글 등록 불가, 예외처리
-            if (!user.roles().contains("ADMIN")&& !user.roles().contains("SELLER")) {
-                throw new ProductPostException(PRODUCT_POST_NOT_FOUND);
-            }
-        } catch (FeignException.NotFound e) {
-            // 통신 과정에서 user가 존재하지 않아 예외가 날라올 경우 처리
-            throw new CustomException(USER_NOT_FOUND.getMessage());
-        }
-        catch (FeignException e) {
-            // 기타 통신상의 오류 발생 시 예외 처리
-            throw new ProductPostException(EXTERNAL_API_ERROR);
-        }
+        validateSellerPermission(userId);
 
         ProductPost productPost = ProductPost.builder()
                 .userId(userId)
@@ -337,6 +315,36 @@ public class ProductPostService {
 
         productPost.incrementViewCount();
         return productPost;
+    }
+
+    /**
+     * FeignClient를 통해 사용자 정보를 조회하고 판매자 인증 여부를 검증합니다.
+     *
+     * @param userId 사용자 ID
+     * @return 판매 권한이 있는 사용자 정보
+     * @throws CustomException 사용자를 찾을 수 없는 경우
+     * @throws ProductPostException 판매 권한이 없거나 외부 API 오류 발생 시
+     */
+    private UserView validateSellerPermission(String userId) {
+        try {
+            // FeignClient 를 통해 user-service에 사용자 정보 요청
+            UserView user = userClient.getUserById(userId);
+            List<String> roles = user.roles();
+
+            // 판매자 권한이 없는 단순 "USER" 라면 판매글 등록 불가, 예외처리
+            if (!roles.contains("ADMIN") && !roles.contains("SELLER")) {
+                throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
+            }
+
+            return user;
+
+        } catch (FeignException.NotFound e) {
+            // 통신 과정에서 user가 존재하지 않아 예외가 날라올 경우 처리 (404)
+            throw new CustomException(USER_NOT_FOUND.getMessage());
+        } catch (FeignException e) {
+            // 기타  Feign 통신상의 오류 발생 시 예외 처리
+            throw new ProductPostException(EXTERNAL_API_ERROR);
+        }
     }
 
     // TODO: 상품 판매상태 변경
