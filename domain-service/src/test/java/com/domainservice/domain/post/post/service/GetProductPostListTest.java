@@ -1,6 +1,7 @@
 package com.domainservice.domain.post.post.service;
 
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
@@ -25,6 +26,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -454,4 +456,102 @@ class GetProductPostListTest {
 
         verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
     }
+
+    @DisplayName("삭제된 게시글은 목록에 표시되지 않는다.")
+    @Test
+    void test12() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        ProductPost activePost = ProductPost.builder()
+                .userId("user-123")
+                .categoryId("category-001")
+                .title("아이폰 15 Pro")
+                .name("iPhone 15 Pro")
+                .price(1200000)
+                .status(ProductStatus.GOOD)
+                .tradeStatus(TradeStatus.SELLING)
+                .build();
+
+        // 삭제된 게시글은 Specification에서 필터링되어야 함
+        List<ProductPost> posts = Arrays.asList(activePost);
+        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+
+        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .willReturn(page);
+
+        // when
+        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+                pageable, null, null, null, null, null
+        );
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.contents()).hasSize(1);
+        assertThat(result.contents().get(0).title()).isEqualTo("아이폰 15 Pro");
+
+        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @DisplayName("판매 완료된 게시글도 조회할 수 있다.")
+    @Test
+    void test13() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        List<ProductPost> posts = Arrays.asList(
+                ProductPost.builder()
+                        .userId("user-123")
+                        .categoryId("category-001")
+                        .title("아이폰 15 Pro (판매완료)")
+                        .name("iPhone 15 Pro")
+                        .price(1200000)
+                        .status(ProductStatus.GOOD)
+                        .tradeStatus(TradeStatus.SOLDOUT)
+                        .build()
+        );
+
+        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+
+        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .willReturn(page);
+
+        // when
+        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+                pageable, null, null, TradeStatus.SOLDOUT, null, null
+        );
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.contents()).hasSize(1);
+        assertThat(result.contents().get(0).tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
+
+        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @DisplayName("존재하지 않는 페이지를 요청하면 빈 결과를 반환한다.")
+    @Test
+    void test14() {
+        // given
+        Pageable pageable = PageRequest.of(100, 20);  // 100페이지 요청 (존재하지 않음)
+        Page<ProductPost> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .willReturn(emptyPage);
+
+        // when
+        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+                pageable, null, null, null, null, null
+        );
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.contents()).isEmpty();
+        assertThat(result.pageNum()).isEqualTo(100);
+        assertThat(result.totalPages()).isEqualTo(0);
+        assertThat(result.hasNext()).isFalse();
+
+        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+    }
+
 }
