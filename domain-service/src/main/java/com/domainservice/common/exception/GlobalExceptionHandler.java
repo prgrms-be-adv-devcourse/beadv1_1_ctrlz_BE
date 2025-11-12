@@ -4,6 +4,8 @@ package com.domainservice.common.exception;
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.reivew.exception.ReviewException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(ReviewException e) {
+
+        HttpStatus status = e.getStatus();
         ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
 
         return ResponseEntity.status(status).body(response);

@@ -13,8 +13,9 @@ public record ReviewResponse(
 ) {
 
 	public static ReviewResponse from(
-		Review review
-		// Todo: 회원 엔티티 받아오기
+		Review review,
+		UserResponse user,
+		String userId
 	) {
 		return new ReviewResponse(
 			review.getId(),

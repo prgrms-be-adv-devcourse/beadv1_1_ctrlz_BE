@@ -2,10 +2,14 @@ package com.domainservice.domain.reivew.service;
 
 import java.util.List;
 
+import com.domainservice.domain.reivew.exception.ReviewException;
+import com.domainservice.domain.reivew.exception.code.ReviewExceptionCode;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
+import com.domainservice.domain.reivew.model.dto.response.UserResponse;
 import com.domainservice.domain.reivew.model.entity.Review;
 import com.domainservice.domain.reivew.repository.ReviewRepository;
+import com.domainservice.domain.reivew.service.feign.UserFeignClient;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
+	// private final UserFeignClient userClient;
 
 	@Transactional
 	public ReviewResponse createReview(ReviewRequest request) {
@@ -28,7 +33,7 @@ public class ReviewService {
 
 		Review savedReview = reviewRepository.save(newReview);
 
-		return ReviewResponse.from(savedReview);
+		return ReviewResponse.from(savedReview, findUserByUserId(""), "");
 
 	}
 
@@ -36,17 +41,17 @@ public class ReviewService {
 	public ReviewResponse updateReview(String reviewId, ReviewRequest request) {
 		//TODO: 오류 처리 로직을 한번 볼 필요가 있음, 임시로 IllegalArgumentException으로 작성
 		Review findReview = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> new IllegalArgumentException("해당하는 리뷰가 없습니다."));
+			.orElseThrow(() -> new ReviewException(ReviewExceptionCode.NOT_FOUND));
 
 		findReview.updateReview(request.contents(), request.userRating(), request.productRating());
 
-		return ReviewResponse.from(findReview);
+		return ReviewResponse.from(findReview, findUserByUserId(""), "");
 	}
 
 	@Transactional(readOnly = true)
 	public List<ReviewResponse> getReviewListById(String userId) {
 		return reviewRepository.findAllByUserId(userId).stream()
-			.map(ReviewResponse::from)
+			.map(review -> ReviewResponse.from(review, findUserByUserId(""), ""))
 			.toList();
 	}
 
@@ -57,6 +62,10 @@ public class ReviewService {
 
 		return findrReview == null
 			? null
-			: ReviewResponse.from(findrReview);
+			: ReviewResponse.from(findrReview, findUserByUserId(""), "");
+	}
+
+	private UserResponse findUserByUserId(String userId) {
+		return null;
 	}
 }
