@@ -5,6 +5,7 @@ import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +47,7 @@ public class AuthController {
 		response.addHeader("Set-Cookie", responseCookie.toString());
 	}
 
-	@PostMapping("/logout")
+	@GetMapping("/logout")
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
 		String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
 		String token = bearerToken.replace("Bearer ", "");
