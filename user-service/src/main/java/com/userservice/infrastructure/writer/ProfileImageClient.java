@@ -9,7 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.userservice.infrastructure.writer.dto.ImageResponse;
 
-@FeignClient(name = "profile-image-service", url = "localhost:8081")
+@FeignClient(
+	name = "profile-image-service",
+	url = "localhost:8081",
+	configuration = {ProfileImageClient.class}
+)
 public interface ProfileImageClient {
 
 	@PostMapping(value = "/api/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
