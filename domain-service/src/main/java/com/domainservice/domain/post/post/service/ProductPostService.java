@@ -158,4 +158,25 @@ public class ProductPostService {
 	public boolean isSellingTradeStatus(String id) {
 		return this.getProductPostById(id).tradeStatus() == TradeStatus.SELLING;
 	}
+
+	public void updateTradeStatusToProcessing(String postId) {
+		ProductPost product = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		product.markAsProcessing();
+		productPostRepository.save(product);
+	}
+
+	public void updateTradeStatusToSoldout(String postId) {
+		ProductPost product = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		product.markAsSoldout();
+		productPostRepository.save(product);
+	}
+
+	public void updateTradeStatusToSelling(String postId) {
+		ProductPost product = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		product.markAsSellingAgain();
+		productPostRepository.save(product);
+	}
 }

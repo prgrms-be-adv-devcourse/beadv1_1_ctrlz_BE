@@ -68,6 +68,8 @@ public class OrderService {
 				throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
 			}
 
+			productPostService.updateTradeStatusToProcessing(cartItem.getProductPostId());
+
 			OrderItem orderItem = OrderItem.builder()
 				.productPostId(product.id())
 				.quantity(cartItem.getQuantity())
@@ -80,16 +82,8 @@ public class OrderService {
 
 		Order savedOrder = orderJpaRepository.save(order);
 
-		return new OrderResponse(savedOrder.getOrderName(),
-			savedOrder.getId(), savedOrder.getBuyerId(), savedOrder.getCreatedAt(),
-			savedOrder.getTotalAmount(), savedOrder.getOrderStatus(), savedOrder.getOrderItems()
-			.stream()
-			.map(x ->
-				new OrderItemResponse(x.getId(),
-					x.getQuantity(),
-					x.getPriceSnapshot(),
-					x.getTotalPrice()))
-			.toList());
+		return toOrderResponse(savedOrder);
+
 	}
 
 	/**
@@ -117,6 +111,9 @@ public class OrderService {
 	 * 결제 전 취소 (PAYMENT_PENDING → CANCELLED)
 	 */
 	private OrderResponse cancelBeforePayment(Order order) {
+		for (OrderItem item : order.getOrderItems()) {
+			productPostService.updateTradeStatusToSelling(item.getProductPostId());
+		}
 		order.orderCanceled();
 		Order savedOrder = orderJpaRepository.save(order);
 
@@ -128,6 +125,9 @@ public class OrderService {
 	 * - PG 환불 및 정산 취소 로직 포함 가능
 	 */
 	private OrderResponse cancelAfterPayment(Order order) {
+		for (OrderItem item : order.getOrderItems()) {
+			productPostService.updateTradeStatusToSelling(item.getProductPostId());
+		}
 		// TODO PG사 환불 처리
 		// paymentService.refund(order);
 		order.orderRefundedAfterPayment();
@@ -159,16 +159,20 @@ public class OrderService {
 		switch (order.getOrderStatus()) {
 			case PAYMENT_PENDING:
 				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
+				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
 				break;
 			case PAYMENT_COMPLETED:
 				// paymentService.refundItem(targetItem);
 				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
+				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
 				break;
 			case PURCHASE_CONFIRMED:
 				// TODO 구매확정 후, 정산 전
 				// paymentService.refundItem(targetItem);
 				// settlementService.cancelByOrderItemId(targetItem.getId());
 				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_BEFORE_SETTLEMENT);
+				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
+				
 				break;
 			case SETTLED:
 				// TODO 정산 후 취소에 대해 생각해봐야함
@@ -179,21 +183,8 @@ public class OrderService {
 
 		Order savedOrder = orderJpaRepository.save(order);
 
-		return new OrderResponse(
-			savedOrder.getOrderName(),
-			savedOrder.getId(),
-			savedOrder.getBuyerId(),
-			savedOrder.getCreatedAt(),
-			savedOrder.getTotalAmount(),
-			savedOrder.getOrderStatus(),
-			savedOrder.getOrderItems().stream()
-				.map(x -> new OrderItemResponse(
-					x.getId(),
-					x.getQuantity(),
-					x.getPriceSnapshot(),
-					x.getTotalPrice()))
-				.toList()
-		);
+		return toOrderResponse(savedOrder);
+
 	}
 
 	/**
@@ -216,26 +207,15 @@ public class OrderService {
 			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
 		}
 
+		for (OrderItem item : order.getOrderItems()) {
+			productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+		}
 		order.orderConfirmed();
 
 		Order savedOrder = orderJpaRepository.save(order);
 
 		//todo 정산 서비스에 저장?
-		return new OrderResponse(
-			savedOrder.getOrderName(),
-			savedOrder.getId(),
-			savedOrder.getBuyerId(),
-			savedOrder.getCreatedAt(),
-			savedOrder.getTotalAmount(),
-			savedOrder.getOrderStatus(),
-			savedOrder.getOrderItems()
-				.stream()
-				.map(x -> new OrderItemResponse(
-					x.getId(),
-					x.getQuantity(),
-					x.getPriceSnapshot(),
-					x.getTotalPrice()))
-				.toList());
+		return toOrderResponse(savedOrder);
 	}
 
 	/**
