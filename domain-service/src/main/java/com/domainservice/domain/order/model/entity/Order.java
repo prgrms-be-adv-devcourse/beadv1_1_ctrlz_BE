@@ -1,5 +1,6 @@
 package com.domainservice.domain.order.model.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,10 +44,10 @@ public class Order extends BaseEntity {
 		item.setOrder(this);
 	}
 
-	public int getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return orderItems.stream()
-			.mapToInt(OrderItem::getTotalPrice)
-			.sum();
+			.map(OrderItem::getTotalPrice)
+			.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
 	@Override

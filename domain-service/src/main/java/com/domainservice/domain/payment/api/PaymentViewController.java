@@ -1,5 +1,7 @@
 package com.domainservice.domain.payment.api;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,37 +32,39 @@ public class PaymentViewController {
         PaymentReadyResponse paymentReady = paymentService.getPaymentReadyInfo(orderId);
 
         model.addAttribute("orderId", paymentReady.orderId());
-        model.addAttribute("orderName", paymentReady.orderName());
         model.addAttribute("amount", paymentReady.amount());
         model.addAttribute("depositBalance", paymentReady.depositBalance());
-        model.addAttribute("payPrice", paymentReady.amount()); // payPrice 초기값을 amount로 설정
+        model.addAttribute("orderName", paymentReady.orderName());
 
         return "checkout";
     }
 
-    /** 결제 성공 페이지 */
-    @GetMapping("/success")
-    public String showSuccess(@RequestParam(required = false) String orderId, Model model) {
-
-        // orderId가 null일 경우, 예외 처리 필요
-        // if (orderId == null || orderId.isBlank()) {
-        //     // 적절한 오류 페이지 또는 기본 처리
-        //     return "fail";
-        // }
-
+    @GetMapping("/request-confirm")
+    public String showSuccess(
+        @RequestParam String orderId,
+        @RequestParam String orderName,
+        @RequestParam Long amount,
+        Model model) {
         model.addAttribute("orderId", orderId);
-        model.addAttribute("orderName", paymentService.getPaymentReadyInfo(orderId).orderName());
-        model.addAttribute("amount", paymentService.getPaymentReadyInfo(orderId).amount());
-
+        model.addAttribute("orderName", orderName);
+        model.addAttribute("amount", amount);
         return "success";
     }
 
-    /** 결제 실패 페이지 */
     @GetMapping("/fail")
-    public String showFail(@RequestParam(required = false) String orderId, Model model) {
+    public String showFail(
+        @RequestParam String orderId,
+        @RequestParam String orderName,
+        @RequestParam Long amount,
+        Model model) {
         model.addAttribute("orderId", orderId);
-        model.addAttribute("orderName", paymentService.getPaymentReadyInfo(orderId).orderName());
-        model.addAttribute("amount", paymentService.getPaymentReadyInfo(orderId).amount());
+        model.addAttribute("orderName", orderName);
+        model.addAttribute("amount", amount);
+
+        // 차감했던 예치금 다시 더하기
+
+
         return "fail";
     }
+
 }

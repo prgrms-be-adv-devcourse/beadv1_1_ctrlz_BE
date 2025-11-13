@@ -1,5 +1,7 @@
 package com.domainservice.common.init.data;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public class OrderInitializer {
 
 		OrderItem orderItem = OrderItem.builder()
 			.quantity(1)
-			.priceSnapshot(1000)
+			.priceSnapshot(new BigDecimal(1000))
 			.build();
 
 		order.addOrderItem(orderItem);

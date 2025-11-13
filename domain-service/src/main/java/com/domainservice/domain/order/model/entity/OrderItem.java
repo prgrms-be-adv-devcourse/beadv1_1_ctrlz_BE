@@ -1,5 +1,8 @@
 package com.domainservice.domain.order.model.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.common.model.persistence.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -34,10 +37,10 @@ public class OrderItem extends BaseEntity {
 	private Integer quantity;
 
 	@Column(nullable = false)
-	private int priceSnapshot;
+	private BigDecimal priceSnapshot;
 
-	public int getTotalPrice() {
-		return quantity * priceSnapshot;
+	public BigDecimal getTotalPrice() {
+		return priceSnapshot.multiply(BigDecimal.valueOf(quantity)).setScale(0, RoundingMode.HALF_UP);
 	}
 
 	public void setOrder(Order order) {
