@@ -3,6 +3,10 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
+ext {
+    springCloudVersion = "2025.0.0"
+}
+
 group = 'com'
 version = '0.0.1-SNAPSHOT'
 description = 'common'
@@ -16,6 +20,7 @@ java {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.7"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
     }
 }
 
@@ -37,18 +42,17 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-
     // https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator
     // UUID creator (UUIDv7 등 생성 가능)
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 
-
     //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
+
+    //openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
 }
 
 tasks.named('test') {

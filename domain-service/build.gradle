@@ -57,6 +57,10 @@ dependencies {
 
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    //openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
 }
 dependencyManagement {
     imports {
