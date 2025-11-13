@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CartController {
 	private final CartService cartService;
-	String USERID = "user-001";
 
 	/**
 	 *  장바구니 조회

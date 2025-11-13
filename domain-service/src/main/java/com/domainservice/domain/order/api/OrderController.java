@@ -48,7 +48,7 @@ public class OrderController {
 	public BaseResponse<OrderResponse> confirmPurchase(
 		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@PathVariable String orderId) {
-		return new BaseResponse(orderService.confirmPurchase(orderId, userId),
+		return new BaseResponse<>(orderService.confirmPurchase(orderId, userId),
 			"주문 확정 성공했습니다");
 	}
 
