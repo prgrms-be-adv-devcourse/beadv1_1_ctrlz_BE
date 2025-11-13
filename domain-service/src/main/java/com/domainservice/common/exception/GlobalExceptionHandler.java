@@ -39,6 +39,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ReviewException.class)
     public ResponseEntity<ErrorResponse> handleReviewException(ReviewException e) {
+        e.printStackTrace();
         int status = e.getStatus().value();
         ErrorResponse response = ErrorResponse.of(status, e.getMessage());
 
@@ -92,10 +93,11 @@ public class GlobalExceptionHandler {
 
     /**
      * 기타 걸러지지 않은 오류 발생 시 (500)
+     * 현재 Feign 관련 오류가 잡히는 곳(추후 수정 예정)
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-
+        // e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
                 , "서버 내부 오류가 발생했습니다."

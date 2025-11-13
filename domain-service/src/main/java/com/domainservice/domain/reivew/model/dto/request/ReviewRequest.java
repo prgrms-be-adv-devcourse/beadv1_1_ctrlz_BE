@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 
 public record ReviewRequest(
 
+	@NotBlank(message = "필수 파라미터 누락 - 상품id")
+	String productId,
+
 	@NotBlank(message = "내용은 필수 입력값입니다.")
 	String contents,
 

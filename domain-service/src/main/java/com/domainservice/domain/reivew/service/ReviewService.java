@@ -25,6 +25,7 @@ public class ReviewService {
 	@Transactional
 	public ReviewResponse createReview(ReviewRequest request, String userId) {
 		Review newReview = Review.builder()
+			.productPostId(request.productId())
 			.userId(userId)
 			.contents(request.contents())
 			.userRating(request.userRating())

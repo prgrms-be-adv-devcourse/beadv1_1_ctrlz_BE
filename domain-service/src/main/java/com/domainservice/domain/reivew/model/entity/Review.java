@@ -42,7 +42,6 @@ public class Review extends BaseEntity {
             Integer userRating,
             Integer productRating
     ) {
-        validateSameValue(contents, userRating, productRating);
         this.userId = userId;
         this.productPostId = productPostId;
         this.contents = contents;
