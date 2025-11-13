@@ -39,12 +39,6 @@ for SERVICE in "${SERVICES[@]}"; do
     exit 1
   fi
 
-  echo "$IMAGE_NAME has been successfully built and pushed."
-
-  # 빌드된 이미지 정보 확인
-  echo "Verifying image manifests..."
-  docker buildx imagetools inspect "$IMAGE_NAME"
-  echo ""
 done
 
 echo "All services have been built and pushed to Docker Hub."
