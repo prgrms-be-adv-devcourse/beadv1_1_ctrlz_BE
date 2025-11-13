@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,49 +19,48 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
-	String USERID = "user-001";
 
 	private final OrderService orderService;
 
 	// 주문 생성
 	@PostMapping
 	public BaseResponse<OrderResponse> createOrder(
-		// @RequestHeader("X-USER-ID") String userId,
+		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@RequestBody CreateOrderRequest orderRequest) {
 
 		// TODO 유저아이디
 		return new BaseResponse<>(
-			orderService.createOrder(USERID, orderRequest.cartItemIds()),
+			orderService.createOrder(userId, orderRequest.cartItemIds()),
 			"주문 생성 성공했습니다");
 	}
 
 	// 주문 취소
 	@PatchMapping("/{orderId}/cancel")
 	public BaseResponse<OrderResponse> cancelOrder(
-		// @RequestHeader("X-USER-ID") String userId,
+		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@PathVariable String orderId) {
 		return new BaseResponse<>(
-			orderService.cancelOrder(orderId, USERID), "주문 취소 성공했습니다");
+			orderService.cancelOrder(orderId, userId), "주문 취소 성공했습니다");
 	}
 
 	// 주문 확정
 	@PatchMapping("/{orderId}/confirm")
 	public BaseResponse<OrderResponse> confirmPurchase(
-		// @RequestHeader("X-USER-ID") String userId,
+		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@PathVariable String orderId) {
-		return new BaseResponse(orderService.confirmPurchase(orderId, USERID),
+		return new BaseResponse(orderService.confirmPurchase(orderId, userId),
 			"주문 확정 성공했습니다");
 	}
 
 	// 주문 일부 취소
 	@PatchMapping("/{orderId}/items/{orderItemId}/cancel")
 	public BaseResponse<OrderResponse> cancelOrderItem(
-		// @RequestHeader("X-USER-ID") String userId,
+		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@PathVariable String orderId,
 		@PathVariable String orderItemId
 	) {
 		return new BaseResponse<>(
-			orderService.cancelOrderItem(orderId, USERID, orderItemId),
+			orderService.cancelOrderItem(orderId, userId, orderItemId),
 			"주문 일부 취소 성공했습니다"
 		);
 	}

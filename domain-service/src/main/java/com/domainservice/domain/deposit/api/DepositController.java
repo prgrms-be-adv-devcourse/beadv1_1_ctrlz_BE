@@ -1,6 +1,7 @@
 package com.domainservice.domain.deposit.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,12 +16,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DepositController {
 	private final DepositService depositService;
-	// TODO
-	String USERID = "user-001";
 
 	@GetMapping
-	public BaseResponse<DepositResponse> getDeposit() {
-		DepositResponse depositBalance = depositService.getDepositBalance(USERID);
+	public BaseResponse<DepositResponse> getDeposit(
+		@RequestHeader(value = "X-REQUEST-ID") String userId
+	) {
+		DepositResponse depositBalance = depositService.getDepositBalance(userId);
 
 		return new BaseResponse<>(depositBalance, "예치금 조회 성공했습니다");
 	}
