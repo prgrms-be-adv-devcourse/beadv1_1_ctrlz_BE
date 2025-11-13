@@ -91,7 +91,6 @@ class CartServiceTest {
 		CartItem item = CartItem.builder()
 			.productPostId("p1")
 			.cart(cart)
-			.quantity(1)
 			.selected(true)
 			.build();
 		cartItems.add(item);
@@ -104,7 +103,6 @@ class CartServiceTest {
 
 		// then
 		assertThat(result).hasSize(1);
-		assertThat(result.getFirst().quantity()).isEqualTo(1);
 		verify(cartJpaRepository).findByUserId(userId);
 		verify(cartItemJpaRepository).findByCart(cart);
 	}
@@ -116,7 +114,6 @@ class CartServiceTest {
 		CartItem newItem = CartItem.builder()
 			.productPostId("p1")
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 
@@ -129,7 +126,6 @@ class CartServiceTest {
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.quantity()).isEqualTo(2);
 		assertThat(result.isSelected()).isTrue();
 		verify(cartJpaRepository).findByUserId(userId);
 		verify(cartJpaRepository).save(cart);
@@ -143,7 +139,6 @@ class CartServiceTest {
 		CartItem cartItem = CartItem.builder()
 			.productPostId("p1")
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 
@@ -168,7 +163,6 @@ class CartServiceTest {
 
 		CartItem item = CartItem.builder()
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 

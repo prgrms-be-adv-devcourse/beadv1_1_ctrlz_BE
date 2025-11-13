@@ -54,7 +54,6 @@ class OrderServiceTest {
 
 		cartItem = CartItem.builder()
 			.productPostId("product1")
-			.quantity(2)
 			.build();
 
 		productResponse = new ProductPostResponse(
@@ -132,7 +131,7 @@ class OrderServiceTest {
 		OrderResponse result = orderService.cancelOrder("order1", userId);
 
 		// then
-		assertThat(result.orderStatus()).isEqualTo(OrderStatus.CANCEL);
+		assertThat(result.orderStatus()).isEqualTo(OrderStatus.CANCELLED);
 		verify(orderJpaRepository).save(order);
 	}
 
