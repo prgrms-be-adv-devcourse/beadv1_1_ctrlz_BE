@@ -28,18 +28,8 @@ public class CartItem extends BaseEntity {
 	@Column(name = "productPost_id", nullable = false)
 	private String productPostId;
 
-	@Column(nullable = false)
-	private int quantity;
-
 	@Column(name = "selected", nullable = false)
 	private boolean selected = true;  // 기본적으로 선택된 상태로 설정
-
-	public void updateQuantity(int quantity) {
-		if (quantity > 0) {
-			this.quantity = quantity;
-			this.updateTime();
-		}
-	}
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
@@ -48,11 +38,6 @@ public class CartItem extends BaseEntity {
 
 	public void setCart(Cart cart) {
 		this.cart = cart;
-	}
-
-	// 해당 아이템의 총 가격 계산 (수량 × 상품 가격)
-	public int getTotalPrice(int price) {
-		return this.quantity * price;
 	}
 
 	@Override
