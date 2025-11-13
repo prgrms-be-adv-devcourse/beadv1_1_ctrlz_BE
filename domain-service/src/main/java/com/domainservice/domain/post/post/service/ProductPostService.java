@@ -1,6 +1,5 @@
 package com.domainservice.domain.post.post.service;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
 
 import java.util.List;
 
@@ -284,7 +283,6 @@ public class ProductPostService {
         // clear 하게되면 'orphanRemoval = true' 옵션에 의해 ProductPostImage를 DB에 DELETE 요청함
         target.getProductPostImages().clear();
         productPostRepository.flush();
-
         targetIds.forEach(imageService::deleteProfileImageById);
     }
 

@@ -1,5 +1,6 @@
 package com.domainservice.domain.order.model.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record OrderResponse(
 	String orderId,
 	String buyerId,
 	LocalDateTime orderDate,
-	int totalAmount,
+	BigDecimal totalAmount,
 	OrderStatus orderStatus,
 	List<OrderItemResponse> orderItems
 ) {

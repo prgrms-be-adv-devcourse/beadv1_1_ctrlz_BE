@@ -1,5 +1,7 @@
 package com.domainservice.domain.order.model.entity;
 
+import java.math.BigDecimal;
+
 import com.common.model.persistence.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -30,22 +32,19 @@ public class OrderItem extends BaseEntity {
 	@JoinColumn(name = "order_id", nullable = false)
 	private Order order;
 
-	@Column(name = "quantity", nullable = false)
-	private Integer quantity;
-
 	@Column(nullable = false)
-	private int priceSnapshot;
+	private BigDecimal priceSnapshot;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private OrderItemStatus orderItemStatus;
 
-	public int getTotalPrice() {
+	public BigDecimal getTotalPrice() {
 		if (orderItemStatus == OrderItemStatus.CANCELLED
 			|| orderItemStatus == OrderItemStatus.REFUND_AFTER_PAYMENT) {
-			return 0;
+			return BigDecimal.valueOf(0);
 		}
-		return quantity * priceSnapshot;
+		return priceSnapshot;
 	}
 
 	public void setOrder(Order order) {

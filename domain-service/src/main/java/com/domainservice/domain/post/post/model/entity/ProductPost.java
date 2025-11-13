@@ -1,11 +1,5 @@
 package com.domainservice.domain.post.post.model.entity;
 
-import static com.domainservice.domain.post.post.exception.vo.ProductPostExceptionCode.*;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -102,6 +96,10 @@ public class ProductPost extends BaseEntity {
     /*
      =============== 비즈니스 로직 ===============
     */
+
+	public void incrementViewCount() {
+		this.viewCount++;
+	}
 
     public void update(ProductPostRequest request) {
         this.title = request.title();

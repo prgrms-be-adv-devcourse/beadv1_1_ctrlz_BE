@@ -1,5 +1,6 @@
 package com.domainservice.domain.cart.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,8 +42,8 @@ public class CartService {
 		for (CartItem cartItem : cartItemList) {
 			ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
 			CartItemResponse cartItemResponse = new CartItemResponse(productPostById.title(), productPostById.name(),
-				getTotalPrice(cartItem),
-				cartItem.getQuantity(), cartItem.isSelected());
+				BigDecimal.valueOf(productPostById.price()),
+				cartItem.isSelected());
 			response.add(cartItemResponse);
 		}
 
@@ -87,7 +88,6 @@ public class CartService {
 			CartItem newItem = CartItem.builder()
 				.cart(cart)
 				.productPostId(productPostId)
-				.quantity(quantity)
 				.selected(true)
 				.build();
 
@@ -97,8 +97,7 @@ public class CartService {
 		cartJpaRepository.save(cart);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(), productPostById.name(), getTotalPrice(targetItem),
-			targetItem.getQuantity(),
+		return new CartItemResponse(productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
 			targetItem.isSelected());
 
 	}
@@ -136,8 +135,9 @@ public class CartService {
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(), productPostById.name(), getTotalPrice(savedItem),
-			savedItem.getQuantity(),
+		return new CartItemResponse(productPostById.title(),
+			productPostById.name(),
+			BigDecimal.valueOf(productPostById.price()),
 			savedItem.isSelected());
 	}
 
@@ -159,13 +159,5 @@ public class CartService {
 
 		cartJpaRepository.save(cart);
 
-	}
-
-	private int getTotalPrice(CartItem cartItem) {
-		int totalPrice = 0;
-		ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
-		totalPrice += productPostById.price() * cartItem.getQuantity();
-
-		return totalPrice;
 	}
 }

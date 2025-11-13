@@ -1,5 +1,6 @@
 package com.domainservice.domain.order.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,8 +74,7 @@ public class OrderService {
 
 			OrderItem orderItem = OrderItem.builder()
 				.productPostId(product.id())
-				.quantity(cartItem.getQuantity())
-				.priceSnapshot(product.price())
+				.priceSnapshot(BigDecimal.valueOf(product.price()))
 				.orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
 				.build();
 
@@ -232,9 +232,7 @@ public class OrderService {
 			order.getOrderItems().stream()
 				.map(x -> new OrderItemResponse(
 					x.getId(),
-					x.getQuantity(),
 					x.getPriceSnapshot(),
-					x.getTotalPrice(),
 					x.getOrderItemStatus()))
 				.toList()
 		);
