@@ -1,10 +1,5 @@
 package com.domainservice.domain.order.api;
 
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.common.model.web.PageResponse;
 import com.domainservice.domain.order.model.dto.CreateOrderRequest;
 import com.domainservice.domain.order.model.dto.OrderResponse;
 import com.domainservice.domain.order.service.OrderService;
@@ -70,24 +64,6 @@ public class OrderController {
 			"주문 일부 취소 성공했습니다"
 		);
 	}
-
-	//  주문 상세 조회
-	@GetMapping("/{orderId}")
-	public OrderResponse getOrderInfo(
-		@PathVariable("orderId") String orderId,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
-	){
-		return orderService.getOrderById(orderId, userId);
-	}
-
-	//  주문 목록 조회
-	@GetMapping
-	public PageResponse<List<OrderResponse>> getOrderList(
-		@RequestHeader(value = "X-REQUEST-ID") String userId,
-		@PageableDefault(size = 10) Pageable pageable
-	){
-		PageResponse<List<OrderResponse>> orderListByUserId = orderService.getOrderListByUserId(userId, pageable);
-
-		return orderListByUserId;
-	}
+	// TODO: 주문 목록 조회
+	// TODO: 주문 상세 조회
 }
