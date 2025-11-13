@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.settlementservice.domain.dto.addSettlementRequest;
 import com.settlementservice.service.SettlementService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,9 +20,9 @@ public class SettlementController {
 
 	@PostMapping
 	public ResponseEntity addSettlement(
-		@RequestBody addSettlementRequest request
+		@Valid @RequestBody addSettlementRequest request
 	) {
 		settlementService.createSettlements(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok().body("정산 저장 성공");
 	}
 }
