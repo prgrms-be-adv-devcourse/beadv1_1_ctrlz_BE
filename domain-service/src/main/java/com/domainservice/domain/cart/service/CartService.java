@@ -1,5 +1,7 @@
 package com.domainservice.domain.cart.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +36,18 @@ public class CartService {
 	public List<CartItemResponse> getCartItemList(String userId) {
 
 		Cart cart = getCartByUserId(userId);
+		List<CartItemResponse> response = new ArrayList<>();
+		List<CartItem> cartItemList = cartItemJpaRepository.findByCart(cart);
 
-		return cartItemJpaRepository.findByCart(cart).stream()
-			.map(x -> new CartItemResponse("title", "name", getTotalPrice(x), x.getQuantity(), x.isSelected()))
-			.toList();
+		for (CartItem cartItem : cartItemList) {
+			ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
+			CartItemResponse cartItemResponse = new CartItemResponse(productPostById.title(), productPostById.name(),
+				BigDecimal.valueOf(productPostById.price()),
+				cartItem.isSelected());
+			response.add(cartItemResponse);
+		}
+
+		return response;
 	}
 
 	public Cart getCartByUserId(String userId) {
@@ -67,16 +77,17 @@ public class CartService {
 
 		for (CartItem item : cartItems) {
 			if (productPostId.equals(item.getProductPostId())) {
-				item.updateQuantity(item.getQuantity() + quantity);
+
+				// 재고가 있을 때의 경우임
+				// item.updateQuantity(item.getQuantity() + quantity);
 				targetItem = item;
-				break;
+				throw new CustomException(CartExceptionCode.CARTITEM_ALREADY_ADDED.getMessage());
 			}
 		}
 		if (targetItem == null) {
 			CartItem newItem = CartItem.builder()
 				.cart(cart)
 				.productPostId(productPostId)
-				.quantity(quantity)
 				.selected(true)
 				.build();
 
@@ -84,28 +95,31 @@ public class CartService {
 			targetItem = newItem;
 		}
 		cartJpaRepository.save(cart);
-		return new CartItemResponse("title", "name", getTotalPrice(targetItem), targetItem.getQuantity(),
+
+		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
+		return new CartItemResponse(productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
 			targetItem.isSelected());
 
 	}
 
-	/**
-	 * 장바구니 아이템 수량 변경 <p>
-	 * 아이템 ID로 장바구니 아이템 조회 <p>
-	 * 수량 업데이트 <p>
-	 * 변경사항 저장 <p>
-	 */
-	public CartItemResponse updateQuantity(String itemId, int quantity) {
-		CartItem cartItem = cartItemJpaRepository.findById(itemId)
-			.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
-
-		cartItem.updateQuantity(quantity);
-
-		CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
-
-		return new CartItemResponse("title", "name", getTotalPrice(savedCartItem), savedCartItem.getQuantity(),
-			savedCartItem.isSelected());
-	}
+	// /**
+	//  * 장바구니 아이템 수량 변경 <p>
+	//  * 아이템 ID로 장바구니 아이템 조회 <p>
+	//  * 수량 업데이트 <p>
+	//  * 변경사항 저장 <p>
+	//  */
+	// public CartItemResponse updateQuantity(String itemId, int quantity) {
+	// 	CartItem cartItem = cartItemJpaRepository.findById(itemId)
+	// 		.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
+	//
+	// 	cartItem.updateQuantity(quantity);
+	//
+	// 	CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
+	// 	ProductPostResponse productPostById = productPostService.getProductPostById(savedCartItem.getProductPostId());
+	// 	return new CartItemResponse(productPostById.title(), productPostById.name(), getTotalPrice(savedCartItem),
+	// 		savedCartItem.getQuantity(),
+	// 		savedCartItem.isSelected());
+	// }
 
 	/**
 	 * 아이템 ID로 장바구니 아이템 조회 <p>
@@ -119,7 +133,11 @@ public class CartService {
 		cartItem.setSelected(selected);
 
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
-		return new CartItemResponse("title", "name", getTotalPrice(savedItem), savedItem.getQuantity(),
+
+		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
+		return new CartItemResponse(productPostById.title(),
+			productPostById.name(),
+			BigDecimal.valueOf(productPostById.price()),
 			savedItem.isSelected());
 	}
 
@@ -141,13 +159,5 @@ public class CartService {
 
 		cartJpaRepository.save(cart);
 
-	}
-
-	private int getTotalPrice(CartItem cartItem) {
-		int totalPrice = 0;
-		ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
-		totalPrice += productPostById.price() * cartItem.getQuantity();
-
-		return totalPrice;
 	}
 }

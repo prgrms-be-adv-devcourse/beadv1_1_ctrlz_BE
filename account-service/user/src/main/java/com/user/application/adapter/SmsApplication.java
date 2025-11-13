@@ -91,6 +91,7 @@ public class SmsApplication implements SellerVerificationUseCase {
 			}
 		} catch (Exception e) {
 			log.warn("기존 인증번호 조회 실패 userId: {}", userId, e);
+			throw e;
 		}
 	}
 

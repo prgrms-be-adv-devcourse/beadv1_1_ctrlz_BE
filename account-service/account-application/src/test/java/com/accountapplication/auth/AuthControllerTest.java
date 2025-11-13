@@ -80,7 +80,7 @@ class AuthControllerTest {
 		given(jwtTokenProvider.getUserIdFromToken(token)).willReturn(userId);
 
 		// when then
-		mockMvc.perform(post("/api/auth/logout")
+		mockMvc.perform(get("/api/auth/logout")
 				.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
 			.andDo(print())
 			.andExpect(cookie().maxAge("ACCESS_TOKEN", 0))
