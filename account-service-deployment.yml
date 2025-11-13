@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: account-service
+  name: account-service-deploy
   labels:
     app: account
 spec:
@@ -61,7 +61,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: svc-account
+  name: account-service # 앱 네임이랑 같아야함.
 spec:
   selector:
     app: account # 이 라벨을 가진 Pod들에게 트래픽 분산
