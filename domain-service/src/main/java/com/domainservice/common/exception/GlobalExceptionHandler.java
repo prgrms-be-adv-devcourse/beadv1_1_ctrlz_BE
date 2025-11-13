@@ -4,6 +4,8 @@ package com.domainservice.common.exception;
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.reivew.exception.ReviewException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,17 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    /**
+     * ReviewException를 상속받는 모든 예외 처리
+     */
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<ErrorResponse> handleReviewException(ReviewException e) {
+        int status = e.getStatus().value();
+        ErrorResponse response = ErrorResponse.of(status, e.getMessage());
 
         return ResponseEntity.status(status).body(response);
     }
