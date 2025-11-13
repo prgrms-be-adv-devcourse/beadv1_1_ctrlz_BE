@@ -179,7 +179,12 @@ public class ProductPostService {
     public ProductPostResponse getProductPostById(String userId, String postId) {
 
         ProductPost productPost = getPostAndIncrementViewCount(postId);
-        recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
+
+        // 실제 유저인 경우 redis에 최근 본 상품 목록으로 저장
+        if(!userId.equals("anonymous")){
+            getUserInfo(userId); // user-service에 해당 유저가 존재하는지 확인
+            recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
+        }
 
         return ProductPostMapper.toProductPostResponse(productPost);
 

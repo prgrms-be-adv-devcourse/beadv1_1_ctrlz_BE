@@ -101,7 +101,6 @@ public class ProductPostController {
             @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
             @PathVariable String postId
     ) {
-        validateAuthentication(userId);
         ProductPostResponse response = productPostService.getProductPostById(userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
     }
