@@ -36,6 +36,11 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+    defer-datasource-initialization: true # resources 경로에 *.sql 을 읽고 db에 넣어줌
+
+  sql:
+    init:
+      mode: always # sql 을 초기화하는 모듈로 변경
 
   data:
     redis:
