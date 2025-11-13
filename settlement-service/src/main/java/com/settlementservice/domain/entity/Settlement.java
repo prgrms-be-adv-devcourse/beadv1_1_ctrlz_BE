@@ -1,5 +1,6 @@
 package com.settlementservice.domain.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.common.model.persistence.BaseEntity;
@@ -21,10 +22,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Settlement extends BaseEntity {
-
-	@Column(name = "order_id", nullable = false)
-	private String orderId;
-
 	@Column(name = "order_item_id", nullable = false)
 	private String orderItemId;
 
@@ -32,29 +29,29 @@ public class Settlement extends BaseEntity {
 	private String userId;
 
 	@Column(name = "amount", nullable = false)
-	private int amount; // 실제 정산 금액 (수수료 제외 전)
+	private BigDecimal amount; // 실제 정산 금액 (수수료 제외 전)
 
 	@Column(name = "fee", nullable = false)
-	private int fee; // 정산 수수료
+	private BigDecimal fee; // 정산 수수료
 
 	@Column(name = "net_amount", nullable = false)
-	private int netAmount; // 실제 예치금에 들어갈 금액 = amount - fee
+	private BigDecimal netAmount; // 실제 예치금에 들어갈 금액 = amount - fee
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
-	private SettlementStatus status;
+	private SettlementStatus settlementStatus;
 
 	@Column(name = "settled_at")
 	private LocalDateTime settledAt;
 
 	// 정산 상태
 	public void markCompleted() {
-		this.status = SettlementStatus.COMPLETED;
+		this.settlementStatus = SettlementStatus.COMPLETED;
 		this.settledAt = LocalDateTime.now();
 	}
 
 	public void markFailed() {
-		this.status = SettlementStatus.FAILED;
+		this.settlementStatus = SettlementStatus.FAILED;
 	}
 
 	@Override
