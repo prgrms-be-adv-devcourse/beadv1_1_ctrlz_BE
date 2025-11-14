@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.event.SettlementCreatedEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
 import com.common.exception.vo.OrderExceptionCode;
@@ -32,6 +33,7 @@ public class OrderService {
 	private final OrderJpaRepository orderJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
+	private final SettlementProducer settlementProducer;
 
 	/**
 	 * 주문 생성
@@ -190,7 +192,7 @@ public class OrderService {
 		if (order.getOrderStatus() != OrderStatus.PAYMENT_COMPLETED) {
 			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
 		}
-		
+
 		// 주문 상태만 변경
 		order.setOrderStatus(OrderStatus.PURCHASE_CONFIRMED);
 		// 각 아이템 상태는 부분취소 여부에 따라 조건부 변경
@@ -198,12 +200,16 @@ public class OrderService {
 			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
 				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
 				productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+				// kafka 메시지 발행
+				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
+					productPostService.getProductPostById(item.getProductPostId()).userId(),
+					item.getPriceSnapshot()
+				));
 			}
+
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
-
-		//todo 정산 서비스에 저장?
 		return toOrderResponse(savedOrder);
 	}
 
@@ -230,6 +236,8 @@ public class OrderService {
 			order.getTotalAmount(),
 			order.getOrderStatus(),
 			order.getOrderItems().stream()
+				.filter(x -> x.getOrderItemStatus() != OrderItemStatus.CANCELLED
+					&& x.getOrderItemStatus() != OrderItemStatus.REFUND_AFTER_PAYMENT)
 				.map(x -> new OrderItemResponse(
 					x.getId(),
 					x.getPriceSnapshot(),

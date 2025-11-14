@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.settlementservice.domain.dto.addSettlementRequest;
 import com.settlementservice.domain.entity.Settlement;
 import com.settlementservice.domain.entity.SettlementStatus;
 import com.settlementservice.repository.SettlementRepository;
@@ -25,19 +24,18 @@ public class SettlementService {
 	/**
 	 * 구매확정된 주문에 대해 정산 데이터 생성
 	 */
-	public Settlement createSettlements(addSettlementRequest request) {
-		BigDecimal amount = request.amount();
+	public Settlement createSettlement(String orderItemId, String userId, BigDecimal amount) {
+
 		BigDecimal fee = amount.multiply(FEE_RATE).setScale(0, RoundingMode.HALF_UP);
 		BigDecimal netAmount = amount.subtract(fee);
 
 		Settlement settlement = Settlement.builder()
-			.orderItemId(request.orderItemId())
-			.userId(request.userId())
+			.orderItemId(orderItemId)
+			.userId(userId)
 			.amount(amount)
 			.fee(fee)
 			.netAmount(netAmount)
-			.settlementStatus(SettlementStatus.PENDING) // 초기 상태
-			.settledAt(null)
+			.settlementStatus(SettlementStatus.PENDING)
 			.build();
 
 		return settlementRepository.save(settlement);
