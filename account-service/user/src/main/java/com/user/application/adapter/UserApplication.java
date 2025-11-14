@@ -1,5 +1,6 @@
 package com.user.application.adapter;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,11 +10,10 @@ import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.dto.UserContext;
 import com.user.application.adapter.dto.UserUpdateContext;
 import com.user.application.port.in.UserCommandUseCase;
+import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
-import com.user.infrastructure.feign.CartClient;
-import com.user.infrastructure.feign.dto.CartCreateRequest;
-import com.user.infrastructure.feign.exception.FeignClientException;
+import com.user.domain.vo.EventType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class UserApplication implements UserCommandUseCase {
 
 	private final com.user.application.port.out.UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
-	private final CartClient cartClient;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	@Override
 	public UserContext create(UserContext userContext) {
@@ -36,7 +36,8 @@ public class UserApplication implements UserCommandUseCase {
 		User user = generateUser(userContext);
 		User savedUser = userPersistencePort.save(user);
 
-		requestCartCreate(savedUser);
+		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATE));
+		// requestCartCreate(savedUser);
 
 		return UserContext.builder()
 			.nickname(savedUser.getNickname())
@@ -137,12 +138,12 @@ public class UserApplication implements UserCommandUseCase {
 		}
 	}
 
-	private void requestCartCreate(User savedUser) {
-		try {
-			cartClient.createCart(new CartCreateRequest(savedUser.getId()));
-		} catch (Exception e) {
-			userPersistencePort.delete(savedUser.getId());
-			throw new FeignClientException(e.getMessage(), e);
-		}
-	}
+	// private void requestCartCreate(User savedUser) {
+	// 	try {
+	// 		cartClient.createCart(new CartCreateRequest(savedUser.getId()));
+	// 	} catch (Exception e) {
+	// 		userPersistencePort.delete(savedUser.getId());
+	// 		throw new FeignClientException(e.getMessage(), e);
+	// 	}
+	// }
 }

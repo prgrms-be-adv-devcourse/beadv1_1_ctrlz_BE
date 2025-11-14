@@ -55,6 +55,9 @@ spring:
         enable.idempotence: true
         allow.auto.create.topics: false
 
+    admin:
+      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
+
 custom:
   config:
     topic-partitions: 1
@@ -63,10 +66,6 @@ custom:
   cart:
     topic:
       command: cart-command
-
-  deposit:
-    topic:
-      command: deposit-command
 
   image:
     allowed-extension: jpg,jpeg,png,webp
