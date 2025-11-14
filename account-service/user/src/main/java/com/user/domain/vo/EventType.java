@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum EventType {
-	CREATE("user is created userId: ");
+	CREATED("user is created userId: ");
 
 	private final String value;
 

@@ -46,7 +46,7 @@ class kafkaOutboundEventPublisherTest {
 	@Test
 	void test1() throws Exception {
 		//given
-		UserSignedUpEvent event = new UserSignedUpEvent("test_id", EventType.CREATE);
+		UserSignedUpEvent event = new UserSignedUpEvent("test_id", EventType.CREATED);
 
 		//when
 		testKafkaOutboundEventPublisher.publish(cartTopicCommand, event);

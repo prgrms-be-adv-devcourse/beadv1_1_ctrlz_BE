@@ -36,7 +36,7 @@ public class UserApplication implements UserCommandUseCase {
 		User user = generateUser(userContext);
 		User savedUser = userPersistencePort.save(user);
 
-		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATE));
+		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATED));
 
 		return UserContext.builder()
 			.nickname(savedUser.getNickname())
