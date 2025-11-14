@@ -11,4 +11,9 @@ import com.domainservice.domain.cart.model.entity.CartItem;
 @Repository
 public interface CartItemJpaRepository extends JpaRepository<CartItem, String> {
 	List<CartItem> findByCart(Cart cart);
+
+	List<CartItem> findAllByIdIn(List<String> ids);
+
+	void deleteAllByIdIn(List<String> ids);
+
 }
