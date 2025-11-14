@@ -20,17 +20,6 @@ public class PendingEventScheduler {
 	@Scheduled(cron = "0 * * * * *")
 	@Transactional
 	public void publishPendingEvent() {
-		// List<ExternalEventEntity> pendingExternalEvents =
-		// 	externalEventJpaRepository.findTop20ByPublishedOrderByCreatedAt(false);
-		//
-		// if(pendingExternalEvents.isEmpty()) {
-		// 	return;
-		// }
-
 		pendingEventUseCase.publishPendingEvents();
-
-		// pendingExternalEvents.forEach(pendingExternalEvent -> {
-		// 	pendingEventUseCase.publishPendingEvent(pendingExternalEvent.getUserId(), pendingExternalEvent.getEventType());
-		// });
 	}
 }
