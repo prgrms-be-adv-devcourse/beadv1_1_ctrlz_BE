@@ -81,7 +81,9 @@ logging:
 
 
 # k8s 설정
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://svc-discovery:8761/eureka/
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://svc-discovery:8761/eureka/
