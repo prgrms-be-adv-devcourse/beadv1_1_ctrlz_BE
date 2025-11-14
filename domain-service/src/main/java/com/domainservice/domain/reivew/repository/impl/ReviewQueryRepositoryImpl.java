@@ -19,7 +19,12 @@ public class ReviewQueryRepositoryImpl implements ReviewQueryRepository {
 
 	@Override
 	public List<Review> findReviewsByUserId(String userId, Pageable pageable) {
-		return queryFactory.selectFrom(review).fetch();
-
+		return queryFactory
+			.selectFrom(review)
+			.where(review.userId.eq(userId))
+			.orderBy(review.createdAt.desc())            // 필요에 맞게 정렬 필드 지정
+			.offset(pageable.getOffset())                // 시작 위치
+			.limit(pageable.getPageSize())               // 개수
+			.fetch();
 	}
 }

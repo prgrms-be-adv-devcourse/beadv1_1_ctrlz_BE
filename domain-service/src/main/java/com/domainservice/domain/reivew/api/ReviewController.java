@@ -70,9 +70,10 @@ public class ReviewController {
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ReviewResponse>> getReviewListById(
-		String userId //TODO: 회원 정보를 가져와야함.
+		String userId, //TODO: 회원 정보를 가져와야함.
+		@RequestParam Integer pageNumber
 	) {
-		List<ReviewResponse> responseList = reviewService.getReviewListById(TEST_USER_ID);
+		List<ReviewResponse> responseList = reviewService.getReviewListById(TEST_USER_ID, pageNumber);
 		return new BaseResponse<>(
 			responseList,
 			ReviewConstant.REVIEW_FETCHED.getMessage()

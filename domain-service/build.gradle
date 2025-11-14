@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.compile.JavaCompile
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'

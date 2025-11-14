@@ -26,6 +26,7 @@ public class ReviewService {
 
 	@Transactional
 	public ReviewResponse createReview(ReviewRequest request, String userId) {
+		//TODO: 댓글을 작성하는 사용자가 정말 해당 물건을 구매했는 지에 대한 로직이 필요할거 같음.
 		Review newReview = Review.builder()
 			.productPostId(request.productId())
 			.userId(userId)
@@ -36,7 +37,7 @@ public class ReviewService {
 
 		Review savedReview = reviewRepository.save(newReview);
 
-		return ReviewResponse.from(savedReview, findUserById(userId), userId);
+		return ReviewResponse.from(savedReview, null, userId);
 
 	}
 
@@ -51,28 +52,28 @@ public class ReviewService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReviewResponse> getReviewListById(String userId) {
-		return reviewRepository.findReviewsByUserId(userId, defaultPageable(1, 10)).stream()
-			.map(review -> ReviewResponse.from(review, findUserById(userId), userId))
+	public List<ReviewResponse> getReviewListById(String userId, Integer pageNumber) {
+		return reviewRepository.findReviewsByUserId(userId, defaultPageable(pageNumber)).stream()
+			.map(review -> ReviewResponse.from(review, null, userId))
 			.toList();
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public ReviewResponse getReviewByProductPostId(String productPostId, String userId) {
 		Review findReview = reviewRepository.findByProductPostId(productPostId)
 			.orElseGet(null);
 
 		return findReview == null
 			? null
-			: ReviewResponse.from(findReview, findUserById(userId), userId);
+			: ReviewResponse.from(findReview, null, userId);
 	}
 
 	private UserResponse findUserById(String userId) {
 		return userFeignClient.getUser(userId);
 	}
 
-	private Pageable defaultPageable(int pageNumber, int pageSize) {
-		return PageRequest.of(pageNumber, pageSize);
+	private Pageable defaultPageable(int pageNumber) {
+		return PageRequest.of(pageNumber, 5);
 	}
 }
 

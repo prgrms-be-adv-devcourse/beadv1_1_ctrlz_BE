@@ -19,13 +19,14 @@ public record ReviewResponse(
 		String userId
 	) {
 		return new ReviewResponse(
+			//TODO: 현재는 FeignClient로 통신시 401에러를 받음.
 			review.getId(),
 			review.getUserId(),
-			userResponse.nickname(),
+			userResponse == null ? "" : userResponse.nickname(),
 			review.getContents(),
 			review.getUserRating(),
 			review.getProductRating(),
-			review.getUserId().equals(userId)
+			userId.equals(review.getUserId())
 		);
 	}
 }
