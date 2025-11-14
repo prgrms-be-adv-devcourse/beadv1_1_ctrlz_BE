@@ -12,6 +12,8 @@ import com.domainservice.domain.reivew.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +52,7 @@ public class ReviewService {
 
 	@Transactional(readOnly = true)
 	public List<ReviewResponse> getReviewListById(String userId) {
-		return reviewRepository.findAllByUserId(userId).stream()
+		return reviewRepository.findReviewsByUserId(userId, defaultPageable(1, 10)).stream()
 			.map(review -> ReviewResponse.from(review, findUserById(userId), userId))
 			.toList();
 	}
@@ -67,6 +69,10 @@ public class ReviewService {
 
 	private UserResponse findUserById(String userId) {
 		return userFeignClient.getUser(userId);
+	}
+
+	private Pageable defaultPageable(int pageNumber, int pageSize) {
+		return PageRequest.of(pageNumber, pageSize);
 	}
 }
 
