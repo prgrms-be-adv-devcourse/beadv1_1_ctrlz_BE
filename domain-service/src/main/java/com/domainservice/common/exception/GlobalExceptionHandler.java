@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        // e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
+        e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
                 , "서버 내부 오류가 발생했습니다."

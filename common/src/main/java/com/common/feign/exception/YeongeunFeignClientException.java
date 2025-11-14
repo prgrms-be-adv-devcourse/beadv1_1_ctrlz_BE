@@ -7,11 +7,12 @@ public abstract class YeongeunFeignClientException extends Exception {
 	private final HttpStatus status;
 	private final String message;
 
-	public YeongeunFeignClientException(HttpStatus status, String message) {
+	protected YeongeunFeignClientException(HttpStatus status, String message) {
 		this.status = status;
 		this.message = message;
 	}
 
+	@Override
 	public String getMessage() {
 		return this.message;
 	}
@@ -23,6 +24,12 @@ public abstract class YeongeunFeignClientException extends Exception {
 	public static class BadRequest extends YeongeunFeignClientException {
 		public BadRequest(String message) {
 			super(HttpStatus.BAD_REQUEST, message);
+		}
+	}
+
+	public static class Unauthorized extends YeongeunFeignClientException {
+		public Unauthorized(String message) {
+			super(HttpStatus.UNAUTHORIZED, message);
 		}
 	}
 
