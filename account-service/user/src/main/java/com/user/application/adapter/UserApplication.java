@@ -37,7 +37,6 @@ public class UserApplication implements UserCommandUseCase {
 		User savedUser = userPersistencePort.save(user);
 
 		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATE));
-		// requestCartCreate(savedUser);
 
 		return UserContext.builder()
 			.nickname(savedUser.getNickname())
@@ -137,13 +136,4 @@ public class UserApplication implements UserCommandUseCase {
 			user.updateAddress(updatedAddress);
 		}
 	}
-
-	// private void requestCartCreate(User savedUser) {
-	// 	try {
-	// 		cartClient.createCart(new CartCreateRequest(savedUser.getId()));
-	// 	} catch (Exception e) {
-	// 		userPersistencePort.delete(savedUser.getId());
-	// 		throw new FeignClientException(e.getMessage(), e);
-	// 	}
-	// }
 }

@@ -76,4 +76,8 @@ public class ExternalEventEntity {
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}
+
+	public void publishedComplete() {
+		this.published = true;
+	}
 }

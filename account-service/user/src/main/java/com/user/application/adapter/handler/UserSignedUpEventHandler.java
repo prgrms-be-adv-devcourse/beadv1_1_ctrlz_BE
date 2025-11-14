@@ -10,7 +10,9 @@ import com.user.domain.event.UserSignedUpEvent;
 import com.user.infrastructure.kafka.producer.KafkaProducer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class UserSignedUpEventHandler {
@@ -23,12 +25,15 @@ public class UserSignedUpEventHandler {
 
 	@TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
 	public void saveExternalEvent(UserSignedUpEvent event) {
+		log.info("UserSignedUpEvent: {}", event);
 		externalEventPersistentPort.save(event.userId(), event.eventType());
 	}
 
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void publishKafka(UserSignedUpEvent event) {
 		kafkaProducer.send(cartCommandTopic, event);
+		log.info("cartCommandTopic: {}", event);
+		externalEventPersistentPort.completePublish(event.userId(), event.eventType());
+		log.info("externalEventPersistentPort: {}", event);
 	}
-
 }
