@@ -36,7 +36,7 @@ public class ExternalEventEntity {
 	private String content;
 	private boolean published;
 
-	private LocalDateTime published_at;
+	private LocalDateTime publishedAt;
 
 	@CreatedDate
 	private LocalDateTime createdAt;
@@ -45,7 +45,7 @@ public class ExternalEventEntity {
 	private LocalDateTime updatedAt;
 
 	@Builder
-	ExternalEventEntity(
+	private ExternalEventEntity(
 		String id,
 		String userId,
 		EventType eventType,
@@ -60,7 +60,7 @@ public class ExternalEventEntity {
 		this.eventType = eventType;
 		this.content = content;
 		this.published = published;
-		this.published_at = published_at;
+		this.publishedAt = published_at;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}

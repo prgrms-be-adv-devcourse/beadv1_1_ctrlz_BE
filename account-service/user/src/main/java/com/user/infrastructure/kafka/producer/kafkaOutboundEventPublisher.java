@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class KafkaPublisher implements OutboundEventPublisher {
+public class kafkaOutboundEventPublisher implements OutboundEventPublisher {
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;
 

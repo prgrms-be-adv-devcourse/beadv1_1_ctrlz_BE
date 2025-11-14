@@ -37,4 +37,5 @@ public class UserSignedUpEventHandler {
 		externalEventPersistentPort.completePublish(event.userId(), event.eventType());
 		log.info("externalEventPersistentPort: {}", event);
 	}
+
 }

@@ -1,5 +1,7 @@
 package com.user.infrastructure.jpa.adapter;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,6 +10,7 @@ import com.user.domain.vo.EventType;
 import com.user.infrastructure.jpa.entity.ExternalEventEntity;
 import com.user.infrastructure.jpa.exception.ExternalEventException;
 import com.user.infrastructure.jpa.repository.ExternalEventJpaRepository;
+import com.user.infrastructure.scheduler.configuration.vo.PendingEventSpec;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,10 +30,24 @@ public class ExternalEventPersistenceAdapter implements ExternalEventPersistentP
 	@Override
 	public void completePublish(String userId, EventType eventType) {
 
-		ExternalEventEntity externalEvent = externalEventJpaRepository.findExternalEventEntitiesByUserIdAndEventType(
-				userId, eventType)
+		ExternalEventEntity externalEvent = externalEventJpaRepository
+			.findExternalEventEntitiesByUserIdAndEventType(userId, eventType)
 			.orElseThrow(() -> new ExternalEventException("Event not found : " + userId));
 
 		externalEvent.publishedComplete();
+	}
+
+	@Override
+	public List<PendingEventSpec> findPendingEvents() {
+		List<ExternalEventEntity> pendingExternalEvents =
+			externalEventJpaRepository.findTop20ByPublishedOrderByCreatedAt(false);
+
+		if (pendingExternalEvents.isEmpty()) {
+			return List.of();
+		}
+
+		return pendingExternalEvents.stream()
+			.map(event -> new PendingEventSpec(event.getId(), event.getEventType()))
+			.toList();
 	}
 }

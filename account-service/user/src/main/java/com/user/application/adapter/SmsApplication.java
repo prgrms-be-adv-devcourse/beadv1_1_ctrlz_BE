@@ -10,8 +10,8 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.command.SellerVerificationContext;
 import com.user.application.port.in.SellerVerificationUseCase;
+import com.user.application.port.out.SellerVerificationClient;
 import com.user.infrastructure.redis.vo.CacheType;
-import com.user.infrastructure.sms.adapter.SmsClientAdapter;
 import com.user.infrastructure.sms.utils.VerificationCodeSupplier;
 
 import jakarta.annotation.PostConstruct;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SmsApplication implements SellerVerificationUseCase {
 
 	private final CacheManager cacheManager;
-	private final SmsClientAdapter smsClientAdapter;
+	private final SellerVerificationClient smsClientAdapter;
 
 	private Cache verificationTryCache;
 	private Cache verificationCodeCache;
