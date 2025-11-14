@@ -1,5 +1,7 @@
 package com.domainservice.domain.deposit.model.entity;
 
+import java.math.BigDecimal;
+
 import com.common.model.persistence.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -36,21 +38,22 @@ public class DepositLog extends BaseEntity {
 	private TransactionType transactionType; // 충전, 구매, 출금, 환불
 
 	@Column(name = "amount", nullable = false)
-	private int amount; // 거래 금액
+	private BigDecimal amount; // 거래 금액
 
 	@Column(name = "before_balance", nullable = false)
-	private int beforeBalance; // 이전 잔액
+	private BigDecimal beforeBalance; // 이전 잔액
 
 	@Column(name = "after_balance", nullable = false)
-	private int afterBalance; // 이후 잔액
+	private BigDecimal afterBalance; // 이후 잔액
 
 	@Override
 	protected String getEntitySuffix() {
 		return "depositlog";
 	}
 
-	public static DepositLog create(String userId, Deposit deposit, TransactionType type, int amount, int before,
-		int after) {
+	public static DepositLog create(String userId, Deposit deposit, TransactionType type, BigDecimal amount,
+		BigDecimal before,
+		BigDecimal after) {
 		return DepositLog.builder()
 			.userId(userId)
 			.deposit(deposit)

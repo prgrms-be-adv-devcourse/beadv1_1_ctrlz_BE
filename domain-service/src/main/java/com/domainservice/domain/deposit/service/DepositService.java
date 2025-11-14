@@ -1,5 +1,7 @@
 package com.domainservice.domain.deposit.service;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,23 +27,25 @@ public class DepositService {
 	 * 사용자 ID로 예치금 정보 조회
 	 * 사용자의 예치금 정보가 없으면 새로 생성
 	 */
+	@Transactional(readOnly = true)
 	public Deposit getDepositByUserId(String userId) {
 		return depositJpaRepository.findByUserId(userId)
-			.orElseGet(() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(0).build()));
+			.orElseGet(
+				() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(BigDecimal.ZERO).build()));
 	}
 
 	/**
 	 * 사용자의 예치금 충전
 	 */
-	public DepositResponse chargeDeposit(String userId, int amount) {
-		if (amount <= 0) {
+	public DepositResponse chargeDeposit(String userId, BigDecimal amount) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
 			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
 		}
 
 		Deposit deposit = getDepositByUserId(userId);
-		int beforeBalance = deposit.getBalance();
+		BigDecimal beforeBalance = deposit.getBalance();
 		deposit.increaseBalance(amount);
-		int afterBalance = deposit.getBalance();
+		BigDecimal afterBalance = deposit.getBalance();
 
 		Deposit savedDeposit = depositJpaRepository.save(deposit);
 
@@ -61,20 +65,20 @@ public class DepositService {
 	/**
 	 * 사용자의 예치금 사용
 	 */
-	public DepositResponse useDeposit(String userId, int amount) {
-		if (amount <= 0) {
+	public DepositResponse useDeposit(String userId, BigDecimal amount) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
 			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
 		}
 
 		Deposit deposit = getDepositByUserId(userId);
-		int beforeBalance = deposit.getBalance();
+		BigDecimal beforeBalance = deposit.getBalance();
 
-		if (deposit.getBalance() < amount) {
+		if (deposit.getBalance().compareTo(amount) < 0) {
 			throw new CustomException(DepositExceptionCode.INSUFFICIENT_BALANCE.getMessage());
 		}
 
 		deposit.decreaseBalance(amount);
-		int afterBalance = deposit.getBalance();
+		BigDecimal afterBalance = deposit.getBalance();
 
 		Deposit savedDeposit = depositJpaRepository.save(deposit);
 
@@ -104,9 +108,9 @@ public class DepositService {
 	 * 특정 유저의 예치금 확인 (외부 서비스 연동용)
 	 */
 	@Transactional(readOnly = true)
-	public boolean hasEnoughDeposit(String userId, int amount) {
+	public boolean hasEnoughDeposit(String userId, BigDecimal amount) {
 		Deposit deposit = getDepositByUserId(userId);
-		return deposit.getBalance() >= amount;
+		return deposit.getBalance().compareTo(amount) >= 0;
 	}
 
 }
