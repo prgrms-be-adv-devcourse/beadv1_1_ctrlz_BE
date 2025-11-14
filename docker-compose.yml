@@ -1,7 +1,0 @@
-services:
-  redis:
-    image: redis:latest
-    container_name: redis_local
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
