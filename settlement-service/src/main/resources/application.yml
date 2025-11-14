@@ -1,4 +1,19 @@
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: settlement-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+
   application:
     name: settlement-service
 
@@ -13,7 +28,9 @@ spring:
     group:
       local:
         - secret
-
+  h2:
+    console:
+      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:settlement_dev;MODE=MySQL
@@ -33,5 +50,6 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+
 server:
   port: 8082
