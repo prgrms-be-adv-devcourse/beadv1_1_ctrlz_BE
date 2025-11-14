@@ -273,10 +273,11 @@ public class ProductPostService {
      * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
      */
     private void validateUploadImage(List<MultipartFile> imageFiles) {
-        // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
-        if (imageFiles == null || imageFiles.isEmpty()) {
-            throw new ProductPostException(IMAGE_REQUIRED);
-        }
+        // TODO: 추후 제거, 대량의 더미데이터 생성을 위해 이미지가 안들어가도 생성되도록 임시 수정
+       // // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
+       // if (imageFiles == null || imageFiles.isEmpty()) {
+       //     throw new ProductPostException(IMAGE_REQUIRED);
+       // }
 
         // 10개를 초과해서 등록하더라도 예외처리
         if (imageFiles.size() > 10) {

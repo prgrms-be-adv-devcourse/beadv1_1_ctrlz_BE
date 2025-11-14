@@ -1,5 +1,11 @@
 package com.domainservice.domain.post.post.model.entity;
 
+import static com.common.exception.vo.ProductPostExceptionCode.*;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -8,17 +14,17 @@ import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
 import com.domainservice.domain.post.tag.model.entity.Tag;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
-import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 /**
  * 상품 엔티티 (Product_posts 테이블)
@@ -31,7 +37,7 @@ public class ProductPost extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "categorie_id", nullable = false)
+    @Column(name = "category_id", nullable = false)
     private String categoryId;
 
     @OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
