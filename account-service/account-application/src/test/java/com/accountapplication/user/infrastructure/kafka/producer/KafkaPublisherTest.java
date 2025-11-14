@@ -49,7 +49,7 @@ class KafkaPublisherTest {
 		UserSignedUpEvent event = new UserSignedUpEvent("test_id", EventType.CREATE);
 
 		//when
-		testKafkaPublisher.send(cartTopicCommand, event);
+		testKafkaPublisher.publish(cartTopicCommand, event);
 		Thread.sleep(1500);
 
 		//then
