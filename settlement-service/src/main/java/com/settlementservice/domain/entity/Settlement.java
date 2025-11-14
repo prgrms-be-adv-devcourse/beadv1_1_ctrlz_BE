@@ -54,6 +54,18 @@ public class Settlement extends BaseEntity {
 		this.settlementStatus = SettlementStatus.FAILED;
 	}
 
+	public static Settlement create(String orderItemId, String userId, BigDecimal amount,
+		BigDecimal fee, BigDecimal netAmount) {
+		return Settlement.builder()
+			.orderItemId(orderItemId)
+			.userId(userId)
+			.amount(amount)
+			.fee(fee)
+			.netAmount(netAmount)
+			.settlementStatus(SettlementStatus.PENDING)
+			.build();
+	}
+
 	@Override
 	protected String getEntitySuffix() {
 		return "Settlement";

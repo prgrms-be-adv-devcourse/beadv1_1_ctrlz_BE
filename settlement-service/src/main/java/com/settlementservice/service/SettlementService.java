@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.settlementservice.domain.entity.Settlement;
-import com.settlementservice.domain.entity.SettlementStatus;
 import com.settlementservice.repository.SettlementRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,14 +28,7 @@ public class SettlementService {
 		BigDecimal fee = amount.multiply(FEE_RATE).setScale(0, RoundingMode.HALF_UP);
 		BigDecimal netAmount = amount.subtract(fee);
 
-		Settlement settlement = Settlement.builder()
-			.orderItemId(orderItemId)
-			.userId(userId)
-			.amount(amount)
-			.fee(fee)
-			.netAmount(netAmount)
-			.settlementStatus(SettlementStatus.PENDING)
-			.build();
+		Settlement settlement = Settlement.create(orderItemId, userId, amount, fee, netAmount);
 
 		return settlementRepository.save(settlement);
 	}
