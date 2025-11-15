@@ -12,5 +12,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserClient {
 
     @GetMapping("api/users/{userId}")
-    UserView getUserById(@PathVariable String userId);
+    UserView getUserById(@PathVariable("userId") String userId);
 }

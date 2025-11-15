@@ -25,14 +25,18 @@ public class ProductPostSearchController {
 	private final ProductPostElasticService productPostElasticService;
 
 	/**
-	 * 키워드에 따른 통합 겁색을 위한 API
+	 * 키워드에 따른 통합 검색 API
 	 */
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
 		@RequestParam String q,
+		@RequestParam String category,
+		@RequestParam(defaultValue = "0") double minPrice,
+		@RequestParam(defaultValue = "99999999") double maxPrice,
+		@RequestParam(required = false) String tags, // "tag1,tag2" 형태
 		Pageable pageable
 	) {
-		return productPostElasticService.search(q, pageable);
+		return productPostElasticService.search(q, category, minPrice, maxPrice, tags, pageable);
 	}
 
 	// TODO: 현재 조회중인 상품과 유사한 상품 조회 API

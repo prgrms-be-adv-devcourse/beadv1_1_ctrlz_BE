@@ -1,10 +1,10 @@
 package com.domainservice.domain.search.service;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 
 import com.common.model.web.PageResponse;
@@ -26,33 +26,49 @@ public class ProductPostElasticService {
 	/**
 	 * Elasticsearch를 사용하여 상품을 검색하고 페이징된 결과를 반환합니다.
 	 *
-	 * @param query 검색어 (상품명, 제목, 설명, 태그 등에서 검색)
-	 * @param pageable 페이징 정보 (페이지 번호, 사이즈, 정렬 조건)
-	 * @return 검색된 상품 목록과 페이징 정보를 포함한 PageResponse
+	 * @param query     검색어 (상품명, 제목, 설명, 태그 등에서 검색)
+	 * @param category  카테고리명
+	 * @param minPrice  최소 가격
+	 * @param maxPrice  최대 가격
+	 * @param tags      콤마 구분 태그 문자열 (예: "게이밍,기계식")
+	 * @param pageable  페이징 정보
 	 */
-	public PageResponse<List<ProductPostSearchResponse>> search(String query, Pageable pageable) {
+	public PageResponse<List<ProductPostSearchResponse>> search(
+		String query,
+		String category,
+		double minPrice,
+		double maxPrice,
+		String tags,
+		Pageable pageable
+	) {
 
-		// Elasticsearch Repository를 통해 검색 쿼리 실행
-		// - SearchPage: Elasticsearch 검색 결과를 담는 Spring Data의 Page 구현체
-		SearchPage<ProductPostDocumentEntity> searchPage = productPostElasticRepository.search(query, pageable);
+		// tags 문자열 -> List<String> 변환
+		List<String> tagList = tags != null && !tags.isBlank()
+			? Arrays.stream(tags.split(","))
+			.map(String::trim)
+			.filter(tag -> !tag.isEmpty())
+			.toList()
+			: List.of(); // @Query에서 terms 쿼리를 항상 쓰는 구조라면 빈 리스트로 전달
 
-		// - getTotalElements(): 검색 조건에 맞는 전체 문서 개수
-		// - getTotalPages(): 전체 페이지 수
-		log.info("Total hits: {}, Total pages: {}", searchPage.getTotalElements(), searchPage.getTotalPages());
+		// Repository @Query 메서드 호출
+		Page<ProductPostDocumentEntity> resultPage =
+			productPostElasticRepository.search(query, category, minPrice, maxPrice, tagList, pageable);
 
-		List<ProductPostSearchResponse> productPostResponseList = searchPage.getSearchHits()
+		log.info("Total hits: {}, Total pages: {}",
+			resultPage.getTotalElements(), resultPage.getTotalPages());
+
+		List<ProductPostSearchResponse> productPostResponseList = resultPage
+			.getContent()
 			.stream()
-			.map(SearchHit::getContent)
 			.map(ProductPostMapper::toProductPostSearchResponse)
 			.toList();
 
 		return new PageResponse<>(
-			searchPage.getNumber(),
-			searchPage.getTotalPages(),
-			searchPage.getSize(),
-			searchPage.hasNext(),
+			resultPage.getNumber(),
+			resultPage.getTotalPages(),
+			resultPage.getSize(),
+			resultPage.hasNext(),
 			productPostResponseList
 		);
 	}
-
 }
