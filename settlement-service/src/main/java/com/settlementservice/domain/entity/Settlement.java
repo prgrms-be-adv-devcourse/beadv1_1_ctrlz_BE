@@ -52,6 +52,17 @@ public class Settlement extends BaseEntity {
 
 	public void markFailed() {
 		this.settlementStatus = SettlementStatus.FAILED;
+		this.settledAt = LocalDateTime.now();
+	}
+
+	public void markWaiting() {
+		this.settlementStatus = SettlementStatus.READY;
+		this.settledAt = LocalDateTime.now();
+	}
+
+	public void markPendingAgain() {
+		this.settlementStatus = SettlementStatus.PENDING;
+		this.settledAt = LocalDateTime.now();
 	}
 
 	public static Settlement create(String orderItemId, String userId, BigDecimal amount,
@@ -70,4 +81,5 @@ public class Settlement extends BaseEntity {
 	protected String getEntitySuffix() {
 		return "Settlement";
 	}
+
 }
