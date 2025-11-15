@@ -3,6 +3,7 @@ package com.domainservice;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +42,7 @@ class DepositServiceTest {
 		userId = "testUser";
 		deposit = Deposit.builder()
 			.userId(userId)
-			.balance(1000)
+			.balance(BigDecimal.valueOf(1000))
 			.build();
 	}
 
@@ -63,7 +64,7 @@ class DepositServiceTest {
 	@DisplayName("사용자 예치금 충전")
 	void test2() {
 		// given
-		int amount = 500;
+		BigDecimal amount = BigDecimal.valueOf(500);
 		when(depositJpaRepository.findByUserId(userId)).thenReturn(Optional.of(deposit));
 		when(depositJpaRepository.save(deposit)).thenReturn(deposit);
 		when(depositLogJpaRepository.save(any(DepositLog.class))).thenAnswer(i -> i.getArgument(0));
@@ -72,7 +73,7 @@ class DepositServiceTest {
 		DepositResponse response = depositService.chargeDeposit(userId, amount);
 
 		// then
-		assertThat(response.balance()).isEqualTo(1500);
+		assertThat(response.balance()).isEqualTo(BigDecimal.valueOf(1500));
 		assertThat(response.message()).isEqualTo("충전이 완료되었습니다.");
 		verify(depositJpaRepository).save(deposit);
 		verify(depositLogJpaRepository).save(any(DepositLog.class));
@@ -82,7 +83,7 @@ class DepositServiceTest {
 	@DisplayName("사용자 예치금 사용")
 	void test3() {
 		// given
-		int amount = 500;
+		BigDecimal amount = BigDecimal.valueOf(500);
 		when(depositJpaRepository.findByUserId(userId)).thenReturn(Optional.of(deposit));
 		when(depositJpaRepository.save(deposit)).thenReturn(deposit);
 		when(depositLogJpaRepository.save(any(DepositLog.class))).thenAnswer(i -> i.getArgument(0));
@@ -91,7 +92,7 @@ class DepositServiceTest {
 		DepositResponse response = depositService.useDeposit(userId, amount);
 
 		// then
-		assertThat(response.balance()).isEqualTo(500);
+		assertThat(response.balance()).isEqualTo(BigDecimal.valueOf(500));
 		assertThat(response.message()).isEqualTo("예치금 사용이 완료되었습니다.");
 		verify(depositJpaRepository).save(deposit);
 		verify(depositLogJpaRepository).save(any(DepositLog.class));
@@ -107,7 +108,7 @@ class DepositServiceTest {
 		DepositResponse response = depositService.getDepositBalance(userId);
 
 		// then
-		assertThat(response.balance()).isEqualTo(1000);
+		assertThat(response.balance()).isEqualTo(BigDecimal.valueOf(1000));
 		assertThat(response.message()).isEqualTo("잔액 조회가 완료되었습니다.");
 	}
 
@@ -118,8 +119,8 @@ class DepositServiceTest {
 		when(depositJpaRepository.findByUserId(userId)).thenReturn(Optional.of(deposit));
 
 		// when
-		boolean enough = depositService.hasEnoughDeposit(userId, 500);
-		boolean notEnough = depositService.hasEnoughDeposit(userId, 1500);
+		boolean enough = depositService.hasEnoughDeposit(userId, BigDecimal.valueOf(500));
+		boolean notEnough = depositService.hasEnoughDeposit(userId, BigDecimal.valueOf(1500));
 
 		// then
 		assertThat(enough).isTrue();
@@ -130,7 +131,7 @@ class DepositServiceTest {
 	@DisplayName("잔액 부족 시 예치금 사용 예외 발생")
 	void test6() {
 		// given
-		int useAmount = 2000; // 현재 잔액 1000
+		BigDecimal useAmount = BigDecimal.valueOf(2000); // 현재 잔액 1000
 		when(depositJpaRepository.findByUserId(userId)).thenReturn(Optional.of(deposit));
 
 		// when & then

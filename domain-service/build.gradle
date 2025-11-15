@@ -57,6 +57,11 @@ dependencies {
 
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // Spring Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    // JSON 직렬화/역직렬화용
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 dependencyManagement {
     imports {
