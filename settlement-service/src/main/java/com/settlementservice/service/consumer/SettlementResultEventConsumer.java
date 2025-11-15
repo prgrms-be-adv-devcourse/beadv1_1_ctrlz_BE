@@ -1,10 +1,11 @@
-package com.settlementservice.service;
+package com.settlementservice.service.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.common.event.SettlementCompletedEvent;
 import com.common.event.SettlementFailedEvent;
+import com.settlementservice.service.SettlementService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SettlementResultConsumer {
+public class SettlementResultEventConsumer {
 
 	private final SettlementService settlementService;
 

@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.service;
+package com.domainservice.domain.deposit.service.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -8,6 +8,7 @@ import com.common.event.SettlementCompletedEvent;
 import com.common.event.SettlementFailedEvent;
 import com.common.event.SettlementReadyEvent;
 import com.common.exception.CustomException;
+import com.domainservice.domain.deposit.service.DepositService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DepositSettlementConsumer {
+public class SettlementReadyEventConsumer {
 
 	private final DepositService depositSettlementService;
 	private final KafkaTemplate<String, Object> kafkaTemplate;

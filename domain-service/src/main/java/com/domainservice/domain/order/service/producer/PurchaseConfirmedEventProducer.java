@@ -1,4 +1,4 @@
-package com.domainservice.domain.order.service;
+package com.domainservice.domain.order.service.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
-public class SettlementProducer {
+public class PurchaseConfirmedEventProducer {
 
 	private final KafkaTemplate<String, SettlementCreatedEvent> settlementKafkaTemplate;
 

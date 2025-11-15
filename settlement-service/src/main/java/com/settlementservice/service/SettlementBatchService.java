@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.settlementservice.domain.entity.Settlement;
 import com.settlementservice.domain.entity.SettlementStatus;
 import com.settlementservice.repository.SettlementRepository;
+import com.settlementservice.service.producer.SettlementReadyEventProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SettlementBatchService {
 
 	private final SettlementRepository settlementRepository;
-	private final DepositSettlementProducer depositSettlementProducer; // Kafka producer
+	private final SettlementReadyEventProducer depositSettlementProducer; // Kafka producer
 
 	// 1분 주기
 	@Scheduled(cron = "0 */1 * * * *")

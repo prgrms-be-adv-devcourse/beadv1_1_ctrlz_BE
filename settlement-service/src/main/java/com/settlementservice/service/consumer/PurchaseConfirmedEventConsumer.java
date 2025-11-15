@@ -1,9 +1,10 @@
-package com.settlementservice.service;
+package com.settlementservice.service.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.common.event.SettlementCreatedEvent;
+import com.settlementservice.service.SettlementService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SettlementConsumer {
+public class PurchaseConfirmedEventConsumer {
 
 	private final SettlementService settlementService;
 

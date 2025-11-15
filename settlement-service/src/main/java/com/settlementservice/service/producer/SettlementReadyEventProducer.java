@@ -1,4 +1,4 @@
-package com.settlementservice.service;
+package com.settlementservice.service.producer;
 
 import java.math.BigDecimal;
 
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DepositSettlementProducer {
+public class SettlementReadyEventProducer {
 
 	private final KafkaTemplate<String, SettlementReadyEvent> kafkaTemplate;
 

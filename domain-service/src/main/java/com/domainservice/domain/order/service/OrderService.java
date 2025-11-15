@@ -21,6 +21,7 @@ import com.domainservice.domain.order.model.entity.OrderItem;
 import com.domainservice.domain.order.model.entity.OrderItemStatus;
 import com.domainservice.domain.order.model.entity.OrderStatus;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
+import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
@@ -33,7 +34,7 @@ public class OrderService {
 	private final OrderJpaRepository orderJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
-	private final SettlementProducer settlementProducer;
+	private final PurchaseConfirmedEventProducer settlementProducer;
 
 	/**
 	 * 주문 생성
