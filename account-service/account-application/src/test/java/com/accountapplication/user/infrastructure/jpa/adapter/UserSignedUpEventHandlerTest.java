@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.user.application.adapter.CartCreateCommand;
 import com.user.application.adapter.UserSignedUpEventHandler;
 import com.user.application.port.out.ExternalEventPersistentPort;
 import com.user.application.port.out.OutboundEventPublisher;
@@ -64,7 +65,7 @@ class UserSignedUpEventHandlerTest {
 
 		// then
 		verify(kafkaEventPublisher, times(1))
-			.publish(eq(CART_COMMAND_TOPIC), eq(event));
+			.publish(eq(CART_COMMAND_TOPIC), eq(new CartCreateCommand(event.userId())));
 	}
 
 	@DisplayName("Kafka 발행 후 이벤트 발행 완료 처리를 한다")

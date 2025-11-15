@@ -14,12 +14,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import com.user.application.adapter.CartCreateCommand;
 import com.user.application.adapter.UserApplication;
 import com.user.application.adapter.dto.UserContext;
 import com.user.application.port.out.ExternalEventPersistentPort;
 import com.user.application.port.out.OutboundEventPublisher;
 import com.user.application.port.out.UserPersistencePort;
-import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.EventType;
 
@@ -79,14 +79,14 @@ class UserApplicationIntegrationTest {
 
 		//then
 		verify(outboundEventPublisher, never())
-			.publish(any(String.class), any(UserSignedUpEvent.class));
+			.publish(any(String.class), any(CartCreateCommand.class));
 		verify(externalEventPersistentPort, never())
 			.completePublish(expectedUserId, EventType.CREATED);
 
 		transactionManager.commit(status);
 
 		verify(outboundEventPublisher, times(1))
-			.publish(any(String.class), any(UserSignedUpEvent.class));
+			.publish(any(String.class), any(CartCreateCommand.class));
 		verify(externalEventPersistentPort, times(1))
 			.completePublish(expectedUserId, EventType.CREATED);
 	}
