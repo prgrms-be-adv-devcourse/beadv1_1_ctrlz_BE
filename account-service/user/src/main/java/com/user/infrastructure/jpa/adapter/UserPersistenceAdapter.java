@@ -72,9 +72,9 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void updateRole(String id, com.user.domain.vo.UserRole userRole) {
+	public void updateRolesForSeller(String id) {
 		UserEntity userEntity = getUserEntity(id);
-		userEntity.getRoles().add(userRole);
+		userEntity.addSellerRoles();
 	}
 
 	@Override

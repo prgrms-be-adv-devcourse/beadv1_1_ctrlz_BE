@@ -9,6 +9,7 @@ import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.dto.UserContext;
 import com.user.application.adapter.dto.UserUpdateContext;
 import com.user.application.port.in.UserCommandUseCase;
+import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
 import com.user.infrastructure.feign.CartClient;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserApplication implements UserCommandUseCase {
 
-	private final com.user.application.port.out.UserPersistencePort userPersistencePort;
+	private final UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
 	private final CartClient cartClient;
 
@@ -47,14 +48,14 @@ public class UserApplication implements UserCommandUseCase {
 
 	@Override
 	public void updateForSeller(String id) {
-		userPersistencePort.updateRole(id, com.user.domain.vo.UserRole.SELLER);
+		userPersistencePort.updateRolesForSeller(id);
 	}
 
 	@Override
 	public void updateUser(String userId, UserUpdateContext updateContext) {
 		User user = userPersistencePort.findById(userId);
 
-		com.user.domain.vo.Address updatedAddress = com.user.domain.vo.Address.builder()
+		Address updatedAddress = Address.builder()
 			.state(updateContext.state())
 			.city(updateContext.city())
 			.street(updateContext.street())
@@ -93,7 +94,7 @@ public class UserApplication implements UserCommandUseCase {
 			.phoneNumber(userContext.phoneNumber())
 			.nickname(userContext.nickname())
 			.address(
-				com.user.domain.vo.Address.builder()
+				Address.builder()
 					.state(userContext.state())
 					.city(userContext.city())
 					.street(userContext.street())
