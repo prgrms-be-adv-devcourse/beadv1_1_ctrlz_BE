@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.domainservice.common.init.data.CartInitializer;
 import com.domainservice.common.init.data.CategoryInitializer;
+import com.domainservice.common.init.data.DepositInitializer;
 import com.domainservice.common.init.data.OrderInitializer;
 import com.domainservice.common.init.data.ProductPostInitializer;
 import com.domainservice.common.init.data.TagInitializer;
@@ -23,6 +24,7 @@ public class DataInitializer implements ApplicationRunner {
 	private final ProductPostInitializer productPostInitializer;
 	private final CartInitializer cartInitializer;
 	private final OrderInitializer orderInitializer;
+	private final DepositInitializer depositInitializer;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -32,6 +34,7 @@ public class DataInitializer implements ApplicationRunner {
 
 		categoryInitializer.init();
 		tagInitializer.init();
+		depositInitializer.init();
 		productPostInitializer.init();
 		cartInitializer.init();
 		orderInitializer.init();
