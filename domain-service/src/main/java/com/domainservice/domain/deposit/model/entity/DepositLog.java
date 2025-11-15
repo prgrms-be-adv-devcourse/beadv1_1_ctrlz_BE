@@ -46,6 +46,10 @@ public class DepositLog extends BaseEntity {
 	@Column(name = "after_balance", nullable = false)
 	private BigDecimal afterBalance; // 이후 잔액
 
+	// 정산 이벤트와 매핑
+	@Column(name = "reference_id")
+	private String referenceId;
+
 	@Override
 	protected String getEntitySuffix() {
 		return "depositlog";
@@ -61,6 +65,21 @@ public class DepositLog extends BaseEntity {
 			.amount(amount)
 			.beforeBalance(before)
 			.afterBalance(after)
+			.build();
+	}
+
+	public static DepositLog createBySettlementReady(String userId, Deposit deposit,
+		TransactionType type, BigDecimal amount,
+		BigDecimal before, BigDecimal after,
+		String referenceId) {
+		return DepositLog.builder()
+			.userId(userId)
+			.deposit(deposit)
+			.transactionType(type)
+			.amount(amount)
+			.beforeBalance(before)
+			.afterBalance(after)
+			.referenceId(referenceId)
 			.build();
 	}
 }
