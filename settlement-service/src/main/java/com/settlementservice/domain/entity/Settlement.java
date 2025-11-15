@@ -55,7 +55,7 @@ public class Settlement extends BaseEntity {
 		this.settledAt = LocalDateTime.now();
 	}
 
-	public void markWaiting() {
+	public void markReady() {
 		this.settlementStatus = SettlementStatus.READY;
 		this.settledAt = LocalDateTime.now();
 	}

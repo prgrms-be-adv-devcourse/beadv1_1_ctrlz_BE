@@ -46,8 +46,7 @@ public class SettlementBatchService {
 						settlement.getId()
 					);
 
-					// 상태 변경 → WAITING
-					settlement.markWaiting();
+					settlement.markReady();
 					settlementRepository.save(settlement);
 
 				} catch (Exception e) {
@@ -95,8 +94,7 @@ public class SettlementBatchService {
 				settlement.getId()
 			);
 
-			// WAITING 으로 상태 변경
-			settlement.markWaiting();
+			settlement.markReady();
 			settlementRepository.save(settlement);
 
 		} catch (Exception e) {
