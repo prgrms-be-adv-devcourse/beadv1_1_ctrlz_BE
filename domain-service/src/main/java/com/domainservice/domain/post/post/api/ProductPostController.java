@@ -45,7 +45,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductPostController {
 
 	private final ProductPostService productPostService;
-	private final ProductPostElasticService productPostElasticService;
 
 	/**
 	 * 상품 게시글을 생성합니다.
@@ -155,14 +154,6 @@ public class ProductPostController {
 		validateAuthentication(userId);
 		List<ProductPostResponse> recentlyViewedPostList = productPostService.getRecentlyViewedPosts(userId);
 		return new BaseResponse<>(recentlyViewedPostList, "최근 본 상품 목록 조회가 완료되었습니다.");
-	}
-
-	@GetMapping("/search")
-	public PageResponse<List<ProductPostSearchResponse>> search(
-		@RequestParam String q,
-		Pageable pageable
-	) {
-		return productPostElasticService.search(q, pageable);
 	}
 
         /*
