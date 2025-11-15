@@ -100,7 +100,6 @@ public class DepositService {
 	/**
 	 * 사용자의 예치금 잔액 조회
 	 */
-	@Transactional(readOnly = true)
 	public DepositResponse getDepositBalance(String userId) {
 		Deposit deposit = getDepositByUserId(userId);
 		return new DepositResponse(deposit.getId(), deposit.getBalance(), "잔액 조회가 완료되었습니다.");
@@ -109,7 +108,6 @@ public class DepositService {
 	/**
 	 * 특정 유저의 예치금 확인 (외부 서비스 연동용)
 	 */
-	@Transactional(readOnly = true)
 	public boolean hasEnoughDeposit(String userId, BigDecimal amount) {
 		Deposit deposit = getDepositByUserId(userId);
 		return deposit.getBalance().compareTo(amount) >= 0;
