@@ -26,10 +26,10 @@ spring:
               predicates:
                 - Path=/api/users/**
                 - Method=GET,PATCH,DELETE
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: USER
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: USER
 
             - id: post-search-public
               uri: lb://DOMAIN-SERVICE
@@ -42,20 +42,20 @@ spring:
               predicates:
                 - Path=/api/product-posts/**
                 - Method=POST,PUT,DELETE,PATCH
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: SELLER
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: SELLER
 
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/carts/**
                 - Method=GET,PATCH,DELETE,POST
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: USER
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: USER
 
             - id: deposit-api-protected
               uri: lb://DOMAIN-SERVICE
@@ -71,10 +71,10 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://svc-discovery:8761/eureka/
+      defaultZone: http://discovery-service:8761/eureka/
 #eureka:
-#  instance:
-#    prefer-ip-address: false
+  instance:
+    prefer-ip-address: true
 #    hostname: svc-account-service 서비스 이름 직접 등록
 
 

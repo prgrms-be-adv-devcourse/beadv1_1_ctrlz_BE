@@ -8,10 +8,10 @@
 *.iml
 .vscode
 
-# Build outputs
+# Build outputs - .gradle만 제외하고 gradle은 제외하지 않음
 **/build/
 **/bin/
-**/.gradle/
+**/.gradle
 **/target/
 
 # Test

@@ -39,6 +39,7 @@ dependencies {
 
     //sms
     implementation 'com.solapi:sdk:1.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     //test
     testImplementation 'org.springframework.kafka:spring-kafka-test'
@@ -68,4 +69,8 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName.set("${project.name}-boot.jar")
 }

@@ -7,26 +7,26 @@ DOCKERHUB_USERNAME="beatchoi156"
 SERVICES=(
 #   "account-service"
 #   "discovery-service"
-  "domain-service"
-#   "gateway-service"
+#   "domain-service"
+  "gateway-service"
 )
 
 # buildx builder 설정 (멀티 플랫폼 지원)
-echo "Setting up Docker buildx for multi-platform builds..."
-docker buildx create --name multiarch --use 2>/dev/null || docker buildx use multiarch
+# echo "Setting up Docker buildx for multi-platform builds..."
+# docker buildx create --name multiarch --use 2>/dev/null || docker buildx use multiarch
 
 # 각 서비스에 대해 Docker 이미지 빌드 및 푸시
 for SERVICE in "${SERVICES[@]}"; do
   IMAGE_NAME="$DOCKERHUB_USERNAME/$SERVICE:latest"
-  DOCKERFILE="$SERVICE.dockerfile"
+  DOCKERFILE="docker/$SERVICE.dockerfile"
 
   echo "=================================================="
   echo "Building and pushing $IMAGE_NAME"
   echo "Dockerfile: $DOCKERFILE"
-  echo "Platforms: linux/amd64, linux/arm64"
+  echo "Platforms:  linux/arm64"
   echo "=================================================="
 
-  # Docker 이미지 멀티 플랫폼 빌드 및 푸시
+
   docker buildx build \
     --platform linux/arm64 \
     -t "$IMAGE_NAME" \

@@ -2,7 +2,7 @@
 ### 상품 게시글 API 테스트
 ### ========================================
 
-@baseUrl = http://localhost:8080
+@baseUrl = http://localhost:30000
 @contentType = application/json
 
 ### 1. 상품 게시글 목록 조회 - 기본 (최신순, 20개)

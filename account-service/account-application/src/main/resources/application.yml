@@ -41,7 +41,7 @@ spring:
 
   kafka:
     bootstrap-servers:
-      - localhost:9092
+      - kafka-mq:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -86,4 +86,4 @@ eureka:
     prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://svc-discovery:8761/eureka/
+      defaultZone: http://discovery-service:8761/eureka/
