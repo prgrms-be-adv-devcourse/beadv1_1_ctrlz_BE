@@ -43,8 +43,6 @@ spring:
       host: localhost
   kafka:
     bootstrap-servers: localhost:9092
-
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -55,6 +53,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.common.event"
+    listener:
+      auto-startup: false
 
 custom:
   image:
@@ -62,3 +62,12 @@ custom:
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true

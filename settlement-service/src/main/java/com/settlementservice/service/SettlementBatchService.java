@@ -21,11 +21,12 @@ public class SettlementBatchService {
 	private final SettlementRepository settlementRepository;
 	private final SettlementReadyEventProducer depositSettlementProducer; // Kafka producer
 
-	// 1분 주기
-	@Scheduled(cron = "0 */1 * * * *")
+	// 실행후 한번만 작동
+	// @Scheduled(initialDelay = 60_000, fixedDelay = Long.MAX_VALUE)
+	// @Scheduled(cron = "0 */1 * * * *")
 	// @Scheduled(cron = "0 0 3 15 * *") 매달 15일 새벽 3시
 	public void runSettlementBatch() {
-
+		log.info("SettlementBatchService run");
 		while (true) {
 			List<Settlement> settlements =
 				settlementRepository.findTop100BySettlementStatusOrderByCreatedAtAsc(SettlementStatus.PENDING);
