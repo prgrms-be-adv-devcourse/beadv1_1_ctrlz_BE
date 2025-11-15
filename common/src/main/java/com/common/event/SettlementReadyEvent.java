@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record SettlementReadyEvent(
 	String userId,
-	BigDecimal amount,
+	BigDecimal netAmount,
 	String settlementId
 ) {
 }
