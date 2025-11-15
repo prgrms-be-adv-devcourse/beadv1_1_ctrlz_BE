@@ -38,8 +38,7 @@ spring:
         default_batch_fetch_size: 100
 
   kafka:
-    bootstrap-servers:
-      - localhost:9092
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -47,6 +46,7 @@ spring:
       acks: all
 
       properties:
+        spring.json.add.type.headers: false
         delivery.timeout.ms: 120000
         linger.ms: 0
         request.timeout.ms: 30000
@@ -55,22 +55,10 @@ spring:
 
     consumer:
       group-id: accounts-service
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-
 
       properties:
-        spring.json.trusted.packages: "*"
         allow.auto.create.topics: false
         request.timeout.ms: 30000
-        auto:
-          offset:
-            reset: earliest
-        spring:
-          kafka:
-            listener:
-              ack-mode: MANUAL_IMMEDIATE
-              immediate-stop: false
 
 
   data:
@@ -103,3 +91,4 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://svc-discovery:8761/eureka/
+    enabled: false

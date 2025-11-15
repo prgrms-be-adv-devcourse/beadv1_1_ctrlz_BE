@@ -54,6 +54,7 @@ spring:
         request.timeout.ms: 30000
         enable.idempotence: true
         allow.auto.create.topics: false
+        spring.json.add.type.headers: false
 
 
 

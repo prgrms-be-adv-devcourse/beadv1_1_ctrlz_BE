@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @KafkaListener(
-	topics = {"${custom.cart.topic.command}"}
+	topics = {"${custom.cart.topic.command}"},
+	containerFactory = "cartKafkaListenerContainerFactory"
 )
 @Component
 public class UserCreatedListener {
@@ -21,8 +22,8 @@ public class UserCreatedListener {
 	private final CartService cartService;
 
 	@KafkaHandler
-	public void handler(@Payload CartCreateCommand  cartCreateCommand) {
+	public void handler(@Payload CartCreateCommand cartCreateCommand) {
 		cartService.addCart(cartCreateCommand.userId());
-		log.info(cartCreateCommand.toString());
+		log.info("Cart created for user: {}", cartCreateCommand.userId());
 	}
 }
