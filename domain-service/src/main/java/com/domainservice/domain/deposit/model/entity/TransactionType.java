@@ -5,5 +5,6 @@ public enum TransactionType {
 	PURCHASE, // 구매
 	WITHDRAW, // 출금
 	REFUND,    // 환불
-	SETTLEMENT
+	SETTLEMENT,
+	SETTLEMENT_FAIL
 }
