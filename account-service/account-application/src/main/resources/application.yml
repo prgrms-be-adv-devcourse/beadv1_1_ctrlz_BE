@@ -3,6 +3,7 @@ spring:
     name: account-service
 
   profiles:
+    active: local
     group:
       local:
         - secret
