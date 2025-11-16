@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -39,8 +40,9 @@ import redis.embedded.core.RedisServerBuilder;
 @EnableCaching
 @Configuration
 public class EmbeddedRedisConfiguration {
-
+    @Value("${spring.data.redis.host}")
 	private final String host = "localhost";
+    @Value("${spring.data.redis.port}")
 	private int port;
 	private RedisServer redisServer;
 

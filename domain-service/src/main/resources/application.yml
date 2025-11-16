@@ -71,6 +71,20 @@ spring:
     redis:
       port: 6379
       host: localhost
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: domain-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+    listener:
+      auto-startup: false
 
 custom:
   image:
@@ -97,3 +111,12 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true
