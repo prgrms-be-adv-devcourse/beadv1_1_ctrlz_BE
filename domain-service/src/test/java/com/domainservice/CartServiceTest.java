@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,8 @@ import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.cart.repository.CartJpaRepository;
 import com.domainservice.domain.cart.service.CartService;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
+import com.domainservice.domain.post.post.service.ProductPostService;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
@@ -32,21 +35,38 @@ class CartServiceTest {
 	@Mock
 	private CartItemJpaRepository cartItemJpaRepository;
 
+	@Mock
+	private ProductPostService productPostService;
 	@InjectMocks
 	private CartService cartService;
 
 	private String userId;
-	private String productPostId;
 	private Cart cart;
+	private ProductPostResponse productPostResponse;
 
 	@BeforeEach
 	void setUp() {
 		userId = "testUser";
-		productPostId = "test123"; // CartService에서 사용하는 테스트 ID와 일치하도록 설정
 		cart = Cart.builder()
 			.userId(userId)
 			.cartItems(new ArrayList<>())
 			.build();
+		productPostResponse = new ProductPostResponse(
+			"p1",
+			"seller1",
+			"category1",
+			"테스트 상품",
+			"테스트 이름",
+			1000,
+			"테스트 설명",
+			null,
+			null,
+			List.of(),
+			null,
+			List.of(),
+			LocalDateTime.now(),
+			LocalDateTime.now()
+		);
 	}
 
 	@Test
@@ -69,21 +89,20 @@ class CartServiceTest {
 		// given
 		List<CartItem> cartItems = new ArrayList<>();
 		CartItem item = CartItem.builder()
+			.productPostId("p1")
 			.cart(cart)
-			.quantity(1)
 			.selected(true)
 			.build();
 		cartItems.add(item);
 
 		when(cartJpaRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 		when(cartItemJpaRepository.findByCart(cart)).thenReturn(cartItems);
-
+		when(productPostService.getProductPostById("p1")).thenReturn(productPostResponse);
 		// when
 		List<CartItemResponse> result = cartService.getCartItemList(userId);
 
 		// then
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0).quantity()).isEqualTo(1);
 		verify(cartJpaRepository).findByUserId(userId);
 		verify(cartItemJpaRepository).findByCart(cart);
 	}
@@ -92,71 +111,24 @@ class CartServiceTest {
 	@DisplayName("장바구니에 새 아이템 추가")
 	void test4() {
 		// given
-		String newProductId = "newProduct123"; // 존재하지 않는 ID
 		CartItem newItem = CartItem.builder()
+			.productPostId("p1")
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 
 		when(cartJpaRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 		when(cartJpaRepository.save(any(Cart.class))).thenReturn(cart);
+		when(productPostService.getProductPostById("p1")).thenReturn(productPostResponse);
 
 		// when
-		CartItemResponse result = cartService.addItem(userId, newProductId, 2);
+		CartItemResponse result = cartService.addItem(userId, "p1", 2);
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.quantity()).isEqualTo(2);
 		assertThat(result.isSelected()).isTrue();
 		verify(cartJpaRepository).findByUserId(userId);
 		verify(cartJpaRepository).save(cart);
-	}
-
-	@Test
-	@DisplayName("장바구니에 기존 아이템 수량 증가")
-	void test5() {
-		// given
-		CartItem existingItem = CartItem.builder()
-			.cart(cart)
-			.quantity(1)
-			.selected(true)
-			.build();
-		cart.addCartItem(existingItem);
-
-		when(cartJpaRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-
-		// when
-		CartItemResponse result = cartService.addItem(userId, productPostId, 2);
-
-		// then
-		assertThat(result).isNotNull();
-		assertThat(result.quantity()).isEqualTo(3); // 1 + 2
-		verify(cartJpaRepository).findByUserId(userId);
-		verify(cartJpaRepository).save(cart);
-	}
-
-	@Test
-	@DisplayName("장바구니 아이템 수량 변경")
-	void test6() {
-		// given
-		String itemId = "item123";
-		CartItem cartItem = CartItem.builder()
-			.cart(cart)
-			.quantity(1)
-			.selected(true)
-			.build();
-
-		when(cartItemJpaRepository.findById(itemId)).thenReturn(Optional.of(cartItem));
-		when(cartItemJpaRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
-
-		// when
-		CartItemResponse result = cartService.updateQuantity(itemId, 5);
-
-		// then
-		assertThat(result.quantity()).isEqualTo(5);
-		verify(cartItemJpaRepository).findById(itemId);
-		verify(cartItemJpaRepository).save(cartItem);
 	}
 
 	@Test
@@ -165,13 +137,14 @@ class CartServiceTest {
 		// given
 		String itemId = "item123";
 		CartItem cartItem = CartItem.builder()
+			.productPostId("p1")
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 
 		when(cartItemJpaRepository.findById(itemId)).thenReturn(Optional.of(cartItem));
 		when(cartItemJpaRepository.save(any(CartItem.class))).thenAnswer(i -> i.getArgument(0));
+		when(productPostService.getProductPostById("p1")).thenReturn(productPostResponse);
 
 		// when
 		CartItemResponse result = cartService.setItemSelected(itemId, false);
@@ -190,7 +163,6 @@ class CartServiceTest {
 
 		CartItem item = CartItem.builder()
 			.cart(cart)
-			.quantity(2)
 			.selected(true)
 			.build();
 
