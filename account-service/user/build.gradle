@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.compile.JavaCompile
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7' apply false
@@ -7,6 +9,9 @@ plugins {
 group = 'com'
 version = '0.0.1-SNAPSHOT'
 description = 'user'
+
+def queryDslVersion = "7.1" // 25년 11월 14일 기준 가장 최신
+def querydslSrcDir  = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
 
 java {
     toolchain {
@@ -52,8 +57,27 @@ dependencies {
 //    testImplementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
 //    runtimeOnly 'com.h2database:h2'
+
+    implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"
+    implementation "io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion"
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// QueryDSL 설정
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslSrcDir
+        }
+    }
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
 }
