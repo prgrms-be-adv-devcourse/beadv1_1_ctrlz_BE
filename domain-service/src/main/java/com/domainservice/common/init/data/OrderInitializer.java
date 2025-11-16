@@ -3,12 +3,10 @@ package com.domainservice.common.init.data;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
-import com.domainservice.domain.order.model.dto.OrderResponse;
 import com.domainservice.domain.order.service.OrderService;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
@@ -17,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class OrderInitializer {
 
@@ -50,8 +47,7 @@ public class OrderInitializer {
 			}
 
 			try {
-				OrderResponse order = orderService.createOrder(userId, cartItemIds);
-				log.info("order.orderId() = {}", order.orderId());
+				orderService.createOrder(userId, cartItemIds);
 				log.info("{}님의 주문 생성 완료", userId);
 			} catch (Exception e) {
 				log.warn("주문 생성 실패 ({}): {}", userId, e.getMessage());

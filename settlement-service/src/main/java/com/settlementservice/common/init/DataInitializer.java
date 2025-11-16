@@ -2,6 +2,7 @@ package com.settlementservice.common.init;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 import com.settlementservice.common.init.data.SettlementInitializer;
 
@@ -9,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// @Component
+@Component
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
 
