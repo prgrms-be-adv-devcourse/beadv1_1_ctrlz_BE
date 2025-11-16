@@ -30,8 +30,6 @@ import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
-import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
-import com.domainservice.domain.search.service.ProductPostElasticService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -147,6 +145,12 @@ public class ProductPostController {
 		return response;
 	}
 
+	/**
+	 * 최근 본 상품 목록을 조회합니다.
+	 *
+	 * @param userId 사용자 식별자 (X-REQUEST-ID 헤더에서 추출)
+	 * @return 최근 본 상품 목록 (200 OK)
+	 */
 	@GetMapping("/recent-views")
 	public BaseResponse<List<ProductPostResponse>> getRecentlyViewPosts(
 		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId
@@ -156,7 +160,7 @@ public class ProductPostController {
 		return new BaseResponse<>(recentlyViewedPostList, "최근 본 상품 목록 조회가 완료되었습니다.");
 	}
 
-        /*
+	/*
     ================= private Method =================
      */
 
