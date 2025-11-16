@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>결제 확인</title>
-    <link rel="stylesheet" href="../static/modal-page.css"/>
+    <link rel="stylesheet" href="/modal-page.css"/>
     <script src="https://js.tosspayments.com/v2/standard"></script>
 </head>
 
@@ -124,7 +124,7 @@
         console.log(`window.location.origin = ${window.location.origin}`)
         const button = document.getElementById("payment-button");
 
-        const clientKey = '[[ ${@environment.getProperty("custom.payment.toss.test_client_api_key")} ]]';
+        const clientKey = '[[ ${@environment.getProperty("payment.toss.test_client_api_key")} ]]';
         const tossPayments = TossPayments(clientKey);
         const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
 

@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.domainservice.domain.order.model.entity.Order;
 
-public interface OrderRepository extends JpaRepository<Order, String>, OrderQueryRepository {
+public interface OrderRepository extends JpaRepository<Order, String> {
     Optional<Order> findById(String orderId);
 }
