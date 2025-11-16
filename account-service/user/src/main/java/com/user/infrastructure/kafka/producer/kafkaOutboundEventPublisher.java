@@ -1,5 +1,6 @@
 package com.user.infrastructure.kafka.producer;
 
+import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class kafkaOutboundEventPublisher implements OutboundEventPublisher {
 		kafkaTemplate.send(topicName, event).whenComplete((res, e) -> {
 			if (e != null) {
 				log.error("kafka cart 생성 이벤트 전송 실패 : {}", e.getMessage(), e);
-				return;
+				throw new KafkaException(e.getMessage(), e);
 			}
 			log.info("kafka cart 생성 이벤트 전송 완료 : {}", res.getRecordMetadata().offset());
 		});
