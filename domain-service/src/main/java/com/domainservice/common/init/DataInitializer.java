@@ -19,12 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
 
-	private final CategoryInitializer categoryInitializer;
-	private final TagInitializer tagInitializer;
-	private final ProductPostInitializer productPostInitializer;
-	private final CartInitializer cartInitializer;
-	private final OrderInitializer orderInitializer;
-	private final DepositInitializer depositInitializer;
+    private final CategoryInitializer categoryInitializer;
+    private final TagInitializer tagInitializer;
+    private final ProductPostInitializer productPostInitializer;
+    private final CartInitializer cartInitializer;
+    private final OrderInitializer orderInitializer;
+    private final DepositInitializer depositInitializer;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -32,12 +32,12 @@ public class DataInitializer implements ApplicationRunner {
 		log.info("데이터 초기화 시작");
 		log.info("========================================");
 
-		// categoryInitializer.init();
-		// tagInitializer.init();
-		// productPostInitializer.init(); // 유저 더미데이터는 없음, 임시 주석처리함
-		depositInitializer.init();
-		cartInitializer.init();
-		orderInitializer.init();
+        categoryInitializer.init();
+        tagInitializer.init();
+        depositInitializer.init();
+        productPostInitializer.init();
+        cartInitializer.init();
+        orderInitializer.init();
 
 		log.info("========================================");
 		log.info("데이터 초기화 완료!");
