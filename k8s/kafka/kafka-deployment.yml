@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-mq
+  labels:
+    app: kafka
+
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+
+  template:
+    metadata:
+      name: kafka
+      labels:
+        app: kafka
+
+    spec:
+      containers:
+        - name: kafka
+          image: apache/kafka:latest
+          ports:
+            - containerPort: 9090  # PLAINTEXT
+            - containerPort: 9091  # CONTROLLER
+            - containerPort: 9092  # EXTERNAL
+
+          envFrom:
+            - configMapRef:
+                name: kafka-config-map
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-mq
+
+spec:
+  selector:
+    app: kafka
+
+  ports:
+    - name: plaintext
+      port: 9090
+      targetPort: 9090
+    - name: controller
+      port: 9091
+      targetPort: 9091
+    - name: external
+      port: 9092
+      targetPort: 9092

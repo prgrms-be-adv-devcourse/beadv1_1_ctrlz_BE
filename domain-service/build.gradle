@@ -31,12 +31,24 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
+    }
+}
+
 dependencies {
     implementation project(':common')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -70,6 +82,10 @@ dependencies {
     implementation "io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion"
     annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa"
 
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // JSON 직렬화/역직렬화용
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 dependencyManagement {
     imports {

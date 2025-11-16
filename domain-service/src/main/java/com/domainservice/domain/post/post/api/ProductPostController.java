@@ -1,7 +1,10 @@
 package com.domainservice.domain.post.post.api;
 
+import static com.common.exception.vo.ProductPostExceptionCode.UNAUTHORIZED;
+
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
@@ -39,11 +42,11 @@ public class ProductPostController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public BaseResponse<ProductPostResponse> createProductPost(
-            // @AuthenticationPrincipal String userId,
+            @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @Valid @RequestPart("request") ProductPostRequest request
     ) {
-        String userId = "user-001";  // TODO: 실제로는 인증된 사용자 ID
+        validateAuthentication(userId);
         ProductPostResponse response = productPostService.createProductPost(request, userId, imageFiles);
         return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
     }
@@ -59,12 +62,12 @@ public class ProductPostController {
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<ProductPostResponse> updateProductPost(
-            // @AuthenticationPrincipal String userId,
+            @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
             @PathVariable String postId,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @Valid @RequestPart("request") ProductPostRequest request
     ) {
-        String userId = "user-001";  // TODO: 실제로는 인증된 사용자 ID를 사용
+        validateAuthentication(userId);
         ProductPostResponse response = productPostService.updateProductPost(request, imageFiles, userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 수정되었습니다.");
     }
@@ -78,10 +81,10 @@ public class ProductPostController {
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<String> deleteProductPost(
-            // @AuthenticationPrincipal String userId,
+            @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
             @PathVariable String postId
     ) {
-        String userId = "user-001";  // TODO: 실제로는 인증된 사용자 ID를 사용
+        validateAuthentication(userId);
         String response = productPostService.deleteProductPost(userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 삭제되었습니다.");
     }
@@ -95,10 +98,9 @@ public class ProductPostController {
     @GetMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ProductPostResponse> getProductPostById(
+            @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
             @PathVariable String postId
-            // @AuthenticationPrincipal String userId,
     ) {
-        String userId = "user-001"; // TODO: 인증인가 완료되면 매게변수에 추후 userId 넣어주기
         ProductPostResponse response = productPostService.getProductPostById(userId, postId);
         return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
     }
@@ -133,11 +135,16 @@ public class ProductPostController {
 
     @GetMapping("/recent-views")
     public BaseResponse<List<ProductPostResponse>> getRecentlyViewPosts(
-            // @AuthenticationPrincipal String userId,
+            @RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId
     ) {
-        String userId = "user-001";  // TODO: 실제로는 인증된 사용자 ID를 사용
+        validateAuthentication(userId);
         List<ProductPostResponse> recentlyViewedPostList = productPostService.getRecentlyViewedPosts(userId);
         return new BaseResponse<>(recentlyViewedPostList, "최근 본 상품 목록 조회가 완료되었습니다.");
     }
 
+    private void validateAuthentication(String userId) {
+        if(userId.equals("anonymous")) {
+            throw new ProductPostException(UNAUTHORIZED);
+        }
+    }
 }
