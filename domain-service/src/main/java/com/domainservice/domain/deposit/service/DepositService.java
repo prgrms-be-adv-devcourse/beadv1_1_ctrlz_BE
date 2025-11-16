@@ -14,6 +14,7 @@ import com.domainservice.domain.deposit.model.entity.DepositLog;
 import com.domainservice.domain.deposit.model.entity.TransactionType;
 import com.domainservice.domain.deposit.repository.DepositJpaRepository;
 import com.domainservice.domain.deposit.repository.DepositLogJpaRepository;
+import com.domainservice.domain.order.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 @Slf4j
 public class DepositService {
-	private final DepositJpaRepository depositJpaRepository;
-	private final DepositLogJpaRepository depositLogJpaRepository;
+    private final DepositJpaRepository depositJpaRepository;
+    private final DepositLogJpaRepository depositLogJpaRepository;
+    private final OrderRepository orderRepository;
 
 	/**
 	 * 사용자 ID로 예치금 정보 조회
@@ -105,13 +107,6 @@ public class DepositService {
 		return new DepositResponse(deposit.getId(), deposit.getBalance(), "잔액 조회가 완료되었습니다.");
 	}
 
-	/**
-	 * 특정 유저의 예치금 확인 (외부 서비스 연동용)
-	 */
-	public boolean hasEnoughDeposit(String userId, BigDecimal amount) {
-		Deposit deposit = getDepositByUserId(userId);
-		return deposit.getBalance().compareTo(amount) >= 0;
-	}
 
 	/**
 	 * 정산 준비로 넘어온 정산 아이템 예치금에 반영
@@ -148,6 +143,55 @@ public class DepositService {
 
 		depositLogJpaRepository.save(log);
 	}
+    /**
+     * 특정 유저의 예치금 확인 (외부 서비스 연동용)
+     */
+    @Transactional(readOnly = true)
+    public boolean hasEnoughDeposit(String userId, BigDecimal amount) {
+        Deposit deposit = getDepositByUserId(userId);
+        return deposit.getBalance().compareTo(amount) >= 0;
+    }
+
+    /**
+     * 예치금 환불
+     */
+    public DepositResponse refundUsedDeposit(String userId, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
+        }
+
+        Deposit deposit = getDepositByUserId(userId);
+        BigDecimal beforeBalance = deposit.getBalance();
+        deposit.increaseBalance(amount);
+        BigDecimal afterBalance = deposit.getBalance();
+
+        Deposit savedDeposit = depositJpaRepository.save(deposit);
+
+        DepositLog depositLog = DepositLog.create(
+            userId,
+            savedDeposit,
+            TransactionType.REFUND,
+            amount,
+            beforeBalance,
+            afterBalance
+        );
+        depositLogJpaRepository.save(depositLog);
+
+        return new DepositResponse(savedDeposit.getId(), savedDeposit.getBalance(), "환불이 완료되었습니다.");
+    }
+
+    /**
+     * 결제 실패 시 사용한 예치금을 환불
+     */
+    public DepositResponse refundDeposit(String userId, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
+        }
+
+        DepositResponse response = refundUsedDeposit(userId, amount);
+
+        return new DepositResponse(response.depositId(), response.balance(), "예치금이 환불되었습니다.");
+    }
 
 	public void markSettlementFailed(SettlementReadyEvent event, String reason) {
 		// 이미 성공 로그가 있으면 실패 로그는 굳이 안 남김
