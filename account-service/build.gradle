@@ -49,6 +49,9 @@ subprojects {
     }
 
     dependencies {
+
+        runtimeOnly 'com.mysql:mysql-connector-j'
+
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
@@ -56,6 +59,8 @@ subprojects {
         //redis
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'com.github.codemonstur:embedded-redis:1.4.3'
+
+
 
         //lombok
         compileOnly 'org.projectlombok:lombok'

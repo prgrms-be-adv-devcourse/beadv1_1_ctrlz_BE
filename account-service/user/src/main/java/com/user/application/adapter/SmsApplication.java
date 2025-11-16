@@ -10,8 +10,8 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.command.SellerVerificationContext;
 import com.user.application.port.in.SellerVerificationUseCase;
+import com.user.application.port.out.SellerVerificationClient;
 import com.user.infrastructure.redis.vo.CacheType;
-import com.user.infrastructure.sms.adapter.SmsClientAdapter;
 import com.user.infrastructure.sms.utils.VerificationCodeSupplier;
 
 import jakarta.annotation.PostConstruct;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SmsApplication implements SellerVerificationUseCase {
 
 	private final CacheManager cacheManager;
-	private final SmsClientAdapter smsClientAdapter;
+	private final SellerVerificationClient smsClientAdapter;
 
 	private Cache verificationTryCache;
 	private Cache verificationCodeCache;
@@ -44,15 +44,6 @@ public class SmsApplication implements SellerVerificationUseCase {
 		verificationTryCache = getCache(CacheType.VERIFICATION_TRY);
 		verificationCodeCache = getCache(CacheType.VERIFICATION_CODE);
 		verificationBanCache = getCache(CacheType.VERIFICATION_BAN_ONE_DAY);
-	}
-
-	private Cache getCache(CacheType type) {
-		Cache cache = cacheManager.getCache(type.name());
-		if (cache == null) {
-			log.error("캐시 초기화 실패: {}", cacheManager.getCacheNames());
-			throw new IllegalStateException("캐싱이 초기화되지 않았습니다. type = " + type.name());
-		}
-		return cache;
 	}
 
 	@Override
@@ -154,5 +145,14 @@ public class SmsApplication implements SellerVerificationUseCase {
 			log.error("{} — userId: {}", e.getMessage(), key, e);
 			throw new CustomException(UserExceptionCode.CODE_EXCEPTION.getMessage());
 		}
+	}
+
+	private Cache getCache(CacheType type) {
+		Cache cache = cacheManager.getCache(type.name());
+		if (cache == null) {
+			log.error("캐시 초기화 실패: {}", cacheManager.getCacheNames());
+			throw new IllegalStateException("캐싱이 초기화되지 않았습니다. type = " + type.name());
+		}
+		return cache;
 	}
 }

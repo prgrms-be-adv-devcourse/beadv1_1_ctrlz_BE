@@ -46,9 +46,9 @@ public record ApiErrorResponse(
 		return new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), errors);
 	}
 
-	public static ApiErrorResponse of(String message) {
+	public static ApiErrorResponse of(String message, HttpStatus httpStatus) {
 		return ApiErrorResponse.builder()
-			.status(HttpStatus.BAD_REQUEST.value())
+			.status(httpStatus.value())
 			.message(message)
 			.build();
 	}
