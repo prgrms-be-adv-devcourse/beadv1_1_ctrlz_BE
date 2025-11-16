@@ -6,7 +6,11 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.user.domain.vo.EventType;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -26,12 +30,10 @@ public class ExternalEventEntity {
 
 	private String userId;
 
-	private String eventType;
-
-	private String commandType;
+	@Enumerated(EnumType.STRING)
+	private EventType eventType;
 
 	private String content;
-
 	private boolean published;
 
 	private LocalDateTime published_at;
@@ -46,8 +48,7 @@ public class ExternalEventEntity {
 	ExternalEventEntity(
 		String id,
 		String userId,
-		String eventType,
-		String commandType,
+		EventType eventType,
 		String content,
 		boolean published,
 		LocalDateTime published_at,
@@ -57,7 +58,6 @@ public class ExternalEventEntity {
 		this.id = id;
 		this.userId = userId;
 		this.eventType = eventType;
-		this.commandType = commandType;
 		this.content = content;
 		this.published = published;
 		this.published_at = published_at;
@@ -65,14 +65,13 @@ public class ExternalEventEntity {
 		this.updatedAt = updatedAt;
 	}
 
-	public static ExternalEventEntity from(String userId, String eventType, String commandType, String content) {
+	public static ExternalEventEntity from(String userId, EventType eventType, String content) {
 		return ExternalEventEntity.builder()
 			.userId(userId)
 			.eventType(eventType)
 			.content(content)
 			.published(false)
-			.commandType(commandType)
-			.published_at(null)
+			.published_at(LocalDateTime.now())
 			.createdAt(LocalDateTime.now())
 			.updatedAt(LocalDateTime.now())
 			.build();
@@ -80,6 +79,5 @@ public class ExternalEventEntity {
 
 	public void publishedComplete() {
 		this.published = true;
-		this.published_at = LocalDateTime.now();
 	}
 }

@@ -1,6 +1,6 @@
 package com.user.domain.event;
 
-import com.user.application.adapter.vo.EventType;
+import com.user.domain.vo.EventType;
 
 public record UserSignedUpEvent(
 	String userId,

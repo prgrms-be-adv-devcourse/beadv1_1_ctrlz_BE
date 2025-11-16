@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: domain-deploy
+  name: domain-service-deploy
   labels:
     app: domain
 spec:
@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0 # 새 pod ready시 까지 유지
-      maxSurge: 1 # 새 pod 생성
+#    rollingUpdate:
+#      maxUnavailable: 1
+#      maxSurge: 1
   template:
     metadata:
       labels:
@@ -22,10 +22,12 @@ spec:
     spec:
       containers:
         - name: domain-service-app
-          image: docker.io/beatchoi156/domain-service:latest
+          image: beatchoi156/domain-service:latest
           env:
-            - name: discovery_default_zone
-              value: "http://discovery-svc:8761/eureka/"
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           ports:
             - containerPort: 8081
 #          resources:
@@ -59,7 +61,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: domain-svc
+  name: domain-service
 spec:
 #  type: NodePort
   selector:

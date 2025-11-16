@@ -14,11 +14,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.user.application.adapter.dto.CartCreateCommand;
 import com.user.application.adapter.UserSignedUpEventHandler;
-import com.user.application.adapter.vo.CommandType;
 import com.user.application.port.out.ExternalEventPersistentPort;
 import com.user.application.port.out.OutboundEventPublisher;
 import com.user.domain.event.UserSignedUpEvent;
-import com.user.application.adapter.vo.EventType;
+import com.user.domain.vo.EventType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserSignedUpEventHandler 테스트")
@@ -52,7 +51,7 @@ class UserSignedUpEventHandlerTest {
 
 		// then
 		verify(externalEventPersistentPort, times(1))
-			.save(eq(TEST_USER_ID), eq(EventType.CREATED.name()), eq(CommandType.CART_COMMAND.name()), eq(CommandType.DEPOSIT_COMMAND.name()));
+			.save(eq(TEST_USER_ID), eq(EventType.CREATED));
 	}
 
 	@DisplayName("UserSignedUpEvent 발생 시 Kafka에 이벤트를 발행한다")
@@ -62,7 +61,7 @@ class UserSignedUpEventHandlerTest {
 		UserSignedUpEvent event = UserSignedUpEvent.from(TEST_USER_ID, EventType.CREATED);
 
 		// when
-		userSignedUpEventHandler.publishCartCommand(event);
+		userSignedUpEventHandler.publishKafka(event);
 
 		// then
 		verify(kafkaEventPublisher, times(1))
@@ -76,10 +75,10 @@ class UserSignedUpEventHandlerTest {
 		UserSignedUpEvent event = UserSignedUpEvent.from(TEST_USER_ID, EventType.CREATED);
 
 		// when
-		userSignedUpEventHandler.publishDepositCommand(event);
+		userSignedUpEventHandler.publishKafka(event);
 
 		// then
 		verify(externalEventPersistentPort, times(1))
-			.completePublish(eq(TEST_USER_ID), eq(EventType.CREATED.name()), eq(CommandType.DEPOSIT_COMMAND.name()));
+			.completePublish(eq(TEST_USER_ID), eq(EventType.CREATED));
 	}
 }

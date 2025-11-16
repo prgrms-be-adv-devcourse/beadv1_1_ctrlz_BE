@@ -105,11 +105,6 @@ public class EmbeddedRedisConfiguration {
 
 	@PostConstruct
 	public void startRedis() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (osName.contains("win")) {
-			log.warn("Embedded Redis is not supported on Windows. Skipping Redis startup.");
-			return;
-		}
 		try {
 			int defaultRedisPort = 6380;
 			try {

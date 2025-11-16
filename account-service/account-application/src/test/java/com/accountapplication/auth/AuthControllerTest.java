@@ -24,55 +24,55 @@ import com.auth.dto.TokenRefreshRequest;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.jwt.TokenType;
 import com.auth.service.JwtAuthService;
-import com.user.infrastructure.redis.configuration.EmbeddedRedisConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.user.infrastructure.redis.configuration.EmbeddedRedisConfiguration;
 
 @ActiveProfiles("test")
-@Import(EmbeddedRedisConfiguration.class)
+@Import({EmbeddedRedisConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
+	@MockitoBean
+	private JwtTokenProvider jwtTokenProvider;
 
-    @MockitoBean
-    private JwtAuthService jwtAuthService;
+	@MockitoBean
+	private JwtAuthService jwtAuthService;
 
-    @DisplayName("토큰 재발급 테스트")
-    @Test
-    void refreshToken() throws Exception {
-        // given
-        TokenRefreshRequest request = new TokenRefreshRequest("testUser", "valid-refresh-token");
-        String newAccessToken = "new-access-token";
-        long expiration = Instant.now().getEpochSecond() + 3600;
-
-        given(jwtAuthService.reissueAccessToken(anyString(), anyString())).willReturn(newAccessToken);
-        given(jwtTokenProvider.getExpirationFromToken(newAccessToken)).willReturn(Instant.ofEpochSecond(expiration));
-
-        // when then
-        mockMvc.perform(post("/api/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(cookie().exists(TokenType.ACCESS_TOKEN.name()))
-            .andExpect(cookie().value(TokenType.ACCESS_TOKEN.name(), newAccessToken))
-            .andExpect(cookie().httpOnly(TokenType.ACCESS_TOKEN.name(), true))
-            .andExpect(cookie().secure(TokenType.ACCESS_TOKEN.name(), false))
-            .andExpect(cookie().path(TokenType.ACCESS_TOKEN.name(), "/"))
-            .andExpect(cookie().sameSite(TokenType.ACCESS_TOKEN.name(), "Lax"));
-    }
-
-    @DisplayName("로그아웃 테스트")
+	@DisplayName("토큰 재발급 테스트")
 	@Test
-	void logout() throws Exception {
+	void test1() throws Exception {
+		// given
+		TokenRefreshRequest request = new TokenRefreshRequest("testUser", "valid-refresh-token");
+		String newAccessToken = "new-access-token";
+		long expiration = Instant.now().getEpochSecond() + 3600;
+
+		given(jwtAuthService.reissueAccessToken(anyString(), anyString())).willReturn(newAccessToken);
+		given(jwtTokenProvider.getExpirationFromToken(newAccessToken)).willReturn(Instant.ofEpochSecond(expiration));
+
+		// when then
+		mockMvc.perform(post("/api/auth/refresh")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists(TokenType.ACCESS_TOKEN.name()))
+			.andExpect(cookie().value(TokenType.ACCESS_TOKEN.name(), newAccessToken))
+			.andExpect(cookie().httpOnly(TokenType.ACCESS_TOKEN.name(), true))
+			.andExpect(cookie().secure(TokenType.ACCESS_TOKEN.name(), false))
+			.andExpect(cookie().path(TokenType.ACCESS_TOKEN.name(), "/"))
+			.andExpect(cookie().sameSite(TokenType.ACCESS_TOKEN.name(), "Lax"));
+	}
+
+	@DisplayName("로그아웃 테스트")
+	@Test
+	void test2() throws Exception {
 		// given
 		String token = "valid-access-token";
 		String userId = "testUser";

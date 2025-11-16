@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: discovery-deploy
+  name: discovery-service-deploy
   labels:
     app: discovery
 spec:
@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0 # 새 pod ready시 까지 유지
-      maxSurge: 1 # 새 pod 생성
+#    rollingUpdate:
+#      maxUnavailable: 1
+#      maxSurge: 1
   template:
     metadata:
       labels:
@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: discovery-service-app
-          image: docker.io/beatchoi156/discovery-service:latest
+          image: beatchoi156/discovery-service:latest
           ports:
             - containerPort: 8761
           #          resources:
@@ -56,7 +56,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: discovery-svc
+  name: discovery-service
 spec:
   type: NodePort
   selector:
