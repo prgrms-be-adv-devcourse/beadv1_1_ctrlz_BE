@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Build outputs - .gradle만 제외하고 gradle은 제외하지 않음
+**/build/
+**/bin/
+**/.gradle
+**/target/
+
+# Test
+**/test-results/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+*.bak
+*.swp
