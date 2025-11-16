@@ -1,10 +1,12 @@
 package com.domainservice.domain.payment.model.dto;
 
+import java.math.BigDecimal;
+
 public record PaymentConfirmRequest(
-    String userId,
     String paymentKey,
     String orderId,
-    int amount,
-    boolean depositUsed // 예치금 사용 여부
+    BigDecimal amount,
+    BigDecimal usedDepositAmount,
+    BigDecimal totalAmount
 ) {
 }

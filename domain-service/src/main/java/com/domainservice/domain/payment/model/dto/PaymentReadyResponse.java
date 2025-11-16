@@ -8,4 +8,5 @@ public record PaymentReadyResponse(
     BigDecimal amount,
     BigDecimal depositBalance,
     String orderName
-) {}
+) {
+}

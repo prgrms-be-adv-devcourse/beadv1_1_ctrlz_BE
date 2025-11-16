@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.common.model.persistence.BaseEntity;
+import com.domainservice.domain.payment.model.entity.PaymentEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -43,8 +46,8 @@ public class Order extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus;
 
-	@Column(nullable = false)
-	private String orderName;
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private PaymentEntity payment;
 
 	public void addOrderItem(OrderItem item) {
 		this.orderItems.add(item);
@@ -79,5 +82,9 @@ public class Order extends BaseEntity {
 	@Override
 	protected String getEntitySuffix() {
 		return "order";
+	}
+
+	public void setPayment(PaymentEntity paymentEntity) {
+		this.payment = paymentEntity;
 	}
 }

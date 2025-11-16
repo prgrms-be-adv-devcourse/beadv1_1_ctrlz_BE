@@ -1,14 +1,21 @@
 package com.domainservice.domain.payment.model.entity;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 import com.common.model.persistence.BaseEntity;
+import com.domainservice.domain.order.model.entity.Order;
 import com.domainservice.domain.payment.model.enums.PayType;
+import com.domainservice.domain.payment.model.enums.PaymentStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,69 +31,78 @@ import lombok.NoArgsConstructor;
 @Table(name = "payments")
 public class PaymentEntity extends BaseEntity {
 
-    /** 사용자 서비스에서 받아올 ID */
     @Column(name = "users_id", nullable = false)
     private String usersId;
 
-    /** Toss 결제키 */
-    @Column(nullable = false, unique = true)
+    // 토스에서 자동 발급될 키
+    @Column
     private String paymentKey;
 
-    /** 주문 서비스에서 받아올 ID */
-    @Column(name = "orders_id", nullable = false)
-    private String orderId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "orders_id", nullable = false)
+    private Order order;
 
-    /** 요청 금액 Order에서 넘어온 금액 */
+    // order에서 넘어오는 요청 금액
     @Column(nullable = false)
-    private int requestedAmount;
+    private BigDecimal requestedAmount;
 
-    /** 실제 결제된 금액*/
+    // 실제 결제된 금액
     @Column(nullable = false)
-    private int amount;
+    private BigDecimal amount;
 
-    /** 예치금 사용 금액 */
+    // 예치금 사용 금액
     @Column(nullable = false)
-    private int depositUsedAmount;
+    private BigDecimal depositUsedAmount;
 
-    /** Toss 충전된 금액 */
+    // 토스 충전된 금액
     @Column(nullable = false)
-    private int tossChargedAmount;
+    private BigDecimal tossChargedAmount;
 
-    /** 결제 통화 */
     @Column(nullable = false)
     private String currency;
 
-    /** 결제 수단 */
+    // 결제 수단(예치금/예치금+토스/토스)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PayType payType;
 
-    /** 상태 */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private PaymentStatus status;
 
-    /** 실패 사유 */
-    @Column
-    private String failureReason;
+    private OffsetDateTime approvedAt;
 
-    /** 결제 승인 시각 */
-    private LocalDateTime approvedAt;
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private PaymentRefundEntity refund;
+
+    public void linkRefund(PaymentRefundEntity refund) {
+        this.refund = refund;
+        refund.linkPayment(this);
+        this.updateStatus(PaymentStatus.REFUNDED);
+    }
+
+    public void updateStatus(PaymentStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void linkOrder(Order order) {
+        this.order = order;
+        order.setPayment(this);
+    }
 
     @Override
     protected String getEntitySuffix() {
         return "payment";
     }
 
-    /** 실제 결제 금액 계산 후 빌더에서 반환 */
-    public static PaymentEntity of(String userId, String orderId, int requestedAmount,
-        int depositUsedAmount, int tossChargedAmount,
+    public static PaymentEntity of(String userId, Order order, BigDecimal requestedAmount,
+        BigDecimal depositUsedAmount, BigDecimal tossChargedAmount,
         String currency, PayType payType,
-        String status, String paymentKey,
-        String failureReason, LocalDateTime approvedAt) {
-        int actualAmount = depositUsedAmount + tossChargedAmount;
+        PaymentStatus status, String paymentKey, OffsetDateTime approvedAt) {
+        BigDecimal actualAmount = depositUsedAmount.add(tossChargedAmount);
         return PaymentEntity.builder()
             .usersId(userId)
-            .orderId(orderId)
+            .order(order)
             .requestedAmount(requestedAmount)
             .amount(actualAmount)
             .depositUsedAmount(depositUsedAmount)
@@ -95,7 +111,6 @@ public class PaymentEntity extends BaseEntity {
             .payType(payType)
             .status(status)
             .paymentKey(paymentKey)
-            .failureReason(failureReason)
             .approvedAt(approvedAt)
             .build();
     }

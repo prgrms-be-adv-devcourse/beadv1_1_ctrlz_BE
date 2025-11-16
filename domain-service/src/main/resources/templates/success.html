@@ -1,69 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="ko">-->
-<!--<head>-->
-<!--    <meta charset="utf-8" />-->
-<!--</head>-->
-<!--<body>-->
-<!--<h2>결제 성공</h2>-->
-<!--<p id="paymentKey"></p>-->
-<!--<p id="orderId"></p>-->
-<!--<p id="amount"></p>-->
-
-<!--<script>-->
-<!--    // 쿼리 파라미터에서 결제 정보 추출-->
-<!--    const urlParams = new URLSearchParams(window.location.search);-->
-<!--    const paymentKey = urlParams.get("paymentKey");-->
-<!--    const orderId = urlParams.get("orderId");-->
-<!--    const amount = urlParams.get("amount");-->
-<!--    const depositUsed = urlParams.get("depositUsed") === 'true';-->
-<!--    const userId = localStorage.getItem("userId"); // 로그인 정보-->
-
-<!--    // 서버로 결제 승인 요청-->
-<!--    async function confirm() {-->
-<!--        const requestData = {-->
-<!--            userId: userId,-->
-<!--            paymentKey: paymentKey,-->
-<!--            orderId: orderId,-->
-<!--            amount: Number(amount),-->
-<!--            depositUsed: depositUsed-->
-<!--        };-->
-
-<!--        try {-->
-<!--            const response = await fetch("/api/payments/confirm", {-->
-<!--                method: "POST",-->
-<!--                headers: {-->
-<!--                    "Content-Type": "application/json",-->
-<!--                },-->
-<!--                body: JSON.stringify(requestData),-->
-<!--            });-->
-
-<!--            const json = await response.json();-->
-
-<!--            if (!response.ok) {-->
-<!--                console.error("결제 승인 실패:", json);-->
-<!--                window.location.href = `/fail?message=${json.message}&code=${json.code}`;-->
-<!--                return;-->
-<!--            }-->
-
-<!--            console.log("결제 승인 성공:", json);-->
-<!--        } catch (error) {-->
-<!--            console.error("결제 승인 요청 중 오류 발생:", error);-->
-<!--            window.location.href = `/fail?message=${error.message}&code=NETWORK_ERROR`;-->
-<!--        }-->
-
-<!--        confirm();-->
-
-<!--        // 결제 정보 표시-->
-<!--        document.getElementById("orderId").textContent = "주문 번호: " + orderId;-->
-<!--        document.getElementById("amount").textContent = "결제 금액: " + amount + "원";-->
-<!--        document.getElementById("paymentKey").textContent = "결제 키: " + paymentKey;-->
-<!--    }-->
-
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -91,17 +25,22 @@
 
             <div class="info-row">
                 <span class="info-label">주문번호</span>
-                <span class="info-value" id="orderId"> [[ ${orderId} ]] </span>
+                <span class="info-value" id="orderId"></span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">상품명</span>
-                <span class="info-value" id="orderName"> [[ ${productName} ]] </span>
+                <span class="info-value" id="orderName"></span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">사용한 예치금 금액</span>
+                <span class="info-value" id="usedDepositAmount"></span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">결제금액</span>
-                <span class="info-value" id="amount"> [[ ${amount} ]] </span>
+                <span class="info-value" id="amount"></span>
             </div>
 
         </div>
@@ -115,35 +54,55 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
 
-    document.getElementById('loading').style.display = 'block';
+        const orderId = urlParams.get("orderId");
+        const orderName = urlParams.get("orderName");
+        const usedDepositAmount = parseInt(urlParams.get("usedDepositAmount")) || 0;
+        const totalAmount = parseInt(urlParams.get("totalAmount")) || 0;
 
-    const urlParams = new URLSearchParams(window.location.search);
+        // 화면에 값 표시
+        document.getElementById("orderId").innerText = orderId;
+        document.getElementById("orderName").innerText = orderName;
+        document.getElementById("usedDepositAmount").innerText = `₩ ${usedDepositAmount.toLocaleString()}`;
+        document.getElementById("amount").innerText = `₩ ${totalAmount.toLocaleString()}`;
 
-    var requestData = {
-        paymentKey: urlParams.get("paymentKey"),
-        orderId: urlParams.get("orderId"),
-        amount: urlParams.get("amount"),
-    };
+        if (totalAmount === 0) {
+            // 예치금만 결제 -> 바로 성공 화면 표시
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success-content').style.display = 'block';
+        } else {
+            // 일반 결제 -> 서버 confirm 호출
+            const requestData = {
+                paymentKey: urlParams.get("paymentKey"),
+                orderId: orderId,
+                amount: totalAmount + usedDepositAmount,
+                usedDepositAmount: usedDepositAmount,
+                totalAmount: totalAmount
+            };
 
-    fetch('/confirm', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestData)
-    }).then(response => response.text())
-        .then(
-            t => {
-                if ( t === "success" ) {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('success-content').style.display = 'block';
-                } else {
-                    location.href = "/fail";
-                }
-            }
-        )
-
+            fetch('/api/payments/confirm', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    console.log("confirm result:", result);
+                    if (result.message === "결제 처리 완료") {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('success-content').style.display = 'block';
+                    } else {
+                        location.href = "/api/payments/fail";
+                    }
+                })
+                .catch(error => {
+                    console.error("결제 확인 중 오류:", error);
+                    location.href = "/api/payments/fail";
+                });
+        }
+    });
 </script>
 </body>
 </html>
