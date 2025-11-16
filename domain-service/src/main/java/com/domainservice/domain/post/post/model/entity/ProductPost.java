@@ -203,7 +203,13 @@ public class ProductPost extends BaseEntity {
     ================ validate ================
      */
 
-    public void validateUpdate(String userId) {
+    public void validateUpdate(String userId, List<String> roles) {
+
+        // 관리자는 검증 없이 게시글 수정 가능
+        if (roles.contains("ADMIN")) {
+            return;
+        }
+
         // 판매 완료된 상품은 수정 불가
         if (this.tradeStatus == TradeStatus.SOLDOUT) {
             throw new ProductPostException(CANNOT_UPDATE_SOLDOUT);
@@ -211,7 +217,13 @@ public class ProductPost extends BaseEntity {
         validate(userId);
     }
 
-    public void validateDelete(String userId) {
+    public void validateDelete(String userId, List<String> roles) {
+
+        // 관리자는 검증 없이 게시글 삭제 가능
+        if (roles.contains("ADMIN")) {
+            return;
+        }
+
         validate(userId);
     }
 

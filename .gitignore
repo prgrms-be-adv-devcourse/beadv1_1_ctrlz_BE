@@ -181,3 +181,9 @@ Temporary Items
 
 # Application specific
 application-secret.yml
+*.webp
+common/out/
+account-service/account-application/out
+account-service/user/out
+account-service/auth/out
+gateway-service/out

@@ -3,7 +3,6 @@ package com.user.application.port.out;
 import java.util.Optional;
 
 import com.user.domain.model.User;
-import com.user.domain.vo.UserRole;
 
 public interface UserPersistencePort {
 
@@ -21,7 +20,7 @@ public interface UserPersistencePort {
 
 	boolean existsNickname(String nickname);
 
-	void updateRole(String id, UserRole userRole);
+	void updateRolesForSeller(String id);
 
 	void updateImage(String userId, String imageId, String profileImageUrl);
 
