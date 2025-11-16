@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-service
+  labels:
+    app: mysql
+
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+
+  template:
+    metadata:
+      name: mysql
+      labels:
+        app: mysql
+
+    spec:
+      containers:
+        - name: mysql1
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+          envFrom:
+            - configMapRef:
+                name: mysql-config-map
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+
+spec:
+  type: NodePort
+  selector:
+    app: mysql  # 이 라벨을 가진 Pod들에게 트래픽 분산
+
+  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+
+  ports:
+    - protocol: TCP
+      port: 3306 # 어디로 포워딩 할건지
+      targetPort: 3306 # 컨테이너 포트 번호
+      nodePort: 30006
+

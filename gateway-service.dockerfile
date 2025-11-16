@@ -2,11 +2,11 @@ FROM gradle:jdk21 AS build
 
 WORKDIR /app
 
-COPY ../gateway-service/build.gradle gateway-service/settings.gradle gateway-service/gradlew gateway-service/gradlew.bat ./gateway-service/
-COPY ../gateway-service/gradle ./gateway-service/gradle
+COPY gateway-service/build.gradle gateway-service/settings.gradle gateway-service/gradlew gateway-service/gradlew.bat ./gateway-service/
+COPY gateway-service/gradle ./gateway-service/gradle
 
 
-COPY ../gateway-service/src ./gateway-service/src
+COPY gateway-service/src ./gateway-service/src
 
 WORKDIR /app/gateway-service
 RUN chmod +x ./gradlew

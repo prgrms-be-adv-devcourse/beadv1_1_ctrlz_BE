@@ -18,7 +18,7 @@ SERVICES=(
 # 각 서비스에 대해 Docker 이미지 빌드 및 푸시
 for SERVICE in "${SERVICES[@]}"; do
   IMAGE_NAME="$DOCKERHUB_USERNAME/$SERVICE:latest"
-  DOCKERFILE="docker/$SERVICE.dockerfile"
+  DOCKERFILE="$SERVICE.dockerfile"
 
   echo "=================================================="
   echo "Building and pushing $IMAGE_NAME"

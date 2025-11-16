@@ -17,19 +17,25 @@ spring:
       local:
         - secret
 
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:mem:domain_dev;MODE=MySQL # ?????? ???? ??
+#    username: sa
+#    password:
+#    hikari:
+#      auto-commit: false
+
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:domain_dev;MODE=MySQL # ?????? ???? ??
-    username: sa
-    password:
-    hikari:
-      auto-commit: false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    password: 1234
+    url: jdbc:mysql://localhost:30006/test_db
 
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: create
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         format_sql: true

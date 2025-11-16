@@ -2,11 +2,11 @@ FROM gradle:jdk21 AS build
 
 WORKDIR /app
 
-COPY ../discovery-service/build.gradle discovery-service/settings.gradle discovery-service/gradlew discovery-service/gradlew.bat ./discovery-service/
-COPY ../discovery-service/gradle ./discovery-service/gradle
+COPY discovery-service/build.gradle discovery-service/settings.gradle discovery-service/gradlew discovery-service/gradlew.bat ./discovery-service/
+COPY discovery-service/gradle ./discovery-service/gradle
 
 
-COPY ../discovery-service/src ./discovery-service/src
+COPY discovery-service/src ./discovery-service/src
 
 WORKDIR /app/discovery-service
 RUN chmod +x ./gradlew

@@ -16,11 +16,18 @@ spring:
     hibernate:
       ddl-auto: create
 
+  #  datasource:
+  #    driver-class-name: org.h2.Driver
+  #    username: sa
+  #    password:
+  #    url: jdbc:h2:mem:user-db
   datasource:
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    url: jdbc:h2:mem:user-db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    password: 1234
+    url: jdbc:mysql://mysql-service:3306/test_db
+
+
 
   h2:
     console:
