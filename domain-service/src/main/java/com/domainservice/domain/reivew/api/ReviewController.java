@@ -8,6 +8,7 @@ import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.service.ReviewService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
 	private final ReviewService reviewService;
+	private final String TEST_USER_ID = "user-001";
 
 	/**
 	 * 리뷰 생성 api
@@ -31,10 +33,10 @@ public class ReviewController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<ReviewResponse> createReview(
-		@RequestBody ReviewRequest request
+		@Valid @RequestBody ReviewRequest request
 		// TODO: 회원 정보를 가져와야함.
 	) {
-		ReviewResponse response = reviewService.createReview(request);
+		ReviewResponse response = reviewService.createReview(request, TEST_USER_ID);
 
 		return new BaseResponse<>(
 			response,
@@ -51,10 +53,10 @@ public class ReviewController {
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ReviewResponse> getReview(
 		@PathVariable String reviewId,
-		@RequestBody ReviewRequest request
+		@Valid @RequestBody ReviewRequest request
 		//TODO: 회원 정보를 가져와야함.
 	) {
-		ReviewResponse response = reviewService.updateReview(reviewId, request);
+		ReviewResponse response = reviewService.updateReview(reviewId, request, TEST_USER_ID);
 		return new BaseResponse<>(
 			response,
 			ReviewConstant.REVIEW_UPDATED.getMessage()
@@ -68,9 +70,10 @@ public class ReviewController {
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ReviewResponse>> getReviewListById(
-		String userId //TODO: 회원 정보를 가져와야함.
+		String userId, //TODO: 회원 정보를 가져와야함.
+		@RequestParam Integer pageNumber
 	) {
-		List<ReviewResponse> responseList = reviewService.getReviewListById(userId);
+		List<ReviewResponse> responseList = reviewService.getReviewListById(TEST_USER_ID, pageNumber);
 		return new BaseResponse<>(
 			responseList,
 			ReviewConstant.REVIEW_FETCHED.getMessage()
@@ -87,7 +90,7 @@ public class ReviewController {
 	public BaseResponse<ReviewResponse> getReviewByProductPostId(
 		@PathVariable String productPostId
 	) {
-		ReviewResponse response = reviewService.getReviewByProductPostId(productPostId);
+		ReviewResponse response = reviewService.getReviewByProductPostId(productPostId, TEST_USER_ID);
 
 		return new BaseResponse<>(
 			response,

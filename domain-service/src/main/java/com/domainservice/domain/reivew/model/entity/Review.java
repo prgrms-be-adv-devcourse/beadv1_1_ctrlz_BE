@@ -1,6 +1,8 @@
 package com.domainservice.domain.reivew.model.entity;
 
 import com.common.model.persistence.BaseEntity;
+import com.domainservice.domain.reivew.exception.DuplicatedReviewException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -40,26 +42,11 @@ public class Review extends BaseEntity {
             Integer userRating,
             Integer productRating
     ) {
-        validateValue(contents, userRating, productRating);
         this.userId = userId;
         this.productPostId = productPostId;
         this.contents = contents;
         this.userRating = userRating;
         this.productRating = productRating;
-    }
-
-    private static void validateValue(String contents, Integer userRating, Integer productRating) {
-        if(contents == null || contents.isEmpty()) {
-            throw new IllegalArgumentException("내용은 필수 입력값입니다.");
-        }
-
-        if(userRating <= 0) {
-            throw new IllegalArgumentException("판매자 평점은 1점 이상이어야 합니다.");
-        }
-
-        if(productRating <= 0) {
-            throw new IllegalArgumentException("상품 평점은 1점 이상이어야 합니다.");
-        }
     }
 
     private void validateSameValue(
@@ -69,8 +56,9 @@ public class Review extends BaseEntity {
     ) {
         if(this.contents.equals(newContents)
             && this.userRating.equals(newUserRating)
-            && this.productRating.equals(newProductRating)) {
-            throw new IllegalArgumentException("기존에 작성된 리뷰와 동일합니다.");
+            && this.productRating.equals(newProductRating
+        )) {
+            throw DuplicatedReviewException.EXCEPTION;
         }
     }
 
@@ -79,12 +67,11 @@ public class Review extends BaseEntity {
         Integer userRating,
         Integer productPostRating
     ) {
-        validateValue(contents, userRating, productPostRating);
         validateSameValue(contents, userRating, productPostRating);
         this.contents = contents;
         this.userRating = userRating;
         this.productRating = productPostRating;
-        //TODO: updatedAt에 접근할 수 있는 방법이 없음.
+        this.update();
     }
 
 

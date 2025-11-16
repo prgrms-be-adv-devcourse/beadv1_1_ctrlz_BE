@@ -3,7 +3,6 @@ package com.domainservice.common.model.user;
 import java.util.List;
 
 public record UserResponse(
-	String userId,
 	String name,
 	String nickname,
 	String phoneNumber,
