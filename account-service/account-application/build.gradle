@@ -92,6 +92,7 @@ sourceSets {
 }
 configurations {
     querydsl.extendsFrom compileClasspath
+}
 tasks.named('bootJar') {
     archiveFileName.set("${project.name}-boot.jar")
 }
