@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Profile("!test")
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfiguration {
@@ -38,15 +36,19 @@ public class SecurityConfiguration {
 		return http
 			// CSRF 비활성화
 			.csrf(AbstractHttpConfigurer::disable)
+
 			// CORS 설정
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
 			// 프레임 옵션 설정 (H2 콘솔) -> 추후 제거
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 			)
+
 			// 기본 인증 및 폼 로그인 비활성화
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
+
 			// OAuth2 로그인 설정
 			.oauth2Login(oauth2 -> oauth2
 				.successHandler(oAuth2SuccessHandler) // 로그인 성공 핸들러
@@ -88,8 +90,6 @@ public class SecurityConfiguration {
 				).permitAll()
 				// H2 콘솔
 				.requestMatchers("/h2-console/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/users/**")
-				.authenticated()
 
 				.anyRequest().permitAll()
 			)

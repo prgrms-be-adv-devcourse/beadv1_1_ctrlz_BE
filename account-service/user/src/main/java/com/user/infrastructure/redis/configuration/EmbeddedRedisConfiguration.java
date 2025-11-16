@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -39,8 +40,9 @@ import redis.embedded.core.RedisServerBuilder;
 @EnableCaching
 @Configuration
 public class EmbeddedRedisConfiguration {
-
+    @Value("${spring.data.redis.host}")
 	private final String host = "localhost";
+    @Value("${spring.data.redis.port}")
 	private int port;
 	private RedisServer redisServer;
 
@@ -103,11 +105,6 @@ public class EmbeddedRedisConfiguration {
 
 	@PostConstruct
 	public void startRedis() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (osName.contains("win")) {
-			log.warn("Embedded Redis is not supported on Windows. Skipping Redis startup.");
-			return;
-		}
 		try {
 			int defaultRedisPort = 6380;
 			try {

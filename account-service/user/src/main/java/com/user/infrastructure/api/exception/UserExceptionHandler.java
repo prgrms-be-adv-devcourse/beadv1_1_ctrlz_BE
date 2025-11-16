@@ -31,7 +31,7 @@ public class UserExceptionHandler {
 	public ApiErrorResponse handleFeignClientException(FeignClientException e) {
 		log.info("FeignClientException:{}", e.getMessage(), e);
 
-		return ApiErrorResponse.of("알 수 없는 에러가 발생했습니다.");
+		return ApiErrorResponse.of("알 수 없는 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class UserExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiErrorResponse businessLogicExceptionHandler(CustomException e) {
 		log.info("BusinessLogicException => {}, class = {}", e.getMessage(), e.getStackTrace()[0]);
-		return ApiErrorResponse.of(e.getMessage());
+		return ApiErrorResponse.of(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class UserExceptionHandler {
 	) {
 
 		log.info("MissingServletRequestParameterException => {}", e.getMessage());
-		return ApiErrorResponse.of(e.getMessage());
+		return ApiErrorResponse.of(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 
 	/**

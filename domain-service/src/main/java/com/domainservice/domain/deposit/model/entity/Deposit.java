@@ -31,20 +31,23 @@ public class Deposit extends BaseEntity {
 
 	// 예치금 증가
 	public void increaseBalance(BigDecimal amount) {
-		if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
 			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
 		}
+
 		this.balance = this.balance.add(amount);
 	}
 
 	// 예치금 감소
 	public void decreaseBalance(BigDecimal amount) {
-		if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-			throw new CustomException(DepositExceptionCode.INSUFFICIENT_BALANCE.getMessage());
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
 		}
+
 		if (this.balance.compareTo(amount) < 0) {
 			throw new CustomException(DepositExceptionCode.INSUFFICIENT_BALANCE.getMessage());
 		}
+
 		this.balance = this.balance.subtract(amount);
 	}
 

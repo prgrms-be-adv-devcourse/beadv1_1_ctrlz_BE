@@ -1,17 +1,14 @@
 package com.domainservice.common.init.data;
 
-import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.domainservice.domain.deposit.model.entity.Deposit;
-import com.domainservice.domain.deposit.repository.DepositJpaRepository;
-import com.domainservice.domain.order.model.entity.Order;
-import com.domainservice.domain.order.model.entity.OrderItem;
-import com.domainservice.domain.order.model.entity.OrderItemStatus;
-import com.domainservice.domain.order.model.entity.OrderStatus;
-import com.domainservice.domain.order.repository.OrderRepository;
+import com.domainservice.domain.cart.model.entity.CartItem;
+import com.domainservice.domain.cart.repository.CartItemJpaRepository;
+import com.domainservice.domain.order.service.OrderService;
+import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,119 +18,42 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderInitializer {
 
-    private final OrderRepository orderRepository;
-    private final DepositJpaRepository depositJpaRepository;
+	private final OrderService orderService;
+	private final CartItemJpaRepository cartItemJpaRepository;
+	private final ProductPostService productPostService;
 
-    @Transactional
-    public void init() {
-        /**
-         * 1. 예치금으로 전체 결제
-         * 예치금 10,000 / 주문금액 1,000
-         */
-        Order order1 = Order.builder()
-            .orderName("예치금으로 전체 결제")
-            .buyerId("test_user_id_1")
-            .orderStatus(OrderStatus.PAYMENT_PENDING)
-            .build();
+	public void init() {
+		log.info("--- 주문 초기화 시작 ---");
 
-        OrderItem orderItem1 = OrderItem.builder()
-            .productPostId("test_product_post_id_1")
-            .priceSnapshot(new BigDecimal(1000))
-            .orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
-            .build();
+		List<String> userIds = List.of("user-001", "user-002", "user-003", "user-004", "user-005");
 
-        order1.addOrderItem(orderItem1);
-        Order savedOrder1 = orderRepository.save(order1);
+		for (String userId : userIds) {
+			// 장바구니 아이템 조회
+			List<String> cartItemIdsFromDb = cartItemJpaRepository.findCartItemIdsByUserId(userId);
 
-        Deposit deposit1 = Deposit.builder()
-            .userId("test_user_id_1")
-            .balance(new BigDecimal(10000))
-            .build();
+			// 판매 가능한 상품만 필터 + ProductPostId 기준으로 중복 제거
+			List<String> cartItemIds = cartItemIdsFromDb.stream()
+				.map(id -> cartItemJpaRepository.findById(id).orElse(null))
+				.filter(item -> item != null && productPostService.isSellingTradeStatus(item.getProductPostId()))
+				.collect(Collectors.groupingBy(CartItem::getProductPostId))
+				.values().stream()
+				.map(list -> list.get(0)) // 같은 상품은 하나만
+				.map(CartItem::getId)
+				.toList();
 
-        depositJpaRepository.save(deposit1);
-        log.info("[1] 예치금 결제 주문 생성 완료 — orderId={}", savedOrder1.getId());
+			if (cartItemIds.isEmpty()) {
+				log.warn("{}님의 주문 생성 실패: 판매 가능한 상품이 없습니다.", userId);
+				continue;
+			}
 
-        /**
-         * 2. 예치금 + 토스 결제
-         * 예치금 5,000 / 주문금액 10,000
-         */
-        Order order2 = Order.builder()
-            .orderName("예치금 + 토스 결제")
-            .buyerId("test_user_id_2")
-            .orderStatus(OrderStatus.PAYMENT_PENDING)
-            .build();
+			try {
+				orderService.createOrder(userId, cartItemIds);
+				log.info("{}님의 주문 생성 완료", userId);
+			} catch (Exception e) {
+				log.warn("주문 생성 실패 ({}): {}", userId, e.getMessage());
+			}
+		}
 
-        OrderItem orderItem2 = OrderItem.builder()
-            .productPostId("test_product_post_id_2")
-            .priceSnapshot(new BigDecimal(10000))
-            .orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
-            .build();
-
-        order2.addOrderItem(orderItem2);
-        Order savedOrder2 = orderRepository.save(order2);
-
-        Deposit deposit2 = Deposit.builder()
-            .userId("test_user_id_2")
-            .balance(new BigDecimal(5000))
-            .build();
-
-        depositJpaRepository.save(deposit2);
-        log.info("[2] 예치금 + 토스 결제 주문 생성 완료 — orderId={}", savedOrder2.getId());
-
-        /**
-         * 3. 토스로만 결제 (예치금 없음)
-         * 예치금 0 / 주문금액 10,000
-         */
-        Order order3 = Order.builder()
-            .orderName("토스로만 결제 1")
-            .buyerId("test_user_id_3")
-            .orderStatus(OrderStatus.PAYMENT_PENDING)
-            .build();
-
-        OrderItem orderItem3 = OrderItem.builder()
-            .productPostId("test_product_post_id_3")
-            .priceSnapshot(new BigDecimal(10000))
-            .orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
-            .build();
-
-        order3.addOrderItem(orderItem3);
-        Order savedOrder3 = orderRepository.save(order3);
-
-        Deposit deposit3 = Deposit.builder()
-            .userId("test_user_id_3")
-            .balance(new BigDecimal(0))
-            .build();
-
-        depositJpaRepository.save(deposit3);
-        log.info("[3] 토스 100% 결제 주문 생성 완료 — orderId={}", savedOrder3.getId());
-
-        /**
-         * 4. 토스로만 결제 (예치금 있으나 사용 안함)
-         * 예치금 10,000 / 주문금액 20,000
-         */
-        Order order4 = Order.builder()
-            .orderName("토스로만 결제 2")
-            .buyerId("test_user_id_4")
-            .orderStatus(OrderStatus.PAYMENT_PENDING)
-            .build();
-
-        OrderItem orderItem4 = OrderItem.builder()
-            .productPostId("test_product_post_id_4")
-            .priceSnapshot(new BigDecimal(20000))
-            .orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
-            .build();
-
-        order4.addOrderItem(orderItem4);
-        Order savedOrder4 = orderRepository.save(order4);
-
-        Deposit deposit4 = Deposit.builder()
-            .userId("test_user_id_4")
-            .balance(new BigDecimal(10000))
-            .build();
-
-        depositJpaRepository.save(deposit4);
-        log.info("[4] 토스 100% 결제 주문 생성 완료 — orderId={}", savedOrder4.getId());
-
-        log.info("총 4가지 테스트용 주문 및 예치금 데이터 생성 완료!");
-    }
+		log.info("--- 주문 초기화 완료 ---");
+	}
 }
