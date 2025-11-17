@@ -34,10 +34,10 @@ public class DataInitializer implements ApplicationRunner {
 		log.info("데이터 초기화 시작");
 		log.info("========================================");
 
-        categoryInitializer.init();
-        tagInitializer.init();
-        depositInitializer.init();
-        productPostInitializer.init();
+        // categoryInitializer.init();
+        // tagInitializer.init();
+		// productPostInitializer.init();
+		depositInitializer.init();
         reviewInitializer.init();
         cartInitializer.init();
         orderInitializer.init();

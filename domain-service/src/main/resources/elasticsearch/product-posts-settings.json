@@ -1,0 +1,58 @@
+{
+  "analysis": {
+    "analyzer": {
+      "nori_analyzer": {
+        "type": "custom",
+        "tokenizer": "nori_tokenizer",
+        "filter": ["lowercase"]
+      },
+      "nori_html_analyzer": {
+        "type": "custom",
+        "tokenizer": "nori_tokenizer",
+        "char_filter": ["html_strip"],
+        "filter": ["nori_part_of_speech", "lowercase", "nori_readingform"]
+      },
+      "edge_ngram_analyzer": {
+        "type": "custom",
+        "tokenizer": "edge_ngram_tokenizer",
+        "filter": ["lowercase"]
+      },
+      "nori_synonym_analyzer": {
+        "type": "custom",
+        "tokenizer": "nori_tokenizer",
+        "filter": ["lowercase", "synonym_filter"]
+      }
+    },
+    "tokenizer": {
+      "nori_tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "mixed"
+      },
+      "edge_ngram_tokenizer": {
+        "type": "edge_ngram",
+        "min_gram": 1,
+        "max_gram": 20,
+        "token_chars": ["letter", "digit"]
+      }
+    },
+    "filter": {
+      "synonym_filter": {
+        "type": "synonym_graph",
+        "synonyms": [
+          "노트북,랩탑,laptop",
+          "핸드폰,휴대폰,스마트폰,smartphone",
+          "삼성,샘숭,삼송,samsung",
+          "애플,에플,apple,aple",
+          "lg,엘지,앨지,엘쥐,앨쥐"
+        ],
+        "lenient": true
+      }
+    },
+    "normalizer": {
+      "lowercase_normalizer": {
+        "type": "custom",
+        "filter": ["lowercase"]
+      }
+    }
+  }
+}

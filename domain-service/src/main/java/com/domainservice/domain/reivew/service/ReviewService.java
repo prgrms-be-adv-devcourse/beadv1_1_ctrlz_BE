@@ -2,7 +2,7 @@ package com.domainservice.domain.reivew.service;
 
 import java.util.List;
 
-import com.domainservice.common.feign.client.UserFeignClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.reivew.exception.ReviewNotFoundException;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;

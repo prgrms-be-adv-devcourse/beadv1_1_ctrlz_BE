@@ -1,0 +1,46 @@
+// 1. "hangul" 인식이 안됨
+// 2.nori_synonym_analyzer	synonym_filter 정의 안되어있음
+
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "autocomplete_edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 30,
+          "token_chars": ["letter", "digit", "hangul"]
+        }
+      },
+      "analyzer": {
+        "autocomplete_analyzer": {
+          "type": "custom",
+          "tokenizer": "autocomplete_edge_ngram_tokenizer",
+          "filter": ["lowercase"]
+        },
+        "autocomplete_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase"]
+        },
+        "nori_autocomplete_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": ["lowercase", "edge_ngram_filter"]
+        },
+        "nori_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": ["lowercase"]
+        }
+      },
+      "filter": {
+        "edge_ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 1,
+          "max_gram": 30
+        }
+      }
+    }
+  }
+}

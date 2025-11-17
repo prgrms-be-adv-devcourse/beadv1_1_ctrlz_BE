@@ -1,7 +1,7 @@
 package com.domainservice.domain.post.post.service;
 
 import com.common.exception.CustomException;
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
@@ -40,7 +40,7 @@ class GetProductPostTest {
     private ProductPostRepository productPostRepository;
 
     @Mock
-    private UserClient userClient;
+    private UserFeignClient userClient;
 
     @Mock
     private RecentlyViewedService recentlyViewedService;
@@ -101,7 +101,7 @@ class GetProductPostTest {
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SELLING);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -135,7 +135,7 @@ class GetProductPostTest {
         assertThat(currentViewCount).isEqualTo(initialViewCount + 1);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -160,7 +160,7 @@ class GetProductPostTest {
         setViewCount(productPost, 20);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
         doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
         // when
@@ -171,7 +171,7 @@ class GetProductPostTest {
         assertThat(result.title()).isEqualTo("갤럭시 S24 Ultra");
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
     }
 
@@ -195,14 +195,14 @@ class GetProductPostTest {
         setViewCount(productPost, 15);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willThrow(FeignException.NotFound.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
                 .isInstanceOf(CustomException.class);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -226,7 +226,7 @@ class GetProductPostTest {
         setViewCount(productPost, 25);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willThrow(FeignException.Unauthorized.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
@@ -234,7 +234,7 @@ class GetProductPostTest {
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -258,7 +258,7 @@ class GetProductPostTest {
         setViewCount(productPost, 30);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willThrow(FeignException.Forbidden.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.Forbidden.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
@@ -266,7 +266,7 @@ class GetProductPostTest {
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -290,7 +290,7 @@ class GetProductPostTest {
         setViewCount(productPost, 40);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willThrow(mock(FeignException.class));
+        given(userClient.getUser(userId)).willThrow(mock(FeignException.class));
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
@@ -298,7 +298,7 @@ class GetProductPostTest {
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
     }
 
@@ -317,7 +317,7 @@ class GetProductPostTest {
                 .hasMessage(PRODUCT_POST_NOT_FOUND.getMessage());
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
     }
 
     @DisplayName("삭제된 게시글은 조회할 수 없다.")
@@ -347,7 +347,7 @@ class GetProductPostTest {
                 .hasMessage(PRODUCT_POST_DELETED.getMessage());
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
     }
 
     @DisplayName("판매 완료된 게시글도 조회할 수 있다.")
@@ -379,7 +379,7 @@ class GetProductPostTest {
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
     }
 
     @DisplayName("거래 진행 중인 게시글도 조회할 수 있다.")
@@ -411,7 +411,7 @@ class GetProductPostTest {
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.PROCESSING);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient, never()).getUserById(anyString());
+        verify(userClient, never()).getUser(anyString());
     }
 
     @DisplayName("인증된 사용자가 판매 완료 게시글을 조회하면 최근 본 상품에 저장된다.")
@@ -435,7 +435,7 @@ class GetProductPostTest {
         setViewCount(productPost, 100);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
         doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
         // when
@@ -446,7 +446,7 @@ class GetProductPostTest {
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
     }
 
@@ -471,7 +471,7 @@ class GetProductPostTest {
         setViewCount(productPost, 5);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
         // when
@@ -482,7 +482,7 @@ class GetProductPostTest {
         assertThat(result.title()).isEqualTo("맥북 에어 M2");
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
     }
 
@@ -507,7 +507,7 @@ class GetProductPostTest {
         setViewCount(productPost, 50);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createAdmin(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createAdmin(userId));
         doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
         // when
@@ -518,7 +518,7 @@ class GetProductPostTest {
         assertThat(result.title()).isEqualTo("닌텐도 스위치");
 
         verify(productPostRepository).findById(postId);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
     }
 }
