@@ -28,11 +28,11 @@ public class DataInitializer implements ApplicationRunner {
     private final OrderInitializer orderInitializer;
     private final DepositInitializer depositInitializer;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info("========================================");
-        log.info("데이터 초기화 시작");
-        log.info("========================================");
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		log.info("========================================");
+		log.info("데이터 초기화 시작");
+		log.info("========================================");
 
         categoryInitializer.init();
         tagInitializer.init();
@@ -42,8 +42,8 @@ public class DataInitializer implements ApplicationRunner {
         cartInitializer.init();
         orderInitializer.init();
 
-        log.info("========================================");
-        log.info("데이터 초기화 완료!");
-        log.info("========================================");
-    }
+		log.info("========================================");
+		log.info("데이터 초기화 완료!");
+		log.info("========================================");
+	}
 }
