@@ -35,7 +35,7 @@ spring:
       password: "${REDIS_PASSWORD}"
 
   kafka:
-    bootstrap-servers: kafka-mq:9092
+    bootstrap-servers: kafka-mq:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -46,7 +46,6 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.common.event"
-
 
 custom:
   image:
