@@ -25,11 +25,11 @@ spring:
     hikari:
       auto-commit: false
 
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/${custom.db.database}
-#    username: "${custom.db.username}"
-#    password: "${custom.db.password}"
+  #  datasource:
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://localhost:3306/${custom.db.database}
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
 
   jpa:
     open-in-view: false
@@ -48,7 +48,7 @@ spring:
       port: 6379
       host: localhost
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
