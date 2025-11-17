@@ -1,7 +1,7 @@
 package com.domainservice.domain.post.post.service;
 
 import com.common.model.persistence.BaseEntity.DeleteStatus;
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -43,7 +43,7 @@ class DeleteProductPostTest {
     private ImageService imageService;
 
     @Mock
-    private UserClient userClient;
+    private UserFeignClient userClient;
 
     private void setId(ProductPost productPost, String id) throws Exception {
         Field field = productPost.getClass().getSuperclass().getDeclaredField("id");

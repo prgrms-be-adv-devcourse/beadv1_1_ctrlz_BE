@@ -1,18 +1,18 @@
 package com.domainservice.domain.post.post.service;
 
-import com.domainservice.common.model.user.UserView;
+import com.domainservice.common.model.user.UserResponse;
 
 import java.util.List;
 
 /**
- * 테스트용 UserView 팩토리 클래스
- * 반복적인 UserView 생성을 간편하게 해줍니다.
+ * 테스트용 UserResponse 팩토리 클래스
+ * 반복적인 UserResponse 생성을 간편하게 해줍니다.
  */
 public class UserViewFactory {
 
     // SELLER 권한을 가진 기본 사용자
-    public static UserView createSeller(String userId) {
-        return new UserView(
+    public static UserResponse createSeller(String userId) {
+        return new UserResponse(
                 "홍길동",
                 "seller" + userId,
                 "010-1234-5678",
@@ -29,8 +29,8 @@ public class UserViewFactory {
     }
 
     // ADMIN 권한을 가진 사용자
-    public static UserView createAdmin(String userId) {
-        return new UserView(
+    public static UserResponse createAdmin(String userId) {
+        return new UserResponse(
                 "관리자",
                 "admin",
                 "010-9999-9999",
@@ -47,8 +47,8 @@ public class UserViewFactory {
     }
 
     // USER 권한만 가진 일반 사용자 (SELLER X)
-    public static UserView createUser(String userId) {
-        return new UserView(
+    public static UserResponse createUser(String userId) {
+        return new UserResponse(
                 "김철수",
                 "user" + userId,
                 "010-5555-5555",

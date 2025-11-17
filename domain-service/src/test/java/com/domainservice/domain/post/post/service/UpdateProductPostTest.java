@@ -1,6 +1,6 @@
 package com.domainservice.domain.post.post.service;
 
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
@@ -54,7 +54,7 @@ class UpdateProductPostTest {
     private ImageService imageService;
 
     @Mock
-    private UserClient userClient;
+    private UserFeignClient userClient;
 
     @Mock
     private MultipartFile mockImageFile;

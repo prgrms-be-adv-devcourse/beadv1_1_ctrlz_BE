@@ -1,7 +1,7 @@
 package com.domainservice.domain.post.post.service;
 
 import com.common.exception.CustomException;
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
@@ -40,7 +40,7 @@ class GetProductPostTest {
     private ProductPostRepository productPostRepository;
 
     @Mock
-    private UserClient userClient;
+    private UserFeignClient userClient;
 
     @Mock
     private RecentlyViewedService recentlyViewedService;
