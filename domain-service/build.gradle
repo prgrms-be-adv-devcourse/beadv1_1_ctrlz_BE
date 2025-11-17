@@ -66,6 +66,10 @@ dependencies {
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+    // WordNet (extJWNL)
+    implementation 'net.sf.extjwnl:extjwnl:2.0.5'
+    implementation 'net.sf.extjwnl:extjwnl-data-wn31:1.2'
+
 }
 dependencyManagement {
     imports {
