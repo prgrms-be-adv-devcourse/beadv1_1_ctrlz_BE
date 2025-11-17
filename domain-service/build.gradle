@@ -81,6 +81,10 @@ dependencies {
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+    // WordNet (extJWNL)
+    implementation 'net.sf.extjwnl:extjwnl:2.0.5'
+    implementation 'net.sf.extjwnl:extjwnl-data-wn31:1.2'
+    
     //openfeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
@@ -94,6 +98,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 }
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
