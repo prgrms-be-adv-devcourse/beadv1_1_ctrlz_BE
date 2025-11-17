@@ -10,6 +10,7 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+
   profiles:
     active: local
     group:
@@ -35,6 +36,30 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+
+  kafka:
+    bootstrap-servers: kafka-mq:9090
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      properties:
+        spring.json.add.type.headers: false
+        delivery.timeout.ms: 120000
+        linger.ms: 0
+        request.timeout.ms: 30000
+        enable.idempotence: true
+        allow.auto.create.topics: false
+
+    consumer:
+      group-id: accounts-service
+
+      properties:
+        allow.auto.create.topics: false
+        request.timeout.ms: 30000
+
 
   data:
     redis:

@@ -11,7 +11,7 @@ spring:
     active: local
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka-mq:9090
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
