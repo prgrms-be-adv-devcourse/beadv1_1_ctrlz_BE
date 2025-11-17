@@ -87,25 +87,6 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.data.userId").value(Matchers.notNullValue()));
 	}
 
-	@DisplayName("카트가 생성되지 않으면 유저가 생성되지 않고 예외를 던진다.")
-	@Test
-	void test3() throws Exception {
-		// given
-		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
-			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
-
-
-		doThrow(RuntimeException.class).when(cartClient).createCart(any(CartCreateRequest.class));
-
-		// when then
-		mockMvc.perform(post("/api/users")
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.content(objectMapper.writeValueAsString(request))
-			)
-			.andDo(print())
-			.andExpect(status().isInternalServerError());
-	}
-
 	@DisplayName("not blank 예외 처리")
 	@Test
 	void test2() throws Exception {

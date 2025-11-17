@@ -42,16 +42,49 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
-    defer-datasource-initialization: true # 1. resources 경로에 data.sql/schema.sql 스크립트를 실행해줌
 
-  sql:
-    init:
-      mode: always # 2. SQL 스크립트를 실행할 수 있도록 변경
+  kafka:
+    bootstrap-servers: kafka-mq:9090
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      properties:
+        spring.json.add.type.headers: false
+        delivery.timeout.ms: 120000
+        linger.ms: 0
+        request.timeout.ms: 30000
+        enable.idempotence: true
+        allow.auto.create.topics: false
+
+    consumer:
+      group-id: accounts-service
+
+      properties:
+        allow.auto.create.topics: false
+        request.timeout.ms: 30000
+
 
   data:
     redis:
       port: 6379
       host: localhost
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: domain-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+    listener:
+      auto-startup: false
 
   elasticsearch:
     uris: http://localhost:9200 # default 지만 명시적으로 작성
@@ -61,3 +94,32 @@ custom:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true
