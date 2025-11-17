@@ -4,6 +4,8 @@ package com.domainservice.common.exception;
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.reivew.exception.ReviewException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,18 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    /**
+     * ReviewException를 상속받는 모든 예외 처리
+     */
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<ErrorResponse> handleReviewException(ReviewException e) {
+        e.printStackTrace();
+        int status = e.getStatus().value();
+        ErrorResponse response = ErrorResponse.of(status, e.getMessage());
 
         return ResponseEntity.status(status).body(response);
     }
@@ -79,10 +93,11 @@ public class GlobalExceptionHandler {
 
     /**
      * 기타 걸러지지 않은 오류 발생 시 (500)
+     * 현재 Feign 관련 오류가 잡히는 곳(추후 수정 예정)
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-
+        e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
                 , "서버 내부 오류가 발생했습니다."

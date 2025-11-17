@@ -9,6 +9,7 @@ import com.domainservice.common.init.data.CategoryInitializer;
 import com.domainservice.common.init.data.DepositInitializer;
 import com.domainservice.common.init.data.OrderInitializer;
 import com.domainservice.common.init.data.ProductPostInitializer;
+import com.domainservice.common.init.data.ReviewInitializer;
 import com.domainservice.common.init.data.TagInitializer;
 
 import lombok.RequiredArgsConstructor;
@@ -22,25 +23,27 @@ public class DataInitializer implements ApplicationRunner {
     private final CategoryInitializer categoryInitializer;
     private final TagInitializer tagInitializer;
     private final ProductPostInitializer productPostInitializer;
+    private final ReviewInitializer reviewInitializer;
     private final CartInitializer cartInitializer;
     private final OrderInitializer orderInitializer;
     private final DepositInitializer depositInitializer;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info("========================================");
-        log.info("데이터 초기화 시작");
-        log.info("========================================");
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		log.info("========================================");
+		log.info("데이터 초기화 시작");
+		log.info("========================================");
 
         categoryInitializer.init();
         tagInitializer.init();
         depositInitializer.init();
         productPostInitializer.init();
+        reviewInitializer.init();
         cartInitializer.init();
         orderInitializer.init();
 
-        log.info("========================================");
-        log.info("데이터 초기화 완료!");
-        log.info("========================================");
-    }
+		log.info("========================================");
+		log.info("데이터 초기화 완료!");
+		log.info("========================================");
+	}
 }
