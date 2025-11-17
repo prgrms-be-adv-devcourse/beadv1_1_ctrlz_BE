@@ -1,4 +1,4 @@
-package com.domainservice.common.feign.decoder;
+package com.domainservice.common.configuration.feign.decoder;
 
 import com.common.feign.exception.decoder.AbstractErrorDecoder;
 

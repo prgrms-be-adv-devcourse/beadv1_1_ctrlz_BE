@@ -16,13 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
-import com.domainservice.domain.post.post.model.dto.UserView;
+import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
@@ -51,7 +51,7 @@ public class ProductPostService {
 	private final ImageService imageService;
 	private final RecentlyViewedService recentlyViewedService;
 
-	private final UserClient userClient;
+	private final UserFeignClient userFeignClient;
 
 	private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
 
@@ -67,7 +67,7 @@ public class ProductPostService {
 	public ProductPostResponse createProductPost(
 		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-		UserView userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfo(userId);
 		validateSellerPermission(userInfo);
 
 		ProductPost productPost = ProductPost.builder()
@@ -105,7 +105,7 @@ public class ProductPostService {
 	public ProductPostResponse updateProductPost(
 		ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
-		UserView userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfo(userId);
 		validateSellerPermission(userInfo);
 
 		ProductPost productPost = productPostRepository.findById(postId)
@@ -136,7 +136,7 @@ public class ProductPostService {
 	 */
 	public String deleteProductPost(String userId, String postId) {
 
-		UserView userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfo(userId);
 		validateSellerPermission(userInfo);
 
 		ProductPost target = productPostRepository.findById(postId)
@@ -331,9 +331,9 @@ public class ProductPostService {
 	}
 
 	// FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
-	private UserView getUserInfo(String userId) {
+	private UserResponse getUserInfo(String userId) {
 		try {
-			return userClient.getUserById(userId);
+			return userFeignClient.getUser(userId);
 
 		} catch (FeignException.NotFound e) {
 			// 404 - 사용자 없음
@@ -360,7 +360,7 @@ public class ProductPostService {
 	}
 
 	// 사용자 정보를 통해 판매자 인증 여부를 검증합니다.
-	private void validateSellerPermission(UserView user) {
+	private void validateSellerPermission(UserResponse user) {
 		if (!user.roles().contains("ADMIN") && !user.roles().contains("SELLER")) {
 			throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
 		}

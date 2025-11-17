@@ -1,9 +1,9 @@
-package com.domainservice.common.feign.configuration;
+package com.domainservice.common.configuration.feign.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.domainservice.common.feign.decoder.UserErrorDecoder;
+import com.domainservice.common.configuration.feign.decoder.UserErrorDecoder;
 
 import feign.Logger;
 import feign.codec.ErrorDecoder;

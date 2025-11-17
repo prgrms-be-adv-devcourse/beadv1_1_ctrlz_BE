@@ -1,4 +1,4 @@
-package com.domainservice.domain.payment.client;
+package com.domainservice.common.configuration.feign.client;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "tossPaymentClient", url = "https://api.tosspayments.com/v1/payments")
-public interface PaymentClient {
+public interface PaymentFeignClient {
 
     @PostMapping(value = "/confirm", consumes = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> requestPayment(

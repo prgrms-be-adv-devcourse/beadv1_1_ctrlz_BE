@@ -1,7 +1,7 @@
 package com.domainservice.domain.post.post.service;
 
 import com.common.model.persistence.BaseEntity.DeleteStatus;
-import com.domainservice.common.configuration.feignclient.user.UserClient;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -43,7 +43,7 @@ class DeleteProductPostTest {
     private ImageService imageService;
 
     @Mock
-    private UserClient userClient;
+    private UserFeignClient userClient;
 
     private void setId(ProductPost productPost, String id) throws Exception {
         Field field = productPost.getClass().getSuperclass().getDeclaredField("id");
@@ -76,7 +76,7 @@ class DeleteProductPostTest {
 
         setId(productPost, postId);
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
         // when
@@ -85,7 +85,7 @@ class DeleteProductPostTest {
         // then
         assertThat(deletedId).isEqualTo(postId);
         assertThat(productPost.getDeleteStatus()).isEqualTo(DeleteStatus.D);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(productPostRepository).flush();
     }
@@ -109,7 +109,7 @@ class DeleteProductPostTest {
 
         setId(productPost, postId);
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createAdmin(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createAdmin(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
         // when
@@ -118,7 +118,7 @@ class DeleteProductPostTest {
         // then
         assertThat(deletedId).isEqualTo(postId);
         assertThat(productPost.getDeleteStatus()).isEqualTo(DeleteStatus.D);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(productPostRepository).flush();
     }
@@ -130,14 +130,14 @@ class DeleteProductPostTest {
         String userId = "user-123";
         String postId = "post-123";
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(SELLER_PERMISSION_REQUIRED.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository, never()).findById(anyString());
     }
 
@@ -148,14 +148,14 @@ class DeleteProductPostTest {
         String userId = "invalid-user";
         String postId = "post-123";
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.NotFound.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(USER_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository, never()).findById(anyString());
     }
 
@@ -186,7 +186,7 @@ class DeleteProductPostTest {
         productPost.addImages(java.util.List.of(image));
         setId(productPost, postId);
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
         doNothing().when(imageService).deleteProfileImageById(imageId);
 
@@ -196,7 +196,7 @@ class DeleteProductPostTest {
         // then
         assertThat(deletedId).isEqualTo(postId);
         assertThat(productPost.getDeleteStatus()).isEqualTo(DeleteStatus.D);
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(productPostRepository).flush();
         verify(imageService).deleteProfileImageById(imageId);
@@ -209,7 +209,7 @@ class DeleteProductPostTest {
         String userId = "user-123";
         String postId = "invalid-post-id";
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.empty());
 
         // when & then
@@ -217,7 +217,7 @@ class DeleteProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(PRODUCT_POST_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -238,14 +238,14 @@ class DeleteProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.Unauthorized.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
     }
 
     @DisplayName("빈 문자열 userId로는 게시글을 삭제할 수 없다.")
@@ -265,14 +265,14 @@ class DeleteProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.Unauthorized.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
     }
 
     @DisplayName("다른 사용자의 게시글은 삭제할 수 없다.")
@@ -292,7 +292,7 @@ class DeleteProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
         // when & then
@@ -300,7 +300,7 @@ class DeleteProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(PRODUCT_POST_FORBIDDEN.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -321,7 +321,7 @@ class DeleteProductPostTest {
                 .tradeStatus(TradeStatus.PROCESSING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
         // when & then
@@ -329,7 +329,7 @@ class DeleteProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(PRODUCT_POST_IN_PROGRESS.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -352,7 +352,7 @@ class DeleteProductPostTest {
 
         productPost.delete();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
 
         // when & then
@@ -360,7 +360,7 @@ class DeleteProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(ALREADY_DELETED.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 }
