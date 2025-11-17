@@ -52,7 +52,9 @@ spring:
         delivery.timeout.ms: 120000
         linger.ms: 0
         request.timeout.ms: 30000
-        enable.idempotence: true
+        enable.idempotence: false # 멱등성 비활성화
+        retries: 0 # 재시도 하지 않음
+        max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
         allow.auto.create.topics: false
 
     admin:

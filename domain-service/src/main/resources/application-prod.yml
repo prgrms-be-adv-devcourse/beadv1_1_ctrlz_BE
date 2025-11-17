@@ -13,11 +13,12 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #    username: admin
-    #    password: 1234
-    username: "${DB_USERNAME}"
-    password: "${DB_PASSWORD}"
+    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
     url: jdbc:mysql://mysql-service:3306/test_db
+    username: admin
+    password: 1234
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
 
   jpa:
     open-in-view: false
@@ -28,12 +29,15 @@ spring:
       hibernate:
         default_batch_fetch_size: 100
 
+  elasticsearch:
+    uris: http://elastic-search-service:9200 # default 지만 명시적으로 작성
+
   data:
     redis:
       port: 6379
       host: redis-server
-      password: "${REDIS_PASSWORD}"
-
+      password: 1234
+  #      password: "${REDIS_PASSWORD}"
   kafka:
     bootstrap-servers: kafka-mq:9090
     producer:
