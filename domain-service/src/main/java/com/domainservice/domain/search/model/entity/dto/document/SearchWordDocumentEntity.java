@@ -1,9 +1,8 @@
 package com.domainservice.domain.search.model.entity.dto.document;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -14,76 +13,73 @@ import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
-import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
-import com.domainservice.domain.search.service.converter.PrefixConverter;
-
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Document(indexName = "search-words")
 @Setting(settingPath = "/elasticsearch/search-words-settings.json")
 public class SearchWordDocumentEntity {
 
 	@Id
+	private String id;
+
 	@MultiField(
-		mainField = @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "nori_search_analyzer"),
+		mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_synonym_analyzer"),
 		otherFields = {
-			@InnerField(suffix = "raw", type = FieldType.Keyword),
-			@InnerField(suffix = "nori", type = FieldType.Text, analyzer = "nori_search_analyzer", searchAnalyzer = "nori_search_analyzer"),
-			@InnerField(suffix = "eng", type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
+			@InnerField(suffix = "raw", type = FieldType.Keyword)
 		}
 	)
-	private String originValue;
+	private String koreanWord; //컴퓨터
 
 	@MultiField(
 		mainField = @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer"),
-		otherFields = @InnerField(suffix = "raw", type = FieldType.Keyword)
+		otherFields = {
+			@InnerField(suffix = "raw", type = FieldType.Keyword)
+		}
 	)
-	private String qwertyInput;
+	private String qwertyInput;	//zjavbxj
 
-	@Field(name = "created_at", type = FieldType.Date, format = DateFormat.date_time)
-	private Instant createdAt;
+	@Field(type = FieldType.Long)
+	private Long searchedCount; // 얼마나?
 
 	@Field(name = "recent_searched_at", type = FieldType.Date, format = DateFormat.date_time)
-	private Instant recentSearchedAt;
+	private LocalDateTime recentSearchedAt; // 가장 최근 조회 언제?
 
-	@Builder
-	private SearchWordDocumentEntity(String originValue, String qwertyInput, LocalDateTime recentSearchedAt,
-		LocalDateTime createdAt) {
-		this.originValue = originValue;
-		this.qwertyInput = qwertyInput;
-		this.recentSearchedAt = recentSearchedAt.atZone(ZoneId.systemDefault()).toInstant();
-		this.createdAt = createdAt.atZone(ZoneId.systemDefault()).toInstant();
-	}
+	// @Field(name = "daily_count", type = FieldType.Long)
+	// private Long dailyCount; // 오늘 얼마나? -> Redis에 저장하는 것은 어떤지?
+	//
+	// @Field(name = "weekly_count", type = FieldType.Long)
+	// private Long weeklyCount; // 주간 얼마나? -> Redis에 저장하는 것은 어떤지?
 
-	public static SearchWordDocumentEntity createDocumentEntity(
-		SearchWordLog log
-	) {
-		String originValue = log.getWord();
-		LocalDateTime createdAt = log.getCreatedAt() == null ? log.getSearchedAt() : log.getCreatedAt();
-		return SearchWordDocumentEntity.builder()
-			.originValue(originValue)
-			.qwertyInput(PrefixConverter.convertToQwertyInput(originValue))
-			.createdAt(createdAt)
-			.recentSearchedAt(log.getSearchedAt())
-			.build();
-	}
+	@MultiField(
+		mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_synonym_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "raw", type = FieldType.Keyword)
+		}
+	)
+	private String category; // 무슨 카테고리에 포함됨?
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		SearchWordDocumentEntity that = (SearchWordDocumentEntity)o;
-		return Objects.equals(originValue, that.originValue);
-	}
+	@MultiField(
+		mainField = @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "raw", type = FieldType.Keyword)
+		}
+	)
+	private List<String> suggestions; //검색어 자동완성 느낌의 변수로 변경
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(originValue);
-	}
+	// @Field(name = "related_words", type = FieldType.Nested)
+	// private List<UserSearchHistory> userHistory; // -> Redis에 저장하는 것은 어떤지?
+
+	@Field(name = "trend_score", type = FieldType.Double)
+	private Double trendScore;
+
+	@Field(name = "created_at", type = FieldType.Date, format = DateFormat.date_time)
+	private LocalDateTime createdAt;
+
+	@Field(name = "updated_at", type = FieldType.Date, format = DateFormat.date_time)
+	private LocalDateTime updatedAt;
 }

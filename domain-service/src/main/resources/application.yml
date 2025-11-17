@@ -17,25 +17,25 @@ spring:
       local:
         - secret
 
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:domain_dev;MODE=MySQL # ?????? ???? ??
-#    username: sa
-#    password:
-#    hikari:
-#      auto-commit: false
+  #  datasource:
+  #    driver-class-name: org.h2.Driver
+  #    url: jdbc:h2:mem:domain_dev;MODE=MySQL
+  #    username: sa
+  #    password:
+  #    hikari:
+  #      auto-commit: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    password: 1234
-    url: jdbc:mysql://localhost:30006/test_db
+    url: jdbc:mysql://localhost:3306/${custom.db.database}
+    username: "${custom.db.username}"
+    password: "${custom.db.password}"
 
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -85,6 +85,9 @@ spring:
         spring.json.trusted.packages: "com.common.event"
     listener:
       auto-startup: false
+
+  elasticsearch:
+    uris: http://localhost:9200 # default 지만 명시적으로 작성
 
 custom:
   image:
