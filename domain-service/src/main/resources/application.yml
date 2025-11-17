@@ -17,13 +17,13 @@ spring:
       local:
         - secret
 
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:domain_dev;MODE=MySQL
-    username: sa
-    password:
-    hikari:
-      auto-commit: false
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:mem:domain_dev;MODE=MySQL
+#    username: sa
+#    password:
+#    hikari:
+#      auto-commit: false
 
 #  datasource:
 #    driver-class-name: com.mysql.cj.jdbc.Driver
@@ -42,6 +42,11 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
+
+  sql:
+    init:
+      mode: always  # data.sql을 항상 실행
 
   data:
     redis:
@@ -89,11 +94,11 @@ custom:
     url:
       user-service: localhost:8080
 
-payment:
-  toss:
-    test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-    test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
-    targetUrl: https://api.tosspayments.com/v1/payments
+  payment:
+    toss:
+      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+      targetUrl: https://api.tosspayments.com/v1/payments
 
 # k8s 설정
 eureka:
