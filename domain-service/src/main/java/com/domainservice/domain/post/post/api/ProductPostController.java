@@ -74,7 +74,7 @@ public class ProductPostController {
 	@ResponseStatus(HttpStatus.OK)
 	@PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public BaseResponse<ProductPostResponse> updateProductPost(
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
+		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId,
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@Valid @RequestPart("request") ProductPostRequest request
@@ -93,7 +93,7 @@ public class ProductPostController {
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<String> deleteProductPost(
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
+		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
 		validateAuthentication(userId);
@@ -110,7 +110,7 @@ public class ProductPostController {
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ProductPostResponse> getProductPostById(
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
+		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
 		ProductPostResponse response = productPostService.getProductPostById(userId, postId);
@@ -153,7 +153,7 @@ public class ProductPostController {
 	 */
 	@GetMapping("/recent-views")
 	public BaseResponse<List<ProductPostResponse>> getRecentlyViewPosts(
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId
+		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId
 	) {
 		validateAuthentication(userId);
 		List<ProductPostResponse> recentlyViewedPostList = productPostService.getRecentlyViewedPosts(userId);

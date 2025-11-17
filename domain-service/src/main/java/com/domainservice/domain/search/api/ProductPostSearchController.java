@@ -46,12 +46,12 @@ public class ProductPostSearchController {
 	public PageResponse<List<ProductPostSearchResponse>> search(
 		@RequestParam(required = false) String q,                                                     // ex) "아이폰"
 		@RequestParam(required = false) String category,                            // ex) "전자기기"
-		@RequestParam(required = false, defaultValue = "0") Long minPrice,          // ex) "100000"
-		@RequestParam(required = false, defaultValue = "999999999") Long maxPrice,  // ex) "2000000"
+		@RequestParam(defaultValue = "0") Long minPrice,          // ex) "100000"
+		@RequestParam(defaultValue = "999999999") Long maxPrice,  // ex) "2000000"
 		@RequestParam(required = false) String tags,                                // ex) "친환경,중고"
 
 		// ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
-		@RequestParam(required = false, defaultValue = "score") String sort,
+		@RequestParam(defaultValue = "score") String sort,
 
 		@PageableDefault(size = 20) Pageable pageable
 	) {
