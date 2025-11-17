@@ -17,19 +17,13 @@ spring:
       local:
         - secret
 
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:domain_dev;MODE=MySQL # ?????? ???? ??
-#    username: sa
-#    password:
-#    hikari:
-#      auto-commit: false
-
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    password: 1234
-    url: jdbc:mysql://localhost:30006/test_db
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:domain_dev;MODE=MySQL
+    username: sa
+    password:
+    hikari:
+      auto-commit: false
 
   jpa:
     open-in-view: false
@@ -42,30 +36,6 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
-
-  kafka:
-    bootstrap-servers: kafka-mq:9090
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-      acks: all
-
-      properties:
-        spring.json.add.type.headers: false
-        delivery.timeout.ms: 120000
-        linger.ms: 0
-        request.timeout.ms: 30000
-        enable.idempotence: true
-        allow.auto.create.topics: false
-
-    consumer:
-      group-id: accounts-service
-
-      properties:
-        allow.auto.create.topics: false
-        request.timeout.ms: 30000
-
 
   data:
     redis:
@@ -85,6 +55,8 @@ spring:
         spring.json.trusted.packages: "com.common.event"
     listener:
       auto-startup: false
+    admin:
+      auto-create: false
 
 custom:
   image:
@@ -104,13 +76,24 @@ custom:
     topic:
       command: deposit-command
 
+  feign:
+    url:
+      user-service: localhost:8080
+
+payment:
+  toss:
+    test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+    test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+    targetUrl: https://api.tosspayments.com/v1/payments
+
 # k8s 설정
 eureka:
   instance:
     prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+    enabled: false
 ---
 spring:
   config:

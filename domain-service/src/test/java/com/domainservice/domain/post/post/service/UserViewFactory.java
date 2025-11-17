@@ -1,6 +1,6 @@
 package com.domainservice.domain.post.post.service;
 
-import com.domainservice.domain.post.post.model.dto.UserView;
+import com.domainservice.common.model.user.UserView;
 
 import java.util.List;
 

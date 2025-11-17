@@ -96,7 +96,7 @@ class UpdateProductPostTest {
                 .s3Url("https://s3.example.com/updated.webp")
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
         given(tagRepository.findAllById(request.tagIds())).willReturn(tags);
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
@@ -113,7 +113,7 @@ class UpdateProductPostTest {
         assertThat(result.description()).isEqualTo(request.description());
         assertThat(result.status()).isEqualTo(request.status());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(tagRepository).findAllById(request.tagIds());
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
@@ -149,7 +149,7 @@ class UpdateProductPostTest {
                 .s3Url("https://s3.example.com/updated.webp")
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createAdmin(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createAdmin(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -161,7 +161,7 @@ class UpdateProductPostTest {
         assertThat(result).isNotNull();
         assertThat(result.title()).isEqualTo(request.title());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
     }
@@ -182,14 +182,14 @@ class UpdateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.updateProductPost(request, imageFiles, userId, postId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(SELLER_PERMISSION_REQUIRED.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository, never()).findById(anyString());
     }
 
@@ -209,14 +209,14 @@ class UpdateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.NotFound.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.updateProductPost(request, imageFiles, userId, postId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(USER_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository, never()).findById(anyString());
     }
 
@@ -245,7 +245,7 @@ class UpdateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
 
         // when & then
@@ -257,7 +257,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(IMAGE_REQUIRED.getMessage());
 
-        verify(userClient, times(2)).getUserById(userId);
+        verify(userClient, times(2)).getUser(userId);
         verify(productPostRepository, times(2)).findById(postId);
     }
 
@@ -277,7 +277,7 @@ class UpdateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.empty());
 
         // when & then
@@ -285,7 +285,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(PRODUCT_POST_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -315,14 +315,14 @@ class UpdateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.Unauthorized.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.updateProductPost(request, imageFiles, userId, postId))
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(EXTERNAL_API_ERROR.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
     }
 
     @DisplayName("다른 사용자의 게시글은 수정할 수 없다.")
@@ -351,7 +351,7 @@ class UpdateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
 
         // when & then
@@ -359,7 +359,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(PRODUCT_POST_FORBIDDEN.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -389,7 +389,7 @@ class UpdateProductPostTest {
                 .tradeStatus(TradeStatus.SOLDOUT)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
 
         // when & then
@@ -397,7 +397,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(CANNOT_UPDATE_SOLDOUT.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -429,7 +429,7 @@ class UpdateProductPostTest {
 
         existingPost.delete();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
 
         // when & then
@@ -437,7 +437,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(ALREADY_DELETED.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -478,7 +478,7 @@ class UpdateProductPostTest {
                 .s3Url("https://s3.example.com/updated.webp")
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -489,7 +489,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TAG_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
     }
 
@@ -524,7 +524,7 @@ class UpdateProductPostTest {
                 .s3Url("https://s3.example.com/updated.webp")
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -537,7 +537,7 @@ class UpdateProductPostTest {
         assertThat(result.title()).isEqualTo("아이폰 15 Pro 급매!");
         assertThat(result.price()).isEqualTo(1100000);
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(tagRepository, never()).findAllById(anyList());
@@ -573,7 +573,7 @@ class UpdateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
 
         // when & then
@@ -581,7 +581,7 @@ class UpdateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TOO_MANY_IMAGES.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
     }
@@ -616,7 +616,7 @@ class UpdateProductPostTest {
                 .s3Url("https://s3.example.com/new-image.webp")
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(productPostRepository.findById(postId)).willReturn(Optional.of(existingPost));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(newImage));
@@ -627,7 +627,7 @@ class UpdateProductPostTest {
         // then
         assertThat(result).isNotNull();
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(productPostRepository).findById(postId);
         verify(productPostRepository).flush();
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));

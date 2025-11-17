@@ -96,7 +96,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(tagIds)).willReturn(tags);
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -114,7 +114,7 @@ class CreateProductPostTest {
         assertThat(result.description()).isEqualTo(request.description());
         assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SELLING);
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(tagRepository).findAllById(tagIds);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
@@ -151,7 +151,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createAdmin(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createAdmin(userId));
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
         given(productPostRepository.save(any(ProductPost.class))).willReturn(savedProductPost);
@@ -164,7 +164,7 @@ class CreateProductPostTest {
         assertThat(result.userId()).isEqualTo(userId);
         assertThat(result.title()).isEqualTo(request.title());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
         verify(tagRepository, never()).findAllById(anyList());
@@ -185,14 +185,14 @@ class CreateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createUser(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, imageFiles))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(SELLER_PERMISSION_REQUIRED.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }
@@ -212,14 +212,14 @@ class CreateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willThrow(FeignException.NotFound.class);
+        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, imageFiles))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(USER_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }
@@ -247,7 +247,7 @@ class CreateProductPostTest {
                 Tag.builder().name("256GB").build()
         );
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(tagIds)).willReturn(tags);
 
         // when & then
@@ -255,7 +255,7 @@ class CreateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TAG_NOT_FOUND.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(tagRepository).findAllById(tagIds);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
@@ -292,7 +292,7 @@ class CreateProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(emptyTagIds)).willReturn(Collections.emptyList());
         given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
                 .willReturn(List.of(mockImage));
@@ -305,7 +305,7 @@ class CreateProductPostTest {
         assertThat(result).isNotNull();
         assertThat(result.userId()).isEqualTo(userId);
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(tagRepository).findAllById(emptyTagIds);
         verify(imageService).uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT));
         verify(productPostRepository).save(any(ProductPost.class));
@@ -325,7 +325,7 @@ class CreateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, null))
@@ -336,7 +336,7 @@ class CreateProductPostTest {
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(IMAGE_REQUIRED.getMessage());
 
-        verify(userClient, times(2)).getUserById(userId);
+        verify(userClient, times(2)).getUser(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }
@@ -360,14 +360,14 @@ class CreateProductPostTest {
                 .status(ProductStatus.GOOD)
                 .build();
 
-        given(userClient.getUserById(userId)).willReturn(UserViewFactory.createSeller(userId));
+        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
 
         // when & then
         assertThatThrownBy(() -> productPostService.createProductPost(request, userId, tooManyImages))
                 .isInstanceOf(ProductPostException.class)
                 .hasMessage(TOO_MANY_IMAGES.getMessage());
 
-        verify(userClient).getUserById(userId);
+        verify(userClient).getUser(userId);
         verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
         verify(productPostRepository, never()).save(any());
     }

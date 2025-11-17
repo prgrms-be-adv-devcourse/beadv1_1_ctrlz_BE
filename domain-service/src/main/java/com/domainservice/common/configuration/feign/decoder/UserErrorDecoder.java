@@ -1,9 +1,8 @@
-package com.domainservice.common.feign.decoder;
+package com.domainservice.common.configuration.feign.decoder;
 
 import org.springframework.http.HttpStatus;
 
-import com.common.feign.exception.YeongeunFeignClientException;
-import com.domainservice.common.feign.exception.UserClientException;
+import com.domainservice.common.configuration.feign.exception.UserClientException;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
