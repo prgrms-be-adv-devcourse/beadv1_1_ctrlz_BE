@@ -1,4 +1,4 @@
-package com.domainservice.common.feign.exception;
+package com.domainservice.common.configuration.feign.exception;
 
 import org.springframework.http.HttpStatus;
 
