@@ -51,3 +51,44 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+  kafka:
+    image: apache/kafka
+    container_name: kafka
+    ports:
+      - "9090:9090"
+
+    environment:
+      KAFKA_NODE_ID: 1
+
+      CLUSTER_ID: QSZDASDASDsaddasQDSASda
+
+      KAFKA_PROCESS_ROLES: controller,broker
+
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9090
+
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9090
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9091
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8085:8080"
+
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
