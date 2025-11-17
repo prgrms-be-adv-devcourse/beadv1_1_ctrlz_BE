@@ -17,13 +17,19 @@ spring:
       local:
         - secret
 
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:mem:domain_dev;MODE=MySQL
+#    username: sa
+#    password:
+#    hikari:
+#      auto-commit: false
+
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:domain_dev;MODE=MySQL
-    username: sa
-    password:
-    hikari:
-      auto-commit: false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${custom.db.database}
+    username: "${custom.db.username}"
+    password: "${custom.db.password}"
 
   jpa:
     open-in-view: false
@@ -36,35 +42,17 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
 
-  kafka:
-    bootstrap-servers: kafka-mq:9090
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-      acks: all
-
-      properties:
-        spring.json.add.type.headers: false
-        delivery.timeout.ms: 120000
-        linger.ms: 0
-        request.timeout.ms: 30000
-        enable.idempotence: true
-        allow.auto.create.topics: false
-
-    consumer:
-      group-id: accounts-service
-
-      properties:
-        allow.auto.create.topics: false
-        request.timeout.ms: 30000
-
+  sql:
+    init:
+      mode: always  # data.sql을 항상 실행
 
   data:
     redis:
       port: 6379
       host: localhost
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -81,6 +69,18 @@ spring:
       auto-startup: false
     admin:
       auto-create: false
+
+  elasticsearch:
+    uris: http://localhost:9200 # default 지만 명시적으로 작성
+
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    enabled: false
 
 custom:
   image:
@@ -100,20 +100,10 @@ custom:
     topic:
       command: deposit-command
 
-payment:
-  toss:
-    test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-    test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
-    targetUrl: https://api.tosspayments.com/v1/payments
+  feign:
+    url:
+      user-service: localhost:8080
 
-# k8s 설정
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-    enabled: false
 ---
 spring:
   config:
