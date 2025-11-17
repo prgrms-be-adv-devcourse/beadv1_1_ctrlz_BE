@@ -25,6 +25,12 @@ spring:
     hikari:
       auto-commit: false
 
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/${custom.db.database}
+#    username: "${custom.db.username}"
+#    password: "${custom.db.password}"
+
   jpa:
     open-in-view: false
     hibernate:
@@ -57,6 +63,9 @@ spring:
       auto-startup: false
     admin:
       auto-create: false
+
+  elasticsearch:
+    uris: http://localhost:9200 # default 지만 명시적으로 작성
 
 custom:
   image:

@@ -42,22 +42,29 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+    // thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    // lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // elasticsearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
+    // DB
     runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -74,19 +81,24 @@ dependencies {
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+    // WordNet (extJWNL)
+    implementation 'net.sf.extjwnl:extjwnl:2.0.5'
+    implementation 'net.sf.extjwnl:extjwnl-data-wn31:1.2'
+    
     //openfeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
 
+    // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"
     implementation "io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion"
     annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa"
 
-    runtimeOnly 'com.mysql:mysql-connector-j'
-
     // JSON 직렬화/역직렬화용
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 }
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
