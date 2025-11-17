@@ -2,7 +2,6 @@ package com.domainservice.domain.payment.service;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
@@ -19,7 +18,7 @@ import com.domainservice.domain.deposit.repository.DepositJpaRepository;
 import com.domainservice.domain.deposit.service.DepositService;
 import com.domainservice.domain.order.model.entity.Order;
 import com.domainservice.domain.order.repository.OrderRepository;
-import com.domainservice.domain.payment.client.PaymentClient;
+import com.domainservice.common.configuration.feign.client.PaymentFeignClient;
 import com.domainservice.domain.payment.model.dto.PaymentConfirmRequest;
 import com.domainservice.domain.payment.model.dto.PaymentReadyResponse;
 import com.domainservice.domain.payment.model.dto.PaymentResponse;
@@ -42,7 +41,7 @@ public class PaymentService {
     private final DepositService depositService;
     private final DepositJpaRepository depositJpaRepository;
     private final PaymentRepository paymentRepository;
-    private final PaymentClient paymentClient;
+    private final PaymentFeignClient paymentFeignClient;
     private final OrderRepository orderRepository;
     private final PaymentLogService paymentLogService;
 
@@ -207,7 +206,7 @@ public class PaymentService {
                 null
             );
 
-            Map<String, Object> responseMap = paymentClient.requestPayment(
+            Map<String, Object> responseMap = paymentFeignClient.requestPayment(
                 requestBody, authHeader
             );
 
@@ -319,7 +318,7 @@ public class PaymentService {
                 String authHeader = "Basic " + Base64.getEncoder()
                     .encodeToString((key + ":").getBytes(StandardCharsets.UTF_8));
 
-                Map<String, Object> tossResponse = paymentClient.refundPayment(
+                Map<String, Object> tossResponse = paymentFeignClient.refundPayment(
                     payment.getPaymentKey(),
                     cancelBody,
                     authHeader
