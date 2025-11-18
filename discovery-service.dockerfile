@@ -10,6 +10,7 @@ COPY discovery-service/src ./discovery-service/src
 
 WORKDIR /app/discovery-service
 RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew clean build -x test --parallel --no-daemon
 
 FROM gcr.io/distroless/java21-debian12
@@ -18,5 +19,5 @@ WORKDIR /app
 
 COPY --from=build /app/discovery-service/build/libs/*.jar app.jar
 
-# 변경 예정
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=local", "app.jar"]
+
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "app.jar"]

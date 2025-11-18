@@ -1,0 +1,12 @@
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+  name: redis-config-map
+#임시
+data:
+  redis-password: "1234"
+
+
+
