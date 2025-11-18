@@ -1,0 +1,89 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: domain-service
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
+    url: jdbc:mysql://mysql-service:3306/test_db
+    username: admin
+    password: 1234
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
+
+  elasticsearch:
+    uris: http://elastic-search-service:9200 # default 지만 명시적으로 작성
+
+  data:
+    redis:
+      port: 6379
+      host: redis-server
+      password: 1234
+  #      password: "${REDIS_PASSWORD}"
+  kafka:
+    bootstrap-servers: kafka-mq:9090
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: domain-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+custom:
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  payment:
+    toss:
+      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+      targetUrl: https://api.tosspayments.com/v1/payments
+
+  feign:
+    url:
+      user-service: http://account-service:8080
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+

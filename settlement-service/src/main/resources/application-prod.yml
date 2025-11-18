@@ -1,0 +1,40 @@
+spring:
+  h2:
+    console:
+      enabled: true
+
+  kafka:
+    bootstrap-servers: kafka-mq:9090
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: settlement-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: admin
+#    password: 1234
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    url: jdbc:mysql://mysql-service:3306/test_db
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create # 수정 필요
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+server:
+  port: 8082
+

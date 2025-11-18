@@ -1,0 +1,122 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: domain-service
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+
+
+  #  datasource:
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://localhost:3306/${custom.db.database}
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/domain_dev
+    username: app
+    password: 1234
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
+    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
+
+  sql:
+    init:
+      mode: always  # data.sql을 항상 실행
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+
+  kafka:
+    bootstrap-servers: localhost:9090
+    listener:
+      auto-startup: false
+    admin:
+      auto-create: false
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      properties:
+        allow.auto.create.topics: false
+
+    consumer:
+      group-id: domain-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+  elasticsearch:
+    uris: http://localhost:9200 # default 지만 명시적으로 작성
+
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+#    enabled: false
+
+custom:
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  feign:
+    url:
+      user-service: localhost:8080
+
+  payment:
+    toss:
+      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+      targetUrl: https://api.tosspayments.com/v1/payments
+
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true

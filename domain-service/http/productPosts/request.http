@@ -1,0 +1,268 @@
+### ========================================
+### 상품 게시글 API 테스트 (단일 이미지)
+### ========================================
+
+### 환경 변수 설정
+@baseUrl = http://localhost:8081
+@jsonContentType = application/json
+
+### 1. 카테고리 목록 조회
+GET {{baseUrl}}/api/categories
+
+> {%
+    client.test("카테고리 조회 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+    });
+
+    if (response.body.data && response.body.data.length > 0) {
+        client.global.set("categoryId", response.body.data[0].id);
+        client.log("저장된 categoryId: " + response.body.data[0].id);
+    }
+%}
+
+### 2. 태그 목록 조회
+GET {{baseUrl}}/api/tags
+
+> {%
+    client.test("태그 조회 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+    });
+
+    if (response.body.data && response.body.data.length > 0) {
+        var tags = response.body.data;
+        client.global.set("tagId1", tags[0]?.id || "");
+        client.global.set("tagId2", tags[1]?.id || "");
+
+        client.log("저장된 tagId1: " + tags[0]?.id);
+        client.log("저장된 tagId2: " + tags[1]?.id);
+    }
+%}
+
+### 3-1. 이미지 없이 생성 시도 (실패 케이스 - IMAGE_REQUIRED)
+POST {{baseUrl}}/api/product-posts
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "title": "아이폰 15 Pro 256GB 블랙",
+  "name": "iPhone 15 Pro",
+  "price": 1200000,
+  "description": "거의 새것입니다. 애플케어 포함.",
+  "categoryId": "{{categoryId}}",
+  "status": "GOOD",
+  "tagIds": ["{{tagId1}}", "{{tagId2}}"]
+}
+--WebAppBoundary--
+
+> {%
+    client.test("이미지 없이 게시글 생성 실패 (IMAGE_REQUIRED)", function() {
+        client.assert(response.status === 400, "응답 상태가 400이어야 함");
+        client.log("예상된 에러: " + JSON.stringify(response.body));
+    });
+%}
+
+### 3-2. 이미지와 함께 생성 (아이폰)
+POST {{baseUrl}}/api/product-posts
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="images"; filename="product1.png"
+Content-Type: image/png
+
+< ./images/product1.png
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "title": "아이폰 15 Pro 256GB 블랙",
+  "name": "iPhone 15 Pro",
+  "price": 1200000,
+  "description": "거의 새것입니다. 애플케어 포함.",
+  "categoryId": "{{categoryId}}",
+  "status": "GOOD",
+  "tagIds": ["{{tagId1}}", "{{tagId2}}"]
+}
+--WebAppBoundary--
+
+> {%
+    client.test("이미지와 함께 게시글 생성 성공", function() {
+        client.assert(response.status === 201, "응답 상태가 201이어야 함");
+    });
+
+    if (response.body.data) {
+        client.global.set("postId", response.body.data.id);
+        client.log("저장된 postId: " + response.body.data.id);
+    }
+%}
+
+### 3-3. 이미지와 함께 생성 (갤럭시)
+POST {{baseUrl}}/api/product-posts
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="images"; filename="galaxy.png"
+Content-Type: image/png
+
+< ./images/product1.png
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "title": "갤럭시 S24 Ultra 미개봉",
+  "name": "Galaxy S24 Ultra",
+  "price": 1500000,
+  "description": "미개봉 새상품입니다. 상자 포함 전품목 미사용.",
+  "categoryId": "{{categoryId}}",
+  "status": "NEW",
+  "tagIds": ["{{tagId1}}", "{{tagId2}}"]
+}
+--WebAppBoundary--
+
+> {%
+    client.test("갤럭시 게시글 생성 성공", function() {
+        client.assert(response.status === 201, "응답 상태가 201이어야 함");
+    });
+
+    if (response.body.data) {
+        client.global.set("galaxyPostId", response.body.data.id);
+        client.log("갤럭시 게시글 ID: " + response.body.data.id);
+    }
+%}
+
+### 4. 생성된 게시글 조회 (아이폰)
+GET {{baseUrl}}/api/product-posts/{{postId}}
+
+> {%
+    client.test("게시글 조회 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+
+        var data = response.body.data;
+        client.assert(data.imageUrls && data.imageUrls.length > 0, "이미지가 존재해야 함");
+        client.log("이미지 개수: " + data.imageUrls.length);
+        client.log("대표 이미지: " + data.primaryImageUrl);
+    });
+%}
+
+### 5-1. 텍스트만 수정 (이미지 유지)
+PATCH {{baseUrl}}/api/product-posts/{{postId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "title": "아이폰 15 Pro 256GB 블랙 급매!",
+  "name": "iPhone 15 Pro",
+  "price": 1100000,
+  "description": "거의 새것입니다. 애플케어 포함. 급매합니다!",
+  "categoryId": "{{categoryId}}",
+  "status": "GOOD"
+}
+--WebAppBoundary--
+
+> {%
+    client.test("텍스트만 수정 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+
+        var data = response.body.data;
+        client.log("수정된 제목: " + data.title);
+        client.log("수정된 가격: " + data.price);
+        client.log("이미지 개수 (유지): " + data.imageUrls.length);
+    });
+%}
+
+### 5-2. 이미지 교체하며 수정
+PATCH {{baseUrl}}/api/product-posts/{{galaxyPostId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="images"; filename="updated.png"
+Content-Type: image/png
+
+< ./images/product2.png
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "title": "갤럭시 S24 Ultra 가격 인하!",
+  "name": "Galaxy S24 Ultra",
+  "price": 1400000,
+  "description": "급매로 가격 인하합니다. 미개봉 새상품.",
+  "categoryId": "{{categoryId}}",
+  "status": "NEW"
+}
+--WebAppBoundary--
+
+> {%
+    client.test("이미지와 함께 수정 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+
+        var data = response.body.data;
+        client.assert(data.imageUrls && data.imageUrls.length === 1, "이미지가 1개로 교체되어야 함");
+        client.log("수정 후 이미지 개수: " + data.imageUrls.length);
+    });
+%}
+
+### 5-3. 수정 후 조회하여 확인
+GET {{baseUrl}}/api/product-posts/{{galaxyPostId}}
+
+> {%
+    client.test("수정된 게시글 조회 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+
+        var data = response.body.data;
+        client.log("현재 제목: " + data.title);
+        client.log("현재 가격: " + data.price);
+        client.log("현재 이미지 개수: " + data.imageUrls.length);
+        client.log("이미지 URL: " + data.primaryImageUrl);
+    });
+%}
+
+### 6. 게시글 목록 조회
+GET {{baseUrl}}/api/product-posts?page=0&size=20
+
+> {%
+    client.test("목록 조회 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+
+        var data = response.body;
+        client.log("총 게시글 수: " + data.totalElements);
+        client.log("현재 페이지: " + data.currentPage);
+    });
+%}
+
+### 7-1. 게시글 삭제 (아이폰)
+DELETE {{baseUrl}}/api/product-posts/{{postId}}
+
+> {%
+    client.test("게시글 삭제 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+        client.log("삭제된 게시글 ID: " + response.body.data);
+    });
+%}
+
+### 7-2. 삭제된 게시글 조회 시도
+GET {{baseUrl}}/api/product-posts/{{postId}}
+
+> {%
+    client.test("삭제된 게시글 조회 실패", function() {
+        client.assert(response.status === 410 || response.status === 404, "삭제된 게시글은 410 또는 404");
+        client.log("예상된 에러: " + JSON.stringify(response.body));
+    });
+%}
+
+### 8. 갤럭시 게시글 삭제
+DELETE {{baseUrl}}/api/product-posts/{{galaxyPostId}}
+
+> {%
+    client.test("갤럭시 게시글 삭제 성공", function() {
+        client.assert(response.status === 200, "응답 상태가 200이어야 함");
+    });
+%}

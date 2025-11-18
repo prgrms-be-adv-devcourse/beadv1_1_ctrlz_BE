@@ -1,0 +1,96 @@
+services:
+
+  redis:
+    image: redis:latest
+    container_name: redis_local
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  db-mysql:
+    image: mysql
+    container_name: db-mysql
+    ports:
+      - "3306:3306"
+    environment:
+#      - MYSQL_DATABASE=${MYSQL_DATABASE}
+#      - MYSQL_USER=${MYSQL_USER}
+#      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+#      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+#      - TZ=Asia/Seoul
+      - MYSQL_DATABASE=domain_dev
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=1234
+      - MYSQL_ALLOW_EMPTY_PASSWORD=false
+      - TZ=Asia/Seoul
+
+  elasticsearch:
+    image: eddie1031/es:9.1.3
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - node.name=es01
+      - cluster.name=cluster-exp
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+  logstash:
+    image: eddie1031/ls:9.1.3
+    container_name: logstash
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "5044:5044"
+    volumes:
+       - ./lib/pipeline:/usr/share/logstash/pipeline
+
+  kibana:
+    image: kibana:9.1.3
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+  kafka:
+    image: apache/kafka
+    container_name: kafka
+    ports:
+      - "9090:9090"
+
+    environment:
+      KAFKA_NODE_ID: 1
+
+      CLUSTER_ID: QSZDASDASDsaddasQDSASda
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9090
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9090
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9091
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8085:8080"
+
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092

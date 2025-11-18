@@ -1,0 +1,76 @@
+spring:
+  profiles:
+    active: test
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope:
+              - profile
+              - email
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      properties:
+        delivery.timeout.ms: 1
+        linger.ms: 0
+        request.timeout.ms: 300
+        enable.idempotence: true
+        allow.auto.create.topics: false
+
+    admin:
+      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
+
+custom:
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  redirectUrl: http://localhost:8080
+
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: default_image
+
+  bucketname: sdfsdf
+
+aes:
+  key: 1234567890123456
+
+coolsms:
+  apiKey: aaaaaaaaaaaaaaaa
+  secretKey: aaaaaaaaaaaaaaaa
+  from: 01011111111
+
+
+jwt:
+  secret: dddddddddddddddddddddddddddddddddddddddd
+  expiration: 100
+  refresh-expiration: 1000
+eureka:
+  client:
+    enabled: false

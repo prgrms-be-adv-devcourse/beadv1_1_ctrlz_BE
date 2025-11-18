@@ -1,0 +1,60 @@
+name: CI Test Script
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  code-test:
+    name: 코드 테스트
+
+    steps:
+      - name: 브랜치로 체크아웃
+        uses: actions/checkout@v5
+
+      - name: JDK 세팅
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: discovery-service 권한 세팅
+        run: chmod +x discovery-service/gradlew
+
+      - name: discovery-service 테스트 실행
+        working-directory: ./discovery-service
+        run: ./gradlew test --no-daemon
+
+      - name: account-service 권한 세팅
+        run: chmod +x account-service/gradlew
+
+      - name: account-service 테스트 실행
+        working-directory: ./account-service
+        run: ./gradlew test --no-daemon
+
+      - name: domain-service 권한 세팅
+        run: chmod +x domain-service/gradlew
+
+      - name: domain-service 테스트 실행
+        working-directory: ./domain-service
+        run: ./gradlew test --no-daemon
+
+      - name: settlement-service 권한 세팅
+        run: chmod +x settlement-service/gradlew
+
+      - name: settlement-service 테스트 실행
+        working-directory: ./settlement-service
+        run: ./gradlew test --no-daemon
+
+      - name: gateway-service 권한 세팅
+        run: chmod +x gateway-service/gradlew
+
+      - name: gateway-service 테스트 실행
+        working-directory: ./gateway-service
+        run: ./gradlew test --no-daemon
+
+
+
+
+

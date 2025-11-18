@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: settlement-service-deploy
+  labels:
+    app: settlement
+spec:
+  selector:
+    matchLabels:
+      app: settlement
+  replicas: 1
+
+  strategy:
+    type: RollingUpdate
+  #    rollingUpdate:
+  #      maxUnavailable: 1
+  #      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: settlement
+    spec:
+      containers:
+        - name: settlement-service-app
+          image: beatchoi156/settlement-service:latest
+
+          ports:
+            - containerPort: 8082
+
+          #          resources:
+          #            requests:
+          #              memory: "256Mi"
+          #              cpu: "250m"
+          #            limits:
+          #              memory: "512Mi"
+          #              cpu: "500m"
+          #  Pod가 트래픽을 받을 준비가 되었는지 확인
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 85
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          #  Pod가 살아있는지 확인
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 85
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: settlement-service # 앱 네임이랑 같아야함.
+spec:
+  selector:
+    app: settlement # 이 라벨을 가진 Pod들에게 트래픽 분산
+
+  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+  # 로드밸런싱 설정
+  #    sessionAffinity: ClientIP        # 같은 클라이언트 IP는 같은 Pod로 (세션 유지)
+  #  sessionAffinityConfig:
+  #    clientIP:
+  #      timeoutSeconds: 10800          # 3시간 동안 세션 유지
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8082 # 어디로 포워딩 할건지
+      targetPort: 8082 # 컨테이너 포트 번호

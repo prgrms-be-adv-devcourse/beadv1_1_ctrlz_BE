@@ -1,0 +1,87 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: gateway-service
+
+  profiles:
+    active: local
+    group:
+      local:
+        - secret
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: oauth-login
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/oauth2/authorization/google
+                - Method=GET
+
+            - id: auth-sign-up
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/users
+                - Method=POST
+
+            - id: user-api-protected
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/users/**
+                - Method=GET,PATCH,DELETE
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: USER
+
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts
+                - Method=GET
+
+            - id: post-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=POST,PUT,DELETE,PATCH
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: SELLER
+
+            - id: cart-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/carts/**
+                - Method=GET,PATCH,DELETE,POST
+            #              filters:
+            #                - name: AuthenticationFilter
+            #                  args:
+            #                    requiredRole: USER
+
+            - id: deposit-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/deposits/**
+                - Method=GET
+#              filters:
+#                - name: AuthenticationFilter
+#                  args:
+#                    requiredRole: USER
+
+# k8s 설정
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+#eureka:
+  instance:
+    prefer-ip-address: true
+#    hostname: svc-account-service 서비스 이름 직접 등록
+
+

@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7' apply false
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+description = 'user'
+
+def queryDslVersion = "7.1" // 25년 11월 14일 기준 가장 최신
+def querydslSrcDir = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.7"
+    }
+}
+
+dependencies {
+
+    implementation project(":common")
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.security:spring-security-crypto'
+
+
+    //cache redis
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //sms
+    implementation 'com.solapi:sdk:1.0.3'
+
+    //test
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    //s3 테스트 의존성
+//    testImplementation 'software.amazon.awssdk:s3:2.37.5'
+//    testImplementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+//    testImplementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
+//    runtimeOnly 'com.h2database:h2'
+
+    implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"
+    implementation "io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// QueryDSL 설정
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += querydslSrcDir
+        }
+    }
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}

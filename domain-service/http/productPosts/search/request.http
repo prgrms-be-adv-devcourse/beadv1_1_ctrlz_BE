@@ -1,0 +1,68 @@
+### ========================================
+### 상품 게시글 API 테스트
+### ========================================
+
+@baseUrl = http://localhost:30000
+@contentType = application/json
+
+### 1. 상품 게시글 목록 조회 - 기본 (최신순, 20개)
+GET {{baseUrl}}/api/product-posts
+
+### 2. 페이지 지정
+GET {{baseUrl}}/api/product-posts?page=0&size=10
+
+### 3. 페이지 + 정렬 (가격 오름차순)
+GET {{baseUrl}}/api/product-posts?page=0&size=20&sort=price,asc
+
+### 4. 페이지 + 정렬 (가격 내림차순)
+GET {{baseUrl}}/api/product-posts?page=0&size=20&sort=price,desc
+
+### 5. 페이지 + 정렬 (좋아요 많은순)
+GET {{baseUrl}}/api/product-posts?page=0&size=20&sort=likedCount,desc
+
+### 6. 페이지 + 정렬 (조회수 많은순)
+GET {{baseUrl}}/api/product-posts?page=0&size=20&sort=viewCount,desc
+
+### 7. 카테고리 필터
+GET {{baseUrl}}/api/product-posts?categoryId=category-001
+
+### 8. 상품 상태 필터 (NEW)
+GET {{baseUrl}}/api/product-posts?status=NEW
+
+### 9. 상품 상태 필터 (GOOD)
+GET {{baseUrl}}/api/product-posts?status=GOOD
+
+### 10. 거래 상태 필터 (SELLING)
+GET {{baseUrl}}/api/product-posts?tradeStatus=SELLING
+
+### 11. 가격 범위 필터 (100만원 ~ 150만원)
+GET {{baseUrl}}/api/product-posts?minPrice=1000000&maxPrice=1500000
+
+### 12. 가격 범위 필터 (50만원 이하)
+GET {{baseUrl}}/api/product-posts?maxPrice=500000
+
+### 13. 가격 범위 필터 (200만원 이상)
+GET {{baseUrl}}/api/product-posts?minPrice=2000000
+
+### 14. 복합 필터 - 카테고리 + 상품상태
+GET {{baseUrl}}/api/product-posts?categoryId=category-001&status=GOOD
+
+### 15. 복합 필터 - 카테고리 + 가격범위
+GET {{baseUrl}}/api/product-posts?categoryId=category-001&minPrice=500000&maxPrice=1500000
+
+### 16. 복합 필터 - 카테고리 + 가격범위 + 정렬
+GET {{baseUrl}}/api/product-posts?categoryId=category-001&minPrice=500000&maxPrice=1500000&sort=price,asc
+
+### 17. 복합 필터 - 모든 조건
+GET {{baseUrl}}/api/product-posts?categoryId=category-001&status=GOOD&tradeStatus=SELLING&minPrice=500000&maxPrice=2000000&sort=createdAt,desc
+
+### 18. 2페이지 조회
+GET {{baseUrl}}/api/product-posts?page=1&size=10
+
+### 19. 페이지 크기 변경 (5개씩)
+GET {{baseUrl}}/api/product-posts?size=5
+
+### 20. 페이지 크기 변경 (50개씩)
+GET {{baseUrl}}/api/product-posts?size=50
+
+###
