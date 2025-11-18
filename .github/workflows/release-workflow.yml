@@ -1,0 +1,184 @@
+name: Build and release docker image
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+      service-dir:
+        required: true
+        type: string
+      file-name:
+        required: true
+        type: string
+    secrets:
+      APPLICATION_SECRET: ## 각각의 cd-workflow 에서 넘어올 때 secret.yml 정보 가져오기
+        required: false # secret이 있으면 가져오고 없으면 빈 값
+        description: 'Application secret yml content'
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_AC_KEY:
+        required: true
+    outputs:
+      tag_name:
+        value: ${{ jobs.tagging.outputs.tag_name }}
+
+env:
+  REGISTRY: docker.io
+
+jobs:
+
+  tagging:
+    name: 태깅 및 릴리즈
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.tag_version.outputs.new_tag }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: versioning and tagging
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: releasing
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+  build-image:
+    name: 도커 이미지 빌드
+    runs-on: ubuntu-latest
+    needs: tagging
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v5
+
+      # 각 서비스별 application-secret.yml 생성
+      - name: Create application-secret.yml
+        if: ${{ secrets.APPLICATION_SECRET != '' }}
+        run: |
+          mkdir -p ${{ inputs.service-dir }}/src/main/resources
+          echo "${{ secrets.APPLICATION_SECRET }}" > ${{ inputs.service-dir }}/src/main/resources/application-secret.yml
+
+      - name: Sign in github container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_AC_KEY }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ inputs.service-name }}
+          tags: |
+            type=sha
+            type=raw,value=${{ needs.tagging.outputs.tag_name }}
+            type=raw,value=latest
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.service-dir }}
+          file: ${{ inputs.service-dir }}/${{ inputs.file-name }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+#################################################
+#name: Java CI with Gradle
+#
+#on:
+#  push:
+#    branches: [ "release" ]
+#
+#jobs:
+#  build:
+#
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+#
+#      - name: Grant for gradlew
+#        run: chmod +x ./gradlew
+#        shell: bash
+#
+#      - name: Generate YAML Configuration Files
+#        run: |
+#          mkdir -p ./RevUp-domain/src/main/resources
+#          echo "${{ secrets.DOMAIN_VARIABLE_YML }}" > ./RevUp-domain/src/main/resources/domain-variable.yaml
+#
+#          mkdir -p ./RevUp-infra/src/main/resources
+#          echo "${{ secrets.INFRA_VARIABLE_YML }}" > ./RevUp-infra/src/main/resources/infra-variable.yaml
+#
+#          mkdir -p ./RevUp-common/src/main/resources
+#          echo "${{ secrets.COMMON_VARIABLE_YML }}" > ./RevUp-common/src/main/resources/common-variable.yaml
+#
+#          mkdir -p ./RevUp-security/src/main/resources
+#          echo "${{ secrets.SECURITY_VARIABLE_YML }}" > ./RevUp-security/src/main/resources/security-variable.yaml
+#
+#      - name: Build with Gradle Wrapper
+#        run: ./gradlew bootJar
+#
+#      - name: Docker build
+#        run: |
+#          JAR_FILE=$(find ./RevUp-api/build/libs -name "*.jar" | head -n 1)
+#          if [ -z "$JAR_FILE" ]; then
+#            echo "JAR file not found! Ensure ./gradlew bootJar executed successfully."
+#            exit 1
+#          fi
+#          echo "Using JAR file: $JAR_FILE"
+#
+#          docker login -u ${{ secrets.MINU_DOCKERHUB_USERNAME }} -p ${{ secrets.MINU_DOCKERHUB_PASSWORD }}
+#          docker build --build-arg JAR_FILE=$JAR_FILE -t ${{ secrets.MINU_DOCKERHUB_USERNAME }}/revup:latest .
+#          docker push ${{ secrets.MINU_DOCKERHUB_USERNAME }}/revup:latest
+#
+#      - name: Copy docker-compose.yml to EC2
+#        run: |
+#          echo "${{ secrets.MINU_EC2_PRIVATE_KEY }}" > private_key.pem
+#          chmod 600 private_key.pem
+#          scp -i private_key.pem -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.MINU_SSH_USER }}@${{ secrets.MINU_KNOWN_HOSTS }}:/home/ubuntu/
+#
+#      - name: Deploy
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.MINU_KNOWN_HOSTS }} # EC2 인스턴스 퍼블릭 DNS
+#          username: ${{secrets.MINU_SSH_USER}}
+#          key: ${{ secrets.MINU_EC2_PRIVATE_KEY }} # pem 키
+#          # 도커 작업
+#          script: |
+#            sudo docker pull ${{ secrets.MINU_DOCKERHUB_USERNAME }}/revup:latest
+#            sudo docker compose up -d
+#            timeout 60s sudo docker compose logs -f
+#            sudo docker compose ps
+#            sudo docker image prune -f
+#
+#      - name: Check docker-compose status
+#        run: |
+#          sudo docker compose ps
+#          sudo docker compose logs

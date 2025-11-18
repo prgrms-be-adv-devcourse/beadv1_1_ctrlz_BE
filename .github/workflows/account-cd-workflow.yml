@@ -1,0 +1,33 @@
+name: account-service ci/cd
+
+on:
+  push: # 메인에 push 될때 수행됨.
+    branches:
+      - main
+    paths:
+      - 'account-service/**'
+      - 'common/**'
+
+jobs:
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_ACCOUNT_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: accounts-service-app
+      service-dir: ./account-service/account-application # account-service 에는 /account-application로 secret.yml 들어가게 설정
+      file-name: account-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: accounts-service-app # pod랑 같은 이름
+      deploy-name: account-service-deploy # deployment랑 같은 이름
+      label-name: account # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+

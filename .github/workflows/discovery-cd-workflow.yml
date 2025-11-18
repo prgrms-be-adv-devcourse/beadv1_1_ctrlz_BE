@@ -1,0 +1,30 @@
+name: domain-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'discovery-service/**'
+
+jobs:
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets: inherit # discovery 에는 secret.yml 이 없어 따로 읽지 않음
+    with:
+      service-name: discovery-service-app
+      service-dir: .
+      file-name: discovery-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: discovery-service-app # pod랑 같은 이름
+      deploy-name: discovery-service-deploy # deployment랑 같은 이름
+      label-name: discovery # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+
+

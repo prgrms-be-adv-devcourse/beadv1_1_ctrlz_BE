@@ -1,0 +1,33 @@
+name: gateway-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gateway-service/**'
+
+jobs:
+
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_GATEWAY_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: gateway-service-app
+      service-dir: .
+      file-name: gateway-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: gateway-service-app # pod랑 같은 이름
+      deploy-name: gateway-service-deploy # deployment랑 같은 이름
+      label-name: gateway # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+

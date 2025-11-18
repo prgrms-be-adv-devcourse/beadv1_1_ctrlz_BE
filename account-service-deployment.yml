@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: account-service-app
-          image: beatchoi156/account-service:latest
+          image: docker.io/beatchoi156/account-service:latest
           env: # 헬스 체크 및 로드 밸런싱 확인용
             - name: discovery_default_zone
               value: "http://discovery-service:8761/eureka/"

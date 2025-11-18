@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: settlement-service-app
-          image: beatchoi156/settlement-service:latest
+          image: docker.io/beatchoi156/settlement-service:latest
 
           ports:
             - containerPort: 8082

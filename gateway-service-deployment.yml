@@ -25,7 +25,7 @@ spec:   # deployment 면세
     spec:
       containers:
         - name: gateway-service-app
-          image: beatchoi156/gateway-service:latest
+          image: docker.io/beatchoi156/gateway-service:latest
           env:
             - name: discovery_default_zone
               value: "http://discovery-service:8761/eureka/"

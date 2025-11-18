@@ -1,0 +1,61 @@
+name: Deploy and Rolling Update
+
+on:
+  workflow_call:
+    inputs:
+      pod-name:
+        required: true
+        type: string
+        description: "pod name"
+      deploy-name:
+        required: true
+        type: string
+        description: "deployment name"
+      label-name:
+        required: true
+        type: string
+        description: "pod label name"
+      image-tag:
+        required: true
+        type: string
+
+
+env:
+  REGISTRY: docker.io
+
+jobs:
+  deploy:
+    name: 쿠버네티스 배포
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Update deployment image
+        run: |
+          kubectl set image deployment.apps/${{ inputs.deploy-name }} \
+            ${{ inputs.pod-name }}=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ inputs.pod-name }}:${{ inputs.image-tag }}
+
+      - name: Add deployment annotation
+        run: |
+          kubectl annotate deployment.apps/${{ inputs.deploy-name }} \
+          kubernetes.io/change-cause="Deploy ${{ inputs.service-name }}:${{ inputs.image-tag }}" \
+          deployed-at="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          git-commit="${{ github.sha }}" \
+          --overwrite
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment.apps/${{ inputs.deploy-name }}
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -l app=${{ inputs.label-name }} -o wide
+          
+
+      - name: rollout history
+        run: |
+          kubectl rollout history deployment.apps/${{ inputs.deploy-name }}
+          
+          

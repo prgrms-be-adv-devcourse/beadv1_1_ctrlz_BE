@@ -1,0 +1,47 @@
+name: settlement-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'settlement-service/**'
+      - 'common/**'
+
+  workflow_dispatch:
+    inputs:
+      service-name:
+        description: 'yeongeun-Market settlement service for deployment'
+        required: false
+        default: 'sa-settlement-service'
+      force-deploy:
+        description: 'Force deployment even without changes'
+        required: false
+        type: boolean
+        default: false
+
+
+jobs:
+
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_SETTLEMENT_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: settlement-service-app
+      service-dir: .
+      file-name: settlement-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: settlement-service-app # pod랑 같은 이름
+      deploy-name: settlement-service-deploy # deployment랑 같은 이름
+      label-name: settlement # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+

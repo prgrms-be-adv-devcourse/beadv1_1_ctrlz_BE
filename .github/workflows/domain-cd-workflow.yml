@@ -1,0 +1,46 @@
+name: domain-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'domain-service/**'
+      - 'common/**'
+  workflow_dispatch:
+    inputs:
+      service-name:
+        description: 'yeongeun-Market domain service for deployment'
+        required: false
+        default: 'sa-domain-service'
+      force-deploy:
+        description: 'Force deployment even without changes'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+
+  releasing:
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_DOMAIN_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: domain-service-app
+      service-dir: .
+      file-name: domain-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: domain-service-app # pod랑 같은 이름
+      deploy-name: domain-service-deploy # deployment랑 같은 이름
+      label-name: domain # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+
+
