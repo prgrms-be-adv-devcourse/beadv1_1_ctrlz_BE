@@ -24,6 +24,7 @@ jobs:
     with:
       service-name: gateway-service-app
       service-dir: .
+      secret-dir: .
       file-name: gateway-service.dockerfile
 
   deploying:

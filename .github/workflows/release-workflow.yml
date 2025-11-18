@@ -9,6 +9,9 @@ on:
       service-dir:
         required: true
         type: string
+      secret-dir:
+        required: true
+        type: string
       file-name:
         required: true
         type: string
@@ -72,8 +75,8 @@ jobs:
           APP_SECRET: ${{ secrets.APPLICATION_SECRET }}
         if: ${{ env.APP_SECRET != '' }}
         run: |
-          mkdir -p ${{ inputs['service-dir'] }}/src/main/resources
-          echo "${APP_SECRET}" > ${{ inputs['service-dir'] }}/src/main/resources/application-secret.yml
+          mkdir -p ${{ inputs['secret-dir'] }}/src/main/resources
+          echo "${APP_SECRET}" > ${{ inputs['secret-dir'] }}/src/main/resources/application-secret.yml
 
       - name: Sign in github container registry
         uses: docker/login-action@v3

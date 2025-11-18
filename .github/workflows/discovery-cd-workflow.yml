@@ -1,4 +1,4 @@
-name: domain-service ci/cd
+name: discovery-service ci/cd
 
 on:
   push:
@@ -20,6 +20,7 @@ jobs:
     with:
       service-name: discovery-service-app
       service-dir: .
+      secret-dir: .
       file-name: discovery-service.dockerfile
 
 
