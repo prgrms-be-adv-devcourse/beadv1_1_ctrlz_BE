@@ -31,7 +31,6 @@ env:
   REGISTRY: docker.io
 
 jobs:
-
   tagging:
     name: 태깅 및 릴리즈
     runs-on: ubuntu-latest
