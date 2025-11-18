@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline-configmap
+  namespace: default
+data:
+  logstash.conf: |
+    input {
+        jdbc {
+            jdbc_driver_library => "/opt/logstash/jdbc/mysql-connector-j-9.4.0.jar"
+            jdbc_driver_class => "com.mysql.cj.jdbc.Driver"
+            jdbc_connection_string => "jdbc:mysql://mysql-service:3306/${MYSQL_DATABASE}"
+            jdbc_user => "${MYSQL_USER}"
+            jdbc_password => "${MYSQL_PASSWORD}"
+
+            schedule => "* * * * *"
+
+            last_run_metadata_path => "/usr/share/logstash/.jdbc_last_run_product"
+
+            use_column_value => true
+
+            tracking_column => "updated_at"
+            tracking_column_type => "timestamp"
+
+            statement => "
+                SELECT
+                    pp.id, pp.title, pp.name, pp.price, pp.description,
+                    pp.created_at, pp.updated_at,
+                    pp.view_count, pp.liked_count,
+                    pp.status, pp.trade_status, pp.delete_status,
+                    t.name AS tag_name,
+                    c.name AS category_name
+                FROM product_post pp
+                LEFT JOIN product_post_tag ppt ON ppt.product_post_id = pp.id
+                LEFT JOIN tag t ON t.id = ppt.tag_id
+                LEFT JOIN category c ON c.id = pp.category_id
+                WHERE pp.updated_at > :sql_last_value
+                ORDER BY pp.updated_at ASC, pp.id ASC
+            "
+        }
+    }
+
+    filter {
+        aggregate {
+            task_id => "%{id}"
+            code => "
+                map['tags'] ||= []
+
+                if event.get('tag_name') && !event.get('tag_name').to_s.empty?
+                    map['tags'] << event.get('tag_name')
+                end
+
+                map['id'] = event.get('id')
+                map['title'] = event.get('title')
+                map['name'] = event.get('name')
+                map['price'] = event.get('price')
+                map['description'] = event.get('description')
+                map['category_name'] = event.get('category_name')
+                map['view_count'] = event.get('view_count')
+                map['liked_count'] = event.get('liked_count')
+                map['status'] = event.get('status')
+                map['trade_status'] = event.get('trade_status')
+                map['delete_status'] = event.get('delete_status')
+                map['created_at'] = event.get('created_at')
+                map['updated_at'] = event.get('updated_at')
+
+                event.cancel()
+            "
+
+            timeout_code => "
+                event.set('tags', map['tags'].uniq)
+            "
+
+            timeout => 3
+
+            push_map_as_event_on_timeout => true
+        }
+
+        ruby {
+            code => '
+                tags = event.get("tags")
+
+                if tags && tags.is_a?(Array)
+                    clean_tags = tags.reject { |tag|
+                        tag_str = tag.to_s
+                        tag_str.start_with?("_")
+                    }
+
+                    event.set("tags", clean_tags)
+                end
+            '
+        }
+    }
+
+    output {
+        elasticsearch {
+            hosts => [ "http://elastic-search-service:9200" ]
+            index => "product-posts"
+            document_id => "%{id}"
+        }
+    }

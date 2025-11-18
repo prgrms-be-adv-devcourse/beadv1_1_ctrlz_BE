@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-service
+  labels:
+    app: elasticsearch
+
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch
+  replicas: 1
+
+  template:
+    metadata:
+      name: elasticsearch
+      labels:
+        app: elasticsearch
+
+    spec:
+      containers:
+        - name: elasticsearch
+          image: eddie1031/es:9.1.3
+          ports:
+            - containerPort: 9200
+          env:
+            - name: xpack.security.enabled
+              value: "false"
+            - name: xpack.security.http.ssl.enabled
+              value: "false"
+            - name: discovery.type
+              value: "single-node"
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          envFrom:
+            - configMapRef:
+                name: elk-config-map
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastic-search-service
+
+spec:
+  type: NodePort
+  selector:
+    app: elasticsearch
+
+  sessionAffinity: None
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9200
+      targetPort: 9200
+      nodePort: 30920

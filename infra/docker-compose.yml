@@ -13,10 +13,15 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+#      - MYSQL_DATABASE=${MYSQL_DATABASE}
+#      - MYSQL_USER=${MYSQL_USER}
+#      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+#      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+#      - TZ=Asia/Seoul
+      - MYSQL_DATABASE=domain_dev
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=1234
+      - MYSQL_ALLOW_EMPTY_PASSWORD=false
       - TZ=Asia/Seoul
 
   elasticsearch:
@@ -62,11 +67,8 @@ services:
       KAFKA_NODE_ID: 1
 
       CLUSTER_ID: QSZDASDASDsaddasQDSASda
-
       KAFKA_PROCESS_ROLES: controller,broker
-
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9091,EXTERNAL://0.0.0.0:9090
-
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9090
 
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER

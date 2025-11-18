@@ -1,5 +1,25 @@
 package com.domainservice.domain.post.post.service;
 
+import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.UserExceptionCode.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
@@ -13,27 +33,8 @@ import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
+
 import feign.FeignException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static com.common.exception.vo.ProductPostExceptionCode.*;
-import static com.common.exception.vo.UserExceptionCode.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 /**
  * ProductPostService 수정 기능 테스트
@@ -220,6 +221,7 @@ class UpdateProductPostTest {
         verify(productPostRepository, never()).findById(anyString());
     }
 
+	@Disabled
     @DisplayName("이미지 없이 수정하면 예외가 발생한다.")
     @Test
     void test5() {

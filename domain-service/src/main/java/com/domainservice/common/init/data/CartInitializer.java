@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+// @Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class CartInitializer {
 

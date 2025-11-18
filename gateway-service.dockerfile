@@ -10,6 +10,7 @@ COPY gateway-service/src ./gateway-service/src
 
 WORKDIR /app/gateway-service
 RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew clean build -x test --parallel --no-daemon
 
 FROM gcr.io/distroless/java21-debian12
@@ -19,4 +20,4 @@ WORKDIR /app
 COPY --from=build /app/gateway-service/build/libs/*.jar app.jar
 
 # 변경 예정
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=local", "app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]

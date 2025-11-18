@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-service
+  labels:
+    app: redis
+
+spec:
+  selector:
+    matchLabels:
+      app: redis
+
+  template:
+    metadata:
+      name: redis
+      labels:
+        app: redis
+
+    spec:
+      containers:
+        - name: redis1
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          envFrom:
+            - configMapRef:
+                name: redis-config-map
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+
+spec:
+  selector:
+    app: redis  # 이 라벨을 가진 Pod들에게 트래픽 분산
+
+  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+
+  ports:
+    - protocol: TCP
+      port: 6379 # 어디로 포워딩 할건지
+      targetPort: 6379 # 컨테이너 포트 번호
+
