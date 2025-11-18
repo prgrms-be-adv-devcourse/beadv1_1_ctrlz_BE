@@ -24,12 +24,12 @@ for SERVICE in "${SERVICES[@]}"; do
   echo "=================================================="
   echo "Building and pushing $IMAGE_NAME"
   echo "Dockerfile: $DOCKERFILE"
-  echo "Platforms:  linux/arm64"
+  echo "Platforms:  linux/amd64"
   echo "=================================================="
 
 
   docker buildx build \
-    --platform linux/arm64 \
+    --platform linux/amd64 \
     -t "$IMAGE_NAME" \
     -f "$DOCKERFILE" \
     --push \
