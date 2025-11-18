@@ -20,7 +20,7 @@ jobs:
     with:
       service-name: discovery-service-app
       service-dir: .
-      secret-dir: .
+      secret-dir: discovery-service
       file-name: discovery-service.dockerfile
 
 

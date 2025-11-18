@@ -36,7 +36,7 @@ jobs:
     with:
       service-name: domain-service-app
       service-dir: .
-      secret-dir: .
+      secret-dir: domain-service
       file-name: domain-service.dockerfile
 
   deploying:
