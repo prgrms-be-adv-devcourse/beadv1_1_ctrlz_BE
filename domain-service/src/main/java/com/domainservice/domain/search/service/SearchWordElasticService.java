@@ -1,43 +1,117 @@
-// package com.domainservice.domain.search.service;
-//
-// import static co.elastic.clients.elasticsearch.ingest.Processor.Kind.*;
-//
-// import org.springframework.stereotype.Service;
-// import org.springframework.transaction.annotation.Transactional;
-// import org.springframework.util.StringUtils;
-//
-// import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
-// import com.domainservice.domain.search.repository.SearchWordRepository;
-//
-// import lombok.RequiredArgsConstructor;
-//
-// @Service
-// @RequiredArgsConstructor
-// public class SearchWordElasticService {
-//
-// 	private final SearchWordRepository searchWordRepository;
-// 	private final DictionaryService dictionaryService;
-//
-// 	@Transactional
-// 	public SearchWordResponse getAutoCompletionWordList(String prefix) {
-// 		/*
-// 		 * Todo: 검색어를 받아.
-// 		 *  검색어가 없으면? -> 최근에 내가 검색한 목록들 조회.
-// 		 *  검색어가 한글이면? -> qwertyInput으로 변환 후 qwertyInput으로 조회 + 한글로 조회
-// 		 *  검색어가 영어면?
-// 		 *    1. 사전에 있는 단어면? ->
-// 		 *    2. 사전에 없는 단어면? -> qwertyInput이므로, qwertyInput으로 조회 (+ 유사도가 높은 한글 단어로 재조회
-// 		 */
-//
-// 		//검색어가 없으면? -> 최근에 내가 검색한 목록들 조회.
-// 		if (!StringUtils.hasText(prefix)) {
-// 			return null;
-// 		}
-//
-// 		//ElasticSearch에서 조회하기 위한 prefix를 얻는 메서드
-// 		dictionaryService.prepareElasticPrefix(prefix);
-//
-//
-//
-// 	}
-// }
+package com.domainservice.domain.search.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import com.domainservice.domain.search.model.dto.request.Prefix;
+import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
+import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
+import com.domainservice.domain.search.repository.SearchWordRepository;
+import com.domainservice.domain.search.service.converter.SearchWordConverter;
+import com.domainservice.domain.search.service.analyzer.PrefixAnalyzer;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class SearchWordElasticService {
+
+	private final SearchWordRepository searchWordRepository;
+	private final PrefixAnalyzer prefixAnalyzer;
+
+	/**
+	 * 검색어를 받음
+	 * 	검색어가 없으면? -> 최근에 내가 검색한 목록들 조회.
+	 * 	검색어가 한글이면? -> qwertyInput으로 변환 후 qwertyInput으로 조회 + 한글로 조회
+	 * 	검색어가 영어면?
+	 * 	 1. 사전에 있는 단어면? -> 한글로 번역 작업?
+	 *   2. 사전에 없는 단어면? -> qwertyInput이므로, qwertyInput으로 조회 (+ 유사도가 높은 한글 단어로 재조회)
+	 * ---
+	 * TODO:
+	 *  1. 영어로 입력하면 영어자체로도 같이 반환할수 있도록 전환 예정(데이터셋이 많이 필요할듯)
+	 *    DocumentEntity의 koreanWord -> originalWord로 전환해서 리팩토링 예정
+	 *  2. 자음만 입력해도 결과 반환할수 있도록 수정
+	 * @param prefix
+	 * @param userId
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<SearchWordResponse> getAutoCompletionWordList(Prefix prefix, String userId) {
+		List<SearchWordResponse> responseList = new ArrayList<>();
+
+		log.info("originValue = {}", prefix.value());
+		log.info("qwertyValue = {}", prefix.getQwertyInput());
+
+		//검색어가 없는 경우
+		String originValue = prefix.value();
+		if (!userId.isEmpty() && !StringUtils.hasText(originValue)) {
+			// 최근에 내가 검색한 목록들 조회. -> Redis
+			return responseList;
+		}
+
+		String convertedValue = prefix.getQwertyInput();
+
+		List<SearchWordDocumentEntity> findWordList;
+		if (!prefix.isEnglish()) {
+			//입력값이 한글인 경우 (+ 유사도가 높은 한글 단어로 조회)
+			findWordList = findWordListForKorean(prefix);
+
+		} else if (!prefixAnalyzer.existsInDictionary(convertedValue)) {
+			//사전에 없는 영어입력값이면 -> convertedValue와 일치하는 검색후 -> 유사 검색
+			findWordList = findWordListForUnknownEnglish(prefix);
+		} else {
+			findWordList = findWordListForKnownEnglish(prefix);
+		}
+		//koreanWord값이 같으면 중복처리
+		findWordList.stream().distinct().map(SearchWordResponse::from).forEach(responseList::add);
+
+		return responseList;
+	}
+
+	/**
+	 * 사전에 없는 영어일 경우에 조회 -> 실제 의미는 한글
+	 * @param prefix
+	 * @return
+	 */
+	private List<SearchWordDocumentEntity> findWordListForUnknownEnglish(Prefix prefix) {
+		SearchWordDocumentEntity findEntity = searchWordRepository.findByQwertyInput(prefix.value())
+			.orElseGet(() -> SearchWordDocumentEntity.createDocumentEntity(prefix.getKoreanWord(), prefix.value()));
+
+		return findWordListForKorean(new Prefix(findEntity.getKoreanWord()));
+	}
+
+	/**
+	 * 사전에 있는 영어일 경우에 조회
+	 * @param prefix
+	 * @return
+	 */
+	private List<SearchWordDocumentEntity> findWordListForKnownEnglish(Prefix prefix) {
+		return searchWordRepository.findAllByQwertyInput(prefix.getQwertyInput());
+	}
+
+	/**
+	 * 한글일 때 조회
+	 * @param prefix 사용자가 한국어로 입력한 값
+	 * @return
+	 */
+	private List<SearchWordDocumentEntity> findWordListForKorean(Prefix prefix) {
+		String convertedValue = SearchWordConverter.convertToQwertyInput(prefix.getQwertyInput());
+		String originValue = prefix.value();
+
+		List<SearchWordDocumentEntity> findSearchWord = searchWordRepository.findAllByKoreanWord(originValue);
+
+		if (findSearchWord.isEmpty()) {
+			SearchWordDocumentEntity newDocument = SearchWordDocumentEntity.createDocumentEntity(originValue,
+				convertedValue);
+			findSearchWord.add(newDocument);
+		}
+
+		return findSearchWord;
+	}
+}
