@@ -13,9 +13,9 @@ spec:   # deployment 면세
   replicas: 1
   strategy:
     type: RollingUpdate
-#    rollingUpdate:
-#      maxUnavailable: 1
-#      maxSurge: 1
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
 
   ####### pod 영역
   template:

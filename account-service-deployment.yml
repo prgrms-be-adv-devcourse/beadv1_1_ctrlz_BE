@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-  #    rollingUpdate:
-  #      maxUnavailable: 1
-  #      maxSurge: 1
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -26,16 +26,16 @@ spec:
           env: # 헬스 체크 및 로드 밸런싱 확인용
             - name: discovery_default_zone
               value: "http://discovery-service:8761/eureka/"
-#            - name: DB_USERNAME
-#              valueFrom:
-#                secretKeyRef:
-#                  name: db-secret
-#                  key: DB_USERNAME
-#            - name: DB_PASSWORD
-#              valueFrom:
-#                secretKeyRef:
-#                  name: db-secret
-#                  key: DB_PASSWORD
+          #            - name: DB_USERNAME
+          #              valueFrom:
+          #                secretKeyRef:
+          #                  name: db-secret
+          #                  key: DB_USERNAME
+          #            - name: DB_PASSWORD
+          #              valueFrom:
+          #                secretKeyRef:
+          #                  name: db-secret
+          #                  key: DB_PASSWORD
 
           ports:
             - containerPort: 8080

@@ -3,7 +3,7 @@ name: CI Test Script
 on:
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   code-test:
