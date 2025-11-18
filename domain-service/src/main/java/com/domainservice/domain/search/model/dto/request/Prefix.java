@@ -1,16 +1,16 @@
 package com.domainservice.domain.search.model.dto.request;
 
-import com.domainservice.domain.search.service.converter.SearchWordConverter;
+import com.domainservice.domain.search.service.converter.PrefixConverter;
 
 public record Prefix(
 	String value
 ) {
 	public String getQwertyInput() {
-		return SearchWordConverter.convertToQwertyInput(this.value);
+		return PrefixConverter.convertToQwertyInput(this.value);
 	}
 
 	public String getKoreanWord() {
-		return SearchWordConverter.convertToKoreanWord(this.value);
+		return PrefixConverter.convertToKoreanWord(this.value);
 	}
 
 	public boolean isEnglish() {

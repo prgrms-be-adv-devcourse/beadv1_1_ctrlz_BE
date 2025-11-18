@@ -11,7 +11,6 @@ import com.domainservice.domain.search.model.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
 import com.domainservice.domain.search.repository.SearchWordRepository;
-import com.domainservice.domain.search.service.converter.SearchWordConverter;
 import com.domainservice.domain.search.service.analyzer.PrefixAnalyzer;
 
 import lombok.RequiredArgsConstructor;
@@ -101,7 +100,7 @@ public class SearchWordElasticService {
 	 * @return
 	 */
 	private List<SearchWordDocumentEntity> findWordListForKorean(Prefix prefix) {
-		String convertedValue = SearchWordConverter.convertToQwertyInput(prefix.getQwertyInput());
+		String convertedValue = prefix.getQwertyInput();
 		String originValue = prefix.value();
 
 		List<SearchWordDocumentEntity> findSearchWord = new ArrayList<>(

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Arrays;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SearchWordConverter {
+public final class PrefixConverter {
 
 	private static final char[] INITIAL_CONSONANT = {
 		'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ',
