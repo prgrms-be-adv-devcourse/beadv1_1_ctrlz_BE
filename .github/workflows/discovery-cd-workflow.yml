@@ -19,8 +19,8 @@ jobs:
     secrets: inherit # discovery 에는 secret.yml 이 없어 따로 읽지 않음
     with:
       service-name: discovery-service-app
-      service-dir: .
-      secret-dir: .
+      service-dir: discovery-service
+      secret-dir: discovery-service
       file-name: discovery-service.dockerfile
 
 
