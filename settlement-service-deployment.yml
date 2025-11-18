@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: settlement-deploy
+  name: settlement-service-deploy
   labels:
     app: settlement
 spec:
@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0 # 새 pod ready시 까지 유지
-      maxSurge: 1 # 새 pod 생성
+  #    rollingUpdate:
+  #      maxUnavailable: 1
+  #      maxSurge: 1
   template:
     metadata:
       labels:
@@ -22,12 +22,11 @@ spec:
     spec:
       containers:
         - name: settlement-service-app
-          image: docker.io/beatchoi156/settlement-service:latest
-          env:
-            - name: discovery_default_zone
-              value: "http://discovery-svc:8761/eureka/"
+          image: beatchoi156/settlement-service:latest
+
           ports:
-            - containerPort: 8085
+            - containerPort: 8082
+
           #          resources:
           #            requests:
           #              memory: "256Mi"
@@ -39,7 +38,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8085
+              port: 8082
             initialDelaySeconds: 85
             periodSeconds: 5
             timeoutSeconds: 3
@@ -48,7 +47,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8085
+              port: 8082
             initialDelaySeconds: 85
             periodSeconds: 10
             timeoutSeconds: 3
@@ -59,9 +58,8 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: settlement-svc
+  name: settlement-service # 앱 네임이랑 같아야함.
 spec:
-  #  type: NodePort
   selector:
     app: settlement # 이 라벨을 가진 Pod들에게 트래픽 분산
 
@@ -75,5 +73,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 8085 # 어디로 포워딩 할건지
-      targetPort: 8085 # 컨테이너 포트 번호
+      port: 8082 # 어디로 포워딩 할건지
+      targetPort: 8082 # 컨테이너 포트 번호

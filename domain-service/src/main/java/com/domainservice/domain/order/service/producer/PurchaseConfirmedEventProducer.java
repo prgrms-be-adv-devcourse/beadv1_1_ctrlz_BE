@@ -7,6 +7,7 @@ import com.common.event.SettlementCreatedEvent;
 
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
 @Service
 public class PurchaseConfirmedEventProducer {

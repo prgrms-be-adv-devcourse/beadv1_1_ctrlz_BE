@@ -1,25 +1,28 @@
 package com.domainservice.common.init.data;
 
-import com.domainservice.common.init.data.util.ResourceMultipartFile;
-import com.domainservice.domain.post.category.service.CategoryService;
-import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.service.ProductPostService;
-import com.domainservice.domain.post.tag.service.TagService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.domainservice.common.init.data.util.ResourceMultipartFile;
+import com.domainservice.domain.post.category.service.CategoryService;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.enums.ProductStatus;
+import com.domainservice.domain.post.post.service.ProductPostService;
+import com.domainservice.domain.post.tag.service.TagService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
+// @Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class ProductPostInitializer {
 

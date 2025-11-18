@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: logstash-deploy
+  name: logstash-service
   labels:
     app: logstash
 
@@ -30,21 +30,16 @@ spec:
           volumeMounts:
             - name: logstash-pipeline
               mountPath: /usr/share/logstash/pipeline
-            - name: logstash-logs
-              mountPath: /usr/share/logstash/logs
       volumes:
         - name: logstash-pipeline
           configMap:
             name: logstash-pipeline-configmap
-        - name: logstash-logs
-          hostPath:
-            path: /logs
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: logstash-svc
+  name: logstash-service
 
 spec:
   type: NodePort

@@ -24,10 +24,8 @@ spec:
         - name: domain-service-app
           image: beatchoi156/domain-service:latest
           env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
+            - name: discovery_default_zone
+              value: "http://discovery-service:8761/eureka/"
           ports:
             - containerPort: 8081
 #          resources:
