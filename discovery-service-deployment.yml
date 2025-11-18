@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-#    rollingUpdate:
-#      maxUnavailable: 1
-#      maxSurge: 1
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: discovery-service-app
-          image: beatchoi156/discovery-service:latest
+          image: docker.io/beatchoi156/discovery-service:latest
           ports:
             - containerPort: 8761
           #          resources:

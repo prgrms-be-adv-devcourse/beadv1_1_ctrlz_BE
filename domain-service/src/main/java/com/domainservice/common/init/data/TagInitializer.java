@@ -1,5 +1,6 @@
 package com.domainservice.common.init.data;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.domainservice.domain.post.tag.service.TagService;
@@ -9,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-// @Profile({"local", "dev"})
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class TagInitializer {
 

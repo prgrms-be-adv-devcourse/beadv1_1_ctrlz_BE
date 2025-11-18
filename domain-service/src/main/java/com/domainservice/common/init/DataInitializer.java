@@ -2,6 +2,7 @@ package com.domainservice.common.init;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.domainservice.common.init.data.CartInitializer;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
 
