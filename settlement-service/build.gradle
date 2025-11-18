@@ -44,6 +44,10 @@ dependencies {
     // h2
     runtimeOnly 'com.h2database:h2'
 
+    // DB
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
     // Spring Kafka
     implementation 'org.springframework.kafka:spring-kafka'
     // JSON 직렬화/역직렬화용

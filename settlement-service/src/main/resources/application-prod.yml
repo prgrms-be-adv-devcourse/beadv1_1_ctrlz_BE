@@ -1,11 +1,7 @@
 spring:
-  application:
-    name: settlement-service
-
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+  h2:
+    console:
+      enabled: true
 
   kafka:
     bootstrap-servers: kafka-mq:9090
