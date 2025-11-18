@@ -104,14 +104,16 @@ public class SearchWordElasticService {
 		String convertedValue = SearchWordConverter.convertToQwertyInput(prefix.getQwertyInput());
 		String originValue = prefix.value();
 
-		List<SearchWordDocumentEntity> findSearchWord = searchWordRepository.findAllByKoreanWord(originValue);
+		List<SearchWordDocumentEntity> findSearchWord = new ArrayList<>(
+			searchWordRepository.findAllByKoreanWord(originValue)
+		);
 
 		if (findSearchWord.isEmpty()) {
 			SearchWordDocumentEntity newDocument = SearchWordDocumentEntity.createDocumentEntity(originValue,
 				convertedValue);
 			findSearchWord.add(newDocument);
 		}
-
+		log.info("findSearchWord = {}", findSearchWord);
 		return findSearchWord;
 	}
 }
