@@ -35,8 +35,8 @@ jobs:
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
       service-name: domain-service-app
-      service-dir: .
-      secret-dir: .
+      service-dir: domain-service
+      secret-dir: domain-service
       file-name: domain-service.dockerfile
 
   deploying:

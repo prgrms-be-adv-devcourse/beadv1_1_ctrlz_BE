@@ -37,8 +37,8 @@ jobs:
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
       service-name: settlement-service-app
-      service-dir: .
-      secret-dir: .
+      service-dir: settlement-service
+      secret-dir: settlement-service
       file-name: settlement-service.dockerfile
 
   deploying:

@@ -23,8 +23,8 @@ jobs:
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
       service-name: gateway-service-app
-      service-dir: .
-      secret-dir: .
+      service-dir: gateway-service
+      secret-dir: gateway-service
       file-name: gateway-service.dockerfile
 
   deploying:
