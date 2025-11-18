@@ -68,10 +68,12 @@ jobs:
 
       # 각 서비스별 application-secret.yml 생성
       - name: Create application-secret.yml
-        if: ${{ secrets.APPLICATION_SECRET != '' }}
+        env:
+          APP_SECRET: ${{ secrets.APPLICATION_SECRET }}
+        if: ${{ env.APP_SECRET != '' }}
         run: |
-          mkdir -p ${{ inputs.service-dir }}/src/main/resources
-          echo "${{ secrets.APPLICATION_SECRET }}" > ${{ inputs.service-dir }}/src/main/resources/application-secret.yml
+          mkdir -p ${{ inputs['service-dir'] }}/src/main/resources
+          echo "${APP_SECRET}" > ${{ inputs['service-dir'] }}/src/main/resources/application-secret.yml
 
       - name: Sign in github container registry
         uses: docker/login-action@v3

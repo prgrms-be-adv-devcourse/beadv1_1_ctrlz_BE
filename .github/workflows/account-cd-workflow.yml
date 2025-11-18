@@ -16,7 +16,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
-      service-name: accounts-service-app
+      service-name: account-service-app
       service-dir: ./account-service/account-application # account-service 에는 /account-application로 secret.yml 들어가게 설정
       file-name: account-service.dockerfile
 
@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/deploy-workflow.yml
     secrets: inherit
     with:
-      pod-name: accounts-service-app # pod랑 같은 이름
+      pod-name: account-service-app # pod랑 같은 이름
       deploy-name: account-service-deploy # deployment랑 같은 이름
       label-name: account # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}

@@ -40,7 +40,7 @@ jobs:
       - name: Add deployment annotation
         run: |
           kubectl annotate deployment.apps/${{ inputs.deploy-name }} \
-          kubernetes.io/change-cause="Deploy ${{ inputs.service-name }}:${{ inputs.image-tag }}" \
+          kubernetes.io/change-cause="Deploy ${{ inputs.pod-name }}:${{ inputs.image-tag }}" \
           deployed-at="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
           git-commit="${{ github.sha }}" \
           --overwrite
