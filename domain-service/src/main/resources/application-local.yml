@@ -14,12 +14,11 @@ spring:
 
 
   #  datasource:
-  #    driver-class-name: org.h2.Driver
-  #    url: jdbc:h2:mem:domain_dev;MODE=MySQL
-  #    username: sa
-  #    password:
-  #    hikari:
-  #      auto-commit: false
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://localhost:3306/${custom.db.database}
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
+
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
