@@ -38,7 +38,7 @@ jobs:
     with:
       service-name: settlement-service-app
       service-dir: .
-      secret-dir: .
+      secret-dir: settlement-service
       file-name: settlement-service.dockerfile
 
   deploying:

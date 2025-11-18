@@ -31,7 +31,6 @@ env:
   REGISTRY: docker.io
 
 jobs:
-
   tagging:
     name: 태깅 및 릴리즈
     runs-on: ubuntu-latest
@@ -46,6 +45,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ${{ inputs.service-name }}
 
 #      - name: releasing
 #        uses: ncipollo/release-action@v1
