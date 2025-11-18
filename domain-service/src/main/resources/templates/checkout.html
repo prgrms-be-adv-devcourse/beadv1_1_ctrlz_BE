@@ -124,7 +124,7 @@
         console.log(`window.location.origin = ${window.location.origin}`)
         const button = document.getElementById("payment-button");
 
-        const clientKey = '[[ ${@environment.getProperty("payment.toss.test_client_api_key")} ]]';
+        const clientKey = '[[ ${@environment.getProperty("custom.payment.toss.test_client_api_key")} ]]';
         const tossPayments = TossPayments(clientKey);
         const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
 
