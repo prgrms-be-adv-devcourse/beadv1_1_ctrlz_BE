@@ -36,8 +36,12 @@ public class UserSignedUpEventHandler {
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void publishKafka(UserSignedUpEvent event) {
 		CartCreateCommand cartCreateCommand = new CartCreateCommand(event.userId());
-		kafkaEventPublisher.publish(cartCommandTopic, cartCreateCommand);
 		log.info("cartCommandTopic: {}", event);
+		try {
+			kafkaEventPublisher.publish(cartCommandTopic, cartCreateCommand);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
 		externalEventPersistentPort.completePublish(event.userId(), event.eventType());
 		log.info("externalEventPersistentPort: {}", event);
 	}

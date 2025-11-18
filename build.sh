@@ -5,10 +5,11 @@ DOCKERHUB_USERNAME="beatchoi156"
 
 # 서비스 목록
 SERVICES=(
-#   "account-service"
-#   "discovery-service"
-#   "domain-service"
+  "account-service"
+  "discovery-service"
+  "domain-service"
   "gateway-service"
+  "settlement-service"
 )
 
 # buildx builder 설정 (멀티 플랫폼 지원)

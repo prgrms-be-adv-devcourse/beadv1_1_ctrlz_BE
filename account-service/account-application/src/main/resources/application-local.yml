@@ -2,12 +2,6 @@ spring:
   application:
     name: account-service
 
-  profiles:
-    active: local
-    group:
-      local:
-        - secret
-
   servlet:
     multipart:
       max-file-size: 10MB
@@ -22,12 +16,6 @@ spring:
     username: sa
     password:
     url: jdbc:h2:mem:user-db
-  #  datasource:
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
-  #    username: admin
-  #    password: 1234
-  #    url: jdbc:mysql://mysql-service:3306/test_db
-  #
 
   h2:
     console:
@@ -48,7 +36,8 @@ spring:
 
   kafka:
     bootstrap-servers:
-      - kafka-mq:9090
+      - localhost:9090
+
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -59,8 +48,13 @@ spring:
         delivery.timeout.ms: 120000
         linger.ms: 0
         request.timeout.ms: 30000
-        enable.idempotence: true
+        enable.idempotence: false # 멱등성 비활성화
+        retries: 0 # 재시도 하지 않음
+        max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
         allow.auto.create.topics: false
+
+    listener:
+      auto-startup: false
 
     admin:
       auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
@@ -93,3 +87,14 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true

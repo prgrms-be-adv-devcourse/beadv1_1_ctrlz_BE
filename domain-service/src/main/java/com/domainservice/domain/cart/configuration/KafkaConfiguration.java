@@ -1,4 +1,4 @@
-package com.domainservice;
+package com.domainservice.domain.cart.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +13,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.common.event.CartCreateCommand;
 
 @Configuration
 public class KafkaConfiguration {
@@ -36,13 +36,6 @@ public class KafkaConfiguration {
 	private String groupId;
 
 	@Bean
-	public KafkaTemplate<String, Object> kafkaTemplate(
-		ProducerFactory<String, Object> producerFactory
-	) {
-		return new KafkaTemplate<>(producerFactory);
-	}
-
-	@Bean
 	public NewTopic createCartsCommandTopic() {
 		return TopicBuilder.name(cartTopicCommand)
 			.partitions(topicPartitions)
@@ -56,15 +49,15 @@ public class KafkaConfiguration {
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-		
+
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
 		props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
 		props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
-		
+
 		props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 		props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-		
+
 		return props;
 	}
 
@@ -77,7 +70,7 @@ public class KafkaConfiguration {
 
 	@Bean
 	public ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> cartKafkaListenerContainerFactory() {
-		ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> factory = 
+		ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> factory =
 			new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(cartConsumerFactory());
 		return factory;

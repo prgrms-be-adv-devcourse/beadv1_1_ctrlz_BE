@@ -2,11 +2,6 @@ spring:
   h2:
     console:
       enabled: true
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/${custom.db.database}
-    username: "${custom.db.username}"
-    password: "${custom.db.password}"
 
   kafka:
     bootstrap-servers: kafka-mq:9090
@@ -21,5 +16,25 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.common.event"
-    listener:
-      auto-startup: true
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: admin
+#    password: 1234
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    url: jdbc:mysql://mysql-service:3306/test_db
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create # 수정 필요
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+server:
+  port: 8082
+

@@ -47,7 +47,7 @@ public class PaymentService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${payment.toss.test_secret_api_key}")
+    @Value("${custom.payment.toss.test_secrete_api_key}")
     private String secretApiKey;
 
     @Transactional

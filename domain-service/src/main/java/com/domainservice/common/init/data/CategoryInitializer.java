@@ -1,12 +1,15 @@
 package com.domainservice.common.init.data;
 
+import org.springframework.stereotype.Component;
+
 import com.domainservice.domain.post.category.service.CategoryService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+// @Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class CategoryInitializer {
 

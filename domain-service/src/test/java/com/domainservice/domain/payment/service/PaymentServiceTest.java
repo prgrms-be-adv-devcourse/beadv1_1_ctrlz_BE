@@ -136,7 +136,7 @@ public class PaymentServiceTest {
         when(orderRepository.findById("order123")).thenReturn(Optional.of(order));
 
         DepositResponse depositResponse = new DepositResponse("depositId123", new BigDecimal("10000"), "예치금이 환불되었습니다.");
-        when(depositService.refundDeposit("order123", new BigDecimal("3000"))).thenReturn(depositResponse);
+        when(depositService.refundDeposit("user123", new BigDecimal("3000"))).thenReturn(depositResponse);
 
         // paymentLogService는 void이므로 doNothing() 사용 가능
         doNothing().when(paymentLogService).saveLog(
@@ -151,7 +151,7 @@ public class PaymentServiceTest {
         assertThat(response.paymentKey()).isEqualTo("paymentKey123");
 
         // 예치금 환불 호출
-        verify(depositService).refundDeposit("order123", new BigDecimal("3000"));
+        verify(depositService).refundDeposit("user123", new BigDecimal("3000"));
 
         // REFUND_REQUEST 로그 호출
         verify(paymentLogService).saveLog(

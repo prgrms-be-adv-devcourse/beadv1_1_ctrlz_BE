@@ -1,11 +1,11 @@
-package com.domainservice;
+package com.domainservice.domain.cart.service;
 
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.domainservice.domain.cart.service.CartService;
+import com.common.event.CartCreateCommand;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

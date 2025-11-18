@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: account-service
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create # 수정 필요
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    password: 1234
+    #    username: "${DB_USERNAME}"
+    #    password: "${DB_PASSWORD}"
+    #    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-service:3306/test_db
+
+  data:
+    redis:
+      host: redis-service
+      port: 6379
+      #      password: 1234
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+      password: 1234
+  #      password: "${REDIS_PASSWORD}"
+  kafka:
+    bootstrap-servers:
+      - kafka-mq:9090
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+
+      properties:
+        delivery.timeout.ms: 120000
+        linger.ms: 0
+        request.timeout.ms: 30000
+        enable.idempotence: false # 멱등성 비활성화
+        retries: 0 # 재시도 하지 않음
+        max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
+        allow.auto.create.topics: false
+
+    admin:
+      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
+
+custom:
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
+
+  # 수정 필요
+  redirectUrl: http://localhost:8080
+
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+    enabled: true

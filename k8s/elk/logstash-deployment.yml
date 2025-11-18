@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash-service
+  labels:
+    app: logstash
+
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  replicas: 1
+
+  template:
+    metadata:
+      name: logstash
+      labels:
+        app: logstash
+
+    spec:
+      containers:
+        - name: logstash
+          image: eddie1031/ls:9.1.3
+          ports:
+            - containerPort: 5044
+
+          envFrom:
+            - configMapRef:
+                name: elk-config-map
+          volumeMounts:
+            - name: logstash-pipeline
+              mountPath: /usr/share/logstash/pipeline
+      volumes:
+        - name: logstash-pipeline
+          configMap:
+            name: logstash-pipeline-configmap
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash-service
+
+spec:
+  type: NodePort
+  selector:
+    app: logstash
+
+  sessionAffinity: None
+
+  ports:
+    - name: beats
+      protocol: TCP
+      port: 5044
+      targetPort: 5044
+      nodePort: 30504

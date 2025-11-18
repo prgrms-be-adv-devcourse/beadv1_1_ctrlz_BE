@@ -24,4 +24,4 @@ spring:
       properties:
         spring.json.trusted.packages: "com.common.event"
     listener:
-      auto-startup: true
+      auto-startup: false
