@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [discovery-service, account-service, domain-service, settlement-service, gateway-service, payment-service]
+        service: [discovery-service, account-service, domain-service, settlement-service, gateway-service]
 
     steps:
       - name: 브랜치로 체크아웃

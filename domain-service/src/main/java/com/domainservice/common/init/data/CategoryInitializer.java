@@ -1,13 +1,9 @@
 package com.domainservice.common.init.data;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.domainservice.common.init.dummy.DummyDataLoader;
+import com.domainservice.domain.post.category.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,44 +14,22 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CategoryInitializer {
 
-	private final JdbcTemplate jdbcTemplate;
-	private final DummyDataLoader dataLoader;
+    private final CategoryService categoryService;
 
-	@Transactional
-	public void init() {
-		log.info("--- 카테고리 초기화 시작 ---");
+    public void init() {
+        log.info("--- 카테고리 초기화 시작 ---");
 
-		Map<String, String> categories = dataLoader.loadCategories("init/categories.csv");
-		int createdCount = 0;
+        String[] categories = {
+                "가구/인테리어", "가방/지갑", "가전제품"
+                , "기타", "도서",
+                "생활용품", "스포츠/레저", "뷰티/미용", "신발", "식품",
+                "유아동", "의류", "전자기기", "취미/게임", "반려동물용품"
+        };
 
-		for (Map.Entry<String, String> entry : categories.entrySet()) {
-			String id = entry.getKey();
-			String name = entry.getValue();
+        for (String categoryName : categories) {
+            categoryService.createIfNotExists(categoryName);
+        }
 
-			try {
-				// 이미 존재하는지 확인
-				Integer count = jdbcTemplate.queryForObject(
-					"SELECT COUNT(*) FROM category WHERE id = ?",
-					Integer.class,
-					id
-				);
-
-				if (count != null && count == 0) {
-					jdbcTemplate.update(
-						"""
-							INSERT INTO category (id, name, delete_status, created_at, updated_at)
-							VALUES (?, ?, 'N', NOW(), NOW())
-							""",
-						id, name
-					);
-					createdCount++;
-				}
-			} catch (Exception e) {
-				log.error("❌ 카테고리 생성 실패: {} ({})", name, id, e);
-			}
-		}
-
-		log.info("--- 카테고리 초기화 완료 ---");
-		log.info("생성: {}개", createdCount);
-	}
+        log.info("카테고리 {}개 초기화 완료", categories.length);
+    }
 }

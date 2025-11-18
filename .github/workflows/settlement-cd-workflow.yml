@@ -4,13 +4,10 @@ on:
   push:
     branches:
       - main
-      - deploytest
     paths:
-      - 'payment-service/**'
+      - 'settlement-service/**'
       - 'common/**'
-      - '**/*.dockerfile'
-      - '.github/workflows/settlement-cd-workflow.yml'
-      - 'observability-config/**'
+      - '.github/workflows/**'
 
   workflow_dispatch:
     inputs:
@@ -35,12 +32,13 @@ jobs:
       id-token: write
     uses: ./.github/workflows/release-workflow.yml
     secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_SETTLEMENT_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
       service-name: settlement-service-app
       service-dir: .
-      secret-dir: settlement-service
+      secret-dir: .
       file-name: settlement-service.dockerfile
 
   deploying:
@@ -49,7 +47,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: settlement-service-app # pod랑 같은 이름
-      deploy-name: settlement-deploy # deployment랑 같은 이름
+      deploy-name: settlement-service-deploy # deployment랑 같은 이름
       label-name: settlement # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
