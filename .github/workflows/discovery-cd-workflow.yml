@@ -6,15 +6,22 @@ on:
       - main
     paths:
       - 'discovery-service/**'
+      - '.github/workflows/**'
 
 jobs:
   releasing:
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     uses: ./.github/workflows/release-workflow.yml
     secrets: inherit # discovery 에는 secret.yml 이 없어 따로 읽지 않음
     with:
       service-name: discovery-service-app
       service-dir: .
       file-name: discovery-service.dockerfile
+
 
   deploying:
     needs: releasing
