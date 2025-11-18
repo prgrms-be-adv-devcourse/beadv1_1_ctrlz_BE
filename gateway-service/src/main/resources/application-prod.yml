@@ -76,6 +76,7 @@ eureka:
 #eureka:
   instance:
     prefer-ip-address: true
+
 #    hostname: svc-account-service 서비스 이름 직접 등록
 
 
