@@ -20,8 +20,9 @@ spring:
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/login/oauth2/code/google
+                - Method=GET
               filters:
-                - RewritePath=/login/oauth2/code/google, /login/oauth2/code/google
+                - PreserveHostHeader
 
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
