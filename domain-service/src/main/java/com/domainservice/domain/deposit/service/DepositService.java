@@ -238,4 +238,14 @@ public class DepositService {
 			);
 		}
 	}
+
+	public DepositResponse createDeposit(String userId) {
+		Deposit deposit = Deposit.builder()
+			.userId(userId)
+			.balance(BigDecimal.valueOf(1000L))
+			.build();
+
+		Deposit savedDeposit = depositJpaRepository.save(deposit);
+		return new DepositResponse(savedDeposit.getUserId(), savedDeposit.getBalance(), "예치금 생성 완료");
+	}
 }

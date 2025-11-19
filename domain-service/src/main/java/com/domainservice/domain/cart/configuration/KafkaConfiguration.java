@@ -13,8 +13,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 import com.common.event.CartCreateCommand;
 
@@ -73,6 +75,12 @@ public class KafkaConfiguration {
 		ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> factory =
 			new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(cartConsumerFactory());
+
+		DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+			new FixedBackOff(0L, 0)
+		);
+
+		factory.setCommonErrorHandler(errorHandler);
 		return factory;
 	}
 }

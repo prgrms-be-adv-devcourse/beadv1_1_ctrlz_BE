@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - deploytest
     paths:
       - 'domain-service/**'
       - 'common/**'
-      - '.github/workflows/**'
+
   workflow_dispatch:
     inputs:
       service-name:
@@ -36,7 +37,7 @@ jobs:
     with:
       service-name: domain-service-app
       service-dir: .
-      secret-dir: .
+      secret-dir: domain-service
       file-name: domain-service.dockerfile
 
   deploying:

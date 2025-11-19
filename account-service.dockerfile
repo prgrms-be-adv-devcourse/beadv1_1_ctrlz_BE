@@ -19,7 +19,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew dependencies --no-daemon
 RUN ./gradlew clean build -x test --parallel --no-daemon
 
-FROM gcr.io/distroless/java21-debian12
+FROM openjdk:21-ea-21-slim
 
 WORKDIR /app
 
