@@ -5,6 +5,7 @@
 ### 환경 변수 설정
 @baseUrl = http://localhost:8081
 @jsonContentType = application/json
+@userId = test-user-123
 
 ### 1. 카테고리 목록 조회
 GET {{baseUrl}}/api/categories
@@ -136,6 +137,7 @@ Content-Type: application/json
 
 ### 4. 생성된 게시글 조회 (아이폰)
 GET {{baseUrl}}/api/product-posts/{{postId}}
+X-REQUEST-ID: {{userId}}
 
 > {%
     client.test("게시글 조회 성공", function() {
