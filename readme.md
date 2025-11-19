@@ -164,10 +164,9 @@
 
 ### 플로우 차트
 <details>
-  <summary>플로우 차트 보기</summary>
-  
-### 회원가입
-
+<details>
+  <summary>회원가입</summary>
+	
 ```mermaid
 flowchart LR
     A[소셜 로그인 시도] --> B{소셜 로그인 성공?}
@@ -177,31 +176,31 @@ flowchart LR
     D -- 예 --> F[토큰 발행]
     D -- 아니오 --> E[로그인 페이지 이동]
 ```
+</details>
 
----
-
-### 로그인
-
+<details>
+  <summary>로그인</summary>
+	
 ```mermaid
 flowchart LR
     A[소셜 로그인 시도] --> B{소셜 로그인}
     B -- 예 --> C[토큰 발행]
     B -- 아니오 --> D[로그인 페이지로 이동]
 ```
+</details>
 
----
-
-### 로그아웃
+<details>
+  <summary>로그아웃</summary>
 
 ```mermaid
 flowchart LR
     A[로그아웃] --> B[access token 쿠키 파괴] --> C[redis에서 리프레시 토큰 삭제]--> D[로그인 페이지로 이동]
 
 ```
+</details>
 
----
-
-### Access Token 재발급
+<details>
+  <summary>Access Token 재발급</summary>
 
 ```mermaid
 flowchart LR
@@ -210,10 +209,10 @@ flowchart LR
     D -- 아니오 --> F[예외 처리]
 
 ```
+</details>
 
----
-
-### 판매자 등록
+<details>
+  <summary>판매자 등록</summary>
 
 ```mermaid
 flowchart LR
@@ -222,9 +221,11 @@ flowchart LR
     C -- 아니오 --> F[예외 처리]
  
 ```
+</details>
 
----
-
+<details>
+  <summary>판매자 리뷰</summary>
+	
 ## 판매자 리뷰 (review)
 
 ```mermaid
@@ -236,10 +237,10 @@ flowchart TD
     P --> S[판매자에게 알림]
 
 ```
+</details>
 
----
-
-## 상품 등록
+<details>
+  <summary>상품 등록</summary>
 
 ```mermaid
 flowchart TD
@@ -250,10 +251,10 @@ flowchart TD
     L --> M[상품 상세 페이지 이동]
 
 ```
+</details>
 
----
-
-## **상품 조회 및 구매**
+<details>
+  <summary>상품 조회 및 구매</summary>
 
 ```mermaid
 flowchart TD
@@ -270,11 +271,11 @@ flowchart TD
     N --> P[결제 프로세스]
 
 ```
+</details>
 
----
-
-## 결제
-
+<details>
+  <summary>결제</summary>
+	
 ```mermaid
 flowchart TD
     A[장바구니] --> B1[상품 선택]
@@ -287,10 +288,10 @@ flowchart TD
     C -->|실패| I[주문 대기]
     I --> B
 ```
+</details>
 
----
-
-## 정산 1
+<details>
+  <summary>정산</summary>
 
 ```mermaid
 flowchart TD
@@ -307,10 +308,6 @@ flowchart TD
     H --> I[정산 상태 WAITING으로 업데이트]
 
 ```
-
----
-
-## 정산 2
 
 ```mermaid
 flowchart TD
@@ -331,9 +328,10 @@ flowchart TD
     S --> E[배치 스케쥴러 다시 실행]
 ```
 
----
+</details>
 
-## 상품 검색
+<details>
+  <summary>상품 검색</summary>
 
 ```mermaid
 flowchart TD
@@ -360,9 +358,10 @@ flowchart TD
 
 ```
 
----
+</details>
 
-### 결제 시스템 1
+<details>
+  <summary>결제 시스템</summary>
 
 ```mermaid
 flowchart TD
@@ -373,12 +372,7 @@ flowchart TD
 
     D --> E[구매확정 클릭<br/>Order: PURCHASE_CONFIRMED]
     D --> F[취소/환불 요청]
-`
 ```
-
----
-
-### 결제 시스템 2
 
 ```mermaid
 sequenceDiagram
@@ -406,9 +400,10 @@ sequenceDiagram
 
 ```
 
----
+</details>
 
-## 상품 문의 (comments)
+<details>
+  <summary>상품 문의</summary>
 
 ```mermaid
 flowchart TD
@@ -425,4 +420,5 @@ flowchart TD
     Q --> R[구매자에게 알림]
 
 ```
-
+</details>
+</details>
