@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - deploytest
     paths:
       - 'domain-service/**'
       - 'common/**'
-      - '.github/workflows/**'
+
   workflow_dispatch:
     inputs:
       service-name:
