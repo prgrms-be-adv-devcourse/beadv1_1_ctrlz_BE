@@ -31,7 +31,7 @@
 #### 🎯 문제점 및 학습 목표
 - 키워드 기반 실시간 검색 및 자동완성 품질/속도의 한계 (RDB 기반 검색)
 - 모놀리식 구조의 장애 전파와 확장성 부족
-- 중고거래 결제·정산 시 발생하는 사기 및 분쟁 위험
+- 중고거래 결제·정산 시 발생하는 금액 문제 해결
 - 배치 프로세스의 대용량 처리, 효율적 정산 관리 필요
 
 
@@ -148,6 +148,8 @@
 ### 🔗 ERD
   <img width="3280" height="2042" alt="image" src="https://github.com/user-attachments/assets/327e8d03-57f8-489a-a853-273bf79f8ac1" />
 
+### 🏛️ 백엔드 아키텍처
+<img width="1920" height="1080" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/321c6951-3425-43b3-be92-f67be8143d76" />
 
 
 ### 📜 프로젝트 기획서
@@ -164,6 +166,10 @@
 
 ### 플로우 차트
 <details>
+
+***
+
+	
 <details>
   <summary>회원가입</summary>
 	
@@ -421,4 +427,7 @@ flowchart TD
 
 ```
 </details>
+
+***
+
 </details>
