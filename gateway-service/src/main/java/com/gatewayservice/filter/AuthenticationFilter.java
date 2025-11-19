@@ -81,12 +81,13 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 				throw new JwtException("권한이 없습니다.");
 			}
 
-			List<String> list = roles.stream().map(Object::toString).toList();
-			if (list.isEmpty() || !list.contains(config.getRequiredRole())) {
-				return response.writeWith(
-					Flux.just(writeForbiddenResponseBody(response))
-				);
-			}
+			// List<String> list = roles.stream().map(Object::toString).toList();
+			//
+			// if (list.isEmpty() || !list.contains(config.getRequiredRole())) {
+			// 	return response.writeWith(
+			// 		Flux.just(writeForbiddenResponseBody(response))
+			// 	);
+			// }
 
 			String userId = claims.getPayload().get("userId").toString();
 			ServerHttpRequest authorizedRequest = request.mutate()

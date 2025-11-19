@@ -52,7 +52,6 @@ jobs:
       - name: Verify deployment
         run: |
           kubectl get pods -l app=${{ inputs.label-name }} -o wide
-          
 
       - name: rollout history
         run: |

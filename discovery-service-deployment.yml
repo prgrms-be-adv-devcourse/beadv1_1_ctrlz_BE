@@ -12,9 +12,9 @@ spec:
 
   strategy:
     type: RollingUpdate
-#    rollingUpdate:
-#      maxUnavailable: 1
-#      maxSurge: 1
+    rollingUpdate:
+      maxUnavailable: 0 # 새 pod ready시 까지 유지
+      maxSurge: 1 # 새 pod 생성
   template:
     metadata:
       labels:
