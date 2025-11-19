@@ -16,6 +16,12 @@ spring:
                 - Path=/oauth2/authorization/google
                 - Method=GET
 
+            - id: oauth-callback
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/login/oauth2/code/google
+                - Method=GET
+
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -73,7 +79,7 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
-#eureka:
+  #eureka:
   instance:
     prefer-ip-address: true
 
