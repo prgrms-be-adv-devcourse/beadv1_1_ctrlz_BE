@@ -5,11 +5,13 @@ import java.time.OffsetDateTime;
 
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.order.model.entity.Order;
+import com.domainservice.domain.payment.converter.PaymentKeyConverter;
 import com.domainservice.domain.payment.model.enums.PayType;
 import com.domainservice.domain.payment.model.enums.PaymentStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -35,6 +37,7 @@ public class PaymentEntity extends BaseEntity {
     private String usersId;
 
     // 토스에서 자동 발급될 키
+    @Convert(converter = PaymentKeyConverter.class)
     @Column
     private String paymentKey;
 
