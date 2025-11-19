@@ -8,6 +8,7 @@ on:
     paths:
       - 'account-service/**'
       - 'common/**'
+      - '**/*.dockerfile'
 
 jobs:
   releasing:
