@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
+      - deploytest
     paths:
       - 'discovery-service/**'
-      - '.github/workflows/**'
 
 jobs:
   releasing:

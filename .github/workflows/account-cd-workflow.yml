@@ -4,10 +4,10 @@ on:
   push: # 메인에 push 될때 수행됨.
     branches:
       - main
+      - deploytest
     paths:
       - 'account-service/**'
       - 'common/**'
-      - '.github/workflows/**'
 
 jobs:
   releasing:
