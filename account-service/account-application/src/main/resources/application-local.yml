@@ -82,12 +82,12 @@ logging:
 
 # k8s 설정
 eureka:
-  instance:
-    prefer-ip-address: true
+#  instance:
+#    prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
-    enabled: false
+      defaultZone: http://localhost:8761/eureka/
+    enabled: true
 
 ---
 spring:
