@@ -24,6 +24,14 @@ spring:
               filters:
                 - PreserveHostHeader
 
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -39,14 +47,6 @@ spring:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts/**
-                - Method=GET
-              filters:
-                - name: AuthenticationFilter
 
 
             - id: post-api-protected
@@ -89,7 +89,7 @@ spring:
                   args:
                     requiredRole: USER
 
-            - id: payament-api-
+            - id: payment-api-open
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/payments/**
