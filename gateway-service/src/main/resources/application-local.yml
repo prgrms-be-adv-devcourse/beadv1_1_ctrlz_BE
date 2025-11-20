@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: 8082
 
 spring:
   application:
@@ -24,6 +24,14 @@ spring:
               filters:
                 - PreserveHostHeader
 
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -39,14 +47,6 @@ spring:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts/**
-                - Method=GET
-              filters:
-                - name: AuthenticationFilter
 
 
             - id: post-api-protected
@@ -89,21 +89,9 @@ spring:
                   args:
                     requiredRole: USER
 
-            - id: payament-api-
+            - id: payment-api-open
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
-
-
-# k8s 설정
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#eureka:
-#  instance:
-#    prefer-ip-address: true
-#    hostname: svc-account-service 서비스 이름 직접 등록
-
 
