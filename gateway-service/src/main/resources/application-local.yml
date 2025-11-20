@@ -5,12 +5,6 @@ spring:
   application:
     name: gateway-service
 
-  profiles:
-    active: local
-    group:
-      local:
-        - secret
-
   cloud:
     gateway:
       server:
@@ -21,6 +15,22 @@ spring:
               predicates:
                 - Path=/oauth2/authorization/google
                 - Method=GET
+
+            - id: oauth-callback
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/login/oauth2/code/google
+                - Method=GET
+              filters:
+                - PreserveHostHeader
+
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
 
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
@@ -33,55 +43,67 @@ spring:
               predicates:
                 - Path=/api/users/**
                 - Method=GET,PATCH,DELETE
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts
-                - Method=GET
 
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/product-posts/**
                 - Method=POST,PUT,DELETE,PATCH
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: SELLER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: SELLER
 
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/carts/**
                 - Method=GET,PATCH,DELETE,POST
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
             - id: deposit-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/deposits/**
-                - Method=GET
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: USER
+                - Method=GET,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            - id: order-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/orders/**
+                - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            - id: payment-api-open
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
+
 
 # k8s 설정
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
 #eureka:
-  instance:
-    prefer-ip-address: true
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  instance:
+#    prefer-ip-address: true
 #    hostname: svc-account-service 서비스 이름 직접 등록
 
 

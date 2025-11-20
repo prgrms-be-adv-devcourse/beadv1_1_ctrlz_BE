@@ -41,7 +41,7 @@ public class CartService {
 
 		for (CartItem cartItem : cartItemList) {
 			ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
-			CartItemResponse cartItemResponse = new CartItemResponse(productPostById.title(), productPostById.name(),
+			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
 				BigDecimal.valueOf(productPostById.price()),
 				cartItem.isSelected());
 			response.add(cartItemResponse);
@@ -97,7 +97,7 @@ public class CartService {
 		cartJpaRepository.save(cart);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
+		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
 			targetItem.isSelected());
 
 	}
@@ -135,7 +135,7 @@ public class CartService {
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(),
+		return new CartItemResponse(cartItem.getId(), productPostById.title(),
 			productPostById.name(),
 			BigDecimal.valueOf(productPostById.price()),
 			savedItem.isSelected());

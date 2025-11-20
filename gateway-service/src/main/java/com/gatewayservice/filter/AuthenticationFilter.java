@@ -56,7 +56,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			ServerHttpResponse response = exchange.getResponse();
 
 			if (!request.getHeaders().containsKey("Authorization")
-				&& !request.getHeaders().containsKey("accessToken")
+				&& !request.getHeaders().containsKey("ACCESS_TOKEN")
 			) {
 				log.info("Authorization header not found");
 				return response.writeWith(
@@ -82,6 +82,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			}
 
 			List<String> list = roles.stream().map(Object::toString).toList();
+
 			if (list.isEmpty() || !list.contains(config.getRequiredRole())) {
 				return response.writeWith(
 					Flux.just(writeForbiddenResponseBody(response))
