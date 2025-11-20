@@ -24,6 +24,14 @@ spring:
               filters:
                 - PreserveHostHeader
 
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -35,56 +43,65 @@ spring:
               predicates:
                 - Path=/api/users/**
                 - Method=GET,PATCH,DELETE
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts
-                - Method=GET
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/product-posts/**
                 - Method=POST,PUT,DELETE,PATCH
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: SELLER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: SELLER
 
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/carts/**
                 - Method=GET,PATCH,DELETE,POST
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
             - id: deposit-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/deposits/**
-                - Method=GET
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: USER
+                - Method=GET,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
-# k8s 설정
+            - id: order-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/orders/**
+                - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            - id: payment-api-open
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
+
+  # k8s 설정
 eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
-  #eureka:
+    enabled: true
   instance:
     prefer-ip-address: true
-
-#    hostname: svc-account-service 서비스 이름 직접 등록
+    hostname: gateway-service
 
 

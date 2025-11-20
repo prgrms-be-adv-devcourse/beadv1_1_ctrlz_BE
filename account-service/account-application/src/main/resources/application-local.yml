@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: account-service
@@ -73,7 +76,7 @@ custom:
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-  redirectUrl: http://localhost:8080
+  redirectUrl: http://localhost:8000
 
 logging:
   level:

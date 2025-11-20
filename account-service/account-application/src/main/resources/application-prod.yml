@@ -74,13 +74,14 @@ custom:
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-  # 수정 필요
-  redirectUrl: http://localhost:8080
+
+  redirectUrl: https://api.yeongeun.chlab.org
 
 # k8s 설정
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: account-service
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
