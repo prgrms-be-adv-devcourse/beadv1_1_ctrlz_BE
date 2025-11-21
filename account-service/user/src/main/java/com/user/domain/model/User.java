@@ -22,7 +22,7 @@ public class User {
 	private String email;
 	private String password;
 	private String nickname;
-	private List<com.user.domain.vo.UserRole> roles;
+	private List<UserRole> roles;
 	private String profileImageUrl;
 	private Address address;
 	private String phoneNumber;
@@ -39,7 +39,7 @@ public class User {
 		String email,
 		String password,
 		String nickname,
-		List<com.user.domain.vo.UserRole> roles,
+		List<UserRole> roles,
 		String profileImageUrl,
 		Address address,
 		String phoneNumber,
