@@ -74,13 +74,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 			ResponseCookie accessTokenCookie = CookieProvider.to(
 				TokenType.ACCESS_TOKEN.name(),
 				accessToken,
-				Duration.ofMinutes(15)
+				TokenType.ACCESS_TOKEN.getDuration()
 			);
 
 			ResponseCookie refreshTokenCookie = CookieProvider.to(
 				TokenType.REFRESH_TOKEN.name(),
 				refreshToken,
-				Duration.ofDays(7)
+				TokenType.REFRESH_TOKEN.getDuration()
 			);
 
 			response.addHeader("Set-Cookie", accessTokenCookie.toString());
