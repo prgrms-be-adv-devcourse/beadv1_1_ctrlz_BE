@@ -53,6 +53,8 @@ spring:
     bootstrap-servers: localhost:9090
     listener:
       auto-startup: false
+      immediate-stop: false # default 값 명시
+
     admin:
       auto-create: false
 

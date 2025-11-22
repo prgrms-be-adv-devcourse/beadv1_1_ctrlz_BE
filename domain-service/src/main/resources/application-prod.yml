@@ -52,6 +52,9 @@ spring:
       properties:
         spring.json.trusted.packages: "com.common.event"
 
+    listener:
+      immediate-stop: false # default 값 명시
+
 custom:
   image:
     allowed-extension: jpg,jpeg,png,webp
