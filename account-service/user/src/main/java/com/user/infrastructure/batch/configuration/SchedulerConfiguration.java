@@ -1,4 +1,4 @@
-package com.user.infrastructure.scheduler.configuration;
+package com.user.infrastructure.batch.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
