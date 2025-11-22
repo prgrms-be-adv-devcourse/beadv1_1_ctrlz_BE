@@ -10,5 +10,5 @@ import com.user.infrastructure.jpa.entity.ExternalEventEntity;
 
 public interface ExternalEventJpaRepository extends JpaRepository<ExternalEventEntity, String> {
 	Optional<ExternalEventEntity> findExternalEventEntitiesByUserIdAndEventType(String userId, EventType eventType);
-	List<ExternalEventEntity> findTop20ByPublishedOrderByCreatedAt(boolean published);
+	List<ExternalEventEntity> findTop1000ByPublishedOrderByCreatedAtDesc(boolean published);
 }

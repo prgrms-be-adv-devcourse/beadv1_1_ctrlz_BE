@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   application:
     name: account-service
 
@@ -6,6 +6,11 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+  batch:
+    jdbc:
+      initialize-schema: always
+      platform: mysql
 
   jpa:
     hibernate:
@@ -53,6 +58,10 @@ spring:
         max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
         allow.auto.create.topics: false
 
+      batch-size: 32768 #32kb
+      buffer-memory: 67108864 # 64mb
+
+
     listener:
       auto-startup: false
 
@@ -78,12 +87,13 @@ custom:
 logging:
   level:
     io.awspring.cloud: DEBUG
+    org.springframework.batch: DEBUG
 
 
 # k8s 설정
 eureka:
-#  instance:
-#    prefer-ip-address: true
+  #  instance:
+  #    prefer-ip-address: true
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
