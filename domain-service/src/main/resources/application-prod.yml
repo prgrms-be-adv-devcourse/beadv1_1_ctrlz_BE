@@ -14,7 +14,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
-    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-service:3306/test_db?rewriteBatchedStatements=true
     username: admin
     password: 1234
   #    username: "${custom.db.username}"

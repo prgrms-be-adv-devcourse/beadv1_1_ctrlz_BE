@@ -1,5 +1,7 @@
 package com.user.infrastructure.batch.configuration;
 
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import org.springframework.batch.core.Job;
@@ -13,12 +15,14 @@ import org.springframework.batch.item.database.JpaCursorItemReader;
 import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.user.application.adapter.dto.CartCreateCommand;
 import com.user.infrastructure.batch.CartCreateWriter;
 import com.user.infrastructure.jpa.entity.ExternalEventEntity;
 
+import io.netty.channel.ConnectTimeoutException;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +50,13 @@ public class CartCreateBatchConfiguration {
 			.reader(cartCreateItemReader())
 			.processor(cartCreateItemProcessor())
 			.writer(cartCreateItemWriter())
+			.faultTolerant()
+			.retryLimit(3)
+			.retry(ConnectException.class) // 연결 안 됐을 경우
+			.retry(UnknownHostException.class) //host명 모를경우
+			.skipLimit(100)
+			.skip(ConnectTimeoutException.class) //read time out
+			.skip(DataAccessException.class) // db 예외
 			.build();
 	}
 

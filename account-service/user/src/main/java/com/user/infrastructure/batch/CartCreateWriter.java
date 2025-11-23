@@ -8,15 +8,14 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.user.application.adapter.dto.CartCreateCommand;
 import com.user.application.port.out.OutboundEventPublisher;
-import com.user.infrastructure.jpa.entity.ExternalEventEntity;
 import com.user.infrastructure.jpa.repository.ExternalEventJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 @Slf4j
 @Component
@@ -28,50 +27,49 @@ public class CartCreateWriter implements ItemWriter<CartCreateCommand> {
 
 	private final OutboundEventPublisher outboundEventPublisher;
 	private final ExternalEventJpaRepository externalEventJpaRepository;
-	private final Set<String> processedUserIdSet = ConcurrentHashMap.newKeySet();
 
+	@Transactional
 	@Override
-	public void write(Chunk<? extends CartCreateCommand> chunk){
+	public void write(Chunk<? extends CartCreateCommand> chunk) {
 		List<? extends CartCreateCommand> items = chunk.getItems();
 		log.info("Starting batch write for {} items", items.size());
 
-		sendBatchToKafka(items);
-		updatePublishedStatus();
+		Set<String> successUserId = sendBatchToKafka(items);
+		updatePublishedStatus(successUserId);
 
 		log.info("Batch write completed for {} items", items.size());
 	}
 
-	private void sendBatchToKafka(List<? extends CartCreateCommand> items) {
+	private Set<String> sendBatchToKafka(List<? extends CartCreateCommand> items) {
+		Set<String> successfulUserIds = ConcurrentHashMap.newKeySet();
 		for (CartCreateCommand command : items) {
-			try {
-				outboundEventPublisher.publish(cartCommandTopic, command);
-				processedUserIdSet.add(command.userId());
-				log.debug("Cart create command sent for userId: {}", command.userId());
-			} catch (Exception e) {
-				log.error("Failed to send cart create command for userId: {}", command.userId(), e);
-			}
+			publishByKafka(command, successfulUserIds);
+		}
+		return successfulUserIds;
+	}
+
+	private void publishByKafka(CartCreateCommand command, Set<String> successfulUserIds) {
+		try {
+			outboundEventPublisher.publish(cartCommandTopic, command);
+			successfulUserIds.add(command.userId());
+			log.debug("Cart create command sent for userId: {}", command.userId());
+		} catch (Exception e) {
+			log.warn("카프카 전송 실패 userId: {}", command.userId(), e);
 		}
 	}
 
-
-	private void updatePublishedStatus() {
-		if (processedUserIdSet.isEmpty()) {
-			log.warn("No user IDs to update");
+	private void updatePublishedStatus(Set<String> successUserId) {
+		if (successUserId.isEmpty()) {
+			log.info("전송할 userId가 없습니다.");
 			return;
 		}
 
 		try {
-
-			List<ExternalEventEntity> eventsToUpdate =
-				externalEventJpaRepository.findTop1000ByPublishedOrderByCreatedAtDesc(false);
-
-			eventsToUpdate.forEach(ExternalEventEntity::publishedComplete);
-			externalEventJpaRepository.saveAll(eventsToUpdate);
-
-			log.info("Updated published status for {} events", eventsToUpdate.size());
-			processedUserIdSet.clear();
+			int count = externalEventJpaRepository.updatePublished(successUserId);
+			log.info("이벤트 상태 업데이트 개수 : {}", count);
 		} catch (Exception e) {
 			log.error("Error updating published status", e);
+			throw new RuntimeException("Failed to update published status", e);
 		}
 	}
 }

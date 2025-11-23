@@ -15,11 +15,16 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create # 수정 필요
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,7 +33,7 @@ spring:
     #    username: "${DB_USERNAME}"
     #    password: "${DB_PASSWORD}"
     #    url: jdbc:mysql://mysql-service:3306/test_db
-    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-service:3306/test_db?rewriteBatchedStatements=true
 
   data:
     redis:
