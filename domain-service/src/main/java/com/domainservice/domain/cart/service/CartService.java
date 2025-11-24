@@ -19,7 +19,9 @@ import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -61,6 +63,7 @@ public class CartService {
 			throw new CustomException(CartExceptionCode.CART_ALREADY_EXISTS.getMessage());
 		}
 		cartJpaRepository.save(Cart.builder().userId(userId).build());
+		log.info("카트 생성 완료 userId = {}", userId);
 	}
 
 	/**

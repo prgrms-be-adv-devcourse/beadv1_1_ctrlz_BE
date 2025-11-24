@@ -32,7 +32,9 @@ import com.user.infrastructure.reader.port.dto.UserDescription;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -50,10 +52,10 @@ public class UserController {
 	public BaseResponse<UserCreateResponse> createUser(
 		@Valid @RequestBody UserCreateRequest request
 	) {
-
+		log.info("회원가입 요청 받음: email={}", request.email());
 		UserContext context = UserContextMapper.toContext(request, defaultImageUrl);
 		UserContext savedUserContext = userCommandUseCase.create(context);
-
+		log.info("회원가입 완료: userId={}, email={}", savedUserContext.userId(), savedUserContext.email());
 		return new BaseResponse<>(new UserCreateResponse(
 			savedUserContext.userId(),
 			savedUserContext.profileImageUrl(),
