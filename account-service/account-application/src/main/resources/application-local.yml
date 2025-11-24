@@ -30,18 +30,18 @@ spring:
         order_inserts: true
     defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
 
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/domain_dev?rewriteBatchedStatements=true
-#    username: app
-#    password: 1234
-
   datasource:
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    url: jdbc:h2:mem:user-db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    username: app
+    password: 1234
 
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#    url: jdbc:h2:mem:user-db
+#
   h2:
     console:
       enabled: true
@@ -82,11 +82,11 @@ spring:
       buffer-memory: 67108864 # 64mb
 
 
-    listener:
-      auto-startup: false
-
-    admin:
-      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
+#    listener:
+#      auto-startup: false
+#
+#    admin:
+#      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
 
 custom:
   config:

@@ -8,8 +8,12 @@ management:
       probability: 1.0
 
     propagation:
-      consume: b3
-      produce: b3_multi
+      consume: b3 # 64bit trace id
+      produce: b3 # b3_multi 128bit trace id
+      type: b3
+
+    brave:
+      span-joining-supported: true
 
   zipkin:
     tracing:

@@ -22,6 +22,8 @@ repositories {
 }
 
 dependencies {
+
+    implementation project(":observability-config:zipkin")
     implementation project(':common')
 
     implementation 'org.springframework.boot:spring-boot-starter'

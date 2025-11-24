@@ -37,6 +37,8 @@ dependencyManagement {
 }
 
 dependencies {
+
+    implementation project(":observability-config:zipkin")
     implementation project(':common')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -87,6 +89,7 @@ dependencies {
     //openfeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
+    implementation 'io.github.openfeign:feign-micrometer'    // Feign tracing
 
     // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"

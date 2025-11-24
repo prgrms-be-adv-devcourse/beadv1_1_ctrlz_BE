@@ -102,9 +102,6 @@ spring:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
 
-logging:
-  pattern:
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 # k8s 설정
 #eureka:
 #  client:
@@ -115,21 +112,3 @@ logging:
 #    prefer-ip-address: true
 #    hostname: svc-account-service 서비스 이름 직접 등록
 
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-
-    propagation:
-      consume: b3
-      produce: b3_multi
-
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
-
-  endpoints:
-    web:
-      exposure:
-        include: "*"
