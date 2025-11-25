@@ -10,11 +10,16 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create # 수정 필요
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,7 +28,7 @@ spring:
     #    username: "${DB_USERNAME}"
     #    password: "${DB_PASSWORD}"
     #    url: jdbc:mysql://mysql-service:3306/test_db
-    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-service:3306/test_db?rewriteBatchedStatements=true
 
   data:
     redis:
@@ -75,7 +80,7 @@ custom:
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
   # 수정 필요
-  redirectUrl: http://localhost:8080
+  redirectUrl: https://api.yeongeun.chlab.org/
 
 # k8s 설정
 eureka:
