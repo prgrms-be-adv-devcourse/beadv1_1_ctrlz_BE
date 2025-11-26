@@ -20,6 +20,7 @@ spec:
       labels:
         app: settlement
     spec:
+      hostname: domain-service
       containers:
         - name: settlement-service-app
           image: docker.io/beatchoi156/settlement-service:latest
