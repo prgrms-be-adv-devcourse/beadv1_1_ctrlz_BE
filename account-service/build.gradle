@@ -60,7 +60,9 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
-
+//        // micrometer
+//        implementation 'io.micrometer:micrometer-tracing-bridge-brave' // Micrometer와 Brave 사이의 연동을 위한 브리지 역할을 하는 라이브러리입니다.
+//        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
         //lombok
         compileOnly 'org.projectlombok:lombok'

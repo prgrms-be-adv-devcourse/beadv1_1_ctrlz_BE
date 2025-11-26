@@ -5,8 +5,15 @@ spring:
   application:
     name: gateway-service
 
+
   cloud:
     gateway:
+      observations:
+        http:
+          server:
+            enabled: true
+          client:
+            enabled: true
       server:
         webflux:
           routes:
@@ -94,4 +101,14 @@ spring:
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
+
+# k8s 설정
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    hostname: svc-account-service 서비스 이름 직접 등록
 

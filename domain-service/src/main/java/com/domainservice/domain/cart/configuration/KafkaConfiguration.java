@@ -66,6 +66,9 @@ public class KafkaConfiguration {
 			new FixedBackOff(1000L, 1)
 		);
 
+		// Micrometer Observation을 통한 트레이스 전파
+		factory.getContainerProperties().setObservationEnabled(true);
+
 		factory.setCommonErrorHandler(errorHandler);
 		return factory;
 	}

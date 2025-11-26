@@ -38,7 +38,9 @@ import com.user.infrastructure.reader.port.dto.UserDescription;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -57,14 +59,16 @@ public class UserController {
 	public ResponseEntity<BaseResponse<UserCreateResponse>> createUser(
 		@Valid @RequestBody UserCreateRequest request
 	) {
-
+		log.info("회원가입 요청 받음: email={}", request.email());
 		UserContext context = UserContextMapper.toContext(request, defaultImageUrl);
 		UserContext savedUserContext = userCommandUseCase.create(context);
-
-		MultiValueMap<String, String> headers = addTokenInHeader(savedUserContext);
-		BaseResponse<UserCreateResponse> responseBody = addUserInBody(savedUserContext);
-
-		return new ResponseEntity<>(responseBody, headers, HttpStatus.CREATED);
+		log.info("회원가입 완료: userId={}, email={}", savedUserContext.userId(), savedUserContext.email());
+		return new BaseResponse<>(new UserCreateResponse(
+			savedUserContext.userId(),
+			savedUserContext.profileImageUrl(),
+			savedUserContext.nickname()
+		),
+			"가입 완료");
 	}
 
 	@PatchMapping("/{id}")
@@ -78,6 +82,7 @@ public class UserController {
 
 	@GetMapping("/{id}")
 	public UserDescription getUser(@PathVariable("id") String id) {
+		log.info("회원 정보 조회");
 		return userReaderPort.getUserDescription(id);
 	}
 
