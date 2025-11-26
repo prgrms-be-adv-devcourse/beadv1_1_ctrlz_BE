@@ -1,1 +1,3 @@
 rootProject.name = 'gateway-service'
+include(":observability-config:zipkin")
+project(":observability-config:zipkin").projectDir = file("./../observability-config/zipkin")

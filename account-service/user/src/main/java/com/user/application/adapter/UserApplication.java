@@ -36,7 +36,9 @@ public class UserApplication implements UserCommandUseCase {
 
 		User user = generateUser(userContext);
 		User savedUser = userPersistencePort.save(user);
+		log.info("회원 저장 완료 userId = {}", userContext.userId());
 
+		log.info("이벤트 저장 시작: topic=user-registered, userId={}", savedUser.getId());
 		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATED));
 
 		return UserContext.builder()

@@ -2,3 +2,5 @@ rootProject.name = 'domain-service'
 
 include(':common')
 project(':common').projectDir = file('../common')
+include(":observability-config:zipkin")
+project(":observability-config:zipkin").projectDir = file("./../observability-config/zipkin")

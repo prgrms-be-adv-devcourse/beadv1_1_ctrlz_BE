@@ -1,5 +1,5 @@
 ### 회원가입
-POST http://localhost:8080/api/users
+POST http://localhost:8000/api/users
 Content-Type: application/json
 #--WebAppBoundary
 #Content-Disposition: form-data; name="profileImage"; filename="test.png"
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 {
   "oauthId" : "google",
-  "email": "choizz156@gmail.com",
+  "email": "choidfzz156@gmail.com",
   "phoneNumber": "01096395588",
   "street": "street_f42fa85a43a1",
   "zipCode": "zipCode_3f828ede8a5d",
