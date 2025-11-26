@@ -1,3 +1,7 @@
+application:
+  title: yeongeunMarket
+  version: 1.0
+
 server:
   port: 8081
 
@@ -12,7 +16,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/domain_dev
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
     username: app
     password: 1234
 
@@ -37,9 +41,11 @@ spring:
   kafka:
     bootstrap-servers: localhost:9090
     listener:
-      auto-startup: false
-    admin:
-      auto-create: false
+#      auto-startup: false
+      immediate-stop: false # default 값 명시
+
+#    admin:
+#      auto-create: false
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -89,12 +95,6 @@ custom:
   feign:
     url:
       user-service: localhost:8080
-
-  payment:
-    toss:
-      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
-      targetUrl: https://api.tosspayments.com/v1/payments
 
 ---
 spring:

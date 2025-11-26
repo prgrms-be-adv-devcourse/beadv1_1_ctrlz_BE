@@ -187,5 +187,4 @@ account-service/account-application/out
 account-service/user/out
 account-service/auth/out
 gateway-service/out
-infra/.env
 application-window.yml

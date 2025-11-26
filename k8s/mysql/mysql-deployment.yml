@@ -10,6 +10,10 @@ spec:
     matchLabels:
       app: mysql
 
+  # pod가 처음 시작될 때만 스키마 초기화가 실행
+  strategy:
+    type: Recreate
+
   template:
     metadata:
       name: mysql
@@ -17,6 +21,14 @@ spec:
         app: mysql
 
     spec:
+      volumes:
+        - name: mysql-init-volume
+          configMap:
+            name: mysql-init-config
+            # ConfigMap의 init.sql 키를 볼륨의 init.sql 파일로 매핑
+            items:
+              - key: init.sql
+                path: init.sql
       containers:
         - name: mysql1
           image: mysql:latest
@@ -25,7 +37,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: mysql-config-map
-
+          volumeMounts:
+            - name: mysql-init-volume
+              mountPath: /docker-entrypoint-initdb.d/
+              readOnly: true
 ---
 apiVersion: v1
 kind: Service

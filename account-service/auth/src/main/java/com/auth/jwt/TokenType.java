@@ -1,5 +1,14 @@
 package com.auth.jwt;
 
+import java.time.Duration;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum TokenType {
-	ACCESS_TOKEN, REFRESH_TOKEN;
+	ACCESS_TOKEN(Duration.ofMinutes(15)), REFRESH_TOKEN(Duration.ofDays(7));
+
+	private final Duration duration;
 }

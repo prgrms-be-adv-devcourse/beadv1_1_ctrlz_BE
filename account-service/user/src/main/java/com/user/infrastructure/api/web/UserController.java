@@ -1,6 +1,10 @@
 package com.user.infrastructure.api.web;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,12 +31,16 @@ import com.user.infrastructure.api.dto.VerificationReqeust;
 import com.user.infrastructure.api.mapper.UserContextMapper;
 import com.user.infrastructure.feign.ProfileImageClient;
 import com.user.infrastructure.feign.dto.ImageResponse;
+import com.user.infrastructure.reader.port.TokenWriterPort;
 import com.user.infrastructure.reader.port.UserReaderPort;
+import com.user.infrastructure.reader.port.dto.TokenResponse;
 import com.user.infrastructure.reader.port.dto.UserDescription;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -44,22 +52,22 @@ public class UserController {
 	private final UserReaderPort userReaderPort;
 	private final UserCommandUseCase userCommandUseCase;
 	private final SellerVerificationUseCase sellerVerificationUseCase;
+	private final TokenWriterPort tokenWriterPort;
 	private final ProfileImageClient profileImageClient;
 
 	@PostMapping
-	public BaseResponse<UserCreateResponse> createUser(
+	public ResponseEntity<BaseResponse<UserCreateResponse>> createUser(
 		@Valid @RequestBody UserCreateRequest request
 	) {
-
+		log.info("회원가입 요청 받음: email={}", request.email());
 		UserContext context = UserContextMapper.toContext(request, defaultImageUrl);
 		UserContext savedUserContext = userCommandUseCase.create(context);
+		log.info("회원가입 완료: userId={}, email={}", savedUserContext.userId(), savedUserContext.email());
 
-		return new BaseResponse<>(new UserCreateResponse(
-			savedUserContext.userId(),
-			savedUserContext.profileImageUrl(),
-			savedUserContext.nickname()
-		),
-			"가입 완료");
+		MultiValueMap<String, String> headers = addTokenInHeader(savedUserContext);
+		BaseResponse<UserCreateResponse> body = addUserInBody(savedUserContext);
+
+		return new ResponseEntity<>(body, headers, HttpStatus.OK);
 	}
 
 	@PatchMapping("/{id}")
@@ -73,6 +81,7 @@ public class UserController {
 
 	@GetMapping("/{id}")
 	public UserDescription getUser(@PathVariable("id") String id) {
+		log.info("회원 정보 조회");
 		return userReaderPort.getUserDescription(id);
 	}
 
@@ -120,5 +129,23 @@ public class UserController {
 		@PathVariable("id") String id
 	) {
 		userCommandUseCase.delete(id);
+	}
+
+	private MultiValueMap<String, String> addTokenInHeader(UserContext savedUserContext) {
+		TokenResponse tokenResponse = tokenWriterPort.issueToken(savedUserContext.userId());
+
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		headers.add("Set-Cookie", tokenResponse.accessToken().toString());
+		headers.add("Set-Cookie", tokenResponse.refreshToken().toString());
+		return headers;
+	}
+
+	private BaseResponse<UserCreateResponse> addUserInBody(UserContext savedUserContext) {
+		return new BaseResponse<>(new UserCreateResponse(
+			savedUserContext.userId(),
+			savedUserContext.profileImageUrl(),
+			savedUserContext.nickname()
+		),
+			"가입 완료");
 	}
 }

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin-deploy
+  labels:
+    app: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      name: zipkin
+      labels:
+        app: zipkin
+    spec:
+      containers:
+        - name: zipkin
+          image: openzipkin/zipkin:latest
+          ports:
+            - containerPort: 9411
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: zipkin-config-map
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin-service
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: zipkin
+
+  ports:
+    - protocol: TCP
+      port: 9411 # 어디로 포워딩 할건지
+      targetPort: 9411 # 컨테이너 포트 번호
+
+      
