@@ -8,7 +8,5 @@ public interface SearchWordQueryRepository {
 
 	 List<SearchWordDocumentEntity> findAllByQwertyInput(String qwertyInput);
 
-	 List<SearchWordDocumentEntity> findAllByOriginValue(String koreanWord);
-
-	 void upsertByOriginValue(List<SearchWordDocumentEntity> searchWordDocumentEntities);
+	 List<SearchWordDocumentEntity> findAllByKoreanWord(String koreanWord);
 }
