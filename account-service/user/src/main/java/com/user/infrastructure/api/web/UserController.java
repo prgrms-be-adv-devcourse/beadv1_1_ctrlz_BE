@@ -63,12 +63,11 @@ public class UserController {
 		UserContext context = UserContextMapper.toContext(request, defaultImageUrl);
 		UserContext savedUserContext = userCommandUseCase.create(context);
 		log.info("회원가입 완료: userId={}, email={}", savedUserContext.userId(), savedUserContext.email());
-		return new BaseResponse<>(new UserCreateResponse(
-			savedUserContext.userId(),
-			savedUserContext.profileImageUrl(),
-			savedUserContext.nickname()
-		),
-			"가입 완료");
+
+		MultiValueMap<String, String> headers = addTokenInHeader(savedUserContext);
+		BaseResponse<UserCreateResponse> body = addUserInBody(savedUserContext);
+
+		return new ResponseEntity<>(body, headers, HttpStatus.OK);
 	}
 
 	@PatchMapping("/{id}")
