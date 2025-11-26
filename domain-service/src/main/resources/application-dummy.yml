@@ -1,0 +1,32 @@
+# 더미 데이터 생성 전용 프로파일
+# 사용법: --spring.profiles.active=local,secret,dummy
+
+spring:
+  jpa:
+    show-sql: false  # SQL 로그 완전 비활성화
+    properties:
+      hibernate:
+        default_batch_fetch_size: 1000  # 배치 페치 사이즈 (100 → 1000)
+        jdbc:
+          batch_size: 5000  # 더미 생성 시 대량 배치
+        generate_statistics: false  # 통계 수집 비활성화
+        format_sql: false
+        use_sql_comments: false
+        order_inserts: true  # INSERT 문을 정렬하여 배치 효율 극대화
+        order_updates: true  # UPDATE 문을 정렬하여 배치 효율 극대화
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true  # 다중 INSERT를 단일 쿼리로 재작성 (성능 향상)
+    hikari: # HikariCP 커넥션 풀 설정
+      maximum-pool-size: 50  # 최대 DB 커넥션 수, 더미 생성 시 최대 연결 증가
+      minimum-idle: 10
+      connection-timeout: 30000  # 커넥션 타임아웃 (30초)
+      auto-commit: false  # 수동 커밋
+
+logging:
+  level:
+    root: WARN
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+    org.springframework.jdbc: WARN
