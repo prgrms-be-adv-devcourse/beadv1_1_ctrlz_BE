@@ -42,11 +42,11 @@ spring:
   kafka:
     bootstrap-servers: localhost:9090
     listener:
-      auto-startup: false
+#      auto-startup: false
       immediate-stop: false # default 값 명시
 
-    admin:
-      auto-create: false
+#    admin:
+#      auto-create: false
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
