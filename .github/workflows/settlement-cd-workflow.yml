@@ -8,6 +8,7 @@ on:
     paths:
       - 'settlement-service/**'
       - 'common/**'
+      - '.github/workflows/**'
 
 
 

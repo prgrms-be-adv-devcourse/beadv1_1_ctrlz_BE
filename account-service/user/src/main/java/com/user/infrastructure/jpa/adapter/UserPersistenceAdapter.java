@@ -24,10 +24,9 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	private final UserJpaRepository userJpaRepository;
 
 	@Override
-	public User save(com.user.domain.model.User user) {
+	public User save(User user) {
 
-		UserEntity entity =UserEntityMapper.toEntity(
-			user);
+		UserEntity entity =UserEntityMapper.toEntity(user);
 		UserEntity userEntity = userJpaRepository.save(entity);
 
 		return UserEntityMapper.toDomain(userEntity);
@@ -51,8 +50,8 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void withdraw(String id) {
-		UserEntity userEntity = getUserEntity(id);
+	public void withdraw(User user) {
+		UserEntity userEntity = getUserEntity(user.getId());
 		userEntity.delete();
 	}
 
@@ -72,21 +71,20 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 	}
 
 	@Override
-	public void updateRolesForSeller(String id) {
-		UserEntity userEntity = getUserEntity(id);
+	public void updateRolesForSeller(User user) {
+		UserEntity userEntity = getUserEntity(user.getId());
 		userEntity.addSellerRoles();
 	}
 
 	@Override
-	public void updateImage(String userId, String imageId, String profileImageUrl) {
-		UserEntity userEntity = getUserEntity(userId);
-		userEntity.changeProfileImage(imageId, profileImageUrl);
+	public void updateImage(User user) {
+		UserEntity userEntity = getUserEntity(user.getId());
+		userEntity.changeProfileImage(user.getImageId(), user.getProfileImageUrl());
 	}
 
 	@Transactional(readOnly = true)
 	@Override
 	public Optional<User> findByEmailAndOAuthId(String email, String oAuthId) {
-
 		return userJpaRepository.findByEmailAndOauthId(email, oAuthId)
 			.map(UserEntityMapper::toDomain);
 	}
