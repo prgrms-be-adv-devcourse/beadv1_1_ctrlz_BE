@@ -36,12 +36,12 @@ spring:
     username: app
     password: 1234
 
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#    url: jdbc:h2:mem:user-db
-#
+  #  datasource:
+  #    driver-class-name: org.h2.Driver
+  #    username: sa
+  #    password:
+  #    url: jdbc:h2:mem:user-db
+  #
   h2:
     console:
       enabled: true
@@ -81,12 +81,11 @@ spring:
       batch-size: 32768 #32kb
       buffer-memory: 67108864 # 64mb
 
+    listener:
+      auto-startup: false
 
-   listener:
-     auto-startup: false
-
-   admin:
-     auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
+    admin:
+      auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
 
 custom:
   config:
