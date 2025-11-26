@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.common.model.persistence.BaseEntity.DeleteStatus;
 import com.user.domain.vo.Address;
+import com.user.domain.vo.UserRole;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -21,7 +22,7 @@ public class User {
 	private String email;
 	private String password;
 	private String nickname;
-	private List<com.user.domain.vo.UserRole> roles;
+	private List<UserRole> roles;
 	private String profileImageUrl;
 	private Address address;
 	private String phoneNumber;
@@ -38,7 +39,7 @@ public class User {
 		String email,
 		String password,
 		String nickname,
-		List<com.user.domain.vo.UserRole> roles,
+		List<UserRole> roles,
 		String profileImageUrl,
 		Address address,
 		String phoneNumber,
@@ -77,5 +78,18 @@ public class User {
 
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public void updateImage(String imageId, String profileImageUrl) {
+		this.imageId = imageId;
+		this.profileImageUrl = profileImageUrl;
+	}
+
+	public void withdraw() {
+		this.deleteStatus = DeleteStatus.D;
+	}
+
+	public void updateRolesForSeller() {
+		this.roles.add(UserRole.SELLER);
 	}
 }
