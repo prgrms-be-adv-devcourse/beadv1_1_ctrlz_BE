@@ -10,16 +10,6 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-
-
-
-  #  datasource:
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
-  #    url: jdbc:mysql://localhost:3306/${custom.db.database}
-  #    username: "${custom.db.username}"
-  #    password: "${custom.db.password}"
-
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
@@ -78,8 +68,8 @@ spring:
 
 # k8s 설정
 eureka:
-#  instance:
-#    prefer-ip-address: true
+  instance:
+    prefer-ip-address: true
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
