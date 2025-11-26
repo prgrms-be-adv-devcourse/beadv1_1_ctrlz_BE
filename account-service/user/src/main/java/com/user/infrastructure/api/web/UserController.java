@@ -136,7 +136,7 @@ public class UserController {
 		return headers;
 	}
 
-	private static BaseResponse<UserCreateResponse> addUserInBody(UserContext savedUserContext) {
+	private BaseResponse<UserCreateResponse> addUserInBody(UserContext savedUserContext) {
 		return new BaseResponse<>(new UserCreateResponse(
 			savedUserContext.userId(),
 			savedUserContext.profileImageUrl(),
