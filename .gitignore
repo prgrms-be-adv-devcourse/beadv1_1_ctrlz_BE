@@ -188,3 +188,4 @@ account-service/user/out
 account-service/auth/out
 gateway-service/out
 infra/.env
+application-window.yml
