@@ -56,6 +56,9 @@ spring:
       properties:
         spring.json.trusted.packages: "com.common.event"
 
+    listener:
+      immediate-stop: false # default 값 명시
+
 custom:
   image:
     allowed-extension: jpg,jpeg,png,webp
@@ -87,7 +90,9 @@ custom:
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: domain-service
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
+    enabled: true
 

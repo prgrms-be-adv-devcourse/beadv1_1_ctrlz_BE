@@ -103,12 +103,12 @@ spring:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
 
-# k8s 설정
+  # k8s 설정
 eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
-  #eureka:
+    enabled: true
   instance:
     prefer-ip-address: true
     hostname: gateway-service 서비스 이름 직접 등록

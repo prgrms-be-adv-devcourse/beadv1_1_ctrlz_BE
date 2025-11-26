@@ -50,7 +50,9 @@ public class UserApplication implements UserCommandUseCase {
 
 	@Override
 	public void updateForSeller(String id) {
-		userPersistencePort.updateRolesForSeller(id);
+		User user = userPersistencePort.findById(id);
+		user.updateRolesForSeller();
+		userPersistencePort.updateRolesForSeller(user);
 	}
 
 	@Override
@@ -74,12 +76,18 @@ public class UserApplication implements UserCommandUseCase {
 
 	@Override
 	public void updateImage(String userId, String imageId, String profileImageUrl) {
-		userPersistencePort.updateImage(userId, imageId, profileImageUrl);
+		User user = userPersistencePort.findById(userId);
+		user.updateImage(imageId, profileImageUrl);
+
+		userPersistencePort.updateImage(user);
 	}
 
 	@Override
 	public void delete(String id) {
-		userPersistencePort.withdraw(id);
+		User user = userPersistencePort.findById(id);
+		user.withdraw();
+
+		userPersistencePort.withdraw(user);
 	}
 
 	@Transactional(readOnly = true)
@@ -110,18 +118,6 @@ public class UserApplication implements UserCommandUseCase {
 			.build();
 	}
 
-	private void verifyNickname(String nickname) {
-		if (userPersistencePort.existsNickname(nickname)) {
-			throw new CustomException(UserExceptionCode.DUPLICATED_NICKNAME.getMessage());
-		}
-	}
-
-	private void verifyPhoneNumber(String phoneNumber) {
-		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
-			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
-		}
-	}
-
 	private void updateNickname(com.user.application.adapter.dto.UserUpdateContext updateContext, User user) {
 		if (!user.getNickname().equals(updateContext.nickname())) {
 			user.updateNickname(updateContext.nickname());
@@ -139,4 +135,17 @@ public class UserApplication implements UserCommandUseCase {
 			user.updateAddress(updatedAddress);
 		}
 	}
+
+	private void verifyNickname(String nickname) {
+		if (userPersistencePort.existsNickname(nickname)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_NICKNAME.getMessage());
+		}
+	}
+
+	private void verifyPhoneNumber(String phoneNumber) {
+		if (userPersistencePort.existsPhoneNumber(phoneNumber)) {
+			throw new CustomException(UserExceptionCode.DUPLICATED_PHONE_NUMBER.getMessage());
+		}
+	}
 }
+

@@ -20,6 +20,7 @@ spec:
       labels:
         app: account
     spec:
+      hostname: account-service
       containers:
         - name: account-service-app
           image: docker.io/beatchoi156/account-service:latest

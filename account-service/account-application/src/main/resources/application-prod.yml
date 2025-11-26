@@ -7,6 +7,11 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  batch:
+    jdbc:
+      initialize-schema: always
+      platform: mysql
+
   jpa:
     open-in-view: false
     hibernate:
@@ -57,10 +62,13 @@ spring:
         delivery.timeout.ms: 120000
         linger.ms: 0
         request.timeout.ms: 30000
-        enable.idempotence: false # 멱등성 비활성화
-        retries: 0 # 재시도 하지 않음
-        max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
+        enable.idempotence: true
+        retries: 1
+        max.in.flight.requests.per.connection: 5
         allow.auto.create.topics: false
+
+      batch-size: 32768 #32kb
+      buffer-memory: 67108864 # 64mb
 
     admin:
       auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
@@ -86,6 +94,7 @@ custom:
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: account-service
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/

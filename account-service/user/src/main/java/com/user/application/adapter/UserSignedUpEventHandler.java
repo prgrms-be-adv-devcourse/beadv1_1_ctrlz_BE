@@ -1,9 +1,8 @@
 package com.user.application.adapter;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -33,7 +32,8 @@ public class UserSignedUpEventHandler {
 		log.info("이벤트 저장 완료: {}, {}", event.userId(), event.eventType());
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+
+	@Async("taskExecutor")
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void publishKafka(UserSignedUpEvent event) {
 		CartCreateCommand cartCreateCommand = new CartCreateCommand(event.userId());
