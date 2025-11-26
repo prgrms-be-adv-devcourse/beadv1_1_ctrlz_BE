@@ -14,8 +14,8 @@ public class AsyncConfiguration {
 	@Bean(name = "taskExecutor")
 	public Executor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(2);
-		executor.setMaxPoolSize(5);
+		executor.setCorePoolSize(10);
+		executor.setMaxPoolSize(20);
 		executor.setQueueCapacity(100);
 		executor.setThreadNamePrefix("kafka-task-");
 		executor.initialize();
