@@ -20,6 +20,7 @@ spec:
       labels:
         app: domain
     spec:
+      hostname: domain-service
       containers:
         - name: domain-service-app
           image: docker.io/beatchoi156/domain-service:latest

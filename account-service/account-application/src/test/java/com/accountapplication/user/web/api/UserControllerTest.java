@@ -80,7 +80,7 @@ class UserControllerTest {
 				.content(objectMapper.writeValueAsString(request))
 			)
 			.andDo(print())
-			.andExpect(status().isOk())
+			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.message").value("가입 완료"))
 			.andExpect(jsonPath("$.data.nickname").value("nickname"))
 			.andExpect(jsonPath("$.data.profileUrl").value("default_image"))

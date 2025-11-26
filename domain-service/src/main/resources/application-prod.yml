@@ -86,7 +86,9 @@ custom:
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: domain-service
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
+    enabled: true
 
