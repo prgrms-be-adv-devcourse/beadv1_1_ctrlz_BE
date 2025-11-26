@@ -35,9 +35,7 @@ metadata:
 spec:
   selector:
     app: redis  # 이 라벨을 가진 Pod들에게 트래픽 분산
-
   sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
-
   ports:
     - protocol: TCP
       port: 6379 # 어디로 포워딩 할건지
