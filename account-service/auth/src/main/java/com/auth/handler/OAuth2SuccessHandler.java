@@ -2,8 +2,6 @@ package com.auth.handler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -83,21 +81,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 				TokenType.REFRESH_TOKEN.getDuration()
 			);
 
-			response.addHeader("Set-Cookie", accessTokenCookie.toString());
-			response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-
-			LinkedMultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-			queryParams.add("profile_image", customOAuth2User.profileUrl());
-			queryParams.add("nickname", customOAuth2User.nickname());
-
-			String uriString = UriComponentsBuilder.fromUriString(redirectUrl)
-				.queryParams(queryParams)
-				.encode(StandardCharsets.UTF_8)
-				.build()
-				.toUriString();
-			log.info("OAuth2 로그인 성공 - 리다이렉트");
-
-			getRedirectStrategy().sendRedirect(request, response, uriString);
+			successRedirect(request, response, accessTokenCookie, refreshTokenCookie, customOAuth2User);
 
 		} catch (Exception e) {
 			log.error("OAuth2 로그인 처리 중 오류 발생", e);
@@ -105,9 +89,29 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		}
 	}
 
-	private long getMaxAgeSeconds(String token) {
-		Instant expiration = jwtTokenProvider.getExpirationFromToken(token);
-		return Duration.between(Instant.now(), expiration).toMillis();
+	private void successRedirect(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		ResponseCookie accessTokenCookie,
+		ResponseCookie refreshTokenCookie,
+		CustomOAuth2User customOAuth2User
+	) throws IOException {
+
+		response.addHeader("Set-Cookie", accessTokenCookie.toString());
+		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+		LinkedMultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+		queryParams.add("profile_image", customOAuth2User.profileUrl());
+		queryParams.add("nickname", customOAuth2User.nickname());
+
+		String uriString = UriComponentsBuilder.fromUriString(redirectUrl)
+			.queryParams(queryParams)
+			.encode(StandardCharsets.UTF_8)
+			.build()
+			.toUriString();
+		log.info("OAuth2 로그인 성공 - 리다이렉트");
+
+		getRedirectStrategy().sendRedirect(request, response, uriString);
 	}
 
 	private boolean needToSignup(

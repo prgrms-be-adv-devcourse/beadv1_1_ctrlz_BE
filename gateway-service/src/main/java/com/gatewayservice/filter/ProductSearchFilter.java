@@ -18,8 +18,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
 @Slf4j
+@Component
 public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSearchFilter.Config> {
 
 	@Value("${jwt.secret}")

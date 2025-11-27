@@ -29,8 +29,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
-@Component
 @Slf4j
+@Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
 	@Value("${jwt.secret}")
