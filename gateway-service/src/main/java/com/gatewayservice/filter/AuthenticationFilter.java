@@ -1,7 +1,5 @@
 package com.gatewayservice.filter;
 
-import static java.util.Optional.*;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gatewayservice.handler.UserVerificationHandler;
+import com.gatewayservice.utils.ServletRequestUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -37,15 +36,17 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 	private String secretKey;
 
 	private final ObjectMapper objectMapper;
+	private final UserVerificationHandler userVerificationHandler;
 
 	@Data
 	public static class Config {
 		private String requiredRole;
 	}
 
-	public AuthenticationFilter() {
+	public AuthenticationFilter(UserVerificationHandler userVerificationHandler) {
 		super(Config.class);
 		this.objectMapper = new ObjectMapper();
+		this.userVerificationHandler = userVerificationHandler;
 	}
 
 	@Override
@@ -64,10 +65,19 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 				);
 			}
 
-			Optional<String> tokenOptional = resolveToken(request);
+			Optional<String> tokenOptional = ServletRequestUtils.resolveToken(request);
 			String token = tokenOptional.orElseThrow(() -> new JwtException("토큰이 필요합니다!"));
 
 			if (!isValidToken(token)) {
+				return response.writeWith(
+					Flux.just(writeUnAuthorizationResponseBody(response))
+				);
+			}
+
+			boolean isNotValid
+				= userVerificationHandler.validateToken(ServletRequestUtils.extractIp(request), token);
+
+			if (isNotValid) {
 				return response.writeWith(
 					Flux.just(writeUnAuthorizationResponseBody(response))
 				);
@@ -77,7 +87,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
 			List<Object> roles = claims.getPayload().get("roles", List.class);
 
-			if(roles.isEmpty()) {
+			if (roles.isEmpty()) {
 				throw new JwtException("권한이 없습니다.");
 			}
 
@@ -98,23 +108,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
 			return chain.filter(exchange.mutate().request(authorizedRequest).build());
 		};
-	}
-
-	private Optional<String> resolveToken(ServerHttpRequest request) {
-		String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-			log.info("bearerToken.substring(7) = {}", bearerToken.substring(7));
-			return of(bearerToken.replace("Bearer ", ""));
-		}
-
-		HttpCookie tokenCookie = request.getCookies().getFirst("accessToken");
-		if (tokenCookie != null) {
-			log.info("Optional.of(tokenCookie.getValue()) = {}", of(tokenCookie.getValue()));
-			return of(tokenCookie.getValue());
-		}
-
-		return Optional.empty();
 	}
 
 	private byte[] writeResponseBody(TokenAuthorizationResponse body) {
@@ -163,4 +156,5 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			.build()
 			.parseSignedClaims(token);
 	}
+
 }
