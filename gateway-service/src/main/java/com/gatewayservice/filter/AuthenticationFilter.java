@@ -56,17 +56,14 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 			ServerHttpRequest request = exchange.getRequest();
 			ServerHttpResponse response = exchange.getResponse();
 
-			if (!request.getHeaders().containsKey("Authorization")
-				&& !request.getHeaders().containsKey("ACCESS_TOKEN")
-			) {
-				log.info("Authorization header not found");
+			Optional<String> tokenOptional = ServletRequestUtils.resolveToken(request);
+			if (tokenOptional.isEmpty()) {
+				log.info("Authorization token not found in header or cookie");
 				return response.writeWith(
 					Flux.just(writeUnAuthorizationResponseBody(response))
 				);
 			}
-
-			Optional<String> tokenOptional = ServletRequestUtils.resolveToken(request);
-			String token = tokenOptional.orElseThrow(() -> new JwtException("토큰이 필요합니다!"));
+			String token = tokenOptional.get();
 
 			if (!isValidToken(token)) {
 				return response.writeWith(
@@ -74,10 +71,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 				);
 			}
 
-			boolean isNotValid
+			boolean isInvalid
 				= userVerificationHandler.validateToken(ServletRequestUtils.extractIp(request), token);
 
-			if (isNotValid) {
+			if (isInvalid) {
 				return response.writeWith(
 					Flux.just(writeUnAuthorizationResponseBody(response))
 				);

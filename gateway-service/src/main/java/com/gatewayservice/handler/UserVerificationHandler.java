@@ -22,8 +22,11 @@ public class UserVerificationHandler {
 		redisTemplate.opsForValue().set(IP_KEY + ip, token, expiration, TimeUnit.MILLISECONDS);
 	}
 
-	public boolean validateToken(String ip,String token) {
+	public boolean validateToken(String ip, String token) {
 		String accessToken = redisTemplate.opsForValue().get(IP_KEY + ip);
-		return token.equals(accessToken);
+		if (accessToken == null) {
+			return true;
+		}
+		return !token.equals(accessToken);
 	}
 }

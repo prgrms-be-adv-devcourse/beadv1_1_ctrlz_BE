@@ -27,7 +27,14 @@ public class ServletRequestUtils {
 		}
 
 		InetSocketAddress remoteAddress = request.getRemoteAddress();
-		return remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : "unknown";
+		if (remoteAddress != null) {
+			if (remoteAddress.getAddress() != null) {
+				return remoteAddress.getAddress().getHostAddress();
+			} else {
+				return remoteAddress.getHostString();
+			}
+		}
+		return "unknown";
 	}
 
 	public static Optional<String> resolveToken(ServerHttpRequest request) {

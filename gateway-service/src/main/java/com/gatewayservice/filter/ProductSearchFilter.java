@@ -36,23 +36,24 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 	@Override
 	public GatewayFilter apply(Config config) {
 		return (exchange, chain) -> {
-
 			ServerHttpRequest request = exchange.getRequest();
-
 			Optional<String> tokenOptional = resolveToken(request);
 
 			if (tokenOptional.isPresent()) {
-				Jws<Claims> claims = getClaims(tokenOptional.get());
-				String userId = claims.getPayload().get("userId").toString();
-				ServerHttpRequest authorizedRequest = request.mutate()
-					.header("X-REQUEST-ID", userId)
-					.build();
-
-				log.info("AuthenticationFilter userId = {}", userId);
-				return chain.filter(exchange.mutate().request(authorizedRequest).build());
+				try {
+					Jws<Claims> claims = getClaims(tokenOptional.get());
+					String userId = claims.getPayload().get("userId").toString();
+					ServerHttpRequest authorizedRequest = request.mutate()
+						.header("X-REQUEST-ID", userId)
+						.build();
+					log.info("ProductSearchFilter: User identified: {}", userId);
+					return chain.filter(exchange.mutate().request(authorizedRequest).build());
+				} catch (Exception e) {
+					log.warn("ProductSearchFilter: Token validation failed. Proceeding as anonymous.", e);
+				}
 			}
 
-			log.info("ProductSearchFilter anonymous");
+			log.info("ProductSearchFilter: No token found. Proceeding as anonymous.");
 			return chain.filter(exchange);
 		};
 	}
