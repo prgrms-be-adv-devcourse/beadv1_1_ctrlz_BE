@@ -240,9 +240,13 @@ public class DepositService {
 	}
 
 	public DepositResponse createDeposit(String userId) {
+
+		depositJpaRepository.findByUserId(userId).orElseThrow(
+			() -> new CustomException("이미 존재하는 예치금 엔티티입니다. userId : " + userId));
+
 		Deposit deposit = Deposit.builder()
 			.userId(userId)
-			.balance(BigDecimal.valueOf(1000L))
+			.balance(BigDecimal.valueOf(0L))
 			.build();
 
 		Deposit savedDeposit = depositJpaRepository.save(deposit);
