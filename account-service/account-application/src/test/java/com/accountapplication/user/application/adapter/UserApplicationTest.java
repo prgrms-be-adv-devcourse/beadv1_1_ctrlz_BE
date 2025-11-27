@@ -38,6 +38,8 @@ class UserApplicationTest {
 			.phoneNumber("010-9876-5432")
 			.oauthId("oauth-abcdef123456")
 			.profileImageUrl("https://cdn.example.com/profile/mockuser.png")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		//when then
