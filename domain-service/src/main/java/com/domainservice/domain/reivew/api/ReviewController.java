@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
 	private final ReviewService reviewService;
-	private final String TEST_USER_ID = "user-001";
 
 	/**
 	 * 리뷰 생성 api
@@ -33,10 +32,10 @@ public class ReviewController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<ReviewResponse> createReview(
-		@Valid @RequestBody ReviewRequest request
-		// TODO: 회원 정보를 가져와야함.
+		@Valid @RequestBody ReviewRequest request,
+		@RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
-		ReviewResponse response = reviewService.createReview(request, TEST_USER_ID);
+		ReviewResponse response = reviewService.createReview(request, userId);
 
 		return new BaseResponse<>(
 			response,
@@ -53,10 +52,10 @@ public class ReviewController {
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ReviewResponse> getReview(
 		@PathVariable String reviewId,
-		@Valid @RequestBody ReviewRequest request
-		//TODO: 회원 정보를 가져와야함.
+		@Valid @RequestBody ReviewRequest request,
+		@RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
-		ReviewResponse response = reviewService.updateReview(reviewId, request, TEST_USER_ID);
+		ReviewResponse response = reviewService.updateReview(reviewId, request, userId);
 		return new BaseResponse<>(
 			response,
 			ReviewConstant.REVIEW_UPDATED.getMessage()
@@ -70,10 +69,10 @@ public class ReviewController {
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ReviewResponse>> getReviewListById(
-		String userId, //TODO: 회원 정보를 가져와야함.
+		@RequestHeader(value = "X-REQUEST-ID") String userId,
 		@RequestParam Integer pageNumber
 	) {
-		List<ReviewResponse> responseList = reviewService.getReviewListById(TEST_USER_ID, pageNumber);
+		List<ReviewResponse> responseList = reviewService.getReviewListByUserId(userId, pageNumber);
 		return new BaseResponse<>(
 			responseList,
 			ReviewConstant.REVIEW_FETCHED.getMessage()
@@ -90,7 +89,7 @@ public class ReviewController {
 	public BaseResponse<ReviewResponse> getReviewByProductPostId(
 		@PathVariable String productPostId
 	) {
-		ReviewResponse response = reviewService.getReviewByProductPostId(productPostId, TEST_USER_ID);
+		ReviewResponse response = reviewService.getReviewByProductPostId(productPostId);
 
 		return new BaseResponse<>(
 			response,
