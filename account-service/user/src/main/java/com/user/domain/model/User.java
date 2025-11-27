@@ -28,6 +28,8 @@ public class User {
 	private String phoneNumber;
 	private String oauthId;
 	private String imageId;
+	private Integer age;
+	private String gender;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private DeleteStatus deleteStatus;
@@ -44,6 +46,8 @@ public class User {
 		Address address,
 		String phoneNumber,
 		String oauthId, String imageId,
+		Integer age,
+		String gender,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt,
 		DeleteStatus deleteStatus
@@ -59,6 +63,8 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.oauthId = oauthId;
 		this.imageId = imageId;
+		this.age = age;
+		this.gender = gender;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.deleteStatus = deleteStatus;

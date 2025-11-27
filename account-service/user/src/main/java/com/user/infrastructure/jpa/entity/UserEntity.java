@@ -61,6 +61,12 @@ public class UserEntity extends BaseEntity {
 
 	private String imageId;
 
+	@Column(nullable = false)
+	private int age;
+
+	@Column(nullable = false)
+	private String gender;
+
 	@Builder
 	public UserEntity(
 		String name,
@@ -72,7 +78,9 @@ public class UserEntity extends BaseEntity {
 		String oauthId,
 		String nickname,
 		String imageId,
-		List<UserRole> roles
+		List<UserRole> roles,
+		int age,
+		String gender
 	) {
 		this.oauthId = oauthId;
 		this.name = name;
@@ -84,6 +92,8 @@ public class UserEntity extends BaseEntity {
 		this.nickname = nickname;
 		this.imageId = imageId;
 		this.roles.add(UserRole.USER);
+		this.age = age;
+		this.gender = gender;
 	}
 
 	@Override
