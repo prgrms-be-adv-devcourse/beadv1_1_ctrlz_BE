@@ -1,6 +1,8 @@
 package com.domainservice.domain.reivew.model.dto.response;
 
+import java.time.LocalDateTime;
 import com.domainservice.common.model.user.UserResponse;
+import com.domainservice.domain.order.model.dto.OrderedAt;
 import com.domainservice.domain.reivew.model.entity.Review;
 
 public record ReviewResponse(
@@ -10,22 +12,24 @@ public record ReviewResponse(
 	String contents,
 	Integer userRating,
 	Integer productRating,
+	LocalDateTime orderedAt,
 	boolean isMine
 ) {
 
 	public static ReviewResponse from(
 		Review review,
 		UserResponse userResponse,
+		OrderedAt orderedAt,
 		String userId
 	) {
 		return new ReviewResponse(
-			//TODO: 현재는 FeignClient로 통신시 401에러를 받음.
 			review.getId(),
 			review.getUserId(),
-			userResponse == null ? "" : userResponse.nickname(),
+			userResponse.nickname(),
 			review.getContents(),
 			review.getUserRating(),
 			review.getProductRating(),
+			orderedAt.date(),
 			userId.equals(review.getUserId())
 		);
 	}
