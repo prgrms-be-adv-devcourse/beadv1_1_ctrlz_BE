@@ -80,6 +80,11 @@ public class UserController {
 		userCommandUseCase.updateUser(userId, context);
 	}
 
+	@GetMapping("/my-info")
+	public UserDescription getMyInformation(@RequestHeader("X-REQUEST-ID") String userId) {
+		return userReaderPort.getUserDescription(userId);
+	}
+
 	@GetMapping("/{id}")
 	public UserDescription getUser(@PathVariable("id") String id) {
 		log.info("회원 정보 조회");

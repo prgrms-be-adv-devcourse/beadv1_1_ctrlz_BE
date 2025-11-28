@@ -45,7 +45,7 @@ spring:
               filters:
                 - name: ProductSearchFilter
 
-            - id: auth-sign-up
+            - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users
@@ -65,6 +65,15 @@ spring:
                   args:
                     requiredRole: USER
 
+            - id: auth-api-protected
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/auth/refresh
+                - Method=GET
+              filters:
+                - name: AccessTokenCaptureFilter
+                - name: IpCaptureFilter
+                - name: ReissueTokenFilter
 
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE

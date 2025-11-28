@@ -42,19 +42,22 @@ public class ServletRequestUtils {
 		String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-			log.info("bearerToken.substring(7) = {}", bearerToken.substring(7));
 			return of(bearerToken.replace("Bearer ", ""));
 		}
 
-		HttpCookie tokenCookie = request.getCookies().getFirst("accessToken");
+		HttpCookie tokenCookie = request.getCookies().getFirst("ACCESS_TOKEN");
 		if (tokenCookie != null) {
 			log.info("Optional.of(tokenCookie.getValue()) = {}", of(tokenCookie.getValue()));
 			return of(tokenCookie.getValue());
 		}
 
+		HttpCookie refreshTokenCookie = request.getCookies().getFirst("REFRESH_TOKEN");
+		if (refreshTokenCookie != null) {
+			return of(refreshTokenCookie.getValue());
+		}
+
 		return Optional.empty();
 	}
-
 
 	public static String extractAccessToken(ServerHttpResponse response) {
 		// 쿠키에서 Authorization 헤더 확인
@@ -68,6 +71,5 @@ public class ServletRequestUtils {
 		}
 		return null;
 	}
-
 
 }
