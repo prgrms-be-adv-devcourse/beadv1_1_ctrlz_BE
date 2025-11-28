@@ -124,6 +124,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 	}
 
 	private DataBuffer writeJwtExpiredResponseBody(ServerHttpResponse response) {
+		response.setStatusCode(HttpStatus.UNAUTHORIZED);
 		response.setRawStatusCode(456);
 		response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 		TokenAuthorizationResponse body = new TokenAuthorizationResponse("토큰 유효시간이 만료되었습니다.");
