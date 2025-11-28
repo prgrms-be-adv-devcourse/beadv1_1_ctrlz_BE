@@ -115,6 +115,8 @@ public class UserApplication implements UserCommandUseCase {
 			.imageId(userContext.imageId())
 			.oauthId(userContext.oauthId())
 			.profileImageUrl(userContext.profileImageUrl())
+			.age(userContext.age())
+			.gender(userContext.gender())
 			.build();
 	}
 
