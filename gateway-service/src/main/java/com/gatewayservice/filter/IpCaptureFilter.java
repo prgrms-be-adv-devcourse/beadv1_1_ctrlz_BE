@@ -1,7 +1,5 @@
 package com.gatewayservice.filter;
 
-import static com.gatewayservice.common.ServeletConst.*;
-
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.Ordered;
@@ -33,7 +31,7 @@ public class IpCaptureFilter
 			}
 
 			// 요청 ID를 exchange에 저장하여 다음 필터에서 사용 가능하도록
-			exchange.getAttributes().put(REQUEST_IP, userIp);
+			exchange.getAttributes().put("REQUEST_ID", userIp);
 			return chain.filter(exchange);
 		};
 	}

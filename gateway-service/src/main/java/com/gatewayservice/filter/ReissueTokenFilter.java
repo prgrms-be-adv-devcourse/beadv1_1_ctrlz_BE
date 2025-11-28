@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gatewayservice.dto.TokenAuthorizationResponse;
 import com.gatewayservice.handler.UserVerificationHandler;
 import com.gatewayservice.utils.ServletRequestUtils;
 

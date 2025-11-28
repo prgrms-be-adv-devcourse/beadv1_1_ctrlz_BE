@@ -12,6 +12,9 @@ spring:
       initialize-schema: always
       platform: mysql
 
+    job:
+      enabled: false
+
   jpa:
     open-in-view: false
     hibernate:
@@ -19,7 +22,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+#        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
@@ -30,17 +33,17 @@ spring:
         order_inserts: true
     defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
-    username: app
-    password: 1234
-
   #  datasource:
-  #    driver-class-name: org.h2.Driver
-  #    username: sa
-  #    password:
-  #    url: jdbc:h2:mem:user-db
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+  #    username: app
+  #    password: 1234
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    url: jdbc:h2:mem:user-db
   #
   h2:
     console:

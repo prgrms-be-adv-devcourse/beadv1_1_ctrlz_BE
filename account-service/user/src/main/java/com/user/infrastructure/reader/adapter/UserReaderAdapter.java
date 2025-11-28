@@ -23,6 +23,7 @@ public class UserReaderAdapter implements UserReaderPort {
 		User user = userPersistencePort.findById(id);
 
 		return UserDescription.builder()
+			.userId(user.getId())
 			.city(user.getAddress().getCity())
 			.roles(user.getRolesToString())
 			.email(user.getEmail())
