@@ -29,8 +29,8 @@ public class AccessTokenCaptureFilter
 	@Override
 	public GatewayFilter apply(Config config) {
 		return (exchange, chain) -> chain.filter(exchange).then(Mono.fromRunnable(() -> {
-			String requestId = exchange.getAttribute("REQUEST_ID");
-			if (requestId == null) {
+			String requestIp = exchange.getAttribute("REQUEST_IP");
+			if (requestIp == null) {
 				return;
 			}
 
@@ -40,7 +40,7 @@ public class AccessTokenCaptureFilter
 				return;
 			}
 
-			userVerificationHandler.addTokenAndIp(accessToken, requestId);
+			userVerificationHandler.addTokenAndIp(accessToken, requestIp);
 		}));
 	}
 
