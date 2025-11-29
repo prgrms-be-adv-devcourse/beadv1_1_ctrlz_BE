@@ -1,4 +1,4 @@
-package com.gatewayservice.filter;
+package com.gatewayservice.dto;
 
 public record TokenAuthorizationResponse(String message) {
 }

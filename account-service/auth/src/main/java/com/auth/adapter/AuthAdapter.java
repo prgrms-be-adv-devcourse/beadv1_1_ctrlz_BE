@@ -31,6 +31,7 @@ public class AuthAdapter implements TokenWriterPort {
 				accessToken,
 				TokenType.ACCESS_TOKEN.getDuration()
 			);
+
 		ResponseCookie refreshTokenCookie =
 			CookieProvider.to(TokenType.REFRESH_TOKEN.name(),
 				refreshToken,

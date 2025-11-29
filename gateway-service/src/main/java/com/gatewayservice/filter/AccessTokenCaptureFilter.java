@@ -1,5 +1,7 @@
 package com.gatewayservice.filter;
 
+import static com.gatewayservice.common.ServeletConst.*;
+
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.Ordered;
@@ -29,7 +31,7 @@ public class AccessTokenCaptureFilter
 	@Override
 	public GatewayFilter apply(Config config) {
 		return (exchange, chain) -> chain.filter(exchange).then(Mono.fromRunnable(() -> {
-			String requestIp = exchange.getAttribute("REQUEST_IP");
+			String requestIp = exchange.getAttribute(REQUEST_IP);
 			if (requestIp == null) {
 				return;
 			}

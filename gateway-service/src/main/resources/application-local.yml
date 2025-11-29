@@ -21,36 +21,14 @@ spring:
       server:
         webflux:
           routes:
-            - id: oauth-login
-              uri: lb://ACCOUNT-SERVICE
-              predicates:
-                - Path=/oauth2/authorization/google
-                - Method=GET
-
-            - id: oauth-callback
-              uri: lb://ACCOUNT-SERVICE
-              predicates:
-                - Path=/login/oauth2/code/google
-                - Method=GET
-              filters:
-                - name: PreserveHostHeader
-                - name: AccessTokenCaptureFilter
-                - name: IpCaptureFilter
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts/**
-                - Method=GET
-              filters:
-                - name: ProductSearchFilter
+            # OAuth2 로그인은 Gateway에서 직접 처리
+            # 기존 라우트 제거하고 Security가 자동 처리하도록 함
 
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users
                 - Method=POST
-
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
@@ -68,8 +46,9 @@ spring:
             - id: auth-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
-                - Path=/api/auth/refresh
-                - Method=GET
+                - Path=/api/auth/reissue
+                - Method=POST  # CSRF 방어를 위해 POST 사용
+
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
@@ -120,6 +99,23 @@ spring:
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
+
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
+
+services:
+  account:
+    url: lb://ACCOUNT-SERVICE
+
+
+custom:
+  redirect-url: http://localhost:8082
 
 # k8s 설정
 #eureka:

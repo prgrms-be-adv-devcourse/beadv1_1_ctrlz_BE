@@ -28,7 +28,7 @@ public class User {
 	private String phoneNumber;
 	private String oauthId;
 	private String imageId;
-	private Integer age;
+	private int age;
 	private String gender;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
@@ -46,7 +46,7 @@ public class User {
 		Address address,
 		String phoneNumber,
 		String oauthId, String imageId,
-		Integer age,
+		int age,
 		String gender,
 		LocalDateTime createdAt,
 		LocalDateTime updatedAt,
