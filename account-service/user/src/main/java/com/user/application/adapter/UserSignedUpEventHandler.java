@@ -65,7 +65,7 @@ public class UserSignedUpEventHandler {
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void publishDepositCommand(UserSignedUpEvent event) {
 		DepositCreateCommand depositCreateCommand = new DepositCreateCommand(event.userId());
-		log.info("deposit command published 상태 변경: {}", event.userId());
+		log.info("deposit command published kafka 전송: {}", event.userId());
 		try {
 			kafkaEventPublisher.publish(depositCommandTopic, depositCreateCommand);
 		} catch (Exception e) {

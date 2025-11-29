@@ -22,7 +22,7 @@ import org.springframework.util.backoff.FixedBackOff;
 import com.common.event.DepositCreateCommand;
 
 @Configuration
-public class KafkaConsumerConfiguration {
+public class KafkaDepositConsumerConfiguration {
 
 	@Value("${custom.deposit.topic.command}")
 	private String depositTopicCommand;

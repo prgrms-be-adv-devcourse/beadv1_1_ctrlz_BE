@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import com.common.event.DepositCreateCommand;
+import com.common.exception.CustomException;
 import com.domainservice.domain.deposit.service.DepositService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,15 @@ public class DepositCommandListener {
 			depositService.createDeposit(depositCreateCommand.userId());
 			log.info("deposit created for user: {}", depositCreateCommand.userId());
 			ack.acknowledge();
+		} catch (CustomException e) {
+			log.warn("이미 처리된 이벤트입니다: {}", depositCreateCommand.userId());
+			ack.acknowledge();
 		} catch (DataIntegrityViolationException e) {
 			log.info("이미 처리된 이벤트입니다: {}", depositCreateCommand.userId());
 			ack.acknowledge();
 		} catch (Exception e) {
 			log.error("카프카 event handler error: {}", e.getMessage(), e);
+			ack.acknowledge();
 			throw e;
 		}
 	}

@@ -12,7 +12,7 @@ import com.user.infrastructure.jpa.entity.ExternalEventEntity;
 
 public interface ExternalEventJpaRepository extends JpaRepository<ExternalEventEntity, String> {
 
-	@Query("select e from ExternalEventEntity e where e.userId =: userId and e.eventType =: eventType and e.commandType =: commandType")
+	@Query("select e from ExternalEventEntity e where e.userId = :userId and e.eventType = :eventType and e.commandType = :commandType")
 	Optional<ExternalEventEntity> findExternalEvent(
 		@Param("userId") String userId,
 		@Param("eventType") String eventType,

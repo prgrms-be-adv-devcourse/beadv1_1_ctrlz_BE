@@ -241,8 +241,9 @@ public class DepositService {
 
 	public DepositResponse createDeposit(String userId) {
 
-		depositJpaRepository.findByUserId(userId).orElseThrow(
-			() -> new CustomException("이미 존재하는 예치금 엔티티입니다. userId : " + userId));
+		if(depositJpaRepository.findByUserId(userId).isPresent()){
+			throw new CustomException(DepositExceptionCode.DEPOSIT_ALREADY_EXISTS.getMessage());
+		}
 
 		Deposit deposit = Deposit.builder()
 			.userId(userId)
