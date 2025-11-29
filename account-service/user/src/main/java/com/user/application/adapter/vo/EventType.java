@@ -1,4 +1,4 @@
-package com.user.domain.vo;
+package com.user.application.adapter.vo;
 
 import lombok.RequiredArgsConstructor;
 

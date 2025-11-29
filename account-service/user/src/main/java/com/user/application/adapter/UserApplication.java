@@ -14,10 +14,11 @@ import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
-import com.user.domain.vo.EventType;
+import com.user.application.adapter.vo.EventType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,7 +29,9 @@ public class UserApplication implements UserCommandUseCase {
 	private final UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
 	private final ApplicationEventPublisher applicationEventPublisher;
-
+	/*
+	* UserSignedUpEventHandler에서 처리
+	*/
 	@Override
 	public UserContext create(UserContext userContext) {
 		verifyNickname(userContext.nickname());

@@ -58,17 +58,21 @@ spring:
 
       acks: all
 
-      properties:
-        delivery.timeout.ms: 120000
-        linger.ms: 0
-        request.timeout.ms: 30000
-        enable.idempotence: true
-        retries: 1
-        max.in.flight.requests.per.connection: 5
-        allow.auto.create.topics: false
+    properties:
+      delivery.timeout.ms: 120000
+      linger.ms: 5
+      request.timeout.ms: 30000
+      enable.idempotence: true
+      retries: 1
+      max.in.flight.requests.per.connection: 5
+      allow.auto.create.topics: false
+      compression.type: lz4 # 압축 추가
+      # transactional.id: 고려할만함
 
       batch-size: 32768 #32kb
       buffer-memory: 67108864 # 64mb
+
+
 
     admin:
       auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
