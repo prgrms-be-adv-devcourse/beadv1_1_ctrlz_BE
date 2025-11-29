@@ -8,6 +8,7 @@ dependencies {
     implementation project(":user")
     implementation project(":auth")
     implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
     implementation project(":common")
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -39,6 +40,9 @@ dependencies {
 
     // test
     testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    //h2
+    runtimeOnly 'com.h2database:h2'
 }
 
 // querydsl 설정
