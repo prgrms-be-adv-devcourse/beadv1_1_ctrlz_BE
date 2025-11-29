@@ -65,7 +65,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
       properties:
-        spring.json.trusted.packages: "com.common.event"
+        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
+        allow.auto.create.topics: false
 
   elasticsearch:
     uris: http://localhost:9200 # default 지만 명시적으로 작성
@@ -96,6 +97,11 @@ custom:
   deposit:
     topic:
       command: deposit-command
+
+  product-post:
+    topic:
+      event: product-post-events
+
 
   feign:
     url:

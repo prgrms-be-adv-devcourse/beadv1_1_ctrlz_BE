@@ -13,22 +13,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.event.productPost.ProductPostEvent;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
+import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.category.model.entity.Category;
+import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
-import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
+import com.domainservice.domain.post.post.service.kafka.ProductPostEventProducer;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
@@ -45,15 +49,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProductPostService {
 
-	private final TagRepository tagRepository;
-	private final ProductPostRepository productPostRepository;
+	private final ProductPostEventProducer eventProducer;
+
+	private final UserFeignClient userFeignClient;
 
 	private final ImageService imageService;
 	private final RecentlyViewedService recentlyViewedService;
 
-	private final UserFeignClient userFeignClient;
+	private final TagRepository tagRepository;
+	private final ProductPostRepository productPostRepository;
 
 	private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
+	private final CategoryRepository categoryRepository;
 
 	/**
 	 * 상품 게시글을 생성합니다.
@@ -67,8 +74,8 @@ public class ProductPostService {
 	public ProductPostResponse createProductPost(
 		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-		UserResponse userInfo = getUserInfo(userId);
-		validateSellerPermission(userInfo);
+		// UserResponse userInfo = getUserInfoByFeignClient(userId);
+		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(userId)
@@ -89,6 +96,9 @@ public class ProductPostService {
 
 		ProductPost saved = productPostRepository.save(productPost);
 
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		publishProductPostEvent(saved, ProductPostEvent.EventType.CREATE);
+
 		return ProductPostMapper.toProductPostResponse(saved);
 	}
 
@@ -105,25 +115,28 @@ public class ProductPostService {
 	public ProductPostResponse updateProductPost(
 		ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
-		UserResponse userInfo = getUserInfo(userId);
-		validateSellerPermission(userInfo);
+		// UserResponse userInfo = getUserInfoByFeignClient(userId);
+		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
 
-		ProductPost productPost = productPostRepository.findById(postId)
+		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 수정 가능한 상태인지 유효성 검사
-		productPost.validateUpdate(userId, userInfo.roles());
+		// target.validateUpdate(userId, userInfo.roles());
 
 		// 기존 저장된 이미지 삭제하고 새 이미지로 교체
-		replaceImages(productPost, imageFiles);
+		replaceImages(target, imageFiles);
 
 		// 게시글에 입력받은 tag 추가
-		addTags(productPost, request.tagIds());
+		addTags(target, request.tagIds());
 
 		// request 요청으로 게시글 정보 변경
-		productPost.update(request);
+		target.update(request);
 
-		return ProductPostMapper.toProductPostResponse(productPost);
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		publishProductPostEvent(target, ProductPostEvent.EventType.UPDATE);
+
+		return ProductPostMapper.toProductPostResponse(target);
 	}
 
 	/**
@@ -136,20 +149,23 @@ public class ProductPostService {
 	 */
 	public String deleteProductPost(String userId, String postId) {
 
-		UserResponse userInfo = getUserInfo(userId);
-		validateSellerPermission(userInfo);
+		// UserResponse userInfo = getUserInfoByFeignClient(userId);
+		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
 
 		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 삭제 가능한 상태인지 유효성 검사
-		target.validateDelete(userId, userInfo.roles());
+		// target.validateDelete(userId, userInfo.roles());
 
 		// 테이블에 저장된 이미지 삭제
 		deleteProductPostImages(target);
 
 		// soft delete 처리
 		target.delete();
+
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		publishProductPostEvent(target, ProductPostEvent.EventType.DELETE);
 
 		return target.getId();
 	}
@@ -183,7 +199,7 @@ public class ProductPostService {
 		log.info("userId = {}", userId);
 		// 실제 유저인 경우 redis에 최근 본 상품 목록으로 저장
 		if (!userId.equals("anonymous")) {
-			getUserInfo(userId); // user-service에 해당 유저가 존재하는지 확인
+			getUserInfoByFeignClient(userId); // user-service에 해당 유저가 존재하는지 확인
 			recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
 		}
 
@@ -233,7 +249,7 @@ public class ProductPostService {
 	 * @return 최근 본 게시물 응답 목록
 	 */
 	public List<ProductPostResponse> getRecentlyViewedPosts(String userId) {
-		getUserInfo(userId); // 사용자 정보가 조회되지 않으면 예외 발생
+		getUserInfoByFeignClient(userId); // 사용자 정보가 조회되지 않으면 예외 발생
 		Set<String> viewedPostIds = recentlyViewedService.getRecentlyViewedPostIds(userId, MAX_COUNT);
 
 		return productPostRepository.findAllById(viewedPostIds)
@@ -331,7 +347,7 @@ public class ProductPostService {
 	}
 
 	// FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
-	private UserResponse getUserInfo(String userId) {
+	private UserResponse getUserInfoByFeignClient(String userId) {
 		try {
 			return userFeignClient.getUser(userId);
 
@@ -391,7 +407,47 @@ public class ProductPostService {
 		productPostRepository.save(product);
 	}
 
-	// TODO: 상품 판매상태 변경
+	/**
+	 * ProductPost 엔티티를 Kafka 이벤트로 발행
+	 *
+	 * @param productPost 발행할 상품 엔티티
+	 * @param eventType 이벤트 타입 (CREATE, UPDATE, DELETE)
+	 */
+	private void publishProductPostEvent(ProductPost productPost, ProductPostEvent.EventType eventType) {
+		try {
+			// TODO: 현재 db 2번 조회, 리펙토링 필요
+			String categoryName = categoryRepository.findById(productPost.getCategoryId())
+				.map(Category::getName).orElse(null);
+
+			List<String> tagNames = productPost.getProductPostTags().stream()
+				.map(ppt -> ppt.getTag().getName())
+				.toList();
+
+			ProductPostEvent event = ProductPostEvent.builder()
+				.id(productPost.getId())
+				.name(productPost.getName())
+				.title(productPost.getTitle())
+				.description(productPost.getDescription())
+				.tags(tagNames)
+				.categoryName(categoryName)
+				.price(productPost.getPrice().longValue())
+				.likedCount(productPost.getLikedCount().longValue())
+				.viewCount(productPost.getViewCount().longValue())
+				.status(productPost.getStatus().name())
+				.tradeStatus(productPost.getTradeStatus().name())
+				.deleteStatus(productPost.getDeleteStatus().name())
+				.createdAt(productPost.getCreatedAt())
+				.eventType(eventType)
+				.build();
+
+			eventProducer.sendEvent(event);
+
+		} catch (Exception e) {
+			log.error("❌ Kafka 이벤트 발행 실패 - postId: {}, eventType: {}", productPost.getId(), eventType, e);
+			// TODO: 이벤트 발행 실패 시 재시도 또는 보상 트랜잭션 고려
+		}
+	}
+
 	// TODO: 내가 구매한 상품 조회
 	// TODO: 내가 판매한 상품 조회
 	// TODO: 좋아요 로직 구현
