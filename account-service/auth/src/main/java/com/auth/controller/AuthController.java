@@ -6,6 +6,7 @@ import java.util.Arrays;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,17 +52,10 @@ public class AuthController {
 	@PostMapping("/reissue")
 	public void refreshToken(
 		@RequestHeader("X-REQUEST-ID") String userId,
-		HttpServletRequest request,
+		@CookieValue(name = "REFRESH_TOKEN") String refreshToken,
 		HttpServletResponse response
 	) {
-
-		Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
-			.filter(cookie -> cookie.getName().equals("REFRESH_TOKEN"))
-			.findFirst()
-			.orElseThrow(() -> new JwtException("재 로그인이 필요합니다."));
-
-		String value = refreshTokenCookie.getValue();
-		String accessToken = jwtAuthService.reissueAccessToken(userId, value);
+		String accessToken = jwtAuthService.reissueAccessToken(userId, refreshToken);
 
 		ResponseCookie responseCookie = CookieProvider.to(
 			TokenType.ACCESS_TOKEN.name(),
