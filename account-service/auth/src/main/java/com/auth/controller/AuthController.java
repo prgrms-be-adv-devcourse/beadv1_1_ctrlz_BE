@@ -3,17 +3,22 @@ package com.auth.controller;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth.dto.LoginRequest;
+import com.auth.dto.LoginResponse;
 import com.auth.handler.CookieProvider;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.jwt.TokenType;
+import com.auth.service.AuthService;
 import com.auth.service.JwtAuthService;
 
 import io.jsonwebtoken.JwtException;
@@ -29,11 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class AuthController {
 
-	@Value("${jwt.expiration}")
-	private long expiration;
-
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtAuthService jwtAuthService;
+	private final AuthService authService;
+
+
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponse> googleLogin(@RequestBody LoginRequest request) {
+		log.info("로그인 요청: email={}", request.email());
+		
+		LoginResponse response = authService.processLogin(request);
+		
+		return ResponseEntity.ok(response);
+	}
 
 	@GetMapping("/reissue")
 	public void refreshToken(

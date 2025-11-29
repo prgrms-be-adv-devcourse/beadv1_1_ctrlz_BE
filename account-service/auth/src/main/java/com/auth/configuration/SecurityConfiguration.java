@@ -15,32 +15,32 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.auth.handler.OAuth2FailureHandler;
-import com.auth.handler.OAuth2SuccessHandler;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Account Service Security 설정
+ * - OAuth2는 Gateway에서 처리하므로 제거
+ * - 단순 API 서버로만 동작
+ * - Gateway로부터 들어오는 요청만 처리
+ */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-	private final OAuth2SuccessHandler oAuth2SuccessHandler;
-	private final OAuth2FailureHandler oAuth2FailureHandler;
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		return http
-			// CSRF 비활성화
+			// CSRF 비활성화 (Stateless API)
 			.csrf(AbstractHttpConfigurer::disable)
 
 			// CORS 설정
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-			// 프레임 옵션 설정 (H2 콘솔) -> 추후 제거
+			// 프레임 옵션 설정 (H2 콘솔용)
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 			)
@@ -49,13 +49,7 @@ public class SecurityConfiguration {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 
-			// OAuth2 로그인 설정
-			.oauth2Login(oauth2 -> oauth2
-				.successHandler(oAuth2SuccessHandler) // 로그인 성공 핸들러
-				.failureHandler(oAuth2FailureHandler) // 로그인 실패 핸들러
-			)
-
-			// 세션 정책: Stateless (JWT 사용)
+			// 세션 사용 안 함 (Stateless)
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			)
@@ -71,26 +65,9 @@ public class SecurityConfiguration {
 					response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
 				})
 			)
+			
+			// 모든 요청 허용 (Gateway에서 인증/인가 처리)
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(
-					"/",
-					"/error",
-					"/favicon.ico",
-					"/*.png",
-					"/*.gif",
-					"/*.svg",
-					"/*.jpg",
-					"/*.html",
-					"/*.css",
-					"/*.js"
-				).permitAll()
-				.requestMatchers(
-					"/oauth2/**",
-					"/login/**"
-				).permitAll()
-				// H2 콘솔
-				.requestMatchers("/h2-console/**").permitAll()
-
 				.anyRequest().permitAll()
 			)
 
@@ -101,7 +78,11 @@ public class SecurityConfiguration {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(List.of("localhost:8080"));
+		// Gateway와 프론트엔드 주소 허용
+		configuration.setAllowedOrigins(List.of(
+			"http://localhost:8082",  // Gateway
+			"http://localhost:3000"   // Frontend
+		));
 
 		configuration.setAllowedMethods(List.of(
 			HttpMethod.GET.name(),
@@ -109,15 +90,15 @@ public class SecurityConfiguration {
 			HttpMethod.PUT.name(),
 			HttpMethod.PATCH.name(),
 			HttpMethod.DELETE.name(),
-			HttpMethod.OPTIONS.name(),
-			HttpMethod.TRACE.name()
-			));
+			HttpMethod.OPTIONS.name()
+		));
 
 		configuration.setAllowedHeaders(List.of(
 			HttpHeaders.AUTHORIZATION,
 			HttpHeaders.CONTENT_TYPE,
 			"X-Requested-With",
-			"X-CODE"
+			"X-USER-ID",
+			"X-REQUEST-ID"
 		));
 
 		configuration.setExposedHeaders(List.of(

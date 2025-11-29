@@ -121,13 +121,12 @@ spring:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
 
-# k8s 설정
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#eureka:
-#  instance:
-#    prefer-ip-address: true
-#    hostname: svc-account-service 서비스 이름 직접 등록
+ # k8s 설정
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: gateway-service
 
