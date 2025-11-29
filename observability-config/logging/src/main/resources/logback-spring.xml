@@ -7,12 +7,15 @@
     <!-- log 저장 paths -->
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <property name="SYSTEM_LOG_FILE" value="${LOG_PATH}/system.log"/>
+    <property name="API_LOG_FILE" value="${LOG_PATH}/api.log"/>
     <property name="INFO_LOG_FILE" value="${LOG_PATH}/application-info.log"/>
     <property name="WARN_LOG_FILE" value="${LOG_PATH}/application-warn.log"/>
     <property name="ERROR_LOG_FILE" value="${LOG_PATH}/application-error.log"/>
 
     <!-- appender 첨부 -->
+    <!-- appender 첨부 -->
     <include resource="appender-system.xml"/>
+    <include resource="appender-api.xml"/>
     <include resource="appender-info.xml"/>
     <include resource="appender-warn.xml"/>
     <include resource="appender-error.xml"/>
@@ -24,6 +27,16 @@
         </springProfile>
         <appender-ref ref="SYSTEM_FILE"/>
     </root>
+
+    <!-- 운영 환경 로그 -->
+    <!-- additivity = false : 로그를 부모에게 전파하지 않음 -> 중복 로그 방지 -->
+    <!-- API 로그 (별도 파일 저장) -->
+    <logger name="API" level="INFO" additivity="false">
+        <springProfile name="!prod">
+            <appender-ref ref="CONSOLE"/>
+        </springProfile>
+        <appender-ref ref="API_FILE"/>
+    </logger>
 
     <!-- 운영 환경 로그 -->
     <!-- additivity = false : 로그를 부모에게 전파하지 않음 -> 중복 로그 방지 -->
