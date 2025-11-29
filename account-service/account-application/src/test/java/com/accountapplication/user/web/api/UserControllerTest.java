@@ -70,7 +70,7 @@ class UserControllerTest {
 	void test1() throws Exception {
 		// given
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
-			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
+			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl", 25, "MALE");
 
 		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
 
@@ -80,7 +80,7 @@ class UserControllerTest {
 				.content(objectMapper.writeValueAsString(request))
 			)
 			.andDo(print())
-			.andExpect(status().isCreated())
+			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("가입 완료"))
 			.andExpect(jsonPath("$.data.nickname").value("nickname"))
 			.andExpect(jsonPath("$.data.profileUrl").value("default_image"))
@@ -92,7 +92,7 @@ class UserControllerTest {
 	void test2() throws Exception {
 		// given
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "", "street",
-			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
+			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl", 25, "MALE");
 
 		mockMvc.perform(post("/api/users")
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -124,6 +124,8 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		UserEntity user = userJpaRepository.save(userEntity);
@@ -157,6 +159,8 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		UserEntity user = userJpaRepository.save(userEntity);
@@ -193,6 +197,8 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(30)
+			.gender("FEMALE")
 			.build();
 
 		UserEntity savedUser = userJpaRepository.save(userEntity);
@@ -222,5 +228,129 @@ class UserControllerTest {
 		assertThat(updatedUser.getAddress().getZipCode()).isEqualTo("new_zipCode");
 		assertThat(updatedUser.getAddress().getState()).isEqualTo("new_state");
 		assertThat(updatedUser.getAddress().getDetails()).isEqualTo("new_details");
+	}
+
+	@DisplayName("나이가 1보다 작으면 예외가 발생한다.")
+	@Test
+	void test8() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			0,
+			"MALE"
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'age')].reason").value("나이는 1 이상이어야 합니다."));
+	}
+
+	@DisplayName("나이가 150보다 크면 예외가 발생한다.")
+	@Test
+	void test9() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			151,
+			"MALE"
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'age')].reason").value("나이는 150 이하여야 합니다."));
+	}
+
+	@DisplayName("성별이 빈 값이면 예외가 발생한다.")
+	@Test
+	void test10() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			25,
+			""
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'gender')].reason").value("성별을 입력해주세요."));
+	}
+
+	@DisplayName("회원가입 시 나이와 성별이 정상적으로 저장된다.")
+	@Test
+	void test11() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			35,
+			"FEMALE"
+		);
+
+		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
+
+		// when
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("가입 완료"));
+
+		// then
+		UserEntity savedUser = userJpaRepository.findAll().get(0);
+		assertThat(savedUser.getAge()).isEqualTo(35);
+		assertThat(savedUser.getGender()).isEqualTo("FEMALE");
+		assertThat(savedUser.getNickname()).isEqualTo("nickname");
 	}
 }

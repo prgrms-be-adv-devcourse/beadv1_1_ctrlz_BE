@@ -2,6 +2,7 @@ package com.domainservice.domain.reivew.model.entity;
 
 import com.common.model.persistence.BaseEntity;
 import com.domainservice.domain.reivew.exception.DuplicatedReviewException;
+import com.domainservice.domain.reivew.exception.NotReviewAuthorException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,18 +63,25 @@ public class Review extends BaseEntity {
         }
     }
 
+    private void isAuthor(String userId) {
+        if(!this.userId.equals(userId)) {
+            throw NotReviewAuthorException.EXCEPTION;
+        }
+    }
+
     public void updateReview(
         String contents,
         Integer userRating,
-        Integer productPostRating
-    ) {
+        Integer productPostRating,
+        String userId) {
+
+        isAuthor(userId);
         validateSameValue(contents, userRating, productPostRating);
         this.contents = contents;
         this.userRating = userRating;
         this.productRating = productPostRating;
         this.update();
     }
-
 
 }
 

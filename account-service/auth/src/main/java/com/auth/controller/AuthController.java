@@ -1,22 +1,23 @@
 package com.auth.controller;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.auth.dto.TokenRefreshRequest;
 import com.auth.handler.CookieProvider;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.jwt.TokenType;
 import com.auth.service.JwtAuthService;
 
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,21 @@ public class AuthController {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtAuthService jwtAuthService;
 
-	@PostMapping("/refresh")
-	public void refreshToken(@RequestBody TokenRefreshRequest request, HttpServletResponse response) {
+	@GetMapping("/reissue")
+	public void refreshToken(
+		@RequestHeader("X-REQUEST-ID") String userId,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) {
 
-		String accessToken = jwtAuthService.reissueAccessToken(request.userId(), request.refreshToken());
+		Cookie refreshTokenCookie = Arrays.stream(request.getCookies())
+			.filter(cookie -> cookie.getName().equals("REFRESH_TOKEN"))
+			.findFirst()
+			.orElseThrow(() -> new JwtException("재 로그인이 필요합니다."));
+
+		String value = refreshTokenCookie.getValue();
+		String accessToken = jwtAuthService.reissueAccessToken(userId, value);
+
 		ResponseCookie responseCookie = CookieProvider.to(
 			TokenType.ACCESS_TOKEN.name(),
 			accessToken,
