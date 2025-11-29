@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ServletRequestUtils {
 
 	public static String extractIp(ServerHttpRequest request) {
-		// X-Forwarded-For 헤더 확인 (프록시/로드밸런서 뒤에 있을 경우)
+		// X-Real-IP 헤더 확인 (프록시/로드밸런서 뒤에 있을 경우)
 		String xff = request.getHeaders().getFirst("X-Real-IP");
 		if (xff != null && !xff.isEmpty()) {
 			return xff.split(",")[0].trim();
