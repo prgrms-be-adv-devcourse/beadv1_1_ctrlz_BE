@@ -2,16 +2,16 @@ package com.auth.service;
 
 import java.util.List;
 
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.auth.dto.LoginResponse;
 import com.auth.dto.LoginRequest;
+import com.auth.dto.LoginResponse;
 import com.auth.jwt.JwtTokenProvider;
 import com.auth.repository.TokenRepository;
 import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.vo.UserRole;
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,14 +68,14 @@ public class JwtAuthService implements AuthService {
 	public String reissueAccessToken(String userId, String refreshToken) {
 
 		if (!jwtTokenProvider.validateToken(refreshToken)) {
-			throw new AuthorizationDeniedException("재 로그인이 필요합니다.");
+			throw new JwtException("재 로그인이 필요합니다.");
 		}
 
 		String findRefreshToken = refreshTokenRedisRepository.findByUserId(userId);
 
 		if (!findRefreshToken.equals(refreshToken)) {
 			refreshTokenRedisRepository.deleteByUserId(userId);
-			throw new AuthorizationDeniedException("재 로그인이 필요합니다.");
+			throw new JwtException("재 로그인이 필요합니다.");
 		}
 
 		List<UserRole> roles = jwtTokenProvider.getRolesFromToken(findRefreshToken);

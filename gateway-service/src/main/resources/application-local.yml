@@ -29,7 +29,6 @@ spring:
               predicates:
                 - Path=/api/users
                 - Method=POST
-
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter

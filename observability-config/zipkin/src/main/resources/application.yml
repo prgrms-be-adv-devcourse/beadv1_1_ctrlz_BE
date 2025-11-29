@@ -33,19 +33,6 @@ spring:
   profiles:
     active: prod
 
-management:
-  tracing:
-    sampling:
-      probability: 0.8
-
-    propagation:
-      consume: b3
-      produce: b3
-      type: b3
-
-    brave:
-      span-joining-supported: true
-
   zipkin:
     tracing:
       endpoint: http://zipkin-service:9411/api/v2/span

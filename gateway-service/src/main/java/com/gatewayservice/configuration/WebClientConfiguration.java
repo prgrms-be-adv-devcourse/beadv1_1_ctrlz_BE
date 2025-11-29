@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class WebClientConfig {
+public class WebClientConfiguration {
 
     @Bean
     @LoadBalanced  //lb://SERVICE-NAME 형태의 URL을 호출할 수 있게 만들어주는 어노테이션

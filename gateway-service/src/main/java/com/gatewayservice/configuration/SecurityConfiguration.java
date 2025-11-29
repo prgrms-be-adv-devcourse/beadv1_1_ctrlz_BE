@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfiguration {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
