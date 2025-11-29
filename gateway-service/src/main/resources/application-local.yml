@@ -39,6 +39,18 @@ spring:
               filters:
                 - name: ProductSearchFilter
 
+            - id: tag-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/tags
+                - Method=GET
+
+            - id: category-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/categories
+                - Method=GET
+
             - id: auth-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
