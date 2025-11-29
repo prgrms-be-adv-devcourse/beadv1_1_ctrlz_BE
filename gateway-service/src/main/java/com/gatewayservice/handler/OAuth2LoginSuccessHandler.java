@@ -19,7 +19,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.gatewayservice.client.AccountServiceClient;
 import com.gatewayservice.dto.LoginRequest;
 import com.gatewayservice.utils.CookieProvider;
-import com.gatewayservice.utils.TokenType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +105,7 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 				ServerWebExchange exchange = webFilterExchange.getExchange();
 				exchange.getResponse().setStatusCode(HttpStatus.FOUND);
 				exchange.getResponse().getHeaders().setLocation(
-					URI.create(redirectUrl + "/login/error")
+					URI.create(redirectUrl + "/login/error") //TODO: 로그인 페이지 변경 예정
 				);
 				return exchange.getResponse().setComplete();
 			});

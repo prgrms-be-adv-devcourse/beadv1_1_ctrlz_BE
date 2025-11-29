@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import org.springframework.http.ResponseCookie;
 
+import com.gatewayservice.handler.TokenType;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
