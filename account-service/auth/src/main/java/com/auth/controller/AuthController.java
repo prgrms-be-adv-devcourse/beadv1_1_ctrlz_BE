@@ -48,7 +48,7 @@ public class AuthController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/reissue")
+	@PostMapping("/reissue")
 	public void refreshToken(
 		@RequestHeader("X-REQUEST-ID") String userId,
 		HttpServletRequest request,
