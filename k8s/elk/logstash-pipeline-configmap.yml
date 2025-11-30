@@ -102,6 +102,10 @@ data:
 
   logstash-file.conf: |
     input {
+      tcp {
+        port => 5044
+        codec => "json"
+      }
       file {
         path => "/usr/share/logstash/logs/*.log"
         start_position => "end"
@@ -110,8 +114,24 @@ data:
     }
 
     filter {
-      grok {
-        match => { "path" => ".*/%{GREEDYDATA:filename}\.log" }
+      if [path] {
+        grok {
+          match => { "path" => ".*/%{GREEDYDATA:filename}\.log" }
+        }
+      } else {
+        if [logger_name] =~ /^API/ {
+          mutate { add_field => { "filename" => "api-log" } }
+        } else if [logger_name] =~ /^com\./ {
+          if [level] == "ERROR" {
+            mutate { add_field => { "filename" => "application-error-log" } }
+          } else if [level] == "WARN" {
+            mutate { add_field => { "filename" => "application-warn-log" } }
+          } else {
+            mutate { add_field => { "filename" => "application-info-log" } }
+          }
+        } else {
+          mutate { add_field => { "filename" => "system-log" } }
+        }
       }
     }
 
