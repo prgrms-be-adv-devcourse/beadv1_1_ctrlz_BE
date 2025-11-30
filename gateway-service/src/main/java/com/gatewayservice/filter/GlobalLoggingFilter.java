@@ -1,19 +1,22 @@
 package com.gatewayservice.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-@Slf4j
+
 @Component
 public class GlobalLoggingFilter implements GlobalFilter, Ordered {
 
-    @Override
+	private static final Logger log = LoggerFactory.getLogger("API." + GlobalLoggingFilter.class.getName());
+
+	@Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         long startTime = System.currentTimeMillis();
 
