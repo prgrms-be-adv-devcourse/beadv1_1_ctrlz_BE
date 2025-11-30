@@ -9,7 +9,7 @@ data:
         jdbc {
             jdbc_driver_library => "/opt/logstash/jdbc/mysql-connector-j-9.4.0.jar"
             jdbc_driver_class => "com.mysql.cj.jdbc.Driver"
-            jdbc_connection_string => "jdbc:mysql://mysql-service:3306/${MYSQL_DATABASE}"
+            jdbc_connection_string => "jdbc:mysql://mysql-svc:3306/${MYSQL_DATABASE}"
             jdbc_user => "${MYSQL_USER}"
             jdbc_password => "${MYSQL_PASSWORD}"
 
@@ -94,8 +94,30 @@ data:
 
     output {
         elasticsearch {
-            hosts => [ "http://elastic-search-service:9200" ]
+            hosts => [ "http://elasticsearch-svc:9200" ]
             index => "product-posts"
             document_id => "%{id}"
         }
+    }
+
+  logstash-file.conf: |
+    input {
+      file {
+        path => "/usr/share/logstash/logs/*.log"
+        start_position => "end"
+        codec => "json"
+      }
+    }
+
+    filter {
+      grok {
+        match => { "path" => ".*/%{GREEDYDATA:filename}\.log" }
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch-svc:9200"]
+        index => "%{filename}-%{+YYYY.MM.dd}"
+      }
     }

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mysql-service
+  name: mysql-sts
   labels:
     app: mysql
 
@@ -9,10 +9,7 @@ spec:
   selector:
     matchLabels:
       app: mysql
-
-  # pod가 처음 시작될 때만 스키마 초기화가 실행
-  strategy:
-    type: Recreate
+  serviceName: mysql-svc
 
   template:
     metadata:
@@ -41,11 +38,22 @@ spec:
             - name: mysql-init-volume
               mountPath: /docker-entrypoint-initdb.d/
               readOnly: true
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-service
+  name: mysql-svc
 
 spec:
   type: NodePort

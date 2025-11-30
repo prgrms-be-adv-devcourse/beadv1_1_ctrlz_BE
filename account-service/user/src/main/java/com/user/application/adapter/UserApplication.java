@@ -1,5 +1,7 @@
 package com.user.application.adapter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,24 +16,21 @@ import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
-import com.user.application.adapter.vo.EventType;
+import com.user.domain.vo.EventType;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-
-@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class UserApplication implements UserCommandUseCase {
 
+	private static final Logger log = LoggerFactory.getLogger("API." + UserApplication.class.getName());
+
 	private final UserPersistencePort userPersistencePort;
 	private final PasswordEncoder passwordEncoder;
 	private final ApplicationEventPublisher applicationEventPublisher;
-	/*
-	* UserSignedUpEventHandler에서 처리
-	*/
+
 	@Override
 	public UserContext create(UserContext userContext) {
 		verifyNickname(userContext.nickname());
@@ -39,16 +38,16 @@ public class UserApplication implements UserCommandUseCase {
 
 		User user = generateUser(userContext);
 		User savedUser = userPersistencePort.save(user);
-		log.info("회원 저장 완료 userId = {}", userContext.userId());
+		log.info("회원 저장 완료 userId = {}", savedUser.getId());
 
 		log.info("이벤트 저장 시작: topic=user-registered, userId={}", savedUser.getId());
 		applicationEventPublisher.publishEvent(UserSignedUpEvent.from(savedUser.getId(), EventType.CREATED));
 
 		return UserContext.builder()
-			.nickname(savedUser.getNickname())
-			.profileImageUrl(savedUser.getProfileImageUrl())
-			.userId(savedUser.getId())
-			.build();
+				.nickname(savedUser.getNickname())
+				.profileImageUrl(savedUser.getProfileImageUrl())
+				.userId(savedUser.getId())
+				.build();
 	}
 
 	@Override
@@ -56,6 +55,7 @@ public class UserApplication implements UserCommandUseCase {
 		User user = userPersistencePort.findById(id);
 		user.updateRolesForSeller();
 		userPersistencePort.updateRolesForSeller(user);
+		log.info("판매자 권한 업데이트 완료 userId = {}", id);
 	}
 
 	@Override
@@ -63,12 +63,12 @@ public class UserApplication implements UserCommandUseCase {
 		User user = userPersistencePort.findById(userId);
 
 		Address updatedAddress = Address.builder()
-			.state(updateContext.state())
-			.city(updateContext.city())
-			.street(updateContext.street())
-			.zipCode(updateContext.zipCode())
-			.details(updateContext.details())
-			.build();
+				.state(updateContext.state())
+				.city(updateContext.city())
+				.street(updateContext.street())
+				.zipCode(updateContext.zipCode())
+				.details(updateContext.details())
+				.build();
 
 		updateAddress(user, updatedAddress);
 		updatePhoneNumber(updateContext, user);
@@ -101,26 +101,25 @@ public class UserApplication implements UserCommandUseCase {
 
 	private User generateUser(UserContext userContext) {
 		return User.builder()
-			.email(userContext.email())
-			.password(passwordEncoder.encode(userContext.password()))
-			.name(userContext.name())
-			.phoneNumber(userContext.phoneNumber())
-			.nickname(userContext.nickname())
-			.address(
-				Address.builder()
-					.state(userContext.state())
-					.city(userContext.city())
-					.street(userContext.street())
-					.zipCode(userContext.zipCode())
-					.details(userContext.addressDetails())
-					.build()
-			)
-			.imageId(userContext.imageId())
-			.oauthId(userContext.oauthId())
-			.profileImageUrl(userContext.profileImageUrl())
-			.age(userContext.age())
-			.gender(userContext.gender())
-			.build();
+				.email(userContext.email())
+				.password(passwordEncoder.encode(userContext.password()))
+				.name(userContext.name())
+				.phoneNumber(userContext.phoneNumber())
+				.nickname(userContext.nickname())
+				.address(
+						Address.builder()
+								.state(userContext.state())
+								.city(userContext.city())
+								.street(userContext.street())
+								.zipCode(userContext.zipCode())
+								.details(userContext.addressDetails())
+								.build())
+				.imageId(userContext.imageId())
+				.oauthId(userContext.oauthId())
+				.profileImageUrl(userContext.profileImageUrl())
+				.age(userContext.age())
+				.gender(userContext.gender())
+				.build();
 	}
 
 	private void updateNickname(com.user.application.adapter.dto.UserUpdateContext updateContext, User user) {

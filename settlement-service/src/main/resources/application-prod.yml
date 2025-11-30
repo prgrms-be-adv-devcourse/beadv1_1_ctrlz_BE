@@ -4,7 +4,7 @@ spring:
       enabled: true
 
   kafka:
-    bootstrap-servers: kafka-mq:9090
+    bootstrap-servers: kafka-svc:9090
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -24,7 +24,7 @@ spring:
     password: 1234
 #    username: "${DB_USERNAME}"
 #    password: "${DB_PASSWORD}"
-    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-svc:3306/test_db
 
   jpa:
     open-in-view: false
