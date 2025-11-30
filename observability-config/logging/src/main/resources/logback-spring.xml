@@ -24,40 +24,40 @@
     <include resource="appender-logstash.xml"/>
 
     <!-- 콘솔 로그 및 시스템 로그 -->
-    <root level="INFO">
-        <springProfile name="!prod">
+    <!-- Local Environment (!prod) -->
+    <springProfile name="!prod">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-        </springProfile>
-        <springProfile name="prod">
-            <appender-ref ref="LOGSTASH"/>
-        </springProfile>
-        <appender-ref ref="SYSTEM_FILE"/>
-    </root>
+            <appender-ref ref="SYSTEM_FILE"/>
+        </root>
+        <logger name="API" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="API_FILE"/>
+        </logger>
+        <logger name="com" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="WARN_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
 
-    <!-- API 로그 (별도 파일 저장) -->
-    <logger name="API" level="INFO" additivity="false">
-        <springProfile name="!prod">
-            <appender-ref ref="CONSOLE"/>
-        </springProfile>
-        <springProfile name="prod">
+    <!-- Production Environment (prod) -->
+    <springProfile name="prod">
+        <root level="INFO">
             <appender-ref ref="LOGSTASH"/>
-        </springProfile>
-        <appender-ref ref="API_FILE"/>
-    </logger>
-
-    <!-- 운영 환경 로그 -->
-    <!-- additivity = false : 로그를 부모에게 전파하지 않음 -> 중복 로그 방지 -->
-    <!-- name="com" -> 'com.*' 밑에 있는 패키지의 로그를 파일로 저장 -->
-    <logger name="com" level="INFO" additivity="false">
-        <springProfile name="!prod">
-            <appender-ref ref="CONSOLE"/>
-        </springProfile>
-        <springProfile name="prod">
+            <appender-ref ref="SYSTEM_FILE"/>
+        </root>
+        <logger name="API" level="INFO" additivity="false">
             <appender-ref ref="LOGSTASH"/>
-        </springProfile>
-        <appender-ref ref="INFO_FILE"/>
-        <appender-ref ref="WARN_FILE"/>
-        <appender-ref ref="ERROR_FILE"/>
-    </logger>
+            <appender-ref ref="API_FILE"/>
+        </logger>
+        <logger name="com" level="INFO" additivity="false">
+            <appender-ref ref="LOGSTASH"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="WARN_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
 
 </configuration>

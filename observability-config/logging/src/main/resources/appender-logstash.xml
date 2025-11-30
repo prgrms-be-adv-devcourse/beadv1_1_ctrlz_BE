@@ -1,7 +1,7 @@
 <included>
     <!--  Logstash Appender -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-           <!-- 추후 변경 예정 -->
+        <!-- 추후 변경 예정 -->
         <destination>localhost:5044</destination>
 
         <!-- 재시도 / 끊김 방지 -->
@@ -9,7 +9,7 @@
         <reconnectionDelay>5000</reconnectionDelay>
 
         <!-- JSON 인코더 -->
-          <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeContext>false</includeContext>
             <includeCallerData>false</includeCallerData>
             <includeMdc>true</includeMdc>
