@@ -7,15 +7,8 @@
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeContext>false</includeContext>
-            <includeCallerData>false</includeCallerData>
-            <includeMdc>true</includeMdc>
-            <fieldNames>
-                <version>[ignore]</version>
-                <levelValue>[ignore]</levelValue>
-            </fieldNames>
-            <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSSZZ</timestampPattern>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 </included>
