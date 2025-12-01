@@ -4,11 +4,9 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import com.common.model.persistence.BaseEntity;
-import com.paymentservice.converter.PaymentKeyConverter;
 import com.paymentservice.payment.model.enums.PaymentStatus;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,7 +32,6 @@ public class PaymentRefundEntity extends BaseEntity {
     @JoinColumn(name = "payment_id", unique = true) // unique = true로 1:1 보장
     private PaymentEntity payment;
 
-    @Convert(converter = PaymentKeyConverter.class)
     @Column
     private String paymentKey;
 

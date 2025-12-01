@@ -62,18 +62,8 @@
         const usedDepositAmount = parseInt(urlParams.get("usedDepositAmount")) || 0;
         const totalAmount = parseInt(urlParams.get("totalAmount")) || 0;
 
-        let displayOrderId = orderId;
-
-        if (orderId) {
-            const parts = orderId.split('-');
-            // 앞 3개의 파트만 가져와서 다시 합침
-            if (parts.length >= 3) {
-                displayOrderId = `${parts[0]}-${parts[1]}-${parts[2]}`;
-            }
-        }
-
         // 화면에 값 표시
-        document.getElementById("orderId").innerText = displayOrderId;
+        document.getElementById("orderId").innerText = orderId;
         document.getElementById("orderName").innerText = orderName;
         document.getElementById("usedDepositAmount").innerText = `₩ ${usedDepositAmount.toLocaleString()}`;
         document.getElementById("amount").innerText = `₩ ${totalAmount.toLocaleString()}`;
@@ -94,32 +84,22 @@
 
             fetch('/api/payments/confirm', {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestData)
             })
                 .then(response => response.json())
                 .then(result => {
                     console.log("confirm result:", result);
-
                     if (result.message === "결제 처리 완료") {
                         document.getElementById('loading').style.display = 'none';
                         document.getElementById('success-content').style.display = 'block';
-
-                    } else if (result.message === "이미 처리된 결제입니다.") {
-                        alert("이미 정상적으로 처리된 주문입니다.");
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('success-content').style.display = 'block';
-
                     } else {
-                        const failParams = `orderId=${orderId}&orderName=${orderName}&usedDepositAmount=${usedDepositAmount}&totalAmount=${totalAmount}`;
-                        location.href = "/api/payments/fail?" + failParams;
+                        location.href = "/api/payments/fail";
                     }
                 })
                 .catch(error => {
                     console.error("결제 확인 중 오류:", error);
-                    // 에러 발생 시
-                    const failParams = `orderId=${orderId}&orderName=${orderName}&usedDepositAmount=${usedDepositAmount}&totalAmount=${totalAmount}`;
-                    location.href = "/api/payments/fail?" + failParams;
+                    location.href = "/api/payments/fail";
                 });
         }
     });

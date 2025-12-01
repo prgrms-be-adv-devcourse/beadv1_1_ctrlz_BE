@@ -1,4 +1,4 @@
-package com.domainservice.domain.payment.model.entity;
+package com.paymentservice.payment.model.entity;
 
 import java.time.LocalDateTime;
 
