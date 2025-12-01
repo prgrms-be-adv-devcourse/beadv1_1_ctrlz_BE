@@ -374,35 +374,20 @@ public class ProductPostService {
 		}
 	}
 
-	// 사용자 정보를 통해 판매자 인증 여부를 검증합니다.
-	private void validateSellerPermission(UserResponse user) {
-		if (!user.roles().contains("ADMIN") && !user.roles().contains("SELLER")) {
-			throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
-		}
-	}
-
 	public boolean isSellingTradeStatus(String id) {
 		return this.getProductPostById(id).tradeStatus() == TradeStatus.SELLING;
 	}
 
-	public void updateTradeStatusToProcessing(String postId) {
+	public void updateTradeStatusById(String postId, TradeStatus tradeStatus) {
 		ProductPost product = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsProcessing();
-		productPostRepository.save(product);
-	}
 
-	public void updateTradeStatusToSoldout(String postId) {
-		ProductPost product = productPostRepository.findById(postId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsSoldout();
-		productPostRepository.save(product);
-	}
+		switch (tradeStatus) {
+			case PROCESSING ->  product.markAsProcessing();
+			case SOLDOUT ->   product.markAsSoldout();
+			case SELLING ->   product.markAsSellingAgain();
+		}
 
-	public void updateTradeStatusToSelling(String postId) {
-		ProductPost product = productPostRepository.findById(postId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsSellingAgain();
 		productPostRepository.save(product);
 	}
 

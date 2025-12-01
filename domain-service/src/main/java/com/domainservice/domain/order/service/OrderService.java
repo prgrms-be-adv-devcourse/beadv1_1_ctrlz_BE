@@ -12,6 +12,7 @@ import com.common.event.SettlementCreatedEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
 import com.common.exception.vo.OrderExceptionCode;
+import com.common.model.vo.TradeStatus;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.order.model.dto.OrderItemResponse;
@@ -73,7 +74,7 @@ public class OrderService {
 			if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
 				throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
 			}
-			productPostService.updateTradeStatusToProcessing(cartItem.getProductPostId());
+			productPostService.updateTradeStatusById(cartItem.getProductPostId(), TradeStatus.PROCESSING);
 
 			OrderItem orderItem = OrderItem.builder()
 				.productPostId(product.id())
@@ -116,7 +117,7 @@ public class OrderService {
 		}
 
 		for (OrderItem item : order.getOrderItems()) {
-			productPostService.updateTradeStatusToSelling(item.getProductPostId());
+			productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SELLING);
 		}
 		return toOrderResponse(orderJpaRepository.save(order));
 	}
@@ -143,12 +144,12 @@ public class OrderService {
 		switch (order.getOrderStatus()) {
 			case PAYMENT_PENDING:
 				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
-				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
+				productPostService.updateTradeStatusById(targetItem.getProductPostId(),  TradeStatus.SELLING);
 				break;
 			case PAYMENT_COMPLETED:
 				// paymentService.refundItem(targetItem);
 				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
-				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
+				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
 				break;
 			default:
 				throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
@@ -200,7 +201,7 @@ public class OrderService {
 		for (OrderItem item : order.getOrderItems()) {
 			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
 				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
-				productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+				productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SOLDOUT);
 				// kafka 메시지 발행
 				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
 					productPostService.getProductPostById(item.getProductPostId()).userId(),
