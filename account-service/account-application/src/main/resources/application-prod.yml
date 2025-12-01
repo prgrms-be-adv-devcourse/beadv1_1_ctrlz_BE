@@ -2,6 +2,9 @@ spring:
   application:
     name: account-service
 
+  logging:
+    config: classpath:logback-prod.xml
+
   servlet:
     multipart:
       max-file-size: 10MB
