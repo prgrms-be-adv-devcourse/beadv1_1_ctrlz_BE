@@ -33,7 +33,6 @@ import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublishe
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -345,31 +344,7 @@ public class ProductPostService {
 
 	// FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
 	private UserResponse getUserInfoByFeignClient(String userId) {
-		try {
-			return userFeignClient.getUser(userId);
-
-		} catch (FeignException.NotFound e) {
-			// 404 - 사용자 없음
-			log.error("사용자를 찾을 수 없음 - userId: {}", userId);
-			throw new CustomException(USER_NOT_FOUND.getMessage());
-
-		} catch (FeignException.Unauthorized e) {
-			// 401 - 인증 실패
-			log.error("인증 실패 - userId: {}, status: {}, message: {}",
-				userId, e.status(), e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-
-		} catch (FeignException.Forbidden e) {
-			// 403 - 권한 없음
-			log.error("권한 없음 - userId: {}, message: {}", userId, e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-
-		} catch (FeignException e) {
-			// 기타 Feign 통신 오류
-			log.error("Feign 통신 오류 - userId: {}, status: {}, message: {}",
-				userId, e.status(), e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-		}
+		return userFeignClient.getUser(userId);
 	}
 
 	// feignClient를 통해 얻게된 사용자 정보의 판매자 인증 여부를 검증합니다.
