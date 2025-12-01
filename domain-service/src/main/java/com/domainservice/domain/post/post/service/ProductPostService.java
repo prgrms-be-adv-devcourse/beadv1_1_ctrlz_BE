@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.event.productPost.ProductPostEvent;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.web.PageResponse;
@@ -22,7 +21,6 @@ import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
-import com.domainservice.domain.post.category.model.entity.Category;
 import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
@@ -32,7 +30,7 @@ import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.post.service.kafka.ProductPostEventProducer;
+import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
@@ -49,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProductPostService {
 
-	private final ProductPostEventProducer eventProducer;
+	private final ProductPostEventPublisher eventPublisher;
 
 	private final UserFeignClient userFeignClient;
 
@@ -97,7 +95,7 @@ public class ProductPostService {
 		ProductPost saved = productPostRepository.save(productPost);
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
-		publishProductPostEvent(saved, ProductPostEvent.EventType.CREATE);
+		eventPublisher.publishCreateEvent(saved);
 
 		return ProductPostMapper.toProductPostResponse(saved);
 	}
@@ -122,7 +120,7 @@ public class ProductPostService {
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 수정 가능한 상태인지 유효성 검사
-		// target.validateUpdate(userId, userInfo.roles());
+		// target.validateUpdate(userId, userInfo.roles()); // TODO: 동기화 테스트 후 주석제거
 
 		// 기존 저장된 이미지 삭제하고 새 이미지로 교체
 		replaceImages(target, imageFiles);
@@ -134,7 +132,7 @@ public class ProductPostService {
 		target.update(request);
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
-		publishProductPostEvent(target, ProductPostEvent.EventType.UPDATE);
+		eventPublisher.publishUpdateEvent(target);
 
 		return ProductPostMapper.toProductPostResponse(target);
 	}
@@ -156,7 +154,7 @@ public class ProductPostService {
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 삭제 가능한 상태인지 유효성 검사
-		// target.validateDelete(userId, userInfo.roles());
+		// target.validateDelete(userId, userInfo.roles()); // TODO: 동기화 테스트 후 주석제거
 
 		// 테이블에 저장된 이미지 삭제
 		deleteProductPostImages(target);
@@ -165,9 +163,10 @@ public class ProductPostService {
 		target.delete();
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
-		publishProductPostEvent(target, ProductPostEvent.EventType.DELETE);
+		String targetId = target.getId();
+		eventPublisher.publishDeleteEvent(targetId);
 
-		return target.getId();
+		return targetId;
 	}
 
 	/**
@@ -405,47 +404,6 @@ public class ProductPostService {
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 		product.markAsSellingAgain();
 		productPostRepository.save(product);
-	}
-
-	/**
-	 * ProductPost 엔티티를 Kafka 이벤트로 발행
-	 *
-	 * @param productPost 발행할 상품 엔티티
-	 * @param eventType 이벤트 타입 (CREATE, UPDATE, DELETE)
-	 */
-	private void publishProductPostEvent(ProductPost productPost, ProductPostEvent.EventType eventType) {
-		try {
-			// TODO: 현재 db 2번 조회, 리펙토링 필요
-			String categoryName = categoryRepository.findById(productPost.getCategoryId())
-				.map(Category::getName).orElse(null);
-
-			List<String> tagNames = productPost.getProductPostTags().stream()
-				.map(ppt -> ppt.getTag().getName())
-				.toList();
-
-			ProductPostEvent event = ProductPostEvent.builder()
-				.id(productPost.getId())
-				.name(productPost.getName())
-				.title(productPost.getTitle())
-				.description(productPost.getDescription())
-				.tags(tagNames)
-				.categoryName(categoryName)
-				.price(productPost.getPrice().longValue())
-				.likedCount(productPost.getLikedCount().longValue())
-				.viewCount(productPost.getViewCount().longValue())
-				.status(productPost.getStatus().name())
-				.tradeStatus(productPost.getTradeStatus().name())
-				.deleteStatus(productPost.getDeleteStatus().name())
-				.createdAt(productPost.getCreatedAt())
-				.eventType(eventType)
-				.build();
-
-			eventProducer.sendEvent(event);
-
-		} catch (Exception e) {
-			log.error("❌ Kafka 이벤트 발행 실패 - postId: {}, eventType: {}", productPost.getId(), eventType, e);
-			// TODO: 이벤트 발행 실패 시 재시도 또는 보상 트랜잭션 고려
-		}
 	}
 
 	// TODO: 내가 구매한 상품 조회

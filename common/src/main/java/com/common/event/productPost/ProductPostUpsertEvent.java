@@ -5,39 +5,30 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductPostEvent {
+public record ProductPostUpsertEvent(
+	String id,
+	String name,
+	String title,
+	String description,
+	List<String> tags,
+	String categoryName,
+	Long price,
+	Long likedCount,
+	Long viewCount,
+	String status,
+	String tradeStatus,
+	String deleteStatus,
 
-	private String id;
-	private String name;
-	private String title;
-	private String description;
-	private List<String> tags;
-	private String categoryName;
-	private Long price;
-	private Long likedCount;
-	private Long viewCount;
-	private String status;
-	private String tradeStatus;
-	private String deleteStatus;
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS") // 밀리초 이슈 방지를 위해 .SSS 권장
+	LocalDateTime createdAt,
 
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private LocalDateTime createdAt;
-
-	private EventType eventType;
-
-	public enum EventType {
-		CREATE, UPDATE, DELETE
-	}
+	EventType eventType
+) {
 }
 
 // TODO: 추후 domain에 있는 enum 값을 common 으로 가져와서 refactoring
