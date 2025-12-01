@@ -23,7 +23,6 @@ import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
-import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
@@ -58,7 +57,6 @@ public class ProductPostService {
 	private final ProductPostRepository productPostRepository;
 
 	private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
-	private final CategoryRepository categoryRepository;
 
 	/**
 	 * 상품 게시글을 생성합니다.

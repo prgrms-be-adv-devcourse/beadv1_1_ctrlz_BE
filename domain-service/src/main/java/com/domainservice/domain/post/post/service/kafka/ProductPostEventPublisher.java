@@ -1,5 +1,7 @@
 package com.domainservice.domain.post.post.service.kafka;
 
+import static com.common.exception.vo.ProductPostExceptionCode.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -9,7 +11,9 @@ import com.common.event.productPost.ProductPostDeleteEvent;
 import com.common.event.productPost.ProductPostUpsertEvent;
 import com.domainservice.domain.post.category.model.entity.Category;
 import com.domainservice.domain.post.category.repository.CategoryRepository;
+import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
+import com.domainservice.domain.post.post.repository.ProductPostRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +28,7 @@ public class ProductPostEventPublisher {
 
 	private final ProductPostEventProducer eventProducer;
 	private final CategoryRepository categoryRepository;
+	private final ProductPostRepository productPostRepository;
 
 	/**
 	 * CREATE 이벤트 발행
@@ -37,6 +42,13 @@ public class ProductPostEventPublisher {
 	 */
 	public void publishUpdateEvent(ProductPost productPost) {
 		publishUpsertEvent(productPost, EventType.UPDATE);
+	}
+
+	public void publishUpdateEvent(String postId) {
+		ProductPost target = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+
+		publishUpsertEvent(target, EventType.UPDATE);
 	}
 
 	/**

@@ -25,6 +25,7 @@ import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
+import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +37,7 @@ public class OrderService {
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
 	private final PurchaseConfirmedEventProducer settlementProducer;
+	private final ProductPostEventPublisher productPosteventPublisher;
 
 	/**
 	 * 주문 생성
@@ -87,6 +89,9 @@ public class OrderService {
 
 		Order savedOrder = orderJpaRepository.save(order);
 
+		// 주문 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
+
 		return toOrderResponse(savedOrder);
 
 	}
@@ -119,7 +124,12 @@ public class OrderService {
 		for (OrderItem item : order.getOrderItems()) {
 			productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SELLING);
 		}
-		return toOrderResponse(orderJpaRepository.save(order));
+		Order savedOrder = orderJpaRepository.save(order);
+
+		// 취소 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
+
+		return toOrderResponse(savedOrder);
 	}
 
 	/**
@@ -169,6 +179,10 @@ public class OrderService {
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
+
+		// 취소 완료된 target 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		productPosteventPublisher.publishUpdateEvent(targetItem.getProductPostId());
+
 		return toOrderResponse(savedOrder);
 
 	}
@@ -212,6 +226,10 @@ public class OrderService {
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
+
+		// 구매 확정 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
+
 		return toOrderResponse(savedOrder);
 	}
 
@@ -247,4 +265,11 @@ public class OrderService {
 				.toList()
 		);
 	}
+
+	private void publishProductPostUpdateEvents(Order order) {
+		order.getOrderItems().stream()
+			.map(OrderItem::getProductPostId)
+			.forEach(productPosteventPublisher::publishUpdateEvent);
+	}
+
 }
