@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.repository;
+package com.paymentservice.deposit.repository;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.domainservice.domain.deposit.model.entity.Deposit;
+import com.paymentservice.deposit.model.entity.Deposit;
 
 import jakarta.persistence.LockModeType;
 
