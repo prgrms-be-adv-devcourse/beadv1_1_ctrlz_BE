@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.service;
+package com.paymentservice.deposit.service;
 
 import java.math.BigDecimal;
 
@@ -8,13 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.event.SettlementReadyEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.DepositExceptionCode;
-import com.domainservice.domain.deposit.model.dto.DepositResponse;
-import com.domainservice.domain.deposit.model.entity.Deposit;
-import com.domainservice.domain.deposit.model.entity.DepositLog;
-import com.domainservice.domain.deposit.model.entity.TransactionType;
-import com.domainservice.domain.deposit.repository.DepositJpaRepository;
-import com.domainservice.domain.deposit.repository.DepositLogJpaRepository;
-import com.domainservice.domain.order.repository.OrderRepository;
+import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.entity.Deposit;
+import com.paymentservice.deposit.model.entity.DepositLog;
+import com.paymentservice.deposit.model.entity.TransactionType;
+import com.paymentservice.deposit.repository.DepositJpaRepository;
+import com.paymentservice.deposit.repository.DepositLogJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class DepositService {
     private final DepositJpaRepository depositJpaRepository;
     private final DepositLogJpaRepository depositLogJpaRepository;
-    private final OrderRepository orderRepository;
 
 	/**
 	 * 사용자 ID로 예치금 정보 조회
@@ -41,6 +39,7 @@ public class DepositService {
 	/**
 	 * 사용자의 예치금 충전
 	 */
+	// TODO: 상아 토스 페이먼츠 API 수정
 	public DepositResponse chargeDeposit(String userId, BigDecimal amount) {
 		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
 			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
@@ -50,6 +49,9 @@ public class DepositService {
 		BigDecimal beforeBalance = deposit.getBalance();
 		deposit.increaseBalance(amount);
 		BigDecimal afterBalance = deposit.getBalance();
+
+		// TODO: 토스 페이먼츠 타기
+
 
 		Deposit savedDeposit = depositJpaRepository.save(deposit);
 
@@ -238,6 +240,7 @@ public class DepositService {
 			);
 		}
 	}
+
 
 	public DepositResponse createDeposit(String userId) {
 

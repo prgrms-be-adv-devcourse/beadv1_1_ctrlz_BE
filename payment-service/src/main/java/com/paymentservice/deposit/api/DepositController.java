@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.api;
+package com.paymentservice.deposit.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.domain.deposit.model.dto.DepositResponse;
-import com.domainservice.domain.deposit.service.DepositService;
+import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.service.DepositService;
 
 import lombok.RequiredArgsConstructor;
 

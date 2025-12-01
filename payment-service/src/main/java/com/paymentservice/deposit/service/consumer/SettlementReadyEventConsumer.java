@@ -1,4 +1,4 @@
-// package com.domainservice.domain.deposit.service.consumer;
+package com.paymentservice.deposit.service.consumer;// package com.domainservice.domain.deposit.service.consumer;
 //
 // import org.springframework.kafka.annotation.KafkaListener;
 // import org.springframework.kafka.core.KafkaTemplate;
