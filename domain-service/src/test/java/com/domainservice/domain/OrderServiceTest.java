@@ -27,9 +27,13 @@ import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.OrderService;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
+import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
+
+	@Mock
+	private ProductPostEventPublisher productPosteventPublisher;
 
 	@Mock
 	private OrderJpaRepository orderJpaRepository;
