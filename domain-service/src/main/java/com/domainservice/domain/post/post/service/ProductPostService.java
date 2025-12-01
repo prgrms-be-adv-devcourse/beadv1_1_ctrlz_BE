@@ -70,8 +70,8 @@ public class ProductPostService {
 	public ProductPostResponse createProductPost(
 		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-		// UserResponse userInfo = getUserInfoByFeignClient(userId);
-		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
+		validateSellerPermission(userInfo);
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(userId)
@@ -111,14 +111,14 @@ public class ProductPostService {
 	public ProductPostResponse updateProductPost(
 		ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
-		// UserResponse userInfo = getUserInfoByFeignClient(userId);
-		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
+		validateSellerPermission(userInfo);
 
 		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 수정 가능한 상태인지 유효성 검사
-		// target.validateUpdate(userId, userInfo.roles()); // TODO: 동기화 테스트 후 주석제거
+		target.validateUpdate(userId, userInfo.roles());
 
 		// 기존 저장된 이미지 삭제하고 새 이미지로 교체
 		replaceImages(target, imageFiles);
@@ -145,14 +145,14 @@ public class ProductPostService {
 	 */
 	public String deleteProductPost(String userId, String postId) {
 
-		// UserResponse userInfo = getUserInfoByFeignClient(userId);
-		// validateSellerPermission(userInfo); // TODO: 동기화 테스트 후 주석제거
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
+		validateSellerPermission(userInfo);
 
 		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 삭제 가능한 상태인지 유효성 검사
-		// target.validateDelete(userId, userInfo.roles()); // TODO: 동기화 테스트 후 주석제거
+		target.validateDelete(userId, userInfo.roles());
 
 		// 테이블에 저장된 이미지 삭제
 		deleteProductPostImages(target);
@@ -287,11 +287,11 @@ public class ProductPostService {
 	 * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
 	 */
 	private void validateUploadImage(List<MultipartFile> imageFiles) {
-		// TODO: 추후 제거, 대량의 더미데이터 생성을 위해 이미지가 안들어가도 생성되도록 임시 수정
-		// // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
-		// if (imageFiles == null || imageFiles.isEmpty()) {
-		//     throw new ProductPostException(IMAGE_REQUIRED);
-		// }
+
+		// 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
+		if (imageFiles == null || imageFiles.isEmpty()) {
+			throw new ProductPostException(IMAGE_REQUIRED);
+		}
 
 		// 10개를 초과해서 등록하더라도 예외처리
 		if (imageFiles.size() > 10) {
@@ -372,6 +372,13 @@ public class ProductPostService {
 		}
 	}
 
+	// feignClient를 통해 얻게된 사용자 정보의 판매자 인증 여부를 검증합니다.
+	private void validateSellerPermission(UserResponse user) {
+		if (!user.roles().contains("ADMIN") && !user.roles().contains("SELLER")) {
+			throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
+		}
+	}
+
 	public boolean isSellingTradeStatus(String id) {
 		return this.getProductPostById(id).tradeStatus() == TradeStatus.SELLING;
 	}
@@ -381,9 +388,9 @@ public class ProductPostService {
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		switch (tradeStatus) {
-			case PROCESSING ->  product.markAsProcessing();
-			case SOLDOUT ->   product.markAsSoldout();
-			case SELLING ->   product.markAsSellingAgain();
+			case PROCESSING -> product.markAsProcessing();
+			case SOLDOUT -> product.markAsSoldout();
+			case SELLING -> product.markAsSellingAgain();
 		}
 
 		productPostRepository.save(product);

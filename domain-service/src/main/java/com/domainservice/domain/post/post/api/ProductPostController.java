@@ -58,7 +58,7 @@ public class ProductPostController {
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
-		// validateAuthentication(userId); // TODO: 동기화 테스트 후 주석제거
+		validateAuthentication(userId);
 		ProductPostResponse response = productPostService.createProductPost(request, userId, imageFiles);
 		return new BaseResponse<>(response, "상품 게시글이 생성되었습니다.");
 	}
@@ -79,7 +79,7 @@ public class ProductPostController {
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
-		// validateAuthentication(userId); // TODO: 동기화 테스트 후 주석제거
+		validateAuthentication(userId);
 		ProductPostResponse response = productPostService.updateProductPost(request, imageFiles, userId, postId);
 		return new BaseResponse<>(response, "상품 게시글이 수정되었습니다.");
 	}
@@ -96,7 +96,7 @@ public class ProductPostController {
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
-		// validateAuthentication(userId); // TODO: 동기화 테스트 후 주석제거
+		validateAuthentication(userId);
 		String response = productPostService.deleteProductPost(userId, postId);
 		return new BaseResponse<>(response, "상품 게시글이 삭제되었습니다.");
 	}
