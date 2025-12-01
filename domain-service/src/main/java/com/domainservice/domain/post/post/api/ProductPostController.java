@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import jakarta.validation.Valid;

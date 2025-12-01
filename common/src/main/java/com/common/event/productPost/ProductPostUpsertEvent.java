@@ -6,8 +6,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Builder
 public record ProductPostUpsertEvent(
@@ -29,25 +27,4 @@ public record ProductPostUpsertEvent(
 
 	EventType eventType
 ) {
-}
-
-// TODO: 추후 domain에 있는 enum 값을 common 으로 가져와서 refactoring
-@Getter
-@RequiredArgsConstructor
-enum ProductStatus {
-	NEW("새 상품"),
-	GOOD("양호"),
-	FAIR("보통");
-
-	private final String description;
-}
-
-@Getter
-@RequiredArgsConstructor
-enum TradeStatus {
-	SELLING("판매중"),
-	PROCESSING("거래중"),
-	SOLDOUT("판매완료");
-
-	private final String description;
 }

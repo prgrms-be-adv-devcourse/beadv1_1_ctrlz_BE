@@ -11,10 +11,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.model.vo.ProductStatus;
 import com.domainservice.common.init.data.util.ResourceMultipartFile;
 import com.domainservice.domain.post.category.service.CategoryService;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
 import com.domainservice.domain.post.tag.service.TagService;
 

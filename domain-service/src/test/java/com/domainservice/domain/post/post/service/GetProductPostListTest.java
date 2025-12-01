@@ -1,12 +1,13 @@
 package com.domainservice.domain.post.post.service;
 
-import com.common.model.web.PageResponse;
-import com.domainservice.domain.asset.image.domain.entity.Image;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
-import com.domainservice.domain.post.post.repository.ProductPostRepository;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,15 +20,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
+import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
+import com.domainservice.domain.post.post.model.entity.ProductPost;
+import com.domainservice.domain.post.post.repository.ProductPostRepository;
 
 /**
  * ProductPostService 목록 조회 기능 테스트

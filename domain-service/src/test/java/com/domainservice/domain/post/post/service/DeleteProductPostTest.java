@@ -1,15 +1,13 @@
 package com.domainservice.domain.post.post.service;
 
-import com.common.model.persistence.BaseEntity.DeleteStatus;
-import com.domainservice.common.configuration.feign.client.UserFeignClient;
-import com.domainservice.domain.asset.image.application.ImageService;
-import com.domainservice.domain.asset.image.domain.entity.Image;
-import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
-import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import feign.FeignException;
+import static com.common.exception.vo.ProductPostExceptionCode.*;
+import static com.common.exception.vo.UserExceptionCode.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.lang.reflect.Field;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +15,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.Optional;
+import com.common.model.persistence.BaseEntity.DeleteStatus;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
+import com.domainservice.common.configuration.feign.client.UserFeignClient;
+import com.domainservice.domain.asset.image.application.ImageService;
+import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.post.post.exception.ProductPostException;
+import com.domainservice.domain.post.post.model.entity.ProductPost;
+import com.domainservice.domain.post.post.repository.ProductPostRepository;
+import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 
-import static com.common.exception.vo.ProductPostExceptionCode.*;
-import static com.common.exception.vo.UserExceptionCode.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import feign.FeignException;
 
 /**
  * ProductPostService 삭제 기능 테스트
@@ -45,7 +46,10 @@ class DeleteProductPostTest {
     @Mock
     private UserFeignClient userClient;
 
-    private void setId(ProductPost productPost, String id) throws Exception {
+	@Mock
+	private ProductPostEventPublisher eventPublisher;
+
+	private void setId(ProductPost productPost, String id) throws Exception {
         Field field = productPost.getClass().getSuperclass().getDeclaredField("id");
         field.setAccessible(true);
         field.set(productPost, id);

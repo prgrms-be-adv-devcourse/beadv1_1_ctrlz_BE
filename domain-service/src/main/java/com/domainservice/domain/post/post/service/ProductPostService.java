@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.common.model.user.UserResponse;
@@ -27,8 +29,6 @@ import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 import com.domainservice.domain.post.tag.model.entity.Tag;
