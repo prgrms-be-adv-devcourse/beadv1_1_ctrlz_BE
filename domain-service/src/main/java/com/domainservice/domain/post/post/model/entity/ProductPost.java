@@ -115,17 +115,17 @@ public class ProductPost extends BaseEntity {
 	 */
 	public void markAsProcessing() {
 		this.tradeStatus = TradeStatus.PROCESSING;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSoldout() {
 		this.tradeStatus = TradeStatus.SOLDOUT;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSellingAgain() {
 		this.tradeStatus = TradeStatus.SELLING;
-		this.updateTime();
+		this.update();
 	}
 
     /*
