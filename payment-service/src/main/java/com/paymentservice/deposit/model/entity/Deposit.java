@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.model.entity;
+package com.paymentservice.deposit.model.entity;
 
 import java.math.BigDecimal;
 

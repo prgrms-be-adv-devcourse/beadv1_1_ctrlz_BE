@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.model.dto;
+package com.paymentservice.deposit.model.dto;
 
 // DepositResponse.java
 
