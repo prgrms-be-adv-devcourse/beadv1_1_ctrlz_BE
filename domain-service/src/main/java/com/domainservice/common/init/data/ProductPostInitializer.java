@@ -48,7 +48,6 @@ public class ProductPostInitializer {
             log.warn("태그가 없습니다.");
         }
 
-        // TODO: 테스트용 user 생성 가능해지면 실제 id로 연결
         String[] userIds = {"user-001", "user-002", "user-003", "user-004", "user-005"};
         ProductTemplate[] templates = createTemplates();
 

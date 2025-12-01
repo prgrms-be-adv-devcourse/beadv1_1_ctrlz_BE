@@ -1,5 +1,11 @@
 package com.domainservice.common.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
@@ -8,12 +14,6 @@ import com.domainservice.domain.reivew.exception.ReviewException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,7 +23,6 @@ public class GlobalExceptionHandler {
     /**
      * CustomException를 상속받는 모든 예외 처리
      * 일단 모든 예외를 404 처리함
-     * TODO: CustomException에 int code 필드 생성하는게 좋을지?
      */
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
