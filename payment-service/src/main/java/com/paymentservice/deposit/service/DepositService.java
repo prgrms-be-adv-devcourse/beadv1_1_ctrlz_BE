@@ -1,7 +1,5 @@
 package com.paymentservice.deposit.service;
 
-import static org.springframework.transaction.annotation.Propagation.*;
-
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
@@ -10,11 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.event.SettlementReadyEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.DepositExceptionCode;
-import com.paymentservice.deposit.client.DepositTossClient;
-import com.paymentservice.deposit.model.dto.DepositConfirmRequest;
-import com.paymentservice.deposit.model.dto.DepositConfirmResponse;
 import com.paymentservice.deposit.model.dto.DepositResponse;
-import com.paymentservice.deposit.model.dto.TossChargeResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.model.entity.DepositLog;
 import com.paymentservice.deposit.model.entity.TransactionType;
@@ -31,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class DepositService {
     private final DepositJpaRepository depositJpaRepository;
     private final DepositLogJpaRepository depositLogJpaRepository;
-	private final DepositTossClient depositTossClient;
 
 	/**
 	 * 사용자 ID로 예치금 정보 조회
@@ -43,6 +36,37 @@ public class DepositService {
 				() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(BigDecimal.ZERO).build()));
 	}
 
+	/**
+	 * 사용자의 예치금 충전
+	 */
+	// TODO: 상아 토스 페이먼츠 API 수정
+	public DepositResponse chargeDeposit(String userId, BigDecimal amount) {
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
+		}
+
+		Deposit deposit = getDepositByUserId(userId);
+		BigDecimal beforeBalance = deposit.getBalance();
+		deposit.increaseBalance(amount);
+		BigDecimal afterBalance = deposit.getBalance();
+
+		// TODO: 토스 페이먼츠 타기
+
+
+		Deposit savedDeposit = depositJpaRepository.save(deposit);
+
+		DepositLog depositLog = DepositLog.create(
+			userId,
+			savedDeposit,
+			TransactionType.CHARGE,
+			amount,
+			beforeBalance,
+			afterBalance
+		);
+		depositLogJpaRepository.save(depositLog);
+
+		return new DepositResponse(savedDeposit.getId(), savedDeposit.getBalance(), "충전이 완료되었습니다.");
+	}
 
 	/**
 	 * 사용자의 예치금 사용
@@ -80,8 +104,9 @@ public class DepositService {
 	/**
 	 * 사용자의 예치금 잔액 조회
 	 */
-	public Deposit getDepositBalance(String userId) {
-		return getDepositByUserId(userId);
+	public DepositResponse getDepositBalance(String userId) {
+		Deposit deposit = getDepositByUserId(userId);
+		return new DepositResponse(deposit.getId(), deposit.getBalance(), "잔액 조회가 완료되었습니다.");
 	}
 
 
@@ -217,71 +242,18 @@ public class DepositService {
 	}
 
 
-	public Deposit createDeposit(String userId) {
+	public DepositResponse createDeposit(String userId) {
 
 		if(depositJpaRepository.findByUserId(userId).isPresent()){
 			throw new CustomException(DepositExceptionCode.DEPOSIT_ALREADY_EXISTS.getMessage());
 		}
 
-		Deposit deposit = Deposit.of(userId,BigDecimal.ZERO);
-		return depositJpaRepository.save(deposit);
-	}
+		Deposit deposit = Deposit.builder()
+			.userId(userId)
+			.balance(BigDecimal.valueOf(0L))
+			.build();
 
-	/**
-	 * Toss 결제 확정 처리
-	 * - Toss 승인을 받고 (DepositTossClient.approve)
-	 * - 승인된 금액과 요청 금액을 검증 (불일치 시 예외)
-	 * - deposit balance 증가, paymentKey 저장, 로그 생성
-	 */
-	// PG 승인 요청 → 트랜잭션 없음
-	@Transactional(propagation = NOT_SUPPORTED)
-	public TossChargeResponse tossApprove(DepositConfirmRequest request, String userId) {
-		return depositTossClient.approve(userId, request);
-	}
-
-	public DepositConfirmResponse tossPayment(TossChargeResponse approve, DepositConfirmRequest request, String userId) {
-		try {
-
-			// 승인된 금액과 요청 금액 검증 (안정성 체크)
-			if (approve.balance() == null || request.amount() == null ||
-				approve.balance().compareTo(request.amount()) != 0) {
-				log.warn("토스승인 금액과 충전 금액이 다릅니다.. requested={}, approved={}", request.amount(), approve.balance());
-				throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
-			}
-
-			// 예치금 계정 조회 및 갱신
-			Deposit deposit = getDepositByUserId(userId);
-			BigDecimal beforeBalance = deposit.getBalance();
-
-			deposit.increaseBalance(request.amount());
-			deposit.setPaymentKey(approve.paymentKey());
-
-			Deposit savedDeposit = depositJpaRepository.save(deposit);
-			BigDecimal afterBalance = savedDeposit.getBalance();
-
-			// 로그 생성 (충전)
-			DepositLog depositLog = DepositLog.create(
-				userId,
-				savedDeposit,
-				TransactionType.CHARGE,
-				request.amount(),
-				beforeBalance,
-				afterBalance
-			);
-			depositLogJpaRepository.save(depositLog);
-
-			return DepositConfirmResponse.from(
-				request.orderId(),
-				userId,
-				approve.paymentKey(),
-				request.amount(),
-				approve.currency(),
-				approve.approvedAt()
-			);
-
-		} catch (Exception e) {
-			throw new CustomException(DepositExceptionCode.DEPOSIT_FAILD.getMessage());
-		}
-
+		Deposit savedDeposit = depositJpaRepository.save(deposit);
+		return new DepositResponse(savedDeposit.getUserId(), savedDeposit.getBalance(), "예치금 생성 완료");
 	}
 }

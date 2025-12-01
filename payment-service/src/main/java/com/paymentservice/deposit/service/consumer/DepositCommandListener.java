@@ -1,4 +1,4 @@
-package com.paymentservice.deposit.service.consumer;
+package com.domainservice.domain.deposit.service.consumer;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.common.event.DepositCreateCommand;
 import com.common.exception.CustomException;
-import com.paymentservice.deposit.service.DepositService;
+import com.domainservice.domain.deposit.service.DepositService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
