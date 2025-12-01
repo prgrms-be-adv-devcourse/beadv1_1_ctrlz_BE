@@ -32,10 +32,10 @@ public class ProductPostEventProducer {
 
 		future.whenComplete((result, ex) -> {
 			if (ex == null) {
-				log.info("✅ Upsert 이벤트 전송 성공 - ID: {}, Type: {}",
+				log.info("Upsert 이벤트 전송 성공 - ID: {}, Type: {}",
 					event.id(), event.eventType());
 			} else {
-				log.error("❌ Upsert 이벤트 전송 실패 - ID: {}, Type: {}",
+				log.error("Upsert 이벤트 전송 실패 - ID: {}, Type: {}",
 					event.id(), event.eventType(), ex);
 			}
 		});
@@ -50,10 +50,10 @@ public class ProductPostEventProducer {
 
 		future.whenComplete((result, ex) -> {
 			if (ex == null) {
-				log.info("✅ Delete 이벤트 전송 성공 - ID: {}, Type: {}",
+				log.info("Delete 이벤트 전송 성공 - ID: {}, Type: {}",
 					event.postId(), event.eventType());
 			} else {
-				log.error("❌ Delete 이벤트 전송 실패 - ID: {}, Type: {}",
+				log.error("Delete 이벤트 전송 실패 - ID: {}, Type: {}",
 					event.postId(), event.eventType(), ex);
 			}
 		});

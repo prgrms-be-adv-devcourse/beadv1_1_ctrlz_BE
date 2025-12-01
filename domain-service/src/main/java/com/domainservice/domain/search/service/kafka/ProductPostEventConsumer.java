@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.common.event.productPost.ProductPostDeleteEvent;
 import com.common.event.productPost.ProductPostUpsertEvent;
+import com.domainservice.domain.search.mapper.SearchMapper;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.repository.ProductPostElasticRepository;
 
@@ -76,33 +77,14 @@ public class ProductPostEventConsumer {
 
 	// Elasticsearch 문서 생성/업데이트
 	private void upsertDocument(ProductPostUpsertEvent event) {
-		ProductPostDocumentEntity document = new ProductPostDocumentEntity(
-			event.id(),
-			event.name(),
-			event.title(),
-			event.description(),
-			event.tags(),
-			event.categoryName(),
-			event.price(),
-			event.likedCount(),
-			event.viewCount(),
-			event.status(),
-			event.tradeStatus(),
-			event.deleteStatus(),
-			event.createdAt()
-		);
-
+		ProductPostDocumentEntity document = SearchMapper.toProductPostDocumentEntity(event);
 		productPostElasticRepository.save(document);
 		log.info("Elasticsearch 문서 저장 완료 - ID: {}", event.id());
 	}
 
 	// Elasticsearch 문서 삭제
 	private void deleteDocument(String postId) {
-		if (productPostElasticRepository.existsById(postId)) {
-			productPostElasticRepository.deleteById(postId);
-			log.info("Elasticsearch 문서 삭제 완료 - ID: {}", postId);
-		} else {
-			log.warn("삭제할 문서가 존재하지 않음 - ID: {}", postId);
-		}
+		productPostElasticRepository.deleteById(postId);
+		log.info("Elasticsearch 문서 삭제 요청 완료 - ID: {}", postId);
 	}
 }
