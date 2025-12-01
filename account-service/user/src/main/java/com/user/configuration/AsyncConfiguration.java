@@ -18,7 +18,9 @@ public class AsyncConfiguration {
 		executor.setMaxPoolSize(20);
 		executor.setQueueCapacity(100);
 		executor.setThreadNamePrefix("kafka-task-");
+		executor.setTaskDecorator(new CustomTaskDecorator());
 		executor.initialize();
 		return executor;
 	}
+
 }

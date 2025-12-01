@@ -6,25 +6,19 @@ plugins {
 
 ext {
     springCloudVersion = "2025.0.0"
+    queryDslVersion = "7.1"
 }
 
-group = 'com'
-version = '0.0.1-SNAPSHOT'
-description = 'account-service'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+allprojects {
+    group = 'com'
+    version = '0.0.1-SNAPSHOT'
+    
+    repositories {
+        mavenCentral()
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
-
 subprojects {
-
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
 
@@ -34,53 +28,39 @@ subprojects {
         }
     }
 
-    repositories {
-        mavenCentral()
-    }
-
-    group = 'com'
-    version = '0.0.1-SNAPSHOT'
-
     dependencyManagement {
         imports {
             mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.7"
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
         }
     }
 
     dependencies {
-
+        // mysql
         runtimeOnly 'com.mysql:mysql-connector-j'
 
+        // spring boot & cloud
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
 
-        //redis
+        // redis
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
-//        // micrometer
-//        implementation 'io.micrometer:micrometer-tracing-bridge-brave' // Micrometer와 Brave 사이의 연동을 위한 브리지 역할을 하는 라이브러리입니다.
-//        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
-
-        //lombok
+        // lombok
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
-        //test
+        // test
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        runtimeOnly 'com.h2database:h2'
+        testRuntimeOnly 'com.h2database:h2'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 
     tasks.named('test') {
         useJUnitPlatform()
     }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }
