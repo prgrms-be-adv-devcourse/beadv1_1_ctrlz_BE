@@ -23,11 +23,9 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation project(":observability-config:logging")
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 
-    // Micrometer Tracing
-//    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-//    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
