@@ -32,7 +32,7 @@ public class ProductPostEventConsumer {
 	public void handleUpsertEvent(@Payload ProductPostUpsertEvent event) {
 		try {
 
-			ProductPostDocumentEntity document = SearchMapper.toProductPostDocumentEntity(event);
+			ProductPostDocumentEntity document = SearchMapper.toDocumentEntity(event);
 			productPostElasticRepository.save(document);
 
 		} catch (Exception e) {

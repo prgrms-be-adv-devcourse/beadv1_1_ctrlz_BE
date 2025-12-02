@@ -95,7 +95,7 @@ public class ProductPostService {
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
 		eventProducer.sendUpsertEvent(saved, EventType.CREATE);
 
-		return ProductPostMapper.toProductPostResponse(saved);
+		return ProductPostMapper.toResponse(saved);
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class ProductPostService {
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
 		eventProducer.sendUpsertEvent(target, EventType.UPDATE);
 
-		return ProductPostMapper.toProductPostResponse(target);
+		return ProductPostMapper.toResponse(target);
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class ProductPostService {
 	 */
 	public ProductPostResponse getProductPostById(String postId) {
 		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		return ProductPostMapper.toProductPostResponse(productPost);
+		return ProductPostMapper.toResponse(productPost);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class ProductPostService {
 			recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
 		}
 
-		return ProductPostMapper.toProductPostResponse(productPost);
+		return ProductPostMapper.toResponse(productPost);
 
 	}
 
@@ -233,7 +233,7 @@ public class ProductPostService {
 			page.getSize(),
 			page.hasNext(),
 			page.getContent().stream()
-				.map(ProductPostMapper::toProductPostResponse)
+				.map(ProductPostMapper::toResponse)
 				.toList()
 		);
 	}
@@ -251,7 +251,7 @@ public class ProductPostService {
 
 		return productPostRepository.findAllById(viewedPostIds)
 			.stream()
-			.map(ProductPostMapper::toProductPostResponse)
+			.map(ProductPostMapper::toResponse)
 			.toList();
 	}
 

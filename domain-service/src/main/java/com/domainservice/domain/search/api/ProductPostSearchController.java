@@ -57,11 +57,8 @@ public class ProductPostSearchController {
 		@PageableDefault(size = 20) Pageable pageable
 	) {
 
-		ProductPostSearchRequest request = SearchMapper.toProductPostSearchRequest(
+		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
 			q, category, minPrice, maxPrice, tags, sort);
-
-		log.info("🔍 검색 요청 - q: '{}', category: '{}', price: {}-{}, tags: {}, sort: '{}'",
-			q, category, minPrice, maxPrice, request.tags(), sort);
 
 		return productPostElasticService.search(request, pageable);
 	}

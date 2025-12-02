@@ -153,6 +153,12 @@ public class ProductPost extends BaseEntity {
 		}
 	}
 
+	public List<String> getTagNames() {
+		return this.productPostTags.stream()
+			.map(ppt -> ppt.getTag().getName())
+			.toList();
+	}
+
     /*
      =============== 이미지 ===============
     */

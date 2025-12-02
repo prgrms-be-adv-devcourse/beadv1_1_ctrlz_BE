@@ -60,7 +60,7 @@ public class ProductPostElasticService {
 			totalPages,
 			pageable.getPageSize(),
 			pageable.getPageNumber() < totalPages - 1,
-			SearchMapper.toProductPostSearchResponseList(searchHits) // 결과값을 responses로 매핑
+			SearchMapper.toSearchResponseList(searchHits) // 결과값을 responses로 매핑
 		);
 	}
 
