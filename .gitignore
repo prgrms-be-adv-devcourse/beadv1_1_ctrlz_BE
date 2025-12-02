@@ -187,4 +187,8 @@ account-service/account-application/out
 account-service/user/out
 account-service/auth/out
 gateway-service/out
+application-window.yml
+
+# Bin directories
+bin/
 application-dev.yml
