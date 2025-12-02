@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: gateway-service-test
+  
+  data:
+    redis:
+      host: localhost
+      port: 6370  # 테스트용 embedded redis 포트
+  
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - name: AuthenticationFilter
+              args:
+                requiredRole: USER
+        
+        - id: admin-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - name: AuthenticationFilter
+              args:
+                requiredRole: ADMIN
+        
+        - id: product-search
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/search
+          filters:
+            - ProductSearchFilter
+
+jwt:
+  secret: MySecretKeyForJWTTokenGenerationAndValidation1234567890
+  expiration: 3600000
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+logging:
+  level:
+    com.gatewayservice: DEBUG
+    org.springframework.cloud.gateway: DEBUG
