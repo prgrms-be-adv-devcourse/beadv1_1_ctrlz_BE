@@ -58,7 +58,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.common.event"
+        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
 
     listener:
       immediate-stop: false # default 값 명시
@@ -80,6 +80,10 @@ custom:
   deposit:
     topic:
       command: deposit-command
+
+  product-post:
+    topic:
+      event: product-post-events
 
   feign:
     url:
