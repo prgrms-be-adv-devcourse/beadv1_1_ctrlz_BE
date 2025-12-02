@@ -16,10 +16,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
-
   jpa:
     open-in-view: false
     hibernate:
@@ -32,6 +31,8 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+      order_inserts: true
+      order_updates: true
 
   data:
     redis:
