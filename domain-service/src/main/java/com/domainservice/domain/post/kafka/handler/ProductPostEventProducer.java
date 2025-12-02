@@ -1,9 +1,11 @@
-package com.domainservice.domain.post.post.service.kafka;
+package com.domainservice.domain.post.kafka.handler;
 
 import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.common.event.productPost.EventType;
@@ -18,75 +20,50 @@ import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * ProductPost 엔티티를 Kafka 이벤트로 변환하여 발행하는 서비스
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProductPostEventPublisher {
+public class ProductPostEventProducer {
 
-	private final ProductPostEventProducer eventProducer;
+	@Value("${custom.product-post.topic.event}")
+	private String topicName;
+
+	private final KafkaTemplate<String, Object> kafkaTemplate;
+
+	private final ProductPostRepository  productPostRepository;
 	private final CategoryRepository categoryRepository;
-	private final ProductPostRepository productPostRepository;
 
 	/**
-	 * CREATE 이벤트 발행
+	 * Upsert(CREATE/UPDATE) 이벤트를 Kafka로 발행
 	 */
-	public void publishCreateEvent(ProductPost productPost) {
-		publishUpsertEvent(productPost, EventType.CREATE);
+	public void sendUpsertEvent(ProductPost productPost, EventType eventType) {
+
+		ProductPostUpsertEvent event = convertToUpsertEvent(productPost, eventType);
+
+		kafkaTemplate.send(topicName, event.id(), event);
+
 	}
 
-	/**
-	 * UPDATE 이벤트 발행
-	 */
-	public void publishUpdateEvent(ProductPost productPost) {
-		publishUpsertEvent(productPost, EventType.UPDATE);
-	}
+	public void sendUpsertEventById(String postId, EventType eventType) {
 
-	public void publishUpdateEvent(String postId) {
 		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
-		publishUpsertEvent(target, EventType.UPDATE);
+		ProductPostUpsertEvent event = convertToUpsertEvent(target, eventType);
+
+		kafkaTemplate.send(topicName, event.id(), event);
+
 	}
 
 	/**
-	 * DELETE 이벤트 발행
+	 * Delete 이벤트를 Kafka로 발행
 	 */
-	public void publishDeleteEvent(String postId) {
-		try {
+	public void sendDeleteEvent(String postId) {
 
-			ProductPostDeleteEvent event = new ProductPostDeleteEvent(postId, EventType.DELETE);
-			eventProducer.sendDeleteEvent(event);
+		ProductPostDeleteEvent event = new ProductPostDeleteEvent(postId, EventType.DELETE);
 
-			log.debug("DELETE 이벤트 발행 요청 완료 - postId: {}", postId);
+		kafkaTemplate.send(topicName, event.postId(), event);
 
-		} catch (Exception e) {
-
-			log.error("DELETE 이벤트 발행 실패 - postId: {}", postId, e);
-			// TODO: 이벤트 발행 실패 시 재시도 또는 보상 트랜잭션 고려
-
-		}
-	}
-
-	// CREATE/UPDATE Event 처리
-	private void publishUpsertEvent(ProductPost productPost, EventType eventType) {
-		try {
-
-			ProductPostUpsertEvent event = convertToUpsertEvent(productPost, eventType);
-			eventProducer.sendUpsertEvent(event);
-
-			log.debug("Upsert 이벤트 발행 요청 완료 - postId: {}, eventType: {}",
-				productPost.getId(), eventType);
-
-		} catch (Exception e) {
-
-			log.error("Upsert 이벤트 발행 실패 - postId: {}, eventType: {}",
-				productPost.getId(), eventType, e);
-			// TODO: 이벤트 발행 실패 시 재시도 또는 보상 트랜잭션 고려
-
-		}
 	}
 
 	// ProductPost → ProductPostUpsertEvent 변환

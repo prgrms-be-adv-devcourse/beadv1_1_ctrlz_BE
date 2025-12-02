@@ -32,16 +32,12 @@ public class ProductPostEventConsumer {
 	public void handleUpsertEvent(@Payload ProductPostUpsertEvent event) {
 		try {
 
-			log.info("Upsert 이벤트 수신 - ID: {}, Type: {}", event.id(), event.eventType());
-
-			upsertDocument(event);
-
-			log.info("Upsert 이벤트 처리 완료 - ID: {}, Type: {}", event.id(), event.eventType());
+			ProductPostDocumentEntity document = SearchMapper.toProductPostDocumentEntity(event);
+			productPostElasticRepository.save(document);
 
 		} catch (Exception e) {
 
 			log.error("Upsert 이벤트 처리 실패 - ID: {}, Type: {}", event.id(), event.eventType(), e);
-			// TODO: 재시도 로직 또는 DLQ로 전송
 
 		}
 	}
@@ -53,38 +49,13 @@ public class ProductPostEventConsumer {
 	public void handleDeleteEvent(@Payload ProductPostDeleteEvent event) {
 		try {
 
-			log.info("Delete 이벤트 수신 - ID: {}", event.postId());
-
-			deleteDocument(event.postId());
-
-			log.info("Delete 이벤트 처리 완료 - ID: {}", event.postId());
+			productPostElasticRepository.deleteById(event.postId());
 
 		} catch (Exception e) {
 
 			log.error("Delete 이벤트 처리 실패 - ID: {}", event.postId(), e);
-			// TODO: 재시도 로직 또는 DLQ로 전송
 
 		}
 	}
 
-	/**
-	 * 알 수 없는 이벤트 처리
-	 */
-	@KafkaHandler(isDefault = true)
-	public void handleUnknownEvent(@Payload Object event) {
-		log.warn("알 수 없는 이벤트 타입 수신: {}", event.getClass().getName());
-	}
-
-	// Elasticsearch 문서 생성/업데이트
-	private void upsertDocument(ProductPostUpsertEvent event) {
-		ProductPostDocumentEntity document = SearchMapper.toProductPostDocumentEntity(event);
-		productPostElasticRepository.save(document);
-		log.info("Elasticsearch 문서 저장 완료 - ID: {}", event.id());
-	}
-
-	// Elasticsearch 문서 삭제
-	private void deleteDocument(String postId) {
-		productPostElasticRepository.deleteById(postId);
-		log.info("Elasticsearch 문서 삭제 요청 완료 - ID: {}", postId);
-	}
 }

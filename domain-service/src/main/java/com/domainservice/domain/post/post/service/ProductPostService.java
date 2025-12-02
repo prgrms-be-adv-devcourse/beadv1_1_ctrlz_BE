@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.event.productPost.EventType;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
 import com.common.model.vo.ProductStatus;
@@ -23,13 +24,13 @@ import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
@@ -45,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProductPostService {
 
-	private final ProductPostEventPublisher eventPublisher;
+	private final ProductPostEventProducer eventProducer;
 
 	private final UserFeignClient userFeignClient;
 
@@ -92,7 +93,7 @@ public class ProductPostService {
 		ProductPost saved = productPostRepository.save(productPost);
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
-		eventPublisher.publishCreateEvent(saved);
+		eventProducer.sendUpsertEvent(saved, EventType.CREATE);
 
 		return ProductPostMapper.toProductPostResponse(saved);
 	}
@@ -129,7 +130,7 @@ public class ProductPostService {
 		target.update(request);
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
-		eventPublisher.publishUpdateEvent(target);
+		eventProducer.sendUpsertEvent(target, EventType.UPDATE);
 
 		return ProductPostMapper.toProductPostResponse(target);
 	}
@@ -161,7 +162,7 @@ public class ProductPostService {
 
 		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
 		String targetId = target.getId();
-		eventPublisher.publishDeleteEvent(targetId);
+		eventProducer.sendDeleteEvent(targetId);
 
 		return targetId;
 	}

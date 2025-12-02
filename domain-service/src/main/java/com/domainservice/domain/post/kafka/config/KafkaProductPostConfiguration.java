@@ -1,5 +1,5 @@
 // KafkaProductPostConfiguration.java
-package com.domainservice.domain.post.post.config;
+package com.domainservice.domain.post.kafka.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
