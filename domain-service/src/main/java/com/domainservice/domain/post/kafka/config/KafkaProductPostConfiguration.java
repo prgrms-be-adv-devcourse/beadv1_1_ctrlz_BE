@@ -40,4 +40,5 @@ public class KafkaProductPostConfiguration {
 			.replicas(topicReplicationFactors)
 			.build();
 	}
+
 }

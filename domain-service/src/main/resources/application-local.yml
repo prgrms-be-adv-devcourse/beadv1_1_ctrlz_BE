@@ -102,7 +102,6 @@ custom:
     topic:
       event: product-post-events
 
-
   feign:
     url:
       user-service: localhost:8080

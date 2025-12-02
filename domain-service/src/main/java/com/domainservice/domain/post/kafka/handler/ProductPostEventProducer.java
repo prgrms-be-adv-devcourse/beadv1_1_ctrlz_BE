@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductPostEventProducer {
 
 	@Value("${custom.product-post.topic.event}")
-	private String topicName;
+	private String eventTopicName;
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -40,7 +40,8 @@ public class ProductPostEventProducer {
 		String categoryName = getCategoryName(productPost);
 
 		ProductPostUpsertEvent event = KafkaEventMapper.toUpsertEvent(productPost, categoryName, eventType);
-		kafkaTemplate.send(topicName, event.id(), event);
+
+		kafkaTemplate.send(eventTopicName, event.id(), event);
 
 	}
 
@@ -53,8 +54,7 @@ public class ProductPostEventProducer {
 
 		ProductPostUpsertEvent event = KafkaEventMapper.toUpsertEvent(target, categoryName, eventType);
 
-		kafkaTemplate.send(topicName, event.id(), event);
-
+		kafkaTemplate.send(eventTopicName, event.id(), event);
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class ProductPostEventProducer {
 	public void sendDeleteEvent(String postId) {
 
 		ProductPostDeleteEvent event = KafkaEventMapper.toDeleteEvent(postId);
-		kafkaTemplate.send(topicName, event.postId(), event);
+		kafkaTemplate.send(eventTopicName, event.postId(), event);
 
 	}
 
