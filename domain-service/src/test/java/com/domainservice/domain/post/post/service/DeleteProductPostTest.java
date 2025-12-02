@@ -21,10 +21,10 @@ import com.common.model.vo.TradeStatus;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 
 import feign.FeignException;
 
@@ -47,7 +47,7 @@ class DeleteProductPostTest {
     private UserFeignClient userClient;
 
 	@Mock
-	private ProductPostEventPublisher eventPublisher;
+	private ProductPostEventProducer eventProducer;
 
 	private void setId(ProductPost productPost, String id) throws Exception {
         Field field = productPost.getClass().getSuperclass().getDeclaredField("id");

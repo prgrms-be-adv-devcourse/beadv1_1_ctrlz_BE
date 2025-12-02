@@ -25,12 +25,12 @@ import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.post.service.kafka.ProductPostEventPublisher;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
@@ -61,7 +61,7 @@ class CreateProductPostTest {
     private MultipartFile mockImageFile;
 
 	@Mock
-	private ProductPostEventPublisher eventPublisher;
+	private ProductPostEventProducer eventProducer;
 
     @DisplayName("판매자는 상품 게시글을 생성할 수 있다.")
     @Test
