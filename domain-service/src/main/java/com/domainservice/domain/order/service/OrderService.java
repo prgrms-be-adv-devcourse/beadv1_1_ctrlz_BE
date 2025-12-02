@@ -182,7 +182,7 @@ public class OrderService {
 		Order savedOrder = orderJpaRepository.save(order);
 
 		// 취소 완료된 target 상품 정보를 ElasticSearch 상품 데이터와 동기화
-		eventProducer.sendDeleteEvent(targetItem.getProductPostId());
+		eventProducer.sendUpsertEventById(targetItem.getProductPostId(), EventType.UPDATE);
 
 		return toOrderResponse(savedOrder);
 
