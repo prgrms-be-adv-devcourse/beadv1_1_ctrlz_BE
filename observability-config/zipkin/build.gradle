@@ -28,6 +28,7 @@ dependencies {
     implementation 'io.micrometer:micrometer-observation'
     implementation 'io.micrometer:micrometer-tracing'
     implementation 'io.micrometer:context-propagation'
+    implementation 'io.zipkin.reporter2:zipkin-sender-kafka:3.5.1'
 }
 
 ext {
