@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 
 @Builder
-public record ProductPostUpsertEvent(
+public record ProductPostUpsertedEvent(
 	String id,
 	String name,
 	String title,

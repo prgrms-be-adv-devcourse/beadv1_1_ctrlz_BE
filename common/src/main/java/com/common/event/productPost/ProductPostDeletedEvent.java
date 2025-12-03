@@ -1,6 +1,6 @@
 package com.common.event.productPost;
 
-public record ProductPostDeleteEvent(
+public record ProductPostDeletedEvent(
 	String postId,
 	EventType eventType
 ) {
