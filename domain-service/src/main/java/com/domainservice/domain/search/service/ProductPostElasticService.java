@@ -53,15 +53,14 @@ public class ProductPostElasticService {
 		long totalHits = searchHits.getTotalHits();
 		int totalPages = (int)Math.ceil((double)totalHits / pageable.getPageSize());
 
-		log.info("📊 검색 결과 - Total hits: {}, Page: {}/{}",
-			totalHits, pageable.getPageNumber(), totalPages);
+		log.info("검색 결과 - Total hits: {}, Page: {}/{}", totalHits, pageable.getPageNumber(), totalPages);
 
 		return new PageResponse<>(
 			pageable.getPageNumber(),
 			totalPages,
 			pageable.getPageSize(),
 			pageable.getPageNumber() < totalPages - 1,
-			SearchMapper.toProductPostSearchResponses(searchHits) // 결과값을 responses로 매핑
+			SearchMapper.toSearchResponseList(searchHits) // 결과값을 responses로 매핑
 		);
 	}
 

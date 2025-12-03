@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.event.SettlementCreatedEvent;
+import com.common.event.productPost.EventType;
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
 import com.common.exception.vo.OrderExceptionCode;
+import com.common.model.vo.TradeStatus;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
@@ -26,6 +28,7 @@ import com.domainservice.domain.order.model.entity.OrderItemStatus;
 import com.domainservice.domain.order.model.entity.OrderStatus;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
@@ -39,6 +42,7 @@ public class OrderService {
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
 	private final PurchaseConfirmedEventProducer settlementProducer;
+	private final ProductPostEventProducer eventProducer;
 
 	/**
 	 * 주문 생성
@@ -77,7 +81,7 @@ public class OrderService {
 			if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
 				throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
 			}
-			productPostService.updateTradeStatusToProcessing(cartItem.getProductPostId());
+			productPostService.updateTradeStatusById(cartItem.getProductPostId(), TradeStatus.PROCESSING);
 
 			OrderItem orderItem = OrderItem.builder()
 				.productPostId(product.id())
@@ -89,6 +93,9 @@ public class OrderService {
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
+
+		// 주문 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
 
 		return toOrderResponse(savedOrder);
 
@@ -120,9 +127,14 @@ public class OrderService {
 		}
 
 		for (OrderItem item : order.getOrderItems()) {
-			productPostService.updateTradeStatusToSelling(item.getProductPostId());
+			productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SELLING);
 		}
-		return toOrderResponse(orderJpaRepository.save(order));
+		Order savedOrder = orderJpaRepository.save(order);
+
+		// 취소 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
+
+		return toOrderResponse(savedOrder);
 	}
 
 	/**
@@ -147,12 +159,12 @@ public class OrderService {
 		switch (order.getOrderStatus()) {
 			case PAYMENT_PENDING:
 				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
-				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
+				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
 				break;
 			case PAYMENT_COMPLETED:
 				// paymentService.refundItem(targetItem);
 				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
-				productPostService.updateTradeStatusToSelling(targetItem.getProductPostId());
+				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
 				break;
 			default:
 				throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
@@ -172,6 +184,10 @@ public class OrderService {
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
+
+		// 취소 완료된 target 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		eventProducer.sendUpsertEventById(targetItem.getProductPostId(), EventType.UPDATE);
+
 		return toOrderResponse(savedOrder);
 
 	}
@@ -204,7 +220,7 @@ public class OrderService {
 		for (OrderItem item : order.getOrderItems()) {
 			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
 				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
-				productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+				productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SOLDOUT);
 				// kafka 메시지 발행
 				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
 					productPostService.getProductPostById(item.getProductPostId()).userId(),
@@ -215,6 +231,10 @@ public class OrderService {
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
+
+		// 구매 확정 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+		publishProductPostUpdateEvents(savedOrder);
+
 		return toOrderResponse(savedOrder);
 	}
 
@@ -250,13 +270,20 @@ public class OrderService {
 				.toList()
 		);
 	}
+
+	private void publishProductPostUpdateEvents(Order order) {
+		order.getOrderItems().stream()
+			.map(OrderItem::getProductPostId)
+			.forEach(postId -> eventProducer.sendUpsertEventById(postId, EventType.UPDATE));
+	}
+
 	// 주문 상세 조회
 	@Transactional(readOnly = true)
 	public OrderResponse getOrderById(String orderId, String userId) {
 		Order order = orderJpaRepository.findById(orderId)
-			.orElseThrow(()-> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+			.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
 
-		if(!Objects.equals(userId, order.getBuyerId())){
+		if (!Objects.equals(userId, order.getBuyerId())) {
 			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
 		}
 
