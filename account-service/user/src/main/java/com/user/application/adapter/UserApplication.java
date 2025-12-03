@@ -11,12 +11,12 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.dto.UserContext;
 import com.user.application.adapter.dto.UserUpdateContext;
+import com.user.application.adapter.vo.EventType;
 import com.user.application.port.in.UserCommandUseCase;
 import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.event.UserSignedUpEvent;
 import com.user.domain.model.User;
 import com.user.domain.vo.Address;
-import com.user.domain.vo.EventType;
 
 import lombok.RequiredArgsConstructor;
 

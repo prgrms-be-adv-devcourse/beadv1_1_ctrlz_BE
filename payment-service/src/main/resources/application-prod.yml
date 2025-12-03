@@ -3,22 +3,17 @@ application:
   version: 1.0
 
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
-    name: domain-service
-
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+    name: payment-service
 
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
-    url: jdbc:mysql://mysql-service:3306/test_db?rewriteBatchedStatements=true
+    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
     username: admin
     password: 1234
   #    username: "${custom.db.username}"
@@ -38,9 +33,6 @@ spring:
         order_updates: true
         order_inserts: true
 
-  elasticsearch:
-    uris: http://elastic-search-service:9200 # default 지만 명시적으로 작성
-
   data:
     redis:
       port: 6379
@@ -48,13 +40,13 @@ spring:
       password: 1234
   #      password: "${REDIS_PASSWORD}"
   kafka:
-    bootstrap-servers: kafka-mq:9090
+    bootstrap-servers: kafka-sts:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
     consumer:
-      group-id: domain-group
+      group-id: payment-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
@@ -64,33 +56,21 @@ spring:
       immediate-stop: false # default 값 명시
 
 custom:
-  image:
-    allowed-extension: jpg,jpeg,png,webp
-    max-size: 10485760 # 10mb
-    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
   config:
     topic-partitions: 1
     topic-replications: 1
-
-  cart:
-    topic:
-      command: cart-command
-
-  deposit:
-    topic:
-      command: deposit-command
-
   feign:
     url:
-      user-service: http://account-service:8080
+      user-service: http://account-svc:8080
+      order-service: http://domain-svc:8081
 # k8s 설정
 eureka:
   instance:
     prefer-ip-address: true
-    hostname: domain-service
+    hostname: payment-service
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
