@@ -1,4 +1,4 @@
-package com.domainservice.domain.deposit.configuration;
+package com.paymentservice.deposit.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
