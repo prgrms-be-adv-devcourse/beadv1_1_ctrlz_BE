@@ -1,4 +1,4 @@
-package com.domainservice.domain.cart.configuration;
+package com.domainservice.domain.deposit.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +19,13 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
-import com.common.event.CartCreateCommand;
+import com.common.event.DepositCreateCommand;
 
 @Configuration
-public class KafkaConfiguration {
+public class KafkaDepositConsumerConfiguration {
 
-	@Value("${custom.cart.topic.command}")
-	private String cartTopicCommand;
+	@Value("${custom.deposit.topic.command}")
+	private String depositTopicCommand;
 
 	@Value("${custom.config.topic-partitions}")
 	private int topicPartitions;
@@ -39,25 +39,25 @@ public class KafkaConfiguration {
 	private String groupId;
 
 	@Bean
-	public NewTopic createCartsCommandTopic() {
-		return TopicBuilder.name(cartTopicCommand)
+	public NewTopic createDepositCommandTopic() {
+		return TopicBuilder.name(depositTopicCommand)
 			.partitions(topicPartitions)
 			.replicas(topicReplications)
 			.build();
 	}
 
 	@Bean
-	public ConsumerFactory<String, CartCreateCommand> cartConsumerFactory() {
-		Map<String, Object> props = commonConsumerConfig();
-		props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, CartCreateCommand.class.getName());
+	public ConsumerFactory<String, DepositCreateCommand> depositConsumerFactory() {
+		Map<String, Object> props = depositConsumerConfig();
+		props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, DepositCreateCommand.class.getName());
 		return new DefaultKafkaConsumerFactory<>(props);
 	}
 
 	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> cartKafkaListenerContainerFactory() {
-		ConcurrentKafkaListenerContainerFactory<String, CartCreateCommand> factory =
+	public ConcurrentKafkaListenerContainerFactory<String, DepositCreateCommand> depositKafkaListenerContainerFactory() {
+		ConcurrentKafkaListenerContainerFactory<String, DepositCreateCommand> factory =
 			new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(cartConsumerFactory());
+		factory.setConsumerFactory(depositConsumerFactory());
 
 		// acknowledge() 메서드를 호출한 즉시 커밋
 		factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
@@ -73,7 +73,7 @@ public class KafkaConfiguration {
 		return factory;
 	}
 
-	private Map<String, Object> commonConsumerConfig() {
+	private Map<String, Object> depositConsumerConfig() {
 		Map<String, Object> props = new HashMap<>();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
