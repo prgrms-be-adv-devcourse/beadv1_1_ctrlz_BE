@@ -49,7 +49,7 @@ class AuthControllerTest {
 		given(jwtAuthService.reissueAccessToken(eq(userId), eq(refreshToken))).willReturn(newAccessToken);
 
 		// when then
-		mockMvc.perform(get("/api/auth/reissue")
+		mockMvc.perform(post("/api/auth/reissue")
 				.header("X-REQUEST-ID", userId)
 				.cookie(new Cookie("REFRESH_TOKEN", refreshToken)))
 			.andDo(print())

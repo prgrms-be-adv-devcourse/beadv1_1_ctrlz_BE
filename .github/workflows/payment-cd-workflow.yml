@@ -1,0 +1,42 @@
+name: payment-service ci/cd
+
+on:
+  workflow_dispatch:
+  push: # 메인에 push 될때 수행됨.
+    branches:
+      - main
+      - deploytest
+    paths:
+      - 'payment-service/**'
+      - 'common/**'
+      - '**/*.dockerfile'
+
+jobs:
+  releasing:
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_ACCOUNT_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: payment-service-app
+      service-dir: .
+      secret-dir: payment-service/payment-application # payment-service 에는 /payment-application로 secret.yml 들어가게 설정
+      file-name: payment-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: payment-service-app # pod랑 같은 이름
+      deploy-name: payment-service-deploy # deployment랑 같은 이름
+      label-name: payment # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+

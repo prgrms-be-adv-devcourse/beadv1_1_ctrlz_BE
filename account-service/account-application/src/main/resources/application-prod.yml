@@ -89,13 +89,16 @@ custom:
     topic:
       command: cart-command
 
+  deposit:
+    topic:
+      command: deposit-command
+
   image:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-  # 수정 필요
-  redirectUrl: https://api.yeongeun.chlab.org/
+
 
 # k8s 설정
 eureka:
