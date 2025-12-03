@@ -1,5 +1,8 @@
 package com.gatewayservice.filter;
 
+import static com.gatewayservice.common.JwtClaimsConst.*;
+import static com.gatewayservice.common.ServeletConst.*;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gatewayservice.dto.TokenAuthorizationResponse;
 import com.gatewayservice.handler.UserVerificationHandler;
 import com.gatewayservice.utils.ServletRequestUtils;
 
@@ -89,7 +93,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
 			Jws<Claims> claims = getClaims(token);
 
-			List<Object> roles = claims.getPayload().get("roles", List.class);
+			List<Object> roles = claims.getPayload().get(ROLES, List.class);
 
 			if (roles.isEmpty()) {
 				throw new JwtException("권한이 없습니다.");
@@ -103,9 +107,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 				);
 			}
 
-			String userId = claims.getPayload().get("userId").toString();
+			String userId = claims.getPayload().get(USER_ID).toString();
 			ServerHttpRequest authorizedRequest = request.mutate()
-				.header("X-REQUEST-ID", userId)
+				.header(X_REQUEST_ID, userId)
 				.build();
 
 			log.warn("AuthenticationFilter userId = {}", userId);

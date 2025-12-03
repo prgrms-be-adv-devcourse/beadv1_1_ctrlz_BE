@@ -17,6 +17,6 @@ management:
 
   zipkin:
     tracing:
-      endpoint: http://zipkin-service:9411/api/v2/spans
+      endpoint: http://zipkin-svc:9411/api/v2/spans
 
 

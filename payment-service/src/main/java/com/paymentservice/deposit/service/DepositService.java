@@ -243,9 +243,14 @@ public class DepositService {
 
 
 	public DepositResponse createDeposit(String userId) {
+
+		if(depositJpaRepository.findByUserId(userId).isPresent()){
+			throw new CustomException(DepositExceptionCode.DEPOSIT_ALREADY_EXISTS.getMessage());
+		}
+
 		Deposit deposit = Deposit.builder()
 			.userId(userId)
-			.balance(BigDecimal.valueOf(1000L))
+			.balance(BigDecimal.valueOf(0L))
 			.build();
 
 		Deposit savedDeposit = depositJpaRepository.save(deposit);
