@@ -13,26 +13,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.event.productPost.EventType;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
+import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
-import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,13 +46,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProductPostService {
 
-	private final TagRepository tagRepository;
-	private final ProductPostRepository productPostRepository;
+	private final ProductPostEventProducer eventProducer;
+
+	private final UserFeignClient userFeignClient;
 
 	private final ImageService imageService;
 	private final RecentlyViewedService recentlyViewedService;
 
-	private final UserFeignClient userFeignClient;
+	private final TagRepository tagRepository;
+	private final ProductPostRepository productPostRepository;
 
 	private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
 
@@ -67,7 +70,7 @@ public class ProductPostService {
 	public ProductPostResponse createProductPost(
 		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
-		UserResponse userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
 		validateSellerPermission(userInfo);
 
 		ProductPost productPost = ProductPost.builder()
@@ -89,7 +92,10 @@ public class ProductPostService {
 
 		ProductPost saved = productPostRepository.save(productPost);
 
-		return ProductPostMapper.toProductPostResponse(saved);
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		eventProducer.sendUpsertEvent(saved, EventType.CREATE);
+
+		return ProductPostMapper.toResponse(saved);
 	}
 
 	/**
@@ -105,25 +111,28 @@ public class ProductPostService {
 	public ProductPostResponse updateProductPost(
 		ProductPostRequest request, List<MultipartFile> imageFiles, String userId, String postId) {
 
-		UserResponse userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
 		validateSellerPermission(userInfo);
 
-		ProductPost productPost = productPostRepository.findById(postId)
+		ProductPost target = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
 		// 게시물이 수정 가능한 상태인지 유효성 검사
-		productPost.validateUpdate(userId, userInfo.roles());
+		target.validateUpdate(userId, userInfo.roles());
 
 		// 기존 저장된 이미지 삭제하고 새 이미지로 교체
-		replaceImages(productPost, imageFiles);
+		replaceImages(target, imageFiles);
 
 		// 게시글에 입력받은 tag 추가
-		addTags(productPost, request.tagIds());
+		addTags(target, request.tagIds());
 
 		// request 요청으로 게시글 정보 변경
-		productPost.update(request);
+		target.update(request);
 
-		return ProductPostMapper.toProductPostResponse(productPost);
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		eventProducer.sendUpsertEvent(target, EventType.UPDATE);
+
+		return ProductPostMapper.toResponse(target);
 	}
 
 	/**
@@ -136,7 +145,7 @@ public class ProductPostService {
 	 */
 	public String deleteProductPost(String userId, String postId) {
 
-		UserResponse userInfo = getUserInfo(userId);
+		UserResponse userInfo = getUserInfoByFeignClient(userId);
 		validateSellerPermission(userInfo);
 
 		ProductPost target = productPostRepository.findById(postId)
@@ -151,7 +160,11 @@ public class ProductPostService {
 		// soft delete 처리
 		target.delete();
 
-		return target.getId();
+		// Elasticsearch 동기화를 위한 Kafka 이벤트 발행
+		String targetId = target.getId();
+		eventProducer.sendDeleteEvent(targetId);
+
+		return targetId;
 	}
 
 	/**
@@ -165,7 +178,7 @@ public class ProductPostService {
 	 */
 	public ProductPostResponse getProductPostById(String postId) {
 		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		return ProductPostMapper.toProductPostResponse(productPost);
+		return ProductPostMapper.toResponse(productPost);
 	}
 
 	/**
@@ -183,11 +196,11 @@ public class ProductPostService {
 		log.info("userId = {}", userId);
 		// 실제 유저인 경우 redis에 최근 본 상품 목록으로 저장
 		if (!userId.equals("anonymous")) {
-			getUserInfo(userId); // user-service에 해당 유저가 존재하는지 확인
+			getUserInfoByFeignClient(userId); // user-service에 해당 유저가 존재하는지 확인
 			recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
 		}
 
-		return ProductPostMapper.toProductPostResponse(productPost);
+		return ProductPostMapper.toResponse(productPost);
 
 	}
 
@@ -220,7 +233,7 @@ public class ProductPostService {
 			page.getSize(),
 			page.hasNext(),
 			page.getContent().stream()
-				.map(ProductPostMapper::toProductPostResponse)
+				.map(ProductPostMapper::toResponse)
 				.toList()
 		);
 	}
@@ -233,13 +246,37 @@ public class ProductPostService {
 	 * @return 최근 본 게시물 응답 목록
 	 */
 	public List<ProductPostResponse> getRecentlyViewedPosts(String userId) {
-		getUserInfo(userId); // 사용자 정보가 조회되지 않으면 예외 발생
+		getUserInfoByFeignClient(userId); // 사용자 정보가 조회되지 않으면 예외 발생
 		Set<String> viewedPostIds = recentlyViewedService.getRecentlyViewedPostIds(userId, MAX_COUNT);
 
 		return productPostRepository.findAllById(viewedPostIds)
 			.stream()
-			.map(ProductPostMapper::toProductPostResponse)
+			.map(ProductPostMapper::toResponse)
 			.toList();
+	}
+
+	public ProductPostResponse createDummyProductPost (
+		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
+
+		ProductPost productPost = ProductPost.builder()
+			.userId(userId)
+			.categoryId(request.categoryId())
+			.title(request.title())
+			.name(request.name())
+			.price(request.price())
+			.description(request.description())
+			.status(request.status())
+			.tradeStatus(TradeStatus.SELLING)
+			.build();
+
+		addTags(productPost, request.tagIds());
+
+		// 첨부된 이미지를 s3 업로드 후 productPost에 추가
+		uploadAndAddImages(productPost, imageFiles);
+
+		ProductPost saved = productPostRepository.save(productPost);
+
+		return ProductPostMapper.toResponse(saved);
 	}
 
     /*
@@ -274,11 +311,11 @@ public class ProductPostService {
 	 * @throws ProductPostException 이미지가 없거나 10개를 초과하는 경우
 	 */
 	private void validateUploadImage(List<MultipartFile> imageFiles) {
-		// TODO: 추후 제거, 대량의 더미데이터 생성을 위해 이미지가 안들어가도 생성되도록 임시 수정
-		// // 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
-		// if (imageFiles == null || imageFiles.isEmpty()) {
-		//     throw new ProductPostException(IMAGE_REQUIRED);
-		// }
+
+		// 게시글 등록 시 이미지 반드시 1개는 필요, 없으면 예외처리
+		if (imageFiles == null || imageFiles.isEmpty()) {
+			throw new ProductPostException(IMAGE_REQUIRED);
+		}
 
 		// 10개를 초과해서 등록하더라도 예외처리
 		if (imageFiles.size() > 10) {
@@ -331,35 +368,11 @@ public class ProductPostService {
 	}
 
 	// FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
-	private UserResponse getUserInfo(String userId) {
-		try {
-			return userFeignClient.getUser(userId);
-
-		} catch (FeignException.NotFound e) {
-			// 404 - 사용자 없음
-			log.error("사용자를 찾을 수 없음 - userId: {}", userId);
-			throw new CustomException(USER_NOT_FOUND.getMessage());
-
-		} catch (FeignException.Unauthorized e) {
-			// 401 - 인증 실패
-			log.error("인증 실패 - userId: {}, status: {}, message: {}",
-				userId, e.status(), e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-
-		} catch (FeignException.Forbidden e) {
-			// 403 - 권한 없음
-			log.error("권한 없음 - userId: {}, message: {}", userId, e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-
-		} catch (FeignException e) {
-			// 기타 Feign 통신 오류
-			log.error("Feign 통신 오류 - userId: {}, status: {}, message: {}",
-				userId, e.status(), e.contentUTF8());
-			throw new ProductPostException(EXTERNAL_API_ERROR);
-		}
+	private UserResponse getUserInfoByFeignClient(String userId) {
+		return userFeignClient.getUser(userId);
 	}
 
-	// 사용자 정보를 통해 판매자 인증 여부를 검증합니다.
+	// feignClient를 통해 얻게된 사용자 정보의 판매자 인증 여부를 검증합니다.
 	private void validateSellerPermission(UserResponse user) {
 		if (!user.roles().contains("ADMIN") && !user.roles().contains("SELLER")) {
 			throw new CustomException(SELLER_PERMISSION_REQUIRED.getMessage());
@@ -370,28 +383,19 @@ public class ProductPostService {
 		return this.getProductPostById(id).tradeStatus() == TradeStatus.SELLING;
 	}
 
-	public void updateTradeStatusToProcessing(String postId) {
+	public void updateTradeStatusById(String postId, TradeStatus tradeStatus) {
 		ProductPost product = productPostRepository.findById(postId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsProcessing();
+
+		switch (tradeStatus) {
+			case PROCESSING -> product.markAsProcessing();
+			case SOLDOUT -> product.markAsSoldout();
+			case SELLING -> product.markAsSellingAgain();
+		}
+
 		productPostRepository.save(product);
 	}
 
-	public void updateTradeStatusToSoldout(String postId) {
-		ProductPost product = productPostRepository.findById(postId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsSoldout();
-		productPostRepository.save(product);
-	}
-
-	public void updateTradeStatusToSelling(String postId) {
-		ProductPost product = productPostRepository.findById(postId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-		product.markAsSellingAgain();
-		productPostRepository.save(product);
-	}
-
-	// TODO: 상품 판매상태 변경
 	// TODO: 내가 구매한 상품 조회
 	// TODO: 내가 판매한 상품 조회
 	// TODO: 좋아요 로직 구현

@@ -1,31 +1,27 @@
+application:
+  title: yeongeunMarket
+  version: 1.0
+
 server:
   port: 8081
 
 spring:
   application:
     name: domain-service
+  
+  logging:
+    config: classpath:logback-local.xml
 
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
-
-
-
-  #  datasource:
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
-  #    url: jdbc:mysql://localhost:3306/${custom.db.database}
-  #    username: "${custom.db.username}"
-  #    password: "${custom.db.password}"
-
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/domain_dev
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
-
   jpa:
     open-in-view: false
     hibernate:
@@ -38,11 +34,8 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
-    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
-
-  sql:
-    init:
-      mode: always  # data.sql을 항상 실행
+      order_inserts: true
+      order_updates: true
 
   data:
     redis:
@@ -52,16 +45,19 @@ spring:
   kafka:
     bootstrap-servers: localhost:9090
     listener:
-      auto-startup: false
-    admin:
-      auto-create: false
+#      auto-startup: false
+      immediate-stop: false # default 값 명시
+
+#    admin:
+#      auto-create: false
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
       properties:
         allow.auto.create.topics: false
+        observation:
+          enabled: true
 
     consumer:
       group-id: domain-group
@@ -69,7 +65,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
       properties:
-        spring.json.trusted.packages: "com.common.event"
+        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
+        allow.auto.create.topics: false
 
   elasticsearch:
     uris: http://localhost:9200 # default 지만 명시적으로 작성
@@ -101,15 +98,13 @@ custom:
     topic:
       command: deposit-command
 
+  product-post:
+    topic:
+      event: product-post-events
+
   feign:
     url:
       user-service: localhost:8080
-
-  payment:
-    toss:
-      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
-      targetUrl: https://api.tosspayments.com/v1/payments
 
 ---
 spring:

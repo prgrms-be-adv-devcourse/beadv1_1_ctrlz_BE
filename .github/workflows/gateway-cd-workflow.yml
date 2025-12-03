@@ -1,6 +1,7 @@
 name: gateway-service ci/cd
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main

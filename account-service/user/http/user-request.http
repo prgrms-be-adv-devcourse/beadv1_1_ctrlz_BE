@@ -1,5 +1,5 @@
 ### 회원가입
-POST http://localhost:8080/api/users
+POST http://localhost:8082/api/users
 Content-Type: application/json
 #--WebAppBoundary
 #Content-Disposition: form-data; name="profileImage"; filename="test.png"
@@ -20,7 +20,9 @@ Content-Type: application/json
   "city": "city_6232d43546ca",
   "details": "details_2de90f41ec58",
   "name": "name_435c00db2258",
-  "nickname": "nickname_9ca5bcb1ad24"
+  "nickname": "nickname_9ca5bcb1ad24",
+  "gender" : "male",
+  "age" : 45
 }
 
 > {%

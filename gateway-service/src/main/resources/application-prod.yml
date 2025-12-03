@@ -1,90 +1,148 @@
 server:
-  port: 8000
+  port: 8082
 
 spring:
   application:
     name: gateway-service
 
+  logging:
+    config: classpath:logback-prod.xml
+
+  data:
+    redis:
+      port: 6379
+      host: redis-svc
+      password: 1234
+
   cloud:
     gateway:
+      observations:
+        http:
+          server:
+            enabled: true
+          client:
+            enabled: true
       server:
         webflux:
           routes:
-            - id: oauth-login
-              uri: lb://ACCOUNT-SERVICE
+            - id: tag-search-public
+              uri: lb://DOMAIN-SERVICE
               predicates:
-                - Path=/oauth2/authorization/google
+                - Path=/api/tags
                 - Method=GET
 
-            - id: oauth-callback
-              uri: lb://ACCOUNT-SERVICE
+            - id: category-search-public
+              uri: lb://DOMAIN-SERVICE
               predicates:
-                - Path=/login/oauth2/code/google
+                - Path=/api/categories
                 - Method=GET
-              filters:
-                - PreserveHostHeader
 
-            - id: auth-sign-up
+            - id: tag-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/tags
+                - Method=GET
+
+            - id: category-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/categories
+                - Method=GET
+
+            - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users
                 - Method=POST
+              filters:
+                - name: AccessTokenCaptureFilter
+                - name: IpCaptureFilter
 
             - id: user-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users/**
                 - Method=GET,PATCH,DELETE
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
+            - id: auth-api-protected
+              uri: lb://ACCOUNT-SERVICE
               predicates:
-                - Path=/api/product-posts
-                - Method=GET
+                - Path=/api/auth/reissue
+                - Method=POST  # CSRF 방어를 위해 POST 사용
+
+              filters:
+                - name: AccessTokenCaptureFilter
+                - name: IpCaptureFilter
+                - name: ReissueTokenFilter
 
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/product-posts/**
                 - Method=POST,PUT,DELETE,PATCH
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: SELLER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: SELLER
 
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/carts/**
                 - Method=GET,PATCH,DELETE,POST
-            #              filters:
-            #                - name: AuthenticationFilter
-            #                  args:
-            #                    requiredRole: USER
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
             - id: deposit-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/deposits/**
-                - Method=GET
-#              filters:
-#                - name: AuthenticationFilter
-#                  args:
-#                    requiredRole: USER
+                - Method=GET,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
-# k8s 설정
+            - id: order-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/orders/**
+                - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            - id: payment-api-open
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
+
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
+services:
+  account:
+    url: lb://ACCOUNT-SERVICE
+
+  # k8s 설정
 eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
-  #eureka:
   instance:
     prefer-ip-address: true
-
-#    hostname: svc-account-service 서비스 이름 직접 등록
-
+    hostname: gateway-service
 

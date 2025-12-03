@@ -7,6 +7,7 @@ COPY domain-service/gradle ./domain-service/gradle
 COPY common/build.gradle ./common/build.gradle
 
 COPY common ./common
+COPY observability-config ./observability-config
 COPY domain-service/src ./domain-service/src
 
 
@@ -23,6 +24,7 @@ WORKDIR /app
 
 COPY --from=build /app/domain-service/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+
 
 

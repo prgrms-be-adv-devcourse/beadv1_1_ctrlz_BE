@@ -3,14 +3,14 @@ name: CI Test Script
 on:
   pull_request:
     branches:
-      - main
+      - test
 
 jobs:
   code-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [discovery-service, account-service, domain-service, settlement-service, gateway-service]
+        service: [discovery-service, account-service, domain-service, settlement-service, gateway-service, payment-service]
 
     steps:
       - name: 브랜치로 체크아웃

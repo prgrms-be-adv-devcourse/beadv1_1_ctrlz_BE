@@ -2,19 +2,32 @@ spring:
   application:
     name: account-service
 
+  logging:
+    config: classpath:logback-prod.xml
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  batch:
+    jdbc:
+      initialize-schema: always
+      platform: mysql
+
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create # 수정 필요
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,11 +36,11 @@ spring:
     #    username: "${DB_USERNAME}"
     #    password: "${DB_PASSWORD}"
     #    url: jdbc:mysql://mysql-service:3306/test_db
-    url: jdbc:mysql://mysql-service:3306/test_db
+    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
 
   data:
     redis:
-      host: redis-service
+      host: redis-svc
       port: 6379
       #      password: 1234
       timeout: 3000ms
@@ -40,7 +53,7 @@ spring:
   #      password: "${REDIS_PASSWORD}"
   kafka:
     bootstrap-servers:
-      - kafka-mq:9090
+      - kafka-svc:9090
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -48,14 +61,21 @@ spring:
 
       acks: all
 
-      properties:
-        delivery.timeout.ms: 120000
-        linger.ms: 0
-        request.timeout.ms: 30000
-        enable.idempotence: false # 멱등성 비활성화
-        retries: 0 # 재시도 하지 않음
-        max.in.flight.requests.per.connection: 1 # 한번에 하나의 요청만 전송
-        allow.auto.create.topics: false
+    properties:
+      delivery.timeout.ms: 120000
+      linger.ms: 5
+      request.timeout.ms: 30000
+      enable.idempotence: true
+      retries: 1
+      max.in.flight.requests.per.connection: 5
+      allow.auto.create.topics: false
+      compression.type: lz4 # 압축 추가
+      # transactional.id: 고려할만함
+
+      batch-size: 32768 #32kb
+      buffer-memory: 67108864 # 64mb
+
+
 
     admin:
       auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
@@ -75,13 +95,14 @@ custom:
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
   # 수정 필요
-  redirectUrl: http://localhost:8080
+  redirectUrl: https://api.yeongeun.chlab.org/
 
 # k8s 설정
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: account-service
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
