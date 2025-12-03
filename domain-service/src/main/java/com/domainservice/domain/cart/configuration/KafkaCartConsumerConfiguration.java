@@ -22,7 +22,7 @@ import org.springframework.util.backoff.FixedBackOff;
 import com.common.event.CartCreateCommand;
 
 @Configuration
-public class KafkaConfiguration {
+public class KafkaCartConsumerConfiguration {
 
 	@Value("${custom.cart.topic.command}")
 	private String cartTopicCommand;
