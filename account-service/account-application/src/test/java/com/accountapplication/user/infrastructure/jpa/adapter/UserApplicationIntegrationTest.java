@@ -67,7 +67,7 @@ class UserApplicationIntegrationTest {
 
 	@DisplayName("사용자 생성 시 트랜잭션 커밋 후에 이벤트가 정상적으로 발행 및 처리된다")
 	@Test
-	void test2() {
+	void test2() throws InterruptedException {
 		// given
 		UserContext newUserContext = UserContext_생성();
 		String expectedUserId = "testId";
@@ -85,6 +85,7 @@ class UserApplicationIntegrationTest {
 
 		transactionManager.commit(status);
 
+		Thread.sleep(500);
 		verify(outboundEventPublisher, times(1))
 			.publish(any(String.class), any(CartCreateCommand.class));
 		verify(externalEventPersistentPort, times(1))
