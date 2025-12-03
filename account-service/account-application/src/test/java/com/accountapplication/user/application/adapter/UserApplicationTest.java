@@ -2,7 +2,6 @@ package com.accountapplication.user.application.adapter;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,30 +15,9 @@ import com.user.application.adapter.UserApplication;
 import com.user.application.adapter.dto.UserContext;
 import com.user.infrastructure.jpa.converter.AESUtils;
 
-@Disabled
 @Import({AESUtils.class})
 @DataJpaTest
 class UserApplicationTest {
-
-	// @DisplayName("회원 가입 시, 닉네임이 중복되면 예외를 던진다.")
-	// @Test
-	// void test1() throws Exception {
-	// 	//given
-	// 	UserApplication userApplication = new UserApplication(new FakeRepository(), null, null);
-	// 	//when//then
-	// 	assertThatThrownBy(() -> userApplication.verifyNickname("test_nickname"))
-	// 		.isInstanceOf(CustomException.class);
-	// }
-	//
-	// @DisplayName("회원 가입 시, 연락처가 중복되면 예외를 던진다.")
-	// @Test
-	// void test2() throws Exception {
-	// 	//given
-	// 	UserApplication userApplication = new UserApplication(new FakeRepository(), null, null);
-	// 	//when//then
-	// 	assertThatThrownBy(() -> userApplication.verifyPhoneNumber("010-1111-1111"))
-	// 		.isInstanceOf(CustomException.class);
-	// }
 
 	@DisplayName("카트 생성에 실패하면 예외를 던진다.")
 	@Test
@@ -60,6 +38,8 @@ class UserApplicationTest {
 			.phoneNumber("010-9876-5432")
 			.oauthId("oauth-abcdef123456")
 			.profileImageUrl("https://cdn.example.com/profile/mockuser.png")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		//when then

@@ -1,5 +1,6 @@
 package com.common.exception.vo;
 
+import org.springframework.http.HttpStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,10 @@ public enum ProductPostExceptionCode {
 
     // ===== 409 Conflict =====
     ALREADY_DELETED(409, "이미 삭제된 상품입니다."),
-    CANNOT_UPDATE_SOLDOUT(409, "판매 완료된 상품은 수정할 수 없습니다.");
+    CANNOT_UPDATE_SOLDOUT(409, "판매 완료된 상품은 수정할 수 없습니다."),
+
+    // ==== 503 Service_Unavailable ====
+    EXTERNAL_API_ERROR(503, "외부 서비스와의 통신 중 오류가 발생했습니다");
 
     private final int code;
     private final String message;

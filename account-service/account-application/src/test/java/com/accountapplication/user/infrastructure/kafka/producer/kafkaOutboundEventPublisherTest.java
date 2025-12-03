@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.accountapplication.user.infrastructure.kafka.TestKafkaConsumer;
 import com.user.domain.event.UserSignedUpEvent;
-import com.user.domain.vo.EventType;
+import com.user.application.adapter.vo.EventType;
 import com.user.infrastructure.kafka.producer.kafkaOutboundEventPublisher;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.model.User;
-import com.user.domain.vo.UserRole;
 
 public class FakeRepository implements UserPersistencePort {
 
@@ -24,7 +23,7 @@ public class FakeRepository implements UserPersistencePort {
 	}
 
 	@Override
-	public void withdraw(String id) {
+	public void withdraw(User user) {
 
 	}
 
@@ -43,14 +42,13 @@ public class FakeRepository implements UserPersistencePort {
 		return true;
 	}
 
-
 	@Override
-	public void updateRole(String id, UserRole userRole) {
+	public void updateRolesForSeller(User user) {
 
 	}
 
 	@Override
-	public void updateImage(String userId, String imageId, String profileImageUrl) {
+	public void updateImage(User user) {
 
 	}
 

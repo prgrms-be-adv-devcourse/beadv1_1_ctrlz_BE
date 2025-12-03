@@ -1,35 +1,47 @@
 package com.domainservice.common.init;
 
-import com.domainservice.common.init.data.CategoryInitializer;
-import com.domainservice.common.init.data.ProductPostInitializer;
-import com.domainservice.common.init.data.TagInitializer;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
+
+import com.domainservice.common.init.data.CartInitializer;
+import com.domainservice.common.init.data.CategoryInitializer;
+import com.domainservice.common.init.data.OrderInitializer;
+import com.domainservice.common.init.data.ProductPostInitializer;
+import com.domainservice.common.init.data.ReviewInitializer;
+import com.domainservice.common.init.data.TagInitializer;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
+// @Component
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
 
     private final CategoryInitializer categoryInitializer;
     private final TagInitializer tagInitializer;
     private final ProductPostInitializer productPostInitializer;
+    private final ReviewInitializer reviewInitializer;
+    private final CartInitializer cartInitializer;
+    private final OrderInitializer orderInitializer;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info("========================================");
-        log.info("데이터 초기화 시작");
-        log.info("========================================");
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		log.info("========================================");
+		log.info("데이터 초기화 시작");
+		log.info("========================================");
 
-        categoryInitializer.init();
-        tagInitializer.init();
-        productPostInitializer.init();
+        // categoryInitializer.init();
+        // tagInitializer.init();
+		// productPostInitializer.init();
+        reviewInitializer.init();
+        cartInitializer.init();
+        orderInitializer.init();
 
-        log.info("========================================");
-        log.info("데이터 초기화 완료!");
-        log.info("========================================");
-    }
+		log.info("========================================");
+		log.info("데이터 초기화 완료!");
+		log.info("========================================");
+	}
 }

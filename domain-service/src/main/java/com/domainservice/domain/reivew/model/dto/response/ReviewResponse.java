@@ -1,5 +1,8 @@
 package com.domainservice.domain.reivew.model.dto.response;
 
+import java.time.LocalDateTime;
+import com.domainservice.common.model.user.UserResponse;
+import com.domainservice.domain.order.model.dto.OrderedAt;
 import com.domainservice.domain.reivew.model.entity.Review;
 
 public record ReviewResponse(
@@ -9,21 +12,25 @@ public record ReviewResponse(
 	String contents,
 	Integer userRating,
 	Integer productRating,
+	LocalDateTime orderedAt,
 	boolean isMine
 ) {
 
 	public static ReviewResponse from(
-		Review review
-		// Todo: 회원 엔티티 받아오기
+		Review review,
+		UserResponse userResponse,
+		OrderedAt orderedAt,
+		String userId
 	) {
 		return new ReviewResponse(
 			review.getId(),
 			review.getUserId(),
-			"회원 닉네임",
+			userResponse.nickname(),
 			review.getContents(),
 			review.getUserRating(),
 			review.getProductRating(),
-			false		//TODO: 자신이 작성한 리뷰가 맞는 지 확인 필요
+			orderedAt.date(),
+			userId.equals(review.getUserId())
 		);
 	}
 }

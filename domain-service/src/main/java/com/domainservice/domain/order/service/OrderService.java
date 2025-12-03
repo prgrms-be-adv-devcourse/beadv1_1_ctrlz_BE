@@ -3,14 +3,19 @@ package com.domainservice.domain.order.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.event.SettlementCreatedEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
 import com.common.exception.vo.OrderExceptionCode;
+import com.common.model.web.PageResponse;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.order.model.dto.OrderItemResponse;
@@ -20,6 +25,7 @@ import com.domainservice.domain.order.model.entity.OrderItem;
 import com.domainservice.domain.order.model.entity.OrderItemStatus;
 import com.domainservice.domain.order.model.entity.OrderStatus;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
+import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
@@ -32,6 +38,7 @@ public class OrderService {
 	private final OrderJpaRepository orderJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
+	private final PurchaseConfirmedEventProducer settlementProducer;
 
 	/**
 	 * 주문 생성
@@ -190,7 +197,7 @@ public class OrderService {
 		if (order.getOrderStatus() != OrderStatus.PAYMENT_COMPLETED) {
 			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
 		}
-		
+
 		// 주문 상태만 변경
 		order.setOrderStatus(OrderStatus.PURCHASE_CONFIRMED);
 		// 각 아이템 상태는 부분취소 여부에 따라 조건부 변경
@@ -198,12 +205,16 @@ public class OrderService {
 			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
 				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
 				productPostService.updateTradeStatusToSoldout(item.getProductPostId());
+				// kafka 메시지 발행
+				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
+					productPostService.getProductPostById(item.getProductPostId()).userId(),
+					item.getPriceSnapshot()
+				));
 			}
+
 		}
 
 		Order savedOrder = orderJpaRepository.save(order);
-
-		//todo 정산 서비스에 저장?
 		return toOrderResponse(savedOrder);
 	}
 
@@ -230,6 +241,8 @@ public class OrderService {
 			order.getTotalAmount(),
 			order.getOrderStatus(),
 			order.getOrderItems().stream()
+				.filter(x -> x.getOrderItemStatus() != OrderItemStatus.CANCELLED
+					&& x.getOrderItemStatus() != OrderItemStatus.REFUND_AFTER_PAYMENT)
 				.map(x -> new OrderItemResponse(
 					x.getId(),
 					x.getPriceSnapshot(),
@@ -237,4 +250,30 @@ public class OrderService {
 				.toList()
 		);
 	}
+	// 주문 상세 조회
+	@Transactional(readOnly = true)
+	public OrderResponse getOrderById(String orderId, String userId) {
+		Order order = orderJpaRepository.findById(orderId)
+			.orElseThrow(()-> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+
+		if(!Objects.equals(userId, order.getBuyerId())){
+			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+		}
+
+		return toOrderResponse(order);
+	}
+
+	// 주문 목록 조회
+	public PageResponse<List<OrderResponse>> getOrderListByUserId(String userId, Pageable pageable) {
+		Page<Order> orderList = orderJpaRepository.findByBuyerId(userId, pageable);
+
+		return new PageResponse<>(
+			orderList.getNumber(),
+			orderList.getTotalPages(),
+			orderList.getSize(),
+			orderList.hasNext(),
+			orderList.getContent().stream().map(this::toOrderResponse).toList()
+		);
+	}
+
 }

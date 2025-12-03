@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-sts
+  labels:
+    app: kafka
+
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+  serviceName: kafka-svc
+
+  template:
+    metadata:
+      name: kafka
+      labels:
+        app: kafka
+
+    spec:
+      containers:
+        - name: kafka
+          image: apache/kafka:latest
+          ports:
+            - containerPort: 9090  # PLAINTEXT
+            - containerPort: 9091  # CONTROLLER
+            - containerPort: 9092  # EXTERNAL
+
+          envFrom:
+            - configMapRef:
+                name: kafka-config-map
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /tmp/kraft-combined-logs
+
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-svc
+
+spec:
+  selector:
+    app: kafka
+
+  ports:
+    - name: plaintext
+      port: 9090
+      targetPort: 9090
+    - name: controller
+      port: 9091
+      targetPort: 9091
+    - name: external
+      port: 9092
+      targetPort: 9092

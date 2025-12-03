@@ -1,0 +1,35 @@
+name: CI Test Script
+
+on:
+  pull_request:
+    branches:
+      - test
+
+jobs:
+  code-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [discovery-service, account-service, domain-service, settlement-service, gateway-service, payment-service]
+
+    steps:
+      - name: 브랜치로 체크아웃
+        uses: actions/checkout@v5
+
+      - name: JDK 세팅
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 서비스 gradlew 권한 세팅
+        run: chmod +x ${{ matrix.service }}/gradlew
+
+      - name: 서비스 테스트 실행
+        working-directory: ./${{ matrix.service }}
+        run: ./gradlew test --no-daemon
+
+
+
+
+

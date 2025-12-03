@@ -1,1 +1,8 @@
 rootProject.name = 'settlement-service'
+
+include(":common")
+project(":common").projectDir = file("./../common")
+include(":observability-config:zipkin")
+project(":observability-config:zipkin").projectDir = file("./../observability-config/zipkin")
+include(":observability-config:logging")
+project(":observability-config:logging").projectDir = file("./../observability-config/logging")

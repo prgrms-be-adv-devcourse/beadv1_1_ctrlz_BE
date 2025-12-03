@@ -1,0 +1,14 @@
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+  name: mysql-config-map
+
+#임시
+data:
+  MYSQL_ROOT_PASSWORD: "1234"
+  TZ: "Asia/Seoul"
+
+
+

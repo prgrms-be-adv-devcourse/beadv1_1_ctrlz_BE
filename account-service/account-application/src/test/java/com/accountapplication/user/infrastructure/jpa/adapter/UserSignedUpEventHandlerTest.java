@@ -12,11 +12,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.user.application.adapter.dto.CartCreateCommand;
 import com.user.application.adapter.UserSignedUpEventHandler;
+import com.user.application.adapter.vo.CommandType;
 import com.user.application.port.out.ExternalEventPersistentPort;
 import com.user.application.port.out.OutboundEventPublisher;
 import com.user.domain.event.UserSignedUpEvent;
-import com.user.domain.vo.EventType;
+import com.user.application.adapter.vo.EventType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserSignedUpEventHandler 테스트")
@@ -50,7 +52,7 @@ class UserSignedUpEventHandlerTest {
 
 		// then
 		verify(externalEventPersistentPort, times(1))
-			.save(eq(TEST_USER_ID), eq(EventType.CREATED));
+			.save(eq(TEST_USER_ID), eq(EventType.CREATED.name()), eq(CommandType.CART_COMMAND.name()), eq(CommandType.DEPOSIT_COMMAND.name()));
 	}
 
 	@DisplayName("UserSignedUpEvent 발생 시 Kafka에 이벤트를 발행한다")
@@ -60,11 +62,11 @@ class UserSignedUpEventHandlerTest {
 		UserSignedUpEvent event = UserSignedUpEvent.from(TEST_USER_ID, EventType.CREATED);
 
 		// when
-		userSignedUpEventHandler.publishKafka(event);
+		userSignedUpEventHandler.publishCartCommand(event);
 
 		// then
 		verify(kafkaEventPublisher, times(1))
-			.publish(eq(CART_COMMAND_TOPIC), eq(event));
+			.publish(eq(CART_COMMAND_TOPIC), eq(new CartCreateCommand(event.userId())));
 	}
 
 	@DisplayName("Kafka 발행 후 이벤트 발행 완료 처리를 한다")
@@ -74,10 +76,10 @@ class UserSignedUpEventHandlerTest {
 		UserSignedUpEvent event = UserSignedUpEvent.from(TEST_USER_ID, EventType.CREATED);
 
 		// when
-		userSignedUpEventHandler.publishKafka(event);
+		userSignedUpEventHandler.publishDepositCommand(event);
 
 		// then
 		verify(externalEventPersistentPort, times(1))
-			.completePublish(eq(TEST_USER_ID), eq(EventType.CREATED));
+			.completePublish(eq(TEST_USER_ID), eq(EventType.CREATED.name()), eq(CommandType.DEPOSIT_COMMAND.name()));
 	}
 }

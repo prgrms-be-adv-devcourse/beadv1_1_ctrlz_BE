@@ -1,1 +1,4 @@
 rootProject.name = 'discovery-service'
+
+include(":observability-config:logging")
+project(":observability-config:logging").projectDir = file("./../observability-config/logging")
