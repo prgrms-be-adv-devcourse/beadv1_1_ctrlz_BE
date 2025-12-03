@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant-cluster-sts
+  labels:
+    app: qdrant-cluster
+spec:
+  serviceName: qdrant-cluster
+  replicas: 3  # 클러스터 모드: 3개의 노드
+  selector:
+    matchLabels:
+      app: qdrant-cluster
+  template:
+    metadata:
+      labels:
+        app: qdrant-cluster
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:latest
+          args:
+            - "./qdrant"
+            - "--uri"
+            - "http://$(POD_NAME).qdrant-cluster:6335"
+          ports:
+            - name: http
+              containerPort: 6333
+              protocol: TCP
+            - name: grpc
+              containerPort: 6334
+              protocol: TCP
+            - name: p2p
+              containerPort: 6335
+              protocol: TCP
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: QDRANT__CLUSTER__ENABLED
+              value: "true"
+            - name: QDRANT__CLUSTER__P2P__PORT
+              value: "6335"
+          envFrom:
+            - configMapRef:
+                name: qdrant-config-map
+          volumeMounts:
+            - name: qdrant-storage
+              mountPath: /qdrant/storage
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+  volumeClaimTemplates:
+    - metadata:
+        name: qdrant-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+
+---
+# Headless Service for StatefulSet (P2P communication)
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-cluster
+  labels:
+    app: qdrant-cluster
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: qdrant-cluster
+  ports:
+    - name: http
+      protocol: TCP
+      port: 6333
+      targetPort: 6333
+    - name: grpc
+      protocol: TCP
+      port: 6334
+      targetPort: 6334
+    - name: p2p
+      protocol: TCP
+      port: 6335
+      targetPort: 6335
+
+---
+# ClusterIP Service for client access
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-cluster-svc
+  labels:
+    app: qdrant-cluster
+spec:
+  type: ClusterIP
+  selector:
+    app: qdrant-cluster
+  ports:
+    - name: http
+      protocol: TCP
+      port: 6333
+      targetPort: 6333
+    - name: grpc
+      protocol: TCP
+      port: 6334
+      targetPort: 6334

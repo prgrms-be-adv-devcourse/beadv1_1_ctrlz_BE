@@ -5,7 +5,7 @@ WORKDIR /app
 COPY gateway-service/build.gradle gateway-service/settings.gradle gateway-service/gradlew gateway-service/gradlew.bat ./gateway-service/
 COPY gateway-service/gradle ./gateway-service/gradle
 
-
+COPY observability-config ./observability-config
 COPY gateway-service/src ./gateway-service/src
 
 WORKDIR /app/gateway-service
@@ -20,4 +20,5 @@ WORKDIR /app
 COPY --from=build /app/gateway-service/build/libs/*.jar app.jar
 
 # 변경 예정
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+

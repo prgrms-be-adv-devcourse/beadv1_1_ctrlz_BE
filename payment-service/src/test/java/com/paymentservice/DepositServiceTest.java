@@ -1,4 +1,4 @@
-package com.domainservice;
+package com.paymentservice;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -15,12 +15,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.common.exception.CustomException;
-import com.domainservice.domain.deposit.model.dto.DepositResponse;
-import com.domainservice.domain.deposit.model.entity.Deposit;
-import com.domainservice.domain.deposit.model.entity.DepositLog;
-import com.domainservice.domain.deposit.repository.DepositJpaRepository;
-import com.domainservice.domain.deposit.repository.DepositLogJpaRepository;
-import com.domainservice.domain.deposit.service.DepositService;
+import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.entity.Deposit;
+import com.paymentservice.deposit.model.entity.DepositLog;
+import com.paymentservice.deposit.repository.DepositJpaRepository;
+import com.paymentservice.deposit.repository.DepositLogJpaRepository;
+import com.paymentservice.deposit.service.DepositService;
 
 @ExtendWith(MockitoExtension.class)
 class DepositServiceTest {

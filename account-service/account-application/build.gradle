@@ -9,7 +9,7 @@ dependencies {
     implementation project(":auth")
     implementation project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
-    compileOnly(project(":common"))
+    implementation(project(":common"))
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
