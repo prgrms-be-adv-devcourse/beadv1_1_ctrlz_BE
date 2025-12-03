@@ -31,6 +31,7 @@ services:
       - "5044:5044"
     volumes:
        - ./lib/pipeline:/usr/share/logstash/pipeline
+       - ../logs:/usr/share/logstash/logs
 
   kibana:
     image: kibana:9.1.3

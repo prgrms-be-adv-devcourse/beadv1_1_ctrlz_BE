@@ -1,5 +1,7 @@
 package com.user.application.adapter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -14,12 +16,12 @@ import com.user.application.port.out.OutboundEventPublisher;
 import com.user.domain.event.UserSignedUpEvent;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public class UserSignedUpEventHandler {
+
+	private static final Logger log = LoggerFactory.getLogger("API." + UserSignedUpEventHandler.class.getName());
 
 	@Value("${custom.cart.topic.command}")
 	private String cartCommandTopic;

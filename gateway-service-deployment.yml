@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway-service-deploy
+  name: gateway-deploy
   labels:
     app: gateway # deploy 식별 라벨
 spec:   # deployment 면세
@@ -23,13 +23,12 @@ spec:   # deployment 면세
       labels:
         app: gateway #spec.selector.matchLabels와 일치해야
     spec:
-      hostname: gateway-service
       containers:
         - name: gateway-service-app
           image: docker.io/beatchoi156/gateway-service:latest
           env:
             - name: discovery_default_zone
-              value: "http://discovery-service:8761/eureka/"
+              value: "http://discovery-svc:8761/eureka/"
           ports:
             - containerPort: 8000
 #          resources:
@@ -64,7 +63,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: gateway-service
+  name: gateway-svc
 spec:
   type: NodePort # 외부 통신 가능하게함
   selector:

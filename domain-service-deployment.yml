@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: domain-service-deploy
+  name: domain-deploy
   labels:
     app: domain
 spec:
@@ -20,13 +20,12 @@ spec:
       labels:
         app: domain
     spec:
-      hostname: domain-service
       containers:
         - name: domain-service-app
           image: docker.io/beatchoi156/domain-service:latest
           env:
             - name: discovery_default_zone
-              value: "http://discovery-service:8761/eureka/"
+              value: "http://discovery-svc:8761/eureka/"
           ports:
             - containerPort: 8081
 #          resources:
@@ -60,7 +59,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: domain-service
+  name: domain-svc
 spec:
 #  type: NodePort
   selector:
