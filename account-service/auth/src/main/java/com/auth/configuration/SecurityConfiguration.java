@@ -86,7 +86,9 @@ public class SecurityConfiguration {
 				).permitAll()
 				.requestMatchers(
 					"/oauth2/**",
-					"/login/**"
+					"/login/**",
+					"/api/searches/",
+					"/api/searches/popular**"
 				).permitAll()
 				// H2 콘솔
 				.requestMatchers("/h2-console/**").permitAll()

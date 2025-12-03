@@ -1,4 +1,4 @@
-package com.domainservice.domain.search.model.dto.request;
+package com.domainservice.domain.search.service.dto.request;
 
 import com.domainservice.domain.search.service.converter.PrefixConverter;
 
