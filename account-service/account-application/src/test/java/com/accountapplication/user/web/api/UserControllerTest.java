@@ -131,7 +131,8 @@ class UserControllerTest {
 		UserEntity user = userJpaRepository.save(userEntity);
 
 		// when then
-		mockMvc.perform(post("/api/users/sellers/verification/{id}", user.getId())
+		mockMvc.perform(post("/api/users/sellers/verification")
+				.header("X-REQUEST-ID", user.getId())
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(objectMapper.writeValueAsString(new VerificationReqeust("010-1234-5678"))))
 			.andDo(print())
@@ -167,7 +168,8 @@ class UserControllerTest {
 
 		doNothing().when(sellerVerificationUseCase).checkVerificationCode(any(SellerVerificationContext.class));
 
-		mockMvc.perform(post("/api/users/sellers/{id}", user.getId())
+		mockMvc.perform(post("/api/users/sellers")
+				.header("X-REQUEST-ID", user.getId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(new UpdateSellerRequest("010-1234-5678"))))
 			.andDo(print())
@@ -214,7 +216,8 @@ class UserControllerTest {
 		);
 
 		// when
-		mockMvc.perform(patch("/api/users/{id}", savedUser.getId())
+		mockMvc.perform(patch("/api/users/my-info")
+				.header("X-REQUEST-ID", savedUser.getId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updateRequest)))
 			.andDo(print())
