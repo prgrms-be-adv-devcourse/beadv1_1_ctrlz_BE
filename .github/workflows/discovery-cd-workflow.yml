@@ -1,13 +1,14 @@
 name: discovery-service ci/cd
 
 on:
-  push:
-    branches:
-      - main
-      - deploytest
-    paths:
-      - 'discovery-service/**'
-      - '.github/workflows/**'
+  workflow_dispatch:
+#  push:
+#    branches:
+#      - main
+#      - deploytest
+#    paths:
+#      - 'discovery-service/**'
+#      - '.github/workflows/**'
 
 jobs:
   releasing:

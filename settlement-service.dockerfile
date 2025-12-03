@@ -6,6 +6,7 @@ COPY settlement-service/build.gradle settlement-service/settings.gradle settleme
 COPY settlement-service/gradle ./settlement-service/gradle
 COPY settlement-service/src ./settlement-service/src
 COPY common ./common
+COPY observability-config ./observability-config
 
 WORKDIR /app/settlement-service
 RUN ./gradlew dependencies --no-daemon
@@ -17,4 +18,4 @@ WORKDIR /app
 
 COPY --from=build /app/settlement-service/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod" ,"app.jar"]
+ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
