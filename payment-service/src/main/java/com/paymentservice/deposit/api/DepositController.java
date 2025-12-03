@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,17 +24,19 @@ public class DepositController {
 	public BaseResponse<DepositResponse> createDeposit(
 		@RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
-		DepositResponse depositResponse = depositService.createDeposit(userId);
+		Deposit deposit = depositService.createDeposit(userId);
+		DepositResponse response = DepositResponse.from(deposit);
 
-		return new BaseResponse<>(depositResponse, depositResponse.message());
+		return new BaseResponse<>(response, "예치금 생성 성공");
 	}
 
 	@GetMapping
 	public BaseResponse<DepositResponse> getDeposit(
 		@RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
-		DepositResponse depositBalance = depositService.getDepositBalance(userId);
+		Deposit deposit = depositService.getDepositBalance(userId);
+		DepositResponse response = DepositResponse.from(deposit);
 
-		return new BaseResponse<>(depositBalance, "예치금 조회 성공했습니다");
+		return new BaseResponse<>(response, "예치금 조회 성공");
 	}
 }

@@ -104,9 +104,9 @@ public class DepositService {
 	/**
 	 * 사용자의 예치금 잔액 조회
 	 */
-	public DepositResponse getDepositBalance(String userId) {
+	public Deposit getDepositBalance(String userId) {
 		Deposit deposit = getDepositByUserId(userId);
-		return new DepositResponse(deposit.getId(), deposit.getBalance(), "잔액 조회가 완료되었습니다.");
+		return new Deposit(deposit.getId(), deposit.getBalance());
 	}
 
 
@@ -242,7 +242,7 @@ public class DepositService {
 	}
 
 
-	public DepositResponse createDeposit(String userId) {
+	public Deposit createDeposit(String userId) {
 
 		if(depositJpaRepository.findByUserId(userId).isPresent()){
 			throw new CustomException(DepositExceptionCode.DEPOSIT_ALREADY_EXISTS.getMessage());
@@ -253,7 +253,6 @@ public class DepositService {
 			.balance(BigDecimal.valueOf(0L))
 			.build();
 
-		Deposit savedDeposit = depositJpaRepository.save(deposit);
-		return new DepositResponse(savedDeposit.getUserId(), savedDeposit.getBalance(), "예치금 생성 완료");
+		return depositJpaRepository.save(deposit);
 	}
 }

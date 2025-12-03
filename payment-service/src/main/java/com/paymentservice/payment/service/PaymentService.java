@@ -12,9 +12,9 @@ import com.common.exception.vo.OrderExceptionCode;
 import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
 import com.paymentservice.common.configuration.feign.client.PaymentFeignClient;
 import com.paymentservice.common.model.order.OrderResponse;
-import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.client.PaymentGatewayClient;
+import com.paymentservice.payment.client.PaymentTossClient;
 import com.paymentservice.payment.exception.InvalidOrderAmountException;
 import com.paymentservice.payment.exception.PaymentFailedException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
@@ -41,7 +41,7 @@ public class PaymentService {
     private final PaymentLogService paymentLogService;
     private final OrderFeignClient orderFeignClient;
     private final DepositService depositService;
-    private final PaymentGatewayClient paymentGatewayClient;
+    private final PaymentTossClient paymentTossClient;
 
     // 결제 정보
     public PaymentReadyResponse getPaymentReadyInfo(String orderId, String userId) {
@@ -51,13 +51,13 @@ public class PaymentService {
             throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
         }
 
-        DepositResponse deposit = depositService.getDepositBalance(userId);
+        Deposit deposit = depositService.getDepositBalance(userId);
 
         return new PaymentReadyResponse(
             userId,
             orderId,
             order.totalAmount(),
-            deposit.balance(),
+            deposit.getBalance(),
             order.orderName()
         );
     }
@@ -119,7 +119,7 @@ public class PaymentService {
     // order, deposit 조회 및 validation
     public PaymentResponse tossPayment(PaymentConfirmRequest request, String userId) {
         OrderResponse order = orderFeignClient.getOrder(request.orderId(), userId);
-        DepositResponse deposit = depositService.getDepositBalance(userId);
+        Deposit deposit = depositService.getDepositBalance(userId);
 
         // 실제 결제 총액 검증
         if (order.totalAmount().compareTo(request.amount()) != 0) {
@@ -135,12 +135,12 @@ public class PaymentService {
 
     // DB저장 및 이벤트 처리(트랜잭션)
     @Transactional
-    public PaymentEntity completePayment(TossApprovalResponse approve, String userId, DepositResponse deposit) {
+    public PaymentEntity completePayment(TossApprovalResponse approve, String userId, Deposit deposit) {
 
         BigDecimal usedDepositAmount = approve.depositUsedAmount();     // deposit 사용 금액
         PayType payType;
 
-        if (deposit.balance().compareTo(BigDecimal.ZERO) > 0
+        if (deposit.getBalance().compareTo(BigDecimal.ZERO) > 0
             && usedDepositAmount.compareTo(BigDecimal.ZERO) > 0) {
             // 예치금 차감
             depositService.useDeposit(userId, usedDepositAmount);
@@ -168,11 +168,11 @@ public class PaymentService {
     }
 
     public PaymentResponse processTossPayment(PaymentConfirmRequest request, String userId,
-        DepositResponse deposit) {
+        Deposit deposit) {
 
         try {
             // toss payments api
-            TossApprovalResponse approve = paymentGatewayClient.approve(request);
+            TossApprovalResponse approve = paymentTossClient.approve(request);
 
             // DB 저장 및 예치금 차감
             PaymentEntity paymentEntity = completePayment(approve, userId, deposit);
@@ -203,7 +203,7 @@ public class PaymentService {
         RefundResponse response = null;
         try {
             // toss api
-            approvalResponse = paymentGatewayClient.refund(payment);
+            approvalResponse = paymentTossClient.refund(payment);
 
             // 내부처리
             response = processRefundOrder(payment, approvalResponse, includeDeposit);
