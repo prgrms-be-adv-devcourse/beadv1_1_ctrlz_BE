@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([%X{userId:-ANONYMOUS}]){yellow} %clr([%X{api:-NO_API}]){blue} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : [%X{traceId:-},%X{spanId:-}] [%X{userId:-ANONYMOUS}] [%X{api:-NO_API}] %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- log 저장 paths -->
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
+    <property name="SYSTEM_LOG_FILE" value="${LOG_PATH}/system.log"/>
+    <property name="API_LOG_FILE" value="${LOG_PATH}/api.log"/>
+    <property name="INFO_LOG_FILE" value="${LOG_PATH}/application-info.log"/>
+    <property name="WARN_LOG_FILE" value="${LOG_PATH}/application-warn.log"/>
+    <property name="ERROR_LOG_FILE" value="${LOG_PATH}/application-error.log"/>
+
+    <!-- appender 첨부 -->
+    <include resource="appender-system.xml"/>
+    <include resource="appender-api.xml"/>
+    <include resource="appender-info.xml"/>
+    <include resource="appender-warn.xml"/>
+    <include resource="appender-error.xml"/>
+    <include resource="appender-logstash.xml"/>
+
+    <!-- prod -->
+    <root level="INFO">
+        <!-- logstash 지정해줘야 전파함 -->
+        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="SYSTEM_FILE"/>
+    </root>
+    <logger name="API" level="INFO" additivity="false">
+        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="API_FILE"/>
+    </logger>
+    
+    <!-- name="com" : com 패키지 아래에 생기는 로그만 저장 -->
+    <!-- additivity="false" : 로그 중복 방지 -->
+    <logger name="com" level="INFO" additivity="false">
+        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="INFO_FILE"/>
+        <appender-ref ref="WARN_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </logger>
+</configuration>

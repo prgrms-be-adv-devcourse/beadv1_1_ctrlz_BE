@@ -3,8 +3,11 @@ package com.domainservice.domain.order.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,7 @@ import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
 import com.common.exception.vo.OrderExceptionCode;
 import com.common.model.vo.TradeStatus;
+import com.common.model.web.PageResponse;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.order.model.dto.OrderItemResponse;
@@ -155,7 +159,7 @@ public class OrderService {
 		switch (order.getOrderStatus()) {
 			case PAYMENT_PENDING:
 				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
-				productPostService.updateTradeStatusById(targetItem.getProductPostId(),  TradeStatus.SELLING);
+				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
 				break;
 			case PAYMENT_COMPLETED:
 				// paymentService.refundItem(targetItem);
@@ -271,6 +275,32 @@ public class OrderService {
 		order.getOrderItems().stream()
 			.map(OrderItem::getProductPostId)
 			.forEach(postId -> eventProducer.sendUpsertEventById(postId, EventType.UPDATE));
+	}
+
+	// 주문 상세 조회
+	@Transactional(readOnly = true)
+	public OrderResponse getOrderById(String orderId, String userId) {
+		Order order = orderJpaRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+
+		if (!Objects.equals(userId, order.getBuyerId())) {
+			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+		}
+
+		return toOrderResponse(order);
+	}
+
+	// 주문 목록 조회
+	public PageResponse<List<OrderResponse>> getOrderListByUserId(String userId, Pageable pageable) {
+		Page<Order> orderList = orderJpaRepository.findByBuyerId(userId, pageable);
+
+		return new PageResponse<>(
+			orderList.getNumber(),
+			orderList.getTotalPages(),
+			orderList.getSize(),
+			orderList.hasNext(),
+			orderList.getContent().stream().map(this::toOrderResponse).toList()
+		);
 	}
 
 }

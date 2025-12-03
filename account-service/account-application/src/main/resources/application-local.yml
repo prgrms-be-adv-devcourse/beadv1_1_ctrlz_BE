@@ -74,14 +74,14 @@ spring:
 
       properties:
         delivery.timeout.ms: 120000
-        linger.ms: 0
+        linger.ms: 300
         request.timeout.ms: 30000
         enable.idempotence: true
         retries: 1
         max.in.flight.requests.per.connection: 5
         allow.auto.create.topics: false
 
-      batch-size: 32768 #32kb
+      batch-size: 65536 #64kb
       buffer-memory: 67108864 # 64mb
 
     listener:
@@ -99,6 +99,10 @@ custom:
     topic:
       command: cart-command
 
+  deposit:
+    topic:
+      command: deposit-command
+
   image:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
@@ -107,6 +111,7 @@ custom:
   redirectUrl: http://localhost:8000
 
 logging:
+  config: classpath:logback-local.xml
   level:
     io.awspring.cloud: DEBUG
     org.springframework.batch: DEBUG

@@ -8,6 +8,9 @@ server:
 spring:
   application:
     name: domain-service
+  
+  logging:
+    config: classpath:logback-local.xml
 
   servlet:
     multipart:
@@ -16,10 +19,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
-
   jpa:
     open-in-view: false
     hibernate:
@@ -32,11 +34,8 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
-    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
-
-  sql:
-    init:
-      mode: always  # data.sql을 항상 실행
+      order_inserts: true
+      order_updates: true
 
   data:
     redis:
