@@ -2,6 +2,9 @@ spring:
   application:
     name: account-service
 
+  logging:
+    config: classpath:logback-prod.xml
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -33,11 +36,11 @@ spring:
     #    username: "${DB_USERNAME}"
     #    password: "${DB_PASSWORD}"
     #    url: jdbc:mysql://mysql-service:3306/test_db
-    url: jdbc:mysql://mysql-service:3306/test_db?rewriteBatchedStatements=true
+    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
 
   data:
     redis:
-      host: redis-service
+      host: redis-svc
       port: 6379
       #      password: 1234
       timeout: 3000ms
@@ -50,7 +53,7 @@ spring:
   #      password: "${REDIS_PASSWORD}"
   kafka:
     bootstrap-servers:
-      - kafka-mq:9090
+      - kafka-svc:9090
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -101,5 +104,5 @@ eureka:
     hostname: account-service
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://discovery-svc:8761/eureka/
     enabled: true

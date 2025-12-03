@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: account-service-deploy
+  name: account-deploy
   labels:
     app: account
 spec:
@@ -20,13 +20,12 @@ spec:
       labels:
         app: account
     spec:
-      hostname: account-service
       containers:
         - name: account-service-app
           image: beatchoi156/account-service:latest
           env: # 헬스 체크 및 로드 밸런싱 확인용
             - name: discovery_default_zone
-              value: "http://discovery-service:8761/eureka/"
+              value: "http://discovery-svc:8761/eureka/"
           #            - name: DB_USERNAME
           #              valueFrom:
           #                secretKeyRef:
@@ -72,7 +71,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: account-service # 앱 네임이랑 같아야함.
+  name: account-svc # 앱 네임이랑 같아야함.
 spec:
   selector:
     app: account # 이 라벨을 가진 Pod들에게 트래픽 분산
