@@ -7,11 +7,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 
@@ -115,17 +115,17 @@ public class ProductPost extends BaseEntity {
 	 */
 	public void markAsProcessing() {
 		this.tradeStatus = TradeStatus.PROCESSING;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSoldout() {
 		this.tradeStatus = TradeStatus.SOLDOUT;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSellingAgain() {
 		this.tradeStatus = TradeStatus.SELLING;
-		this.updateTime();
+		this.update();
 	}
 
     /*
@@ -151,6 +151,12 @@ public class ProductPost extends BaseEntity {
 		if (newTags != null) {
 			addTags(newTags);
 		}
+	}
+
+	public List<String> getTagNames() {
+		return this.productPostTags.stream()
+			.map(ppt -> ppt.getTag().getName())
+			.toList();
 	}
 
     /*

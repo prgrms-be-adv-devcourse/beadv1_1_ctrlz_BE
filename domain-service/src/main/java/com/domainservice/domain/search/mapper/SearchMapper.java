@@ -1,59 +1,72 @@
 package com.domainservice.domain.search.mapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
-import com.domainservice.domain.post.post.mapper.ProductPostMapper;
+import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 
 public class SearchMapper {
 
-	// util 클래스로 선언
-	private SearchMapper() {}
-
 	// 검색 파라미터들을 검색 요청 DTO로 변환
-	public static ProductPostSearchRequest toProductPostSearchRequest(
-		String q,
-		String category,
-		Long minPrice,
-		Long maxPrice,
-		String tags,
-		String sort
-	) {
-		List<String> tagList = parseTags(tags);
+	public static ProductPostSearchRequest toSearchRequest(
+		String q, String category, Long minPrice, Long maxPrice, String tags, String sort) {
 
-		return ProductPostSearchRequest.builder()
-			.q(q)
-			.category(category)
-			.minPrice(minPrice)
-			.maxPrice(maxPrice)
-			.tags(tagList)
-			.sort(sort)
+		return new ProductPostSearchRequest(
+			q, category, minPrice, maxPrice, parseTagList(tags), sort);
+	}
+
+	// Elasticsearch Document를 검색 응답 DTO로 변환
+	public static ProductPostSearchResponse toSearchResponse(ProductPostDocumentEntity document) {
+		return ProductPostSearchResponse.builder()
+			.id(document.getId())
+			.name(document.getName())
+			.title(document.getTitle())
+			.description(document.getDescription())
+			.tags(document.getTags())
+			.categoryName(document.getCategoryName())
+			.price(document.getPrice())
+			.likedCount(document.getLikedCount())
+			.viewCount(document.getViewCount())
+			.status(document.getStatus())
+			.tradeStatus(document.getTradeStatus())
+			.deleteStatus(document.getDeleteStatus())
+			.createdAt(document.getCreatedAt())
 			.build();
 	}
 
-	// 태그 파싱 : 아이폰,중고 -> [아이폰, 중고]
-	private static List<String> parseTags(String tags) {
-		return tags != null && !tags.isBlank()
-			? Arrays.stream(tags.split(","))
-			.map(String::trim)
-			.filter(tag -> !tag.isEmpty())
-			.toList()
-			: null;
-	}
-
-	public static List<ProductPostSearchResponse> toProductPostSearchResponses(
-		SearchHits<ProductPostDocumentEntity> searchHits
-	) {
+	public static List<ProductPostSearchResponse> toSearchResponseList(
+		SearchHits<ProductPostDocumentEntity> searchHits) {
 		return searchHits.getSearchHits()
 			.stream()
 			.map(SearchHit::getContent)
-			.map(ProductPostMapper::toProductPostSearchResponse)
+			.map(SearchMapper::toSearchResponse)
+			.toList();
+	}
+
+	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertedEvent event) {
+		return new ProductPostDocumentEntity(
+			event.id(), event.name(), event.title(), event.description(), event.tags(),
+			event.categoryName(), event.price(), event.likedCount(), event.viewCount(),
+			event.status(), event.tradeStatus(), event.deleteStatus(), event.createdAt()
+		);
+	}
+
+	// 태그 파싱 : 아이폰,중고 -> [아이폰, 중고]
+	private static List<String> parseTagList(String tags) {
+		if (tags == null || tags.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		return Arrays.stream(tags.split(","))
+			.map(String::trim)
+			.filter(s -> !s.isEmpty())
 			.toList();
 	}
 

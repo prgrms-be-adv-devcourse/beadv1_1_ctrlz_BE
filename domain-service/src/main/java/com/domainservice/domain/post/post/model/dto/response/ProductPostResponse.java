@@ -3,8 +3,8 @@ package com.domainservice.domain.post.post.model.dto.response;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 
 import lombok.Builder;
 

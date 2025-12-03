@@ -1,6 +1,5 @@
 package com.common.exception.vo;
 
-import org.springframework.http.HttpStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +19,7 @@ public enum ProductPostExceptionCode {
     PRODUCT_POST_IN_PROGRESS(403, "거래중인 글은 삭제할 수 없습니다."),
 
     // ===== 404 Not Found =====
+	CATEGORY_NOT_FOUND(404, "존재하지 않는 카테고리입니다."),
     TAG_NOT_FOUND(404, "존재하지 않는 태그가 포함되어있습니다."),
     PRODUCT_POST_NOT_FOUND(404, "해당 글은 존재하지 않습니다."),
     PRODUCT_POST_DELETED(404, "해당 게시글은 삭제되어 조회할 수 없습니다."),

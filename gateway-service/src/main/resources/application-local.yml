@@ -37,7 +37,7 @@ spring:
               predicates:
                 - Path=/api/categories
                 - Method=GET
-                -
+
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
