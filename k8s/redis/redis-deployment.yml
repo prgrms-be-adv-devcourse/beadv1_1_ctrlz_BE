@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: redis-service
+  name: redis-sts
   labels:
     app: redis
 
@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: redis
+  serviceName: redis-svc
 
   template:
     metadata:
@@ -25,12 +26,24 @@ spec:
           envFrom:
             - configMapRef:
                 name: redis-config-map
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
+  name: redis-svc
 
 spec:
   selector:

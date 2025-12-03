@@ -111,6 +111,7 @@ custom:
   redirectUrl: http://localhost:8000
 
 logging:
+  config: classpath:logback-local.xml
   level:
     io.awspring.cloud: DEBUG
     org.springframework.batch: DEBUG

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: kafka-mq
+  name: kafka-sts
   labels:
     app: kafka
 
@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: kafka
+  serviceName: kafka-svc
 
   template:
     metadata:
@@ -28,12 +29,24 @@ spec:
           envFrom:
             - configMapRef:
                 name: kafka-config-map
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /tmp/kraft-combined-logs
+
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: kafka-mq
+  name: kafka-svc
 
 spec:
   selector:
