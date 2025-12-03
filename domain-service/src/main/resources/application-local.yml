@@ -8,6 +8,9 @@ server:
 spring:
   application:
     name: domain-service
+  
+  logging:
+    config: classpath:logback-local.xml
 
   servlet:
     multipart:

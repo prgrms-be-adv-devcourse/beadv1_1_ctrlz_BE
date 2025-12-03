@@ -5,10 +5,13 @@ spring:
   application:
     name: gateway-service
 
+  logging:
+    config: classpath:logback-prod.xml
+
   data:
     redis:
       port: 6379
-      host: localhost
+      host: redis-service
 
   cloud:
     gateway:
@@ -21,36 +24,14 @@ spring:
       server:
         webflux:
           routes:
-            - id: oauth-login
-              uri: lb://ACCOUNT-SERVICE
-              predicates:
-                - Path=/oauth2/authorization/google
-                - Method=GET
-
-            - id: oauth-callback
-              uri: lb://ACCOUNT-SERVICE
-              predicates:
-                - Path=/login/oauth2/code/google
-                - Method=GET
-              filters:
-                - name: PreserveHostHeader
-                - name: AccessTokenCaptureFilter
-                - name: IpCaptureFilter
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts/**
-                - Method=GET
-              filters:
-                - name: ProductSearchFilter
+            # OAuth2 로그인은 Gateway에서 직접 처리
+            # 기존 라우트 제거하고 Security가 자동 처리하도록 함
 
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users
                 - Method=POST
-
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
@@ -68,8 +49,9 @@ spring:
             - id: auth-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
-                - Path=/api/auth/refresh
-                - Method=GET
+                - Path=/api/auth/reissue
+                - Method=POST  # CSRF 방어를 위해 POST 사용
+
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
@@ -121,13 +103,24 @@ spring:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
 
-# k8s 설정
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#eureka:
-#  instance:
-#    prefer-ip-address: true
-#    hostname: svc-account-service 서비스 이름 직접 등록
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
+services:
+  account:
+    url: lb://ACCOUNT-SERVICE
+
+  # k8s 설정
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: gateway-service
 
