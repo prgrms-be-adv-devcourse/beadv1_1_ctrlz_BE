@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
-import com.common.event.productPost.ProductPostUpsertEvent;
+import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
@@ -50,7 +50,7 @@ public class SearchMapper {
 			.toList();
 	}
 
-	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertEvent event) {
+	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertedEvent event) {
 		return new ProductPostDocumentEntity(
 			event.id(), event.name(), event.title(), event.description(), event.tags(),
 			event.categoryName(), event.price(), event.likedCount(), event.viewCount(),

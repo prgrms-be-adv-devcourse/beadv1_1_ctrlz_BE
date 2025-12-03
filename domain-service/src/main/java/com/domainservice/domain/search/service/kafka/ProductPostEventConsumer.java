@@ -5,8 +5,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import com.common.event.productPost.ProductPostDeleteEvent;
-import com.common.event.productPost.ProductPostUpsertEvent;
+import com.common.event.productPost.ProductPostDeletedEvent;
+import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.domainservice.domain.search.mapper.SearchMapper;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.repository.ProductPostElasticRepository;
@@ -29,7 +29,7 @@ public class ProductPostEventConsumer {
 	 * Upsert(CREATE/UPDATE) 이벤트 처리
 	 */
 	@KafkaHandler
-	public void handleUpsertEvent(@Payload ProductPostUpsertEvent event) {
+	public void handleUpsertEvent(@Payload ProductPostUpsertedEvent event) {
 		try {
 
 			ProductPostDocumentEntity document = SearchMapper.toDocumentEntity(event);
@@ -46,7 +46,7 @@ public class ProductPostEventConsumer {
 	 * Delete 이벤트 처리
 	 */
 	@KafkaHandler
-	public void handleDeleteEvent(@Payload ProductPostDeleteEvent event) {
+	public void handleDeleteEvent(@Payload ProductPostDeletedEvent event) {
 		try {
 
 			productPostElasticRepository.deleteById(event.postId());

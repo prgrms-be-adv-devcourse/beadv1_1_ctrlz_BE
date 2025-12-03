@@ -7,8 +7,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.common.event.productPost.EventType;
-import com.common.event.productPost.ProductPostDeleteEvent;
-import com.common.event.productPost.ProductPostUpsertEvent;
+import com.common.event.productPost.ProductPostDeletedEvent;
+import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.domainservice.domain.post.category.model.entity.Category;
 import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.kafka.mapper.KafkaEventMapper;
@@ -39,7 +39,7 @@ public class ProductPostEventProducer {
 
 		String categoryName = getCategoryName(productPost);
 
-		ProductPostUpsertEvent event = KafkaEventMapper.toUpsertEvent(productPost, categoryName, eventType);
+		ProductPostUpsertedEvent event = KafkaEventMapper.toUpsertEvent(productPost, categoryName, eventType);
 
 		kafkaTemplate.send(eventTopicName, event.id(), event);
 
@@ -52,7 +52,7 @@ public class ProductPostEventProducer {
 
 		String categoryName = getCategoryName(target);
 
-		ProductPostUpsertEvent event = KafkaEventMapper.toUpsertEvent(target, categoryName, eventType);
+		ProductPostUpsertedEvent event = KafkaEventMapper.toUpsertEvent(target, categoryName, eventType);
 
 		kafkaTemplate.send(eventTopicName, event.id(), event);
 	}
@@ -62,7 +62,7 @@ public class ProductPostEventProducer {
 	 */
 	public void sendDeleteEvent(String postId) {
 
-		ProductPostDeleteEvent event = KafkaEventMapper.toDeleteEvent(postId);
+		ProductPostDeletedEvent event = KafkaEventMapper.toDeleteEvent(postId);
 		kafkaTemplate.send(eventTopicName, event.postId(), event);
 
 	}

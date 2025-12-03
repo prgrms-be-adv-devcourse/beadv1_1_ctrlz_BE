@@ -276,7 +276,7 @@ public class ProductPostService {
 
 		ProductPost saved = productPostRepository.save(productPost);
 
-		return ProductPostMapper.toProductPostResponse(saved);
+		return ProductPostMapper.toResponse(saved);
 	}
 
     /*
