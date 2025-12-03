@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.common.annotation.TimeTrace;
 import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
 import com.domainservice.domain.search.repository.jpa.SearchWordLogCommandRepository;
 import com.domainservice.domain.search.repository.jpa.SearchWordLogQueryRepository;
@@ -38,6 +39,7 @@ public class SearchWordSchedulerService {
 		return popularWordRedisRepository.findRealTimeTrendWordLog();
 	}
 
+	@TimeTrace
 	@Transactional
 	public void updateRealtimeTrendWordList(List<KeywordLog> log) {
 		popularWordRedisRepository.updateRealTimeTrendWord(log);
@@ -55,6 +57,7 @@ public class SearchWordSchedulerService {
 		return searchWordLogQueryRepository.findDailyLogs(lastBatchedAt);
 	}
 
+	@TimeTrace
 	@Transactional
 	public void updateDailyPopularWordList(List<KeywordLog> logList, Map<String, DailyPopularWordLog> previousLogMap) {
 		popularWordRedisRepository.decayDailyPopularScores();
@@ -79,6 +82,7 @@ public class SearchWordSchedulerService {
 		throw new UnsupportedOperationException();
 	}
 
+	@TimeTrace
 	@Transactional
 	public void saveLogsToDataBase(List<KeywordLog> keywordLogs) {
 		//Bulk-Insert 적용 예정
