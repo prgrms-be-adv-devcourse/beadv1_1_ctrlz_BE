@@ -242,6 +242,30 @@ public class ProductPostService {
 			.toList();
 	}
 
+	public ProductPostResponse createDummyProductPost (
+		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
+
+		ProductPost productPost = ProductPost.builder()
+			.userId(userId)
+			.categoryId(request.categoryId())
+			.title(request.title())
+			.name(request.name())
+			.price(request.price())
+			.description(request.description())
+			.status(request.status())
+			.tradeStatus(TradeStatus.SELLING)
+			.build();
+
+		addTags(productPost, request.tagIds());
+
+		// 첨부된 이미지를 s3 업로드 후 productPost에 추가
+		uploadAndAddImages(productPost, imageFiles);
+
+		ProductPost saved = productPostRepository.save(productPost);
+
+		return ProductPostMapper.toProductPostResponse(saved);
+	}
+
     /*
     ================= private Method =================
      */
