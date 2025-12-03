@@ -1,5 +1,6 @@
 package com.gatewayservice.utils;
 
+import static com.gatewayservice.common.ServeletConst.*;
 import static java.util.Optional.*;
 
 import java.net.InetSocketAddress;
@@ -20,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ServletRequestUtils {
 
 	public static String extractIp(ServerHttpRequest request) {
-		// X-Forwarded-For 헤더 확인 (프록시/로드밸런서 뒤에 있을 경우)
-		String xff = request.getHeaders().getFirst("X-Real-IP");
+		// X-Real-IP 헤더 확인 (프록시/로드밸런서 뒤에 있을 경우)
+		String xff = request.getHeaders().getFirst(X_REAL_IP);
 		if (xff != null && !xff.isEmpty()) {
 			return xff.split(",")[0].trim();
 		}
@@ -45,13 +46,13 @@ public class ServletRequestUtils {
 			return of(bearerToken.replace("Bearer ", ""));
 		}
 
-		HttpCookie tokenCookie = request.getCookies().getFirst("ACCESS_TOKEN");
+		HttpCookie tokenCookie = request.getCookies().getFirst(ACCESS_TOKEN);
 		if (tokenCookie != null) {
 			log.info("Optional.of(tokenCookie.getValue()) = {}", of(tokenCookie.getValue()));
 			return of(tokenCookie.getValue());
 		}
 
-		HttpCookie refreshTokenCookie = request.getCookies().getFirst("REFRESH_TOKEN");
+		HttpCookie refreshTokenCookie = request.getCookies().getFirst(REFRESH_TOKEN);
 		if (refreshTokenCookie != null) {
 			return of(refreshTokenCookie.getValue());
 		}
@@ -64,7 +65,7 @@ public class ServletRequestUtils {
 		List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
 		if (cookies != null) {
 			for (String cookie : cookies) {
-				if (cookie.startsWith("ACCESS_TOKEN=")) {
+				if (cookie.contains(ACCESS_TOKEN)) {
 					return cookie.split(";")[0].substring(13);
 				}
 			}
