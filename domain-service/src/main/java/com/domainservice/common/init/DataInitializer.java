@@ -36,7 +36,7 @@ public class DataInitializer implements ApplicationRunner {
         // categoryInitializer.init();
         // tagInitializer.init();
 		// productPostInitializer.init();
-        reviewInitializer.init();
+        // reviewInitializer.init();
         cartInitializer.init();
         orderInitializer.init();
 

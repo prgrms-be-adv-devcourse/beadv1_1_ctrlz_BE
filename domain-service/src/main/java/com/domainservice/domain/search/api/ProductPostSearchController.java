@@ -49,6 +49,7 @@ public class ProductPostSearchController {
 		@RequestParam(defaultValue = "0") Long minPrice,          // ex) "100000"
 		@RequestParam(defaultValue = "999999999") Long maxPrice,  // ex) "2000000"
 		@RequestParam(required = false) String tags,                                // ex) "친환경,중고"
+		// TODO: 상품 판매 상태에 따른 정렬,
 
 		// ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
 		@RequestParam(defaultValue = "score") String sort,
@@ -56,11 +57,8 @@ public class ProductPostSearchController {
 		@PageableDefault(size = 20) Pageable pageable
 	) {
 
-		ProductPostSearchRequest request = SearchMapper.toProductPostSearchRequest(
+		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
 			q, category, minPrice, maxPrice, tags, sort);
-
-		log.info("🔍 검색 요청 - q: '{}', category: '{}', price: {}-{}, tags: {}, sort: '{}'",
-			q, category, minPrice, maxPrice, request.tags(), sort);
 
 		return productPostElasticService.search(request, pageable);
 	}

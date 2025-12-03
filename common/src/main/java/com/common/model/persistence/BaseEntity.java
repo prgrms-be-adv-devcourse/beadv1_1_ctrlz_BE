@@ -50,10 +50,7 @@ public abstract class BaseEntity {
 		this.updatedAt = LocalDateTime.now();
 	}
 
-    public void update() {
-        this.updatedAt = LocalDateTime.now();
-    }
-	public void updateTime() {
+	public void update() {
 		this.updatedAt = LocalDateTime.now();
 	}
 
