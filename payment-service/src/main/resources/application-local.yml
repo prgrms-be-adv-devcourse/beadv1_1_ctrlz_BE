@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: domain-service
+    name: payment-service
 
   servlet:
     multipart:
@@ -60,7 +60,7 @@ spring:
         allow.auto.create.topics: false
 
     consumer:
-      group-id: domain-group
+      group-id: payment-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 

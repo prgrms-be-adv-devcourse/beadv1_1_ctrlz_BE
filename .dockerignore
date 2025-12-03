@@ -19,6 +19,7 @@
 
 # Logs
 *.log
+logs/
 
 # OS
 .DS_Store
@@ -28,3 +29,20 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+
+# K8s and deployment files (빌드에 불필요)
+k8s/
+*-deployment.yml
+*.yaml
+!**/src/**/*.yaml
+!**/resources/**/*.yaml
+
+# Documentation and misc
+readme.md
+*.md
+!**/src/**/*.md
+*.png
+*.webp
+
+# GitHub
+.github/
