@@ -26,7 +26,6 @@ spring:
           routes:
             # OAuth2 로그인은 Gateway에서 직접 처리
             # 기존 라우트 제거하고 Security가 자동 처리하도록 함
-
             - id: tag-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:

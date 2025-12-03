@@ -5,7 +5,7 @@ WORKDIR /app
 COPY discovery-service/build.gradle discovery-service/settings.gradle discovery-service/gradlew discovery-service/gradlew.bat ./discovery-service/
 COPY discovery-service/gradle ./discovery-service/gradle
 
-
+COPY observability-config ./observability-config
 COPY discovery-service/src ./discovery-service/src
 
 WORKDIR /app/discovery-service
@@ -20,4 +20,5 @@ WORKDIR /app
 COPY --from=build /app/discovery-service/build/libs/*.jar app.jar
 
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "app.jar"]
+ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+

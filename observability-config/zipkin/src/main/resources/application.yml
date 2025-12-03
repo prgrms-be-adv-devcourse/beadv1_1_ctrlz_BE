@@ -27,13 +27,3 @@ management:
       exposure:
         include: "*"
 
----
-
-spring:
-  profiles:
-    active: prod
-
-  zipkin:
-    tracing:
-      endpoint: http://zipkin-service:9411/api/v2/span
-
