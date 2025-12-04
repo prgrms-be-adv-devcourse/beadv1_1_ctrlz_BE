@@ -33,21 +33,21 @@ spring:
         order_inserts: true
     defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
 
-  #  datasource:
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
-  #    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
-  #    username: app
-  #    password: 1234
-
   datasource:
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    url: jdbc:h2:mem:user-db
-  #
-  h2:
-    console:
-      enabled: true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    username: app
+    password: 1234
+
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#    url: jdbc:h2:mem:user-db
+#  #
+#  h2:
+#    console:
+#      enabled: true
 
 
   data:

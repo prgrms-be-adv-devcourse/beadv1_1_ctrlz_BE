@@ -9,6 +9,7 @@ COPY account-service/gradle ./account-service/gradle
 COPY common/build.gradle ./common/build.gradle
 
 COPY common ./common
+COPY observability-config ./observability-config
 COPY account-service/auth ./account-service/auth
 COPY account-service/user ./account-service/user
 COPY account-service/account-application ./account-service/account-application
@@ -25,4 +26,5 @@ WORKDIR /app
 
 COPY --from=build /app/account-service/account-application/build/libs/account-application-boot.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod,secret" ,"app.jar"]
+ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+
