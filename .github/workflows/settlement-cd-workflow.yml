@@ -1,13 +1,15 @@
 name: settlement-service ci/cd
 
 on:
-#  push:
-#    branches:
-#      - main
-#      - deploytest
-#    paths:
-#      - 'settlement-service/**'
-#      - 'common/**'
+  push:
+    branches:
+      - main
+      - deploytest
+    paths:
+      - 'payment-service/**'
+      - 'common/**'
+      - '**/*.dockerfile'
+      - '**/.github/**'
 
   workflow_dispatch:
     inputs:
@@ -47,7 +49,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: settlement-service-app # pod랑 같은 이름
-      deploy-name: settlement-service-deploy # deployment랑 같은 이름
+      deploy-name: settlement-deploy # deployment랑 같은 이름
       label-name: settlement # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
