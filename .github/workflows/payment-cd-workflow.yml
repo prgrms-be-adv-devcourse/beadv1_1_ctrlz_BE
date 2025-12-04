@@ -10,7 +10,7 @@ on:
       - 'payment-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/**'
+      - '**/.github/payment-cd-workflow.yml'
 
 jobs:
   releasing:

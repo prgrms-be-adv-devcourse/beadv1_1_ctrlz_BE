@@ -10,7 +10,7 @@ on:
       - 'gateway-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/**'
+      - '**/.github/gateway-cd-workflow.yml'
 
 jobs:
 

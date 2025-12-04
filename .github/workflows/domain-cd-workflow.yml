@@ -10,6 +10,7 @@ on:
       - 'common/**'
       - '**/*.dockerfile'
       - '**/.github/**'
+      - '**/.github/domain-cd-workflow.yml'
 
   workflow_dispatch:
     inputs:
