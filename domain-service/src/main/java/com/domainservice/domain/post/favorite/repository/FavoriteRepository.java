@@ -18,6 +18,7 @@ public interface FavoriteRepository extends JpaRepository<FavoriteProduct, Strin
 	Page<FavoriteProduct> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
 	// 찜하기 존재 여부 확인
+	boolean existsByUserIdAndProductPost(String userId, ProductPost productPost);
 	boolean existsByUserIdAndProductPostId(String userId, String productPostId);
 
 	Long deleteByUserIdAndProductPost(String userId, ProductPost productPost);

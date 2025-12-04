@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.favorite.model.dto.FavoritePostResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteProductResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteStatusResponse;
-import com.domainservice.domain.post.favorite.model.dto.FavoriteToggleResponse;
 import com.domainservice.domain.post.favorite.service.FavoriteService;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 
@@ -36,24 +36,24 @@ public class FavoriteProductController {
 
 	@PostMapping("/{productPostId}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public BaseResponse<FavoriteToggleResponse> addFavoriteProduct(
+	public BaseResponse<FavoritePostResponse> addFavoriteProduct(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String productPostId
 	) {
 		validateAuthentication(userId);
-		FavoriteToggleResponse response = favoriteService.addFavoriteProduct(userId, productPostId);
-		return new BaseResponse<>(response, "찜하기 성공");
+		FavoritePostResponse response = favoriteService.addFavoriteProduct(userId, productPostId);
+		return new BaseResponse<>(response, "관심 상품 등록에 성공했습니다.");
 	}
 
 	@DeleteMapping("/{productPostId}")
 	@ResponseStatus(HttpStatus.OK)
-	public BaseResponse<FavoriteToggleResponse> cancelFavoriteProduct(
+	public BaseResponse<FavoritePostResponse> cancelFavoriteProduct(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String productPostId
 	) {
 		validateAuthentication(userId);
-		FavoriteToggleResponse response = favoriteService.cancelFavoriteProduct(userId, productPostId);
-		return new BaseResponse<>(response, "찜하기 취소 성공");
+		FavoritePostResponse response = favoriteService.cancelFavoriteProduct(userId, productPostId);
+		return new BaseResponse<>(response, "관심 상품 취소에 성공했습니다.");
 	}
 
 	@GetMapping("/my")
@@ -74,7 +74,7 @@ public class FavoriteProductController {
 	) {
 		validateAuthentication(userId);
 		FavoriteStatusResponse response = favoriteService.isFavorite(userId, productPostId);
-		return new BaseResponse<>(response, "찜하기 여부 조회 성공");
+		return new BaseResponse<>(response, "해당 상품에 대한 좋아요 여부 조회를 성공했습니다.");
 	}
 
 	/*

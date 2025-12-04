@@ -23,9 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.favorite.model.dto.FavoritePostResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteProductResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteStatusResponse;
-import com.domainservice.domain.post.favorite.model.dto.FavoriteToggleResponse;
 import com.domainservice.domain.post.favorite.model.entity.FavoriteProduct;
 import com.domainservice.domain.post.favorite.repository.FavoriteRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -84,12 +84,11 @@ class FavoriteServiceTest {
 		given(favoriteRepository.save(any(FavoriteProduct.class))).willAnswer(invocation -> invocation.getArgument(0));
 
 		// when
-		FavoriteToggleResponse result = favoriteService.addFavoriteProduct(userId, productPostId);
+		FavoritePostResponse result = favoriteService.addFavoriteProduct(userId, productPostId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.isFavorite()).isTrue();
-		assertThat(result.likedCount()).isEqualTo(1);
 
 		verify(productPostRepository).findById(productPostId);
 		verify(favoriteRepository).save(any(FavoriteProduct.class));
@@ -114,12 +113,11 @@ class FavoriteServiceTest {
 		given(favoriteRepository.deleteByUserIdAndProductPost(userId, productPost)).willReturn(1L);
 
 		// when
-		FavoriteToggleResponse result = favoriteService.cancelFavoriteProduct(userId, productPostId);
+		FavoritePostResponse result = favoriteService.cancelFavoriteProduct(userId, productPostId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.isFavorite()).isFalse();
-		assertThat(result.likedCount()).isEqualTo(0);
 
 		verify(favoriteRepository).deleteByUserIdAndProductPost(userId, productPost);
 	}

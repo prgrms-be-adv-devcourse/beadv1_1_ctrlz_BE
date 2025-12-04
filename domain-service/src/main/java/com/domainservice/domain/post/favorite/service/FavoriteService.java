@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.favorite.mapper.FavoriteProductMapper;
+import com.domainservice.domain.post.favorite.model.dto.FavoritePostResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteProductResponse;
 import com.domainservice.domain.post.favorite.model.dto.FavoriteStatusResponse;
-import com.domainservice.domain.post.favorite.model.dto.FavoriteToggleResponse;
 import com.domainservice.domain.post.favorite.model.entity.FavoriteProduct;
 import com.domainservice.domain.post.favorite.repository.FavoriteRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
@@ -30,10 +30,14 @@ public class FavoriteService {
 	private final ProductPostRepository productPostRepository;
 
 	@Transactional
-	public FavoriteToggleResponse addFavoriteProduct(String userId, String productPostId) {
+	public FavoritePostResponse addFavoriteProduct(String userId, String productPostId) {
 
 		ProductPost productPost = productPostRepository.findById(productPostId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+
+		if (favoriteRepository.existsByUserIdAndProductPost(userId, productPost)) {
+			throw new ProductPostException(FAVORITE_ALREADY_EXISTS);
+		}
 
 		FavoriteProduct favoriteProduct = FavoriteProduct.builder()
 			.userId(userId)
@@ -44,12 +48,12 @@ public class FavoriteService {
 
 		productPost.incrementLikedCount();
 
-		return new FavoriteToggleResponse(true, productPost.getLikedCount());
+		return new FavoritePostResponse(true, productPostId);
 
 	}
 
 	@Transactional
-	public FavoriteToggleResponse cancelFavoriteProduct(String userId, String productPostId) {
+	public FavoritePostResponse cancelFavoriteProduct(String userId, String productPostId) {
 
 		ProductPost productPost = productPostRepository.findById(productPostId)
 			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
@@ -62,7 +66,7 @@ public class FavoriteService {
 
 		productPost.decrementLikedCount();
 
-		return new FavoriteToggleResponse(false, productPost.getLikedCount());
+		return new FavoritePostResponse(false, productPostId);
 
 	}
 
