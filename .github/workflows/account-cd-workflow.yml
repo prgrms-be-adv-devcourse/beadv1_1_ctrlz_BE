@@ -9,7 +9,7 @@ on:
       - 'account-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/**'
+      - '**/.github/account-cd-workflow.yml'
 
 jobs:
   releasing:

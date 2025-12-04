@@ -8,7 +8,6 @@ on:
       - deploytest
     paths:
       - 'discovery-service/**'
-      - '.github/workflows/**'
 
 jobs:
   releasing:

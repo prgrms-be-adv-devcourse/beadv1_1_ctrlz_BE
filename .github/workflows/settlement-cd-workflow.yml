@@ -9,7 +9,7 @@ on:
       - 'payment-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/**'
+      - '**/.github/settlement-cd-workflow.yml'
 
   workflow_dispatch:
     inputs:
