@@ -8,6 +8,7 @@ on:
       - deploytest
     paths:
       - 'discovery-service/**'
+      - 'observability-config/**'
 
 jobs:
   releasing:

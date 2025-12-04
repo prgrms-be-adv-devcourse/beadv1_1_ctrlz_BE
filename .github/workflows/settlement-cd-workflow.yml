@@ -10,6 +10,7 @@ on:
       - 'common/**'
       - '**/*.dockerfile'
       - '**/.github/settlement-cd-workflow.yml'
+      - 'observability-config/**'
 
   workflow_dispatch:
     inputs:

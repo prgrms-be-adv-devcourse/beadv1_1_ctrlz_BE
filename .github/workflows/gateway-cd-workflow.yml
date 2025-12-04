@@ -11,6 +11,7 @@ on:
       - 'common/**'
       - '**/*.dockerfile'
       - '**/.github/gateway-cd-workflow.yml'
+      - 'observability-config/**'
 
 jobs:
 
