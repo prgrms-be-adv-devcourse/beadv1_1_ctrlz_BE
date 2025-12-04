@@ -41,37 +41,6 @@ public class DepositService {
 				() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(BigDecimal.ZERO).build()));
 	}
 
-	/**
-	 * 사용자의 예치금 충전
-	 */
-	// TODO: 상아 토스 페이먼츠 API 수정
-	public DepositResponse chargeDeposit(String userId, BigDecimal amount) {
-		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-			throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
-		}
-
-		Deposit deposit = getDepositByUserId(userId);
-		BigDecimal beforeBalance = deposit.getBalance();
-		deposit.increaseBalance(amount);
-		BigDecimal afterBalance = deposit.getBalance();
-
-		// TODO: 토스 페이먼츠 타기
-
-
-		Deposit savedDeposit = depositJpaRepository.save(deposit);
-
-		DepositLog depositLog = DepositLog.create(
-			userId,
-			savedDeposit,
-			TransactionType.CHARGE,
-			amount,
-			beforeBalance,
-			afterBalance
-		);
-		depositLogJpaRepository.save(depositLog);
-
-		return new DepositResponse(savedDeposit.getId(), savedDeposit.getBalance(), "충전이 완료되었습니다.");
-	}
 
 	/**
 	 * 사용자의 예치금 사용
