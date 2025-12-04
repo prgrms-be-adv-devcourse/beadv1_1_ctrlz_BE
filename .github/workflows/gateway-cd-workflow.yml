@@ -12,7 +12,6 @@ on:
       - '**/*.dockerfile'
       - '.github/workflows/gateway-cd-workflow.yml'
       - 'observability-config/**'
-
 jobs:
 
   releasing:
