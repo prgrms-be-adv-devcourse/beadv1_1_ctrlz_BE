@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import com.common.exception.CustomException;
 import com.common.exception.vo.DepositExceptionCode;
 import com.common.model.persistence.BaseEntity;
+import com.paymentservice.converter.PaymentKeyConverter;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,7 +31,7 @@ public class Deposit extends BaseEntity {
 	@Column(name = "balance", nullable = false)
 	private BigDecimal balance; // 잔액
 
-	@Column(nullable = true)
+	@Convert(converter = PaymentKeyConverter.class)
 	private String paymentKey;
 
 	// 예치금 증가
@@ -58,11 +60,11 @@ public class Deposit extends BaseEntity {
 		this.paymentKey = paymentKey;
 	}
 
-	public static Deposit of(String userId, BigDecimal balance, String paymentKey) {
+	public static Deposit of(String userId, BigDecimal balance) {
 		return Deposit.builder()
 			.userId(userId)
 			.balance(balance)
-			.paymentKey(paymentKey)
+			.paymentKey("paymentKey")
 			.build();
 	}
 

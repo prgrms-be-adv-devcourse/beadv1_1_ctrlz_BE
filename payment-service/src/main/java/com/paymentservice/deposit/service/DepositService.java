@@ -252,11 +252,7 @@ public class DepositService {
 			throw new CustomException(DepositExceptionCode.DEPOSIT_ALREADY_EXISTS.getMessage());
 		}
 
-		Deposit deposit = Deposit.builder()
-			.userId(userId)
-			.balance(BigDecimal.valueOf(0L))
-			.build();
-
+		Deposit deposit = Deposit.of(userId,BigDecimal.ZERO);
 		return depositJpaRepository.save(deposit);
 	}
 
@@ -282,8 +278,12 @@ public class DepositService {
 			Deposit deposit = getDepositByUserId(userId);
 			BigDecimal beforeBalance = deposit.getBalance();
 
+			log.info("deposit: {}", deposit);
+
 			deposit.increaseBalance(request.amount());
 			deposit.setPaymentKey(approve.paymentKey());
+
+			log.info("deposit: {}", deposit);
 
 			Deposit savedDeposit = depositJpaRepository.save(deposit);
 			BigDecimal afterBalance = savedDeposit.getBalance();
