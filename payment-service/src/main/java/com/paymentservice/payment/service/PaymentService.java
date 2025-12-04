@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.exception.CustomException;
 import com.common.exception.vo.OrderExceptionCode;
 import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
-import com.paymentservice.common.configuration.feign.client.PaymentFeignClient;
 import com.paymentservice.common.model.order.OrderResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
@@ -37,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentFeignClient paymentFeignClient;
     private final PaymentLogService paymentLogService;
     private final OrderFeignClient orderFeignClient;
     private final DepositService depositService;

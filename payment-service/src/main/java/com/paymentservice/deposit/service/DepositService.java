@@ -8,7 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.event.SettlementReadyEvent;
 import com.common.exception.CustomException;
 import com.common.exception.vo.DepositExceptionCode;
+import com.paymentservice.deposit.client.DepositTossClient;
+import com.paymentservice.deposit.model.dto.DepositConfirmRequest;
+import com.paymentservice.deposit.model.dto.DepositConfirmResponse;
 import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.dto.TossChargeResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.model.entity.DepositLog;
 import com.paymentservice.deposit.model.entity.TransactionType;
@@ -25,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DepositService {
     private final DepositJpaRepository depositJpaRepository;
     private final DepositLogJpaRepository depositLogJpaRepository;
+	private final DepositTossClient depositTossClient;
 
 	/**
 	 * 사용자 ID로 예치금 정보 조회
@@ -105,8 +110,7 @@ public class DepositService {
 	 * 사용자의 예치금 잔액 조회
 	 */
 	public Deposit getDepositBalance(String userId) {
-		Deposit deposit = getDepositByUserId(userId);
-		return new Deposit(deposit.getId(), deposit.getBalance());
+		return getDepositByUserId(userId);
 	}
 
 
@@ -254,5 +258,60 @@ public class DepositService {
 			.build();
 
 		return depositJpaRepository.save(deposit);
+	}
+
+	/**
+	 * Toss 결제 확정 처리
+	 * - Toss 승인을 받고 (DepositTossClient.approve)
+	 * - 승인된 금액과 요청 금액을 검증 (불일치 시 예외)
+	 * - deposit balance 증가, paymentKey 저장, 로그 생성
+	 */
+	public DepositConfirmResponse tossPayment(DepositConfirmRequest request, String userId) {
+		try {
+			// toss payments api
+			TossChargeResponse approve = depositTossClient.approve(userId, request);
+
+			// 승인된 금액과 요청 금액 검증 (안정성 체크)
+			if (approve.balance() == null || request.amount() == null ||
+				approve.balance().compareTo(request.amount()) != 0) {
+				log.warn("토스승인 금액과 충전 금액이 다릅니다.. requested={}, approved={}", request.amount(), approve.balance());
+				throw new CustomException(DepositExceptionCode.INVALID_AMOUNT.getMessage());
+			}
+
+			// 예치금 계정 조회 및 갱신
+			Deposit deposit = getDepositByUserId(userId);
+			BigDecimal beforeBalance = deposit.getBalance();
+
+			deposit.increaseBalance(request.amount());
+			deposit.setPaymentKey(approve.paymentKey());
+
+			Deposit savedDeposit = depositJpaRepository.save(deposit);
+			BigDecimal afterBalance = savedDeposit.getBalance();
+
+
+			// 로그 생성 (충전)
+			DepositLog depositLog = DepositLog.create(
+				userId,
+				savedDeposit,
+				TransactionType.CHARGE,
+				request.amount(),
+				beforeBalance,
+				afterBalance
+			);
+			depositLogJpaRepository.save(depositLog);
+
+			return DepositConfirmResponse.from(
+				request.orderId(),
+				userId,
+				approve.paymentKey(),
+				request.amount(),
+				approve.currency(),
+				approve.approvedAt()
+			);
+
+		} catch (Exception e) {
+			throw new CustomException(DepositExceptionCode.DEPOSIT_FAILD.getMessage());
+		}
+
 	}
 }

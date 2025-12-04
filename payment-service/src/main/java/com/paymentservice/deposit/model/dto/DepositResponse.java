@@ -14,7 +14,7 @@ public record DepositResponse(
 
 	public static DepositResponse from(Deposit deposit) {
 		return new DepositResponse(
-			deposit.getUserId(),
+			deposit.getId(),
 			deposit.getBalance(),
 			"success"
 		);

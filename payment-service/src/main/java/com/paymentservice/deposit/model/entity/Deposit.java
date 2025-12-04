@@ -29,6 +29,9 @@ public class Deposit extends BaseEntity {
 	@Column(name = "balance", nullable = false)
 	private BigDecimal balance; // 잔액
 
+	@Column(nullable = true)
+	private String paymentKey;
+
 	// 예치금 증가
 	public void increaseBalance(BigDecimal amount) {
 		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -49,6 +52,18 @@ public class Deposit extends BaseEntity {
 		}
 
 		this.balance = this.balance.subtract(amount);
+	}
+
+	public void setPaymentKey(String paymentKey) {
+		this.paymentKey = paymentKey;
+	}
+
+	public static Deposit of(String userId, BigDecimal balance, String paymentKey) {
+		return Deposit.builder()
+			.userId(userId)
+			.balance(balance)
+			.paymentKey(paymentKey)
+			.build();
 	}
 
 	@Override
