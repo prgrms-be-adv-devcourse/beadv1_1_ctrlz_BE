@@ -9,6 +9,7 @@ on:
       - 'account-service/**'
       - 'common/**'
       - '**/*.dockerfile'
+      - '**/.github/**'
 
 jobs:
   releasing:
@@ -34,7 +35,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: account-service-app # pod랑 같은 이름
-      deploy-name: account-service-deploy # deployment랑 같은 이름
+      deploy-name: account-deploy # deployment랑 같은 이름
       label-name: account # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
