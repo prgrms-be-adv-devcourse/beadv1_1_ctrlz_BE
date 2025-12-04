@@ -10,7 +10,7 @@ on:
       - 'payment-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/payment-cd-workflow.yml'
+      - '.github/workflows/payment-cd-workflow.yml'
       - 'observability-config/**'
 
 jobs:
@@ -35,6 +35,7 @@ jobs:
     needs: releasing
     uses: ./.github/workflows/deploy-workflow.yml
     secrets: inherit
+
     with:
       pod-name: payment-service-app # pod랑 같은 이름
       deploy-name: payment-deploy # deployment랑 같은 이름

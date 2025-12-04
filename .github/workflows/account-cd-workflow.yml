@@ -10,7 +10,7 @@ on:
       - 'common/**'
       - 'observability-config/**'
       - '**/*.dockerfile'
-      - '**/.github/account-cd-workflow.yml'
+      - '.github/workflows/account-cd-workflow.yml'
 
 jobs:
   releasing:

@@ -9,6 +9,7 @@ on:
     paths:
       - 'discovery-service/**'
       - 'observability-config/**'
+      - '.github/workflows/discovery-cd-workflow.yml'
 
 jobs:
   releasing:
@@ -32,7 +33,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: discovery-service-app # pod랑 같은 이름
-      deploy-name: discovery-service-deploy # deployment랑 같은 이름
+      deploy-name: discovery-deploy # deployment랑 같은 이름
       label-name: discovery # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 

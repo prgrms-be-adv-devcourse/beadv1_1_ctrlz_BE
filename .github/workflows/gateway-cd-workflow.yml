@@ -10,9 +10,8 @@ on:
       - 'gateway-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/gateway-cd-workflow.yml'
+      - '.github/workflows/gateway-cd-workflow.yml'
       - 'observability-config/**'
-
 jobs:
 
   releasing:
