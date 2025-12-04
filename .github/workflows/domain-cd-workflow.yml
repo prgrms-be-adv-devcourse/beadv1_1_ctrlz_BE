@@ -10,7 +10,7 @@ on:
       - 'common/**'
       - '**/*.dockerfile'
       - 'observability-config/**'
-      - '**/.github/domain-cd-workflow.yml'
+      - '.github/workflows/domain-cd-workflow.yml'
 
   workflow_dispatch:
     inputs:
