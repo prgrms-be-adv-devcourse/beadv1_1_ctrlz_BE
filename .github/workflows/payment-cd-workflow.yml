@@ -2,14 +2,14 @@ name: payment-service ci/cd
 
 on:
   workflow_dispatch:
-  push: # 메인에 push 될때 수행됨.
-    branches:
-      - main
-      - deploytest
-    paths:
-      - 'payment-service/**'
-      - 'common/**'
-      - '**/*.dockerfile'
+#  push: # 메인에 push 될때 수행됨.
+#    branches:
+#      - main
+#      - deploytest
+#    paths:
+#      - 'payment-service/**'
+#      - 'common/**'
+#      - '**/*.dockerfile'
 
 jobs:
   releasing:

@@ -2,12 +2,12 @@ name: gateway-service ci/cd
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - deploytest
-    paths:
-      - 'gateway-service/**'
+#  push:
+#    branches:
+#      - main
+#      - deploytest
+#    paths:
+#      - 'gateway-service/**'
 
 jobs:
 

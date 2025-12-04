@@ -1,13 +1,13 @@
 name: settlement-service ci/cd
 
 on:
-  push:
-    branches:
-      - main
-      - deploytest
-    paths:
-      - 'settlement-service/**'
-      - 'common/**'
+#  push:
+#    branches:
+#      - main
+#      - deploytest
+#    paths:
+#      - 'settlement-service/**'
+#      - 'common/**'
 
   workflow_dispatch:
     inputs:
