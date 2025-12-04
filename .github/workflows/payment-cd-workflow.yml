@@ -2,14 +2,15 @@ name: payment-service ci/cd
 
 on:
   workflow_dispatch:
-#  push: # 메인에 push 될때 수행됨.
-#    branches:
-#      - main
-#      - deploytest
-#    paths:
-#      - 'payment-service/**'
-#      - 'common/**'
-#      - '**/*.dockerfile'
+  push: # 메인에 push 될때 수행됨.
+    branches:
+      - main
+      - deploytest
+    paths:
+      - 'payment-service/**'
+      - 'common/**'
+      - '**/*.dockerfile'
+      - '**/.github/**'
 
 jobs:
   releasing:
@@ -35,7 +36,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: payment-service-app # pod랑 같은 이름
-      deploy-name: payment-service-deploy # deployment랑 같은 이름
+      deploy-name: payment-deploy # deployment랑 같은 이름
       label-name: payment # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
