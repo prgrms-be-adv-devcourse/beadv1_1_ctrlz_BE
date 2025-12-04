@@ -9,7 +9,6 @@ on:
       - 'settlement-service/**'
       - 'common/**'
 
-
   workflow_dispatch:
     inputs:
       service-name:

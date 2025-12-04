@@ -3,7 +3,7 @@ application:
   version: 1.0
 
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
@@ -40,7 +40,7 @@ spring:
       password: 1234
   #      password: "${REDIS_PASSWORD}"
   kafka:
-    bootstrap-servers: kafka-sts:9090
+    bootstrap-servers: kafka-svc:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -61,9 +61,14 @@ custom:
     topic-partitions: 1
     topic-replications: 1
 
+  deposit:
+    topic:
+      command: deposit-command
+
   feign:
     url:
       user-service: http://account-svc:8080
+      order-service: http://domain-svc:8081
 # k8s 설정
 eureka:
   instance:
@@ -71,6 +76,6 @@ eureka:
     hostname: payment-service
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
