@@ -9,7 +9,7 @@ on:
       - 'payment-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/settlement-cd-workflow.yml'
+      - '.github/workflows/settlement-cd-workflow.yml'
       - 'observability-config/**'
 
   workflow_dispatch:
