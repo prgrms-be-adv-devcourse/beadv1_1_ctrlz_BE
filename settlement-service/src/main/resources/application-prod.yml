@@ -36,5 +36,5 @@ spring:
         default_batch_fetch_size: 100
 
 server:
-  port: 8084
+  port: 8085
 
