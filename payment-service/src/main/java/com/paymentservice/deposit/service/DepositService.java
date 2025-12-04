@@ -1,5 +1,7 @@
 package com.paymentservice.deposit.service;
 
+import static org.springframework.transaction.annotation.Propagation.*;
+
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
@@ -231,10 +233,14 @@ public class DepositService {
 	 * - 승인된 금액과 요청 금액을 검증 (불일치 시 예외)
 	 * - deposit balance 증가, paymentKey 저장, 로그 생성
 	 */
-	public DepositConfirmResponse tossPayment(DepositConfirmRequest request, String userId) {
+	// PG 승인 요청 → 트랜잭션 없음
+	@Transactional(propagation = NOT_SUPPORTED)
+	public TossChargeResponse tossApprove(DepositConfirmRequest request, String userId) {
+		return depositTossClient.approve(userId, request);
+	}
+
+	public DepositConfirmResponse tossPayment(TossChargeResponse approve, DepositConfirmRequest request, String userId) {
 		try {
-			// toss payments api
-			TossChargeResponse approve = depositTossClient.approve(userId, request);
 
 			// 승인된 금액과 요청 금액 검증 (안정성 체크)
 			if (approve.balance() == null || request.amount() == null ||
@@ -247,16 +253,11 @@ public class DepositService {
 			Deposit deposit = getDepositByUserId(userId);
 			BigDecimal beforeBalance = deposit.getBalance();
 
-			log.info("deposit: {}", deposit);
-
 			deposit.increaseBalance(request.amount());
 			deposit.setPaymentKey(approve.paymentKey());
 
-			log.info("deposit: {}", deposit);
-
 			Deposit savedDeposit = depositJpaRepository.save(deposit);
 			BigDecimal afterBalance = savedDeposit.getBalance();
-
 
 			// 로그 생성 (충전)
 			DepositLog depositLog = DepositLog.create(

@@ -11,6 +11,7 @@ import com.common.model.web.BaseResponse;
 import com.paymentservice.deposit.model.dto.DepositConfirmRequest;
 import com.paymentservice.deposit.model.dto.DepositConfirmResponse;
 import com.paymentservice.deposit.model.dto.DepositResponse;
+import com.paymentservice.deposit.model.dto.TossChargeResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
 
@@ -47,12 +48,12 @@ public class DepositApiController {
 
 	@PostMapping("/confirm")
 	public BaseResponse<DepositConfirmResponse> confirmDeposit(
-		@RequestBody DepositConfirmRequest request
-		// @RequestHeader(value = "X-REQUEST-ID") String userId
+		@RequestBody DepositConfirmRequest request,
+		@RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
 		try {
-			String userId = "user-001";
-			DepositConfirmResponse response = depositService.tossPayment(request, userId);
+			TossChargeResponse approve = depositService.tossApprove(request, userId);
+			DepositConfirmResponse response = depositService.tossPayment(approve, request, userId);
 			return new BaseResponse<>(response, "충전 완료");
 		} catch (Exception e) {
 			log.error("충전 중 오류", e);
