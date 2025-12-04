@@ -8,6 +8,7 @@ on:
     paths:
       - 'account-service/**'
       - 'common/**'
+      - 'observability-config/**'
       - '**/*.dockerfile'
       - '**/.github/account-cd-workflow.yml'
 
@@ -33,6 +34,7 @@ jobs:
     needs: releasing
     uses: ./.github/workflows/deploy-workflow.yml
     secrets: inherit
+
     with:
       pod-name: account-service-app # pod랑 같은 이름
       deploy-name: account-deploy # deployment랑 같은 이름

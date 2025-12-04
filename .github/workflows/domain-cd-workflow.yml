@@ -9,7 +9,7 @@ on:
       - 'domain-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/**'
+      - 'observability-config/**'
       - '**/.github/domain-cd-workflow.yml'
 
   workflow_dispatch:

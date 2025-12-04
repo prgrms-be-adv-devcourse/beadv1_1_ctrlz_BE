@@ -11,6 +11,7 @@ on:
       - 'common/**'
       - '**/*.dockerfile'
       - '**/.github/payment-cd-workflow.yml'
+      - 'observability-config/**'
 
 jobs:
   releasing:
