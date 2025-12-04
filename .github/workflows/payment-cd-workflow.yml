@@ -10,7 +10,7 @@ on:
       - 'payment-service/**'
       - 'common/**'
       - '**/*.dockerfile'
-      - '**/.github/payment-cd-workflow.yml'
+      - '.github/workflows/payment-cd-workflow.yml'
       - 'observability-config/**'
 
 jobs:
