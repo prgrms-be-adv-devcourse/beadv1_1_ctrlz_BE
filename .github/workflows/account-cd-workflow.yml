@@ -24,7 +24,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
     with:
-      service-name: account-service-app
+      service-name: account-service
       service-dir: .
       secret-dir: account-service/account-application # account-service 에는 /account-application로 secret.yml 들어가게 설정
       file-name: account-service.dockerfile
