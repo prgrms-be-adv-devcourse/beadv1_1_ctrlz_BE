@@ -6,8 +6,10 @@ on:
       - main
       - deploytest
     paths:
-      - 'domain-service/**'
+      - 'account-service/**'
       - 'common/**'
+      - '**/*.dockerfile'
+      - '**/.github/**'
 
   workflow_dispatch:
     inputs:
@@ -46,7 +48,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: domain-service-app # pod랑 같은 이름
-      deploy-name: domain-service-deploy # deployment랑 같은 이름
+      deploy-name: domain-deploy # deployment랑 같은 이름
       label-name: domain # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
