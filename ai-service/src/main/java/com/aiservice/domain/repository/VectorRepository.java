@@ -10,7 +10,10 @@ import com.aiservice.domain.model.ProductVectorContent;
 
 public interface VectorRepository {
 	String addDocument(ProductVectorContent data);
+
 	Optional<Document> findDocumentByProductId(String productId);
-	List<DocumentSearchResponse> similaritySearch(String query, int maxResults, String categoryName, List<String> tags);
+
+	List<DocumentSearchResponse> similaritySearch(String query, int maxResults);
+
 	void deleteDocument(String productId);
 }

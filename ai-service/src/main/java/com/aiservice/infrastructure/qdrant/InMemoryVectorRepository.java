@@ -1,4 +1,4 @@
-package com.aiservice.infrastructure;
+package com.aiservice.infrastructure.qdrant;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -32,6 +33,12 @@ public class InMemoryVectorRepository implements VectorRepository {
 	}
 
 	@Override
+	public java.util.Optional<Document> findDocumentByProductId(String productId) {
+		// InMemory 구현에서는 간단히 빈 Optional 반환하거나 필요시 구현
+		return java.util.Optional.empty();
+	}
+
+	@Override
 	public String addDocument(ProductVectorContent data) {
 
 		String documentId = UUID.randomUUID().toString();
@@ -40,18 +47,18 @@ public class InMemoryVectorRepository implements VectorRepository {
 		String content = buildNaturalLanguageContent(data);
 
 		Map<String, Object> metadata = Map.of(
-			"uploadTime", LocalDateTime.now(),
-			"id", documentId
-		);
+				"uploadTime", LocalDateTime.now(),
+				"id", documentId,
+				"categoryName", data.categoryName());
 
 		Document document = new Document(content, metadata);
 		// TokenTextSplitter tokenSplitter = TokenTextSplitter.builder()
-		// 	.withChunkSize(512)           // 원하는 청크 크기
-		// 	.withMinChunkSizeChars(350)   // 최소 청크 크기
-		// 	.withMinChunkLengthToEmbed(5) // 임베딩할 최소 청크 길이
-		// 	.withMaxNumChunks(10000)      // 최대 청크 수
-		// 	.withKeepSeparator(true)      // 구분자 유지 여부
-		// 	.build();
+		// .withChunkSize(512) // 원하는 청크 크기
+		// .withMinChunkSizeChars(350) // 최소 청크 크기
+		// .withMinChunkLengthToEmbed(5) // 임베딩할 최소 청크 길이
+		// .withMaxNumChunks(10000) // 최대 청크 수
+		// .withKeepSeparator(true) // 구분자 유지 여부
+		// .build();
 
 		// List<Document> chunks = tokenSplitter.split(document);
 		vectorStore.add(List.of(document));
@@ -72,7 +79,7 @@ public class InMemoryVectorRepository implements VectorRepository {
 
 		// 이름 (제목과 다른 경우)
 		if (data.name() != null && !data.name().isBlank() &&
-			!data.name().equals(data.title())) {
+				!data.name().equals(data.title())) {
 			content.append(data.name()).append("\n");
 		}
 
@@ -105,13 +112,13 @@ public class InMemoryVectorRepository implements VectorRepository {
 	}
 
 	@Override
-	public List<DocumentSearchResponse> similaritySearch(String query, int maxResults, String categoryName, List<String> tags) {
+	public List<DocumentSearchResponse> similaritySearch(String query, int maxResults) {
 		log.info("유사도 검색 시작 query = {}, 최대 결과 = {}", query, maxResults);
 
 		SearchRequest request = SearchRequest.builder()
-			.query(query)
-			.topK(maxResults)
-			.build();
+				.query(query)
+				.topK(maxResults)
+				.build();
 
 		List<Document> documents = vectorStore.similaritySearch(request);
 		if (documents == null || documents.isEmpty()) {
@@ -119,12 +126,17 @@ public class InMemoryVectorRepository implements VectorRepository {
 		}
 
 		return documents.stream()
-			.map(document -> DocumentSearchResponse.builder()
-				.id(document.getId())
-				.content(document.getText() == null ? "" : document.getText())
-				.metadata(document.getMetadata())
-				.score(document.getScore() == null ? 0 : document.getScore())
-				.build())
-			.toList();
+				.map(document -> DocumentSearchResponse.builder()
+						.id(document.getId())
+						.content(document.getText() == null ? "" : document.getText())
+						.metadata(document.getMetadata())
+						.score(document.getScore() == null ? 0 : document.getScore())
+						.build())
+				.toList();
+	}
+
+	@Override
+	public void deleteDocument(String productId) {
+
 	}
 }

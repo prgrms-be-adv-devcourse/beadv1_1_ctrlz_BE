@@ -30,12 +30,20 @@ dependencies {
     implementation "org.springframework.ai:spring-ai-openai-spring-boot-starter"
     implementation "org.springframework.ai:spring-ai-qdrant-store-spring-boot-starter"
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    //openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     //lombok
     compileOnly 'org.projectlombok:lombok'
@@ -45,18 +53,12 @@ dependencies {
 
     //test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     //h2
     runtimeOnly 'com.h2database:h2'
 
-    //s3
-    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
-
-    //embedding transform
-    implementation 'org.springframework.ai:spring-ai-starter-model-transformers:1.1.0'
 }
 
 dependencyManagement {
@@ -68,8 +70,4 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-    }
 }
