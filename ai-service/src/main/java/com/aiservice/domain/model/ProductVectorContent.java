@@ -6,12 +6,13 @@ import lombok.Builder;
 
 @Builder
 public record ProductVectorContent(
-	String title,
-	String name,
-	String categoryName,
-	String status,
-	int price,
-	String description,
-	List<String> tags
-) {
+		String productId,
+		String title,
+		String name,
+		String categoryName,
+		String status,
+		int price,
+		String description,
+		List<String> tags,
+		String url) {
 }
