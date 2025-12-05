@@ -40,7 +40,7 @@ spring:
       password: 1234
   #      password: "${REDIS_PASSWORD}"
   kafka:
-    bootstrap-servers: kafka-sts:9090
+    bootstrap-servers: kafka-svc:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -60,6 +60,11 @@ custom:
   config:
     topic-partitions: 1
     topic-replications: 1
+
+  deposit:
+    topic:
+      command: deposit-command
+
   feign:
     url:
       user-service: http://account-svc:8080
