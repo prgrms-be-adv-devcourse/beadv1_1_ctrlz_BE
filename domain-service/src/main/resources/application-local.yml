@@ -19,7 +19,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
   jpa:
@@ -65,7 +65,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
       properties:
-        spring.json.trusted.packages: "com.common.event.**"
+        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
         allow.auto.create.topics: false
         delivery.timeout.ms: 120000
         linger.ms: 300
@@ -74,18 +74,22 @@ spring:
         retries: 1
         max.in.flight.requests.per.connection: 5
 
+        observation:
+          enabled: true
+
+      enable-auto-commit: true
 
   elasticsearch:
     uris: http://localhost:9200 # default 지만 명시적으로 작성
 
 # k8s 설정
 eureka:
-  instance:
-    prefer-ip-address: true
+#  instance:
+#    prefer-ip-address: true
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-    enabled: true
+#    enabled: false
 
 custom:
   image:
@@ -108,15 +112,6 @@ custom:
   product-post:
     topic:
       event: product-post-events
-
-  order:
-    topic:
-      command: order-command
-
-  search:
-    topic:
-      event: search-word-events
-
 
   feign:
     url:
