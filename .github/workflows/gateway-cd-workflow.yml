@@ -1,14 +1,17 @@
 name: gateway-service ci/cd
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
       - deploytest
     paths:
       - 'gateway-service/**'
-      - '.github/workflows/**'
-
+      - 'common/**'
+      - '**/*.dockerfile'
+      - '.github/workflows/gateway-cd-workflow.yml'
+      - 'observability-config/**'
 jobs:
 
   releasing:
@@ -34,7 +37,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: gateway-service-app # pod랑 같은 이름
-      deploy-name: gateway-service-deploy # deployment랑 같은 이름
+      deploy-name: gateway-deploy # deployment랑 같은 이름
       label-name: gateway # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 

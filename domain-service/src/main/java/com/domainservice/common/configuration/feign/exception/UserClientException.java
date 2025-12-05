@@ -10,7 +10,8 @@ public abstract class UserClientException extends YeongeunFeignClientException {
 		super(status, message);
 	}
 
-	public static class BadRequest extends UserClientException {
+
+	public static class BadRequest extends YeongeunFeignClientException {
 		public BadRequest(String message) {
 			super(HttpStatus.BAD_REQUEST, message);
 		}
