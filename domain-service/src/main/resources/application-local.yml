@@ -63,10 +63,13 @@ spring:
       group-id: domain-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-
       properties:
         spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
         allow.auto.create.topics: false
+        observation:
+          enabled: true
+
+      enable-auto-commit: true
 
   elasticsearch:
     uris: http://localhost:9200 # default 지만 명시적으로 작성
