@@ -7,7 +7,6 @@ on:
       - deploytest
     paths:
       - 'gateway-service/**'
-      - '.github/workflows/**'
 
 jobs:
 
