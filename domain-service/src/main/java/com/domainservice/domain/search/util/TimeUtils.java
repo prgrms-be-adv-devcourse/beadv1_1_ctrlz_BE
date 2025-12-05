@@ -30,11 +30,11 @@ public final class TimeUtils {
 	}
 
 	public static LocalDateTime getLastBatchExecutionTime() {
-		return convertFromStringToDateTime(getCurrentDateTimeStr());
+		return convertFromStringToDateTime(getPreviousDateTimeStr()+"0000");
 	}
 
 	public static LocalDateTime getCurrentBatchExecutionTime() {
-		return convertFromStringToDateTime(getPreviousDateTimeStr());
+		return convertFromStringToDateTime(getCurrentDateTimeStr()+"0000");
 	}
 
 

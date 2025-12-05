@@ -39,7 +39,7 @@ public class SearchWordScheduler {
 		lock.lock();
 		LocalDateTime now = LocalDateTime.now();
 		try {
-			List<KeywordLog> logs = batchService.getTrendWordLogList();
+			List<KeywordLog> logs = batchService.getRealTimeTrendWordLogList();
 
 			CompletableFuture<Void> updateTrendFuture =
 				CompletableFuture.runAsync(() ->
@@ -76,6 +76,7 @@ public class SearchWordScheduler {
 	 * 0시부터 2시간마다 일간 인기 검색어 업데이트 + Elasticsearch
 	 */
 	@Scheduled(cron = "0 0 */2 * * *")
+	// @Scheduled(cron = "0 */5 * * * *")	//테스트용
 	public void updateDailyPopularAndElasticsearch() {
 		lock.lock();
 
@@ -86,7 +87,7 @@ public class SearchWordScheduler {
 
 			log.info("A 완료됨 → B 작업 시작");
 
-			List<KeywordLog> keywordCountLogList = batchService.collectDailyPopularRedisLog();
+			List<KeywordLog> keywordCountLogList = batchService.getDailyPopularRedisLog();
 			Map<String, DailyPopularWordLog> previousLogMap = batchService.getPreviousDailyPopularDBLog();
 
 			batchService.updateDailyPopularWordList(keywordCountLogList, previousLogMap);

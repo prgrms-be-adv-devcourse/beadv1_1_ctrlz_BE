@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record DailyPopularWordLog(
 	String word,
-	Integer searchedCount,
+	Long searchedCount,
 	LocalDateTime lastSearchedAt
 ) {
 }
