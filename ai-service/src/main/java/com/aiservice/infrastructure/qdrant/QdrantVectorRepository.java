@@ -51,10 +51,10 @@ public class QdrantVectorRepository implements VectorRepository {
 	public Optional<Document> findDocumentByProductId(String productId) {
 		FilterExpressionBuilder filter = new FilterExpressionBuilder();
 		SearchRequest request = SearchRequest.builder()
-			.query("")
-			.topK(3)
-			.filterExpression(filter.eq("productId", productId).build())
-			.build();
+				.query("")
+				.topK(3)
+				.filterExpression(filter.eq("productId", productId).build())
+				.build();
 
 		List<Document> documents = vectorStore.similaritySearch(request);
 		if (documents != null && !documents.isEmpty()) {
@@ -64,23 +64,13 @@ public class QdrantVectorRepository implements VectorRepository {
 	}
 
 	@Override
-	public List<DocumentSearchResponse> similaritySearch(
-		String query,
-		int maxResults,
-		String categoryName,
-		List<String> tags
-	) {
+	public List<DocumentSearchResponse> similaritySearch(String query, int maxResults) {
 		log.info("유사도 검색 시작 query = {}, 최대 결과 = {}", query, maxResults);
 
-		FilterExpressionBuilder filter = new FilterExpressionBuilder();
 		SearchRequest request = SearchRequest.builder()
-			.query(query)
-			.topK(maxResults)
-			.filterExpression(
-				filter.and(
-					filter.eq("categoryName", categoryName),
-					filter.in("tags", (Object[])tags.toArray(String[]::new))).build())
-			.build();
+				.query(query)
+				.topK(maxResults)
+				.build();
 
 		List<Document> documents = vectorStore.similaritySearch(request);
 		if (documents == null || documents.isEmpty()) {
@@ -88,24 +78,24 @@ public class QdrantVectorRepository implements VectorRepository {
 		}
 
 		return documents.stream()
-			.map(document -> DocumentSearchResponse.builder()
-				.id(document.getId())
-				.content(document.getText() == null ? "" : document.getText())
-				.metadata(document.getMetadata())
-				.score(document.getScore() == null ? 0 : document.getScore())
-				.build())
-			.toList();
+				.map(document -> DocumentSearchResponse.builder()
+						.id(document.getId())
+						.content(document.getText() == null ? "" : document.getText())
+						.metadata(document.getMetadata())
+						.score(document.getScore() == null ? 0 : document.getScore())
+						.build())
+				.toList();
 	}
 
 	@Override
 	public void deleteDocument(String productId) {
 		FilterExpressionBuilder filter = new FilterExpressionBuilder();
 		List<Document> documents = vectorStore.similaritySearch(
-			SearchRequest.builder()
-				.query("")
-				.topK(5) // 혹시 중복된게 있을 수 있으니 여유있게
-				.filterExpression(filter.eq("productId", productId).build())
-				.build());
+				SearchRequest.builder()
+						.query("")
+						.topK(5) // 혹시 중복된게 있을 수 있으니 여유있게
+						.filterExpression(filter.eq("productId", productId).build())
+						.build());
 
 		if (documents != null && !documents.isEmpty()) {
 			List<String> ids = documents.stream().map(Document::getId).toList();
@@ -122,23 +112,23 @@ public class QdrantVectorRepository implements VectorRepository {
 		// 글 제목
 		String content = "제품명: " + data.title() + ". "
 
-			// 상품이름 (제목과 다른 경우만)
-			+ "상품명: " + data.name() + ". "
+		// 상품이름 (제목과 다른 경우만)
+				+ "상품명: " + data.name() + ". "
 
-			// 상세 설명
-			+ "설명: " + data.description() + ". "
+				// 상세 설명
+				+ "설명: " + data.description() + ". "
 
-			// 카테고리
-			+ "카테고리: " + data.categoryName() + ". "
+				// 카테고리
+				+ "카테고리: " + data.categoryName() + ". "
 
-			// 태그
-			+ "태그: " + String.join(", ", data.tags()) + ". "
+				// 태그
+				+ "태그: " + String.join(", ", data.tags()) + ". "
 
-			// 가격
-			+ "가격: " + data.price() + "원. "
+				// 가격
+				+ "가격: " + data.price() + "원. "
 
-			// 상태
-			+ "상태: " + data.status() + ".";
+				// 상태
+				+ "상태: " + data.status() + ".";
 
 		return content.trim();
 	}
