@@ -4,6 +4,7 @@ import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,28 +45,29 @@ public class FavoriteService {
 			.productPost(productPost)
 			.build();
 
-		favoriteRepository.save(favoriteProduct);
+		try {
 
-		// productPost.incrementLikedCount();
-		productPostRepository.incrementLikedCount(productPostId);
+			favoriteRepository.saveAndFlush(favoriteProduct);
+			productPostRepository.incrementLikedCount(productPostId);
 
-		return new FavoritePostResponse(true, productPostId);
+			return new FavoritePostResponse(true, productPostId);
+
+		} catch (DataIntegrityViolationException e) {
+			throw new ProductPostException(FAVORITE_ALREADY_EXISTS); // DB 유니크 제약조건 위반 (동시 요청)
+		}
 
 	}
 
 	@Transactional
 	public FavoritePostResponse cancelFavoriteProduct(String userId, String productPostId) {
 
-		ProductPost productPost = productPostRepository.findById(productPostId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		FavoriteProduct target = favoriteRepository
+			.findByUserIdAndProductPostId(userId, productPostId)
+			.orElseThrow(() -> new ProductPostException(FAVORITE_NOT_FOUND));
 
-		long deletedCount = favoriteRepository.deleteByUserIdAndProductPost(userId, productPost);
+		favoriteRepository.delete(target);
 
-		if (deletedCount == 0) {
-			throw new ProductPostException(FAVORITE_NOT_FOUND);
-		}
-
-		productPost.decrementLikedCount();
+		productPostRepository.decrementLikedCount(productPostId);
 
 		return new FavoritePostResponse(false, productPostId);
 

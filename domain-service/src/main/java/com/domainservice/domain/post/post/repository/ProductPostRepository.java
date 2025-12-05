@@ -25,4 +25,12 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 		""")
 	void incrementLikedCount(@Param("productPostId") String productPostId);
 
+	@Modifying
+	@Query("""
+		UPDATE ProductPost p
+		SET p.likedCount = p.likedCount - 1
+		WHERE p.id = :productPostId
+		""")
+	void decrementLikedCount(@Param("productPostId") String productPostId);
+
 }
