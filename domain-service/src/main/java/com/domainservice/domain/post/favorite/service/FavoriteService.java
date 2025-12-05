@@ -46,7 +46,8 @@ public class FavoriteService {
 
 		favoriteRepository.save(favoriteProduct);
 
-		productPost.incrementLikedCount();
+		// productPost.incrementLikedCount();
+		productPostRepository.incrementLikedCount(productPostId);
 
 		return new FavoritePostResponse(true, productPostId);
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -15,5 +16,13 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 	// Initializer 전용 메서드
 	@Query("SELECT p.id FROM ProductPost p WHERE p.userId <> :userId AND p.deleteStatus = 'N'")
 	List<String> findAllIdsExceptOwner(@Param("userId") String userId);
+
+	@Modifying
+	@Query("""
+		UPDATE ProductPost p
+		SET p.likedCount = p.likedCount + 1
+		WHERE p.id = :productPostId
+		""")
+	void incrementLikedCount(@Param("productPostId") String productPostId);
 
 }
