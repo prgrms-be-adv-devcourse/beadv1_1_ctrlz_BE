@@ -10,13 +10,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.common.annotation.TimeTrace;
-import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
 import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
-import com.domainservice.domain.search.repository.SearchWordLogCommandRepository;
-import com.domainservice.domain.search.repository.SearchWordRepository;
+import com.domainservice.domain.search.repository.jpa.SearchWordLogCommandRepository;
 import com.domainservice.domain.search.repository.jpa.SearchWordLogQueryRepository;
 
 import com.domainservice.domain.search.repository.redis.PopularSearchWordRedisRepository;
+import com.domainservice.domain.search.repository.redis.SearchLogRedisRepository;
 import com.domainservice.domain.search.service.dto.vo.DailyPopularWordLog;
 import com.domainservice.domain.search.service.dto.vo.KeywordLog;
 import com.domainservice.domain.search.util.TimeUtils;
@@ -28,10 +27,9 @@ import lombok.RequiredArgsConstructor;
 public class SearchWordSchedulerService {
 
 	private final PopularSearchWordRedisRepository popularWordRedisRepository;
+	private final SearchLogRedisRepository searchLogRedisRepository;
 	private final SearchWordLogQueryRepository searchWordLogQueryRepository;
 	private final SearchWordLogCommandRepository searchWordLogCommandRepository;
-
-	private final SearchWordRepository searchWordRepository;
 
 	/**
 	 * 실시간 인기 검색어 조회
@@ -100,7 +98,7 @@ public class SearchWordSchedulerService {
 	 */
 	@TimeTrace
 	@Transactional
-	public List<SearchWordLog> saveLogsToDataBase(List<KeywordLog> keywordLogs) {
+	public void saveLogsToDataBase(List<KeywordLog> keywordLogs) {
 		//Bulk-Insert 적용 예정
 		List<SearchWordLog> allLogs =
 			keywordLogs.stream()
@@ -113,21 +111,6 @@ public class SearchWordSchedulerService {
 				.toList();
 
 		// Bulk insert 1번
-		return searchWordLogCommandRepository.insertAll(allLogs);
-	}
-
-	/**
-	 * SearchWordDocumentEntity의 originValue를 기준으로 데이터가 존재하면 update 없으면 insert하는 메서드
-	 * @param savedLogs
-	 */
-	@TimeTrace
-	@Transactional
-	public void upsertLogsToElasticsearch(List<SearchWordLog> savedLogs) {
-
-		searchWordRepository.upsertByOriginValue(
-			savedLogs.stream()
-				.map(SearchWordDocumentEntity::createDocumentEntity)
-				.toList()
-		);
+		searchWordLogCommandRepository.insertAll(allLogs);
 	}
 }

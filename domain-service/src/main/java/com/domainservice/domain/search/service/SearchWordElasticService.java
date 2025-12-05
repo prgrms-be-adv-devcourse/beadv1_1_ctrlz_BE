@@ -7,11 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.domainservice.domain.search.model.dto.request.Prefix;
+import com.domainservice.domain.search.model.vo.SearchWord;
+import com.domainservice.domain.search.repository.redis.PopularSearchWordRedisRepository;
+import com.domainservice.domain.search.service.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
 import com.domainservice.domain.search.repository.SearchWordRepository;
+import com.domainservice.domain.search.repository.redis.SearchLogRedisRepository;
 import com.domainservice.domain.search.service.analyzer.PrefixAnalyzer;
+import com.domainservice.domain.search.service.dto.vo.KeywordLog;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SearchWordElasticService {
 
 	private final SearchWordRepository searchWordRepository;
+	private final SearchLogRedisRepository searchLogRedisRepository;
+	private final PopularSearchWordRedisRepository popularRedisRepository;
 	private final PrefixAnalyzer prefixAnalyzer;
 
 	/**
@@ -115,4 +121,29 @@ public class SearchWordElasticService {
 		log.info("findSearchWord = {}", findSearchWord);
 		return findSearchWord;
 	}
+
+	@Transactional(readOnly = true)
+	public List<SearchWordResponse> getTrendWordList() {
+		return popularRedisRepository.findTrendWordList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<SearchWordResponse> getDailyPopularWord() {
+		return popularRedisRepository.findDailyPopularWord();
+	}
+
+	/**
+	 * 검색창에 입력한 단어 or 자동완성으로 나온 단어 선택 후 검색 결과 화면에서 보여지는 단어 저장하는 메서드.
+	 * @param word 검색창에 입력한 단어
+	 * @param userId user PK
+	 */
+	public void saveSearchWord(String word, String userId) {
+		SearchWord searchWord = new SearchWord(word);
+
+		if(!userId.isEmpty()) //userId는 null 값일 수 있음.
+			searchLogRedisRepository.save(searchWord, userId);
+
+		popularRedisRepository.save(searchWord);
+	}
+
 }
