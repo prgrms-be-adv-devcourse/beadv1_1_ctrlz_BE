@@ -32,28 +32,40 @@ public class SearchWordSchedulerService {
 	private final SearchWordLogCommandRepository searchWordLogCommandRepository;
 
 	/**
-	 * 5분마다 실시간 인기 검색어 업데이트
+	 * 실시간 인기 검색어 조회
 	 */
 	@Transactional(readOnly = true)
-	public List<KeywordLog> getTrendWordLogList() {
+	public List<KeywordLog> getRealTimeTrendWordLogList() {
 		return popularWordRedisRepository.findRealTimeTrendWordLog();
 	}
 
+	/**
+	 * 실시간 인기 검색어 목록 최신화
+	 * @param log
+	 */
 	@TimeTrace
 	@Transactional
 	public void updateRealtimeTrendWordList(List<KeywordLog> log) {
 		popularWordRedisRepository.updateRealTimeTrendWord(log);
 	}
 
+	/**
+	 * Redis에 저장된 일간 인기 검색어 log 목록 조회
+	 * @return
+	 */
 	@Transactional(readOnly = true)
-	public List<KeywordLog> collectDailyPopularRedisLog() {
+	public List<KeywordLog> getDailyPopularRedisLog() {
 		return popularWordRedisRepository.findDailyPopularWordListLog();
 	}
 
+	/**
+	 * DB에 저장된 검색 로그 조회(현재 ~ 2시간 전)
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public Map<String, DailyPopularWordLog> getPreviousDailyPopularDBLog() {
 		//2시간 전에 저장된 로그 조회
-		LocalDateTime lastBatchedAt = TimeUtils.getLastBatchExecutionTime().minusHours(2);
+		LocalDateTime lastBatchedAt = TimeUtils.getLastBatchExecutionTime();
 		return searchWordLogQueryRepository.findDailyLogs(lastBatchedAt);
 	}
 
@@ -72,16 +84,18 @@ public class SearchWordSchedulerService {
 	}
 
 	/**
-	 * 일간 인기 검색어 업데이트
-	 * 1. 로그를 가져온다.
-	 * 2. DB에서 이전 타임에 저장된 로그를 가져온다.
-	 * 3.
+	 * DB -> Elasticsearch 최신화
+	 * Kafka Connect 방식 고려
 	 */
 	@Transactional
 	public void updateElasticsearch() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * DB에 검색 로그 저장 - bulk-insert 적용
+	 * @param keywordLogs
+	 */
 	@TimeTrace
 	@Transactional
 	public void saveLogsToDataBase(List<KeywordLog> keywordLogs) {
