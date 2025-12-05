@@ -6,6 +6,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.stereotype.Repository;
 
 import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
 import com.domainservice.domain.search.repository.SearchWordQueryRepository;
@@ -16,6 +17,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.RequiredArgsConstructor;
 
+@Repository
 @RequiredArgsConstructor
 public class SearchWordQueryRepositoryImpl implements SearchWordQueryRepository {
 
@@ -66,6 +68,7 @@ public class SearchWordQueryRepositoryImpl implements SearchWordQueryRepository 
 
 		return executeSearch(fuzzyPrefixQuery);
 	}
+
 
 	private List<SearchWordDocumentEntity> executeSearch(Query query) {
 		NativeQuery searchQuery = NativeQuery.builder()

@@ -133,6 +133,18 @@ spring:
               filters:
                 - name: ProductSearchFilter
 
+            - id: search-word-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/**
+                - Method=GET,POST
+
+            - id: search-word-redis-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/redis-test
+                - Method=GET,DELETE
+
 services:
   account:
     url: lb://ACCOUNT-SERVICE

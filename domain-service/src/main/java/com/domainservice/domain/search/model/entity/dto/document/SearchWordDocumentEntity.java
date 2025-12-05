@@ -43,12 +43,6 @@ public class SearchWordDocumentEntity {
 	)
 	private String qwertyInput;
 
-	@Field(type = FieldType.Long)
-	private Long searchedCount;
-
-	@Field(name = "recent_searched_at", type = FieldType.Date, format = DateFormat.date_time)
-	private LocalDateTime recentSearchedAt;
-
 	@MultiField(
 		mainField = @Field(type = FieldType.Text, analyzer = "nori_search_analyzer", searchAnalyzer = "nori_search_analyzer"),
 		otherFields = @InnerField(suffix = "raw", type = FieldType.Keyword)
@@ -61,30 +55,23 @@ public class SearchWordDocumentEntity {
 	)
 	private List<String> suggestions;
 
-	@Field(name = "trend_score", type = FieldType.Double)
-	private Double trendScore;
-
 	@Field(name = "created_at", type = FieldType.Date, format = DateFormat.date_time)
 	private LocalDateTime createdAt;
 
-	@Field(name = "updated_at", type = FieldType.Date, format = DateFormat.date_time)
-	private LocalDateTime updatedAt;
+	@Field(name = "recent_searched_at", type = FieldType.Date, format = DateFormat.date_time)
+	private LocalDateTime recentSearchedAt;
 
 	@Builder
-	private SearchWordDocumentEntity(String id, String koreanWord, String qwertyInput, Long searchedCount,
-		LocalDateTime recentSearchedAt, String category, List<String> suggestions,
-		Double trendScore, LocalDateTime createdAt, LocalDateTime updatedAt) {
+	private SearchWordDocumentEntity(String id, String koreanWord, String qwertyInput, LocalDateTime recentSearchedAt,
+		String category, List<String> suggestions, LocalDateTime createdAt) {
 
 		this.id = id;
 		this.koreanWord = koreanWord;
 		this.qwertyInput = qwertyInput;
-		this.searchedCount = searchedCount;
 		this.recentSearchedAt = recentSearchedAt;
 		this.category = category;
 		this.suggestions = suggestions;
-		this.trendScore = trendScore;
 		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
 	}
 
 	public static SearchWordDocumentEntity createDocumentEntity(
@@ -97,13 +84,10 @@ public class SearchWordDocumentEntity {
 			.id(UUID.randomUUID().toString())
 			.koreanWord(koreanWord)
 			.qwertyInput(qwertyInput)
-			.searchedCount(0L)
-			.recentSearchedAt(now)
 			.category("기타")
 			.suggestions(new ArrayList<>())
-			.trendScore(0.0)
 			.createdAt(now)
-			.updatedAt(now)
+			.recentSearchedAt(now)
 			.build();
 	}
 
