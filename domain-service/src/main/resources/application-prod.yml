@@ -65,7 +65,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
+        spring.json.trusted.packages: "com.common.event.**"
         allow.auto.create.topics: false
         observation:
           enabled: true
