@@ -9,7 +9,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.aiservice.domain.vo.RecommandationStatus;
+import com.aiservice.domain.vo.RecommendationStatus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +58,7 @@ public class RecommendationSseService {
                 emitter.send(SseEmitter.event().data(body));
 
                 // 제한 도달 메시지면 연결 종료
-                if (body.contains(RecommandationStatus.LIMIT_REACHED.name())) {
+                if (body.contains(RecommendationStatus.LIMIT_REACHED.name())) {
                     log.info("추천 제한 도달 메시지 수신, 사용자 SSE 종료: {}", userId);
                     emitter.complete();
                 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.aiservice.controller.dto.DocumentSearchResponse;
 import com.aiservice.domain.model.RecommendationResult;
-import com.aiservice.domain.vo.RecommandationStatus;
+import com.aiservice.domain.vo.RecommendationStatus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class ProductRecommendationService implements RecommendService {
 			List<DocumentSearchResponse> searchResults) {
 		return Optional.ofNullable(recommendationMessageGenerator.toPrompt(userId, query, searchResults))
 				.map(msg -> RecommendationResult.builder()
-						.status(RecommandationStatus.OK)
+						.status(RecommendationStatus.OK)
 						.message(msg)
 						.items(searchResults)
 						.build())

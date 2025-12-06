@@ -1,5 +1,5 @@
 package com.aiservice.domain.vo;
 
-public enum RecommandationStatus {
+public enum RecommendationStatus {
 	OK, LIMIT_REACHED, NO_RESULTS
 }
