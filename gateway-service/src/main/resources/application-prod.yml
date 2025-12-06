@@ -155,6 +155,25 @@ spring:
                 - Path=/api/searches/redis-test
                 - Method=GET,DELETE
 
+            - id: ai-service-sse
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/sse/**
+                - Method=GET
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            - id: ai-service-polling
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/api/recommendations/**
+                - Method=GET
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 services:
   account:
     url: lb://ACCOUNT-SERVICE
