@@ -5,8 +5,7 @@ spring:
   application:
     name: gateway-service
 
-  logging:
-    config: classpath:logback-local.xml
+
 
   data:
     redis:
@@ -144,8 +143,6 @@ spring:
                 - Path=/api/searches/redis-test
                 - Method=GET,DELETE
 
-
-
             - id: ai-service-sse
               uri: lb://AI-SERVICE
               predicates:
@@ -165,6 +162,11 @@ spring:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
+
+
+logging:
+  config: classpath:logback-local.xml
+
 services:
   account:
     url: lb://ACCOUNT-SERVICE

@@ -1,6 +1,6 @@
 package com.gatewayservice.filter;
 
-import static com.gatewayservice.common.ServeletConst.*;
+import static com.gatewayservice.common.ServletConst.*;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;

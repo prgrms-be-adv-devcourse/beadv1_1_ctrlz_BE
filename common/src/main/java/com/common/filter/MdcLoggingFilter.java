@@ -45,7 +45,6 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } finally {
-            // 요청 처리 후 MDC 정리 (메모리 누수 방지)
             MDC.clear();
         }
     }

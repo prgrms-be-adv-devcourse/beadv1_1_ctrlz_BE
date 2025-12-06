@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.aiservice.application.RecommendationSseService;
+import com.aiservice.application.SseCommunicationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RecommendationSseController {
 
-    private final RecommendationSseService recommendationSseService;
+    private final SseCommunicationService sseCommunicationService;
 
     @GetMapping(value = "/recommendations/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamRecommendations(@PathVariable String userId) {
-        return recommendationSseService.connect(userId);
+        return sseCommunicationService.connect(userId);
     }
 }

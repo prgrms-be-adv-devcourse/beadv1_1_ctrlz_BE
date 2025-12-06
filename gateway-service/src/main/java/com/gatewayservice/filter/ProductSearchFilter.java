@@ -2,8 +2,11 @@ package com.gatewayservice.filter;
 
 import static java.util.Optional.*;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -16,15 +19,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSearchFilter.Config> {
 
+	private static final Logger view_logger = LoggerFactory.getLogger("ITEM_VIEW");
+	private static final Logger log = LoggerFactory.getLogger("API." + ProductSearchFilter.class);
 	@Value("${jwt.secret}")
 	private String secretKey;
-
 
 	public static class Config {
 	}
@@ -39,6 +41,9 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 			ServerHttpRequest request = exchange.getRequest();
 			Optional<String> tokenOptional = resolveToken(request);
 
+			List<String> q = request.getQueryParams().get("q");
+			String query = q.getFirst();
+
 			if (tokenOptional.isPresent()) {
 				try {
 					Jws<Claims> claims = getClaims(tokenOptional.get());
@@ -47,6 +52,7 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 						.header("X-REQUEST-ID", userId)
 						.build();
 					log.info("ProductSearchFilter: User identified: {}", userId);
+					view_logger.info("query = {}, userId = {}", query, userId);
 					return chain.filter(exchange.mutate().request(authorizedRequest).build());
 				} catch (Exception e) {
 					log.warn("ProductSearchFilter: Token validation failed. Proceeding as anonymous.", e);
