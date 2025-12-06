@@ -1,4 +1,4 @@
-package com.aiservice.configuration;
+package com.aiservice.application.configuration;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
