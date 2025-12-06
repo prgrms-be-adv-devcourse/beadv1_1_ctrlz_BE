@@ -5,7 +5,6 @@ plugins {
     id 'org.springframework.boot'
 }
 
-
 dependencies {
     implementation project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
@@ -37,4 +36,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+
+
+jar {
+    enabled = true
 }

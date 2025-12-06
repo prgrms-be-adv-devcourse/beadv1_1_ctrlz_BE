@@ -1,7 +1,39 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.7' apply false
-    id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+dependencies {
+    implementation project(':settlement')
+    implementation project(':search')
+    
+    // Dependencies needed for the runnable application
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+bootJar {
+    enabled = true
+}
+
+jar {
+    enabled = false
 }
 
 allprojects {
@@ -11,35 +43,66 @@ allprojects {
     repositories {
         mavenCentral()
     }
+
+    ext {
+        springCloudVersion = "2025.0.0"
+    }
+}
+
+// Need to apply plugin first to allprojects if we want to use dependencyManagement block in allprojects? 
+// But dependencyManagement block comes from a plugin. 
+// Plugin must be applied. subprojects apply it. Root applies it.
+// So we can use a separate block *after* allprojects where we apply logic?
+// OR just duplicate strict configs for root. Moving to allprojects is tricky if plugins aren't applied yet.
+
+// Safer: Add dependencyManagement directly to the root level (it applies to root). 
+// And kept it in subprojects (wait, I just removed it from subprojects!).
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.7"
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
-
+    
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.7"
+        }
+    }
+    
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
-    ext {
-        springCloudVersion = "2025.0.0"
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-batch'
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'org.springframework.batch:spring-batch-test'
         
+        // lombok
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
+
+        // test
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
     }
     
     tasks.named('test') {
