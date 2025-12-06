@@ -37,7 +37,7 @@ public class RecommendationMessageGenerator {
 	 * @param recommendations 추천 상품 목록
 	 * @return 생성된 추천 메시지, 실패 시 null
 	 */
-	public String generateMessage(String userId, String query, List<DocumentSearchResponse> recommendations) {
+	public String toPrompt(String userId, String query, List<DocumentSearchResponse> recommendations) {
 		if (recommendations.isEmpty()) {
 			return null;
 		}
