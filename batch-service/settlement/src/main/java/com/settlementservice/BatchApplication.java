@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class SettlementServiceApplication {
+public class BatchApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SettlementServiceApplication.class, args);
+		SpringApplication.run(BatchApplication.class, args);
 	}
 
 }
