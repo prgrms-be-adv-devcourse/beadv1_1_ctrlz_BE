@@ -1,4 +1,4 @@
-package com.aiservice.exception;
+package com.aiservice.domain.exception;
 
 public class DocumentProcessException extends RuntimeException {
 	public DocumentProcessException(String message) {
