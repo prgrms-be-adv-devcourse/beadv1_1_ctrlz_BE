@@ -1,7 +1,7 @@
 package com.gatewayservice.filter;
 
 import static com.gatewayservice.common.JwtClaimsConst.*;
-import static com.gatewayservice.common.ServeletConst.*;
+import static com.gatewayservice.common.ServletConst.*;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.gatewayservice.utils;
 
-import static com.gatewayservice.common.ServeletConst.*;
+import static com.gatewayservice.common.ServletConst.*;
 import static java.util.Optional.*;
 
 import java.net.InetSocketAddress;
