@@ -31,7 +31,7 @@ public class RedisSessionProvider implements SessionService {
 		redisTemplate.convertAndSend(channel, result);
 		log.info("채널로 추천 결과 발행: {}", channel);
 	}
-
+	//TODO: 이 내역도 저장해야되나????
 	@Override
 	public RecommendationResult getRecommendations(String userId) {
 		String key = KEY_PREFIX + userId;
