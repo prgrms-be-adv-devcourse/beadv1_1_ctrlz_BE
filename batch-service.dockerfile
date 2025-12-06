@@ -24,14 +24,14 @@ COPY observability-config ./observability-config
 COPY batch-service ./batch-service
 
 WORKDIR /app/batch-service
-# Build settlement module which contains the application
-RUN ./gradlew :settlement:build -x test --parallel --no-daemon --build-cache
+# Build root project
+RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12
 
 WORKDIR /app
 
-# Copy the settlement jar as the app jar
-COPY --from=build /app/batch-service/settlement/build/libs/*.jar app.jar
+# Copy the batch-service jar (root)
+COPY --from=build /app/batch-service/build/libs/*.jar app.jar
 
 ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]

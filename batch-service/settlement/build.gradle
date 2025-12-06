@@ -1,13 +1,11 @@
-plugins {
-    id 'org.springframework.boot'
-}
 
-description = 'settlement-service'
+description = 'settlement'
 
 dependencies {
     implementation project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
     implementation project(':common')
+
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -26,4 +24,10 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     // JSON 직렬화/역직렬화용
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
+
+
+
+jar {
+    enabled = true
 }

@@ -1,7 +1,6 @@
-description = 'search-service'
+description = 'search'
 
 dependencies {
-    implementation project(':common')
-    
+
     // implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Example dependency likely needed later
 }
