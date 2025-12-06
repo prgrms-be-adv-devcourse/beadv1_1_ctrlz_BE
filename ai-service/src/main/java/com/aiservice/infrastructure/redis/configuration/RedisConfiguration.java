@@ -1,4 +1,4 @@
-package com.aiservice.configuration;
+package com.aiservice.infrastructure.redis.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
