@@ -15,16 +15,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.common.exception.CustomException;
 import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
+import com.domainservice.common.configuration.feign.exception.UserClientException;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-
-import feign.FeignException;
 
 /**
  * ProductPostService 조회 기능 테스트
@@ -194,11 +192,13 @@ class GetProductPostTest {
         setViewCount(productPost, 15);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
 
         // when & then
-        assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
-                .isInstanceOf(CustomException.class);
+		given(userClient.getUser(userId))
+			.willThrow(new UserClientException.NotFound("Not Found"));
+
+		assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
+			.isInstanceOf(UserClientException.NotFound.class);
 
         verify(productPostRepository).findById(postId);
         verify(userClient).getUser(userId);
@@ -225,12 +225,11 @@ class GetProductPostTest {
         setViewCount(productPost, 25);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
+		given(userClient.getUser(userId)).willThrow(new UserClientException.Unauthorized("Unauthorized"));
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(EXTERNAL_API_ERROR.getMessage());
+                .isInstanceOf(UserClientException.Unauthorized.class);
 
         verify(productPostRepository).findById(postId);
         verify(userClient).getUser(userId);
@@ -257,12 +256,11 @@ class GetProductPostTest {
         setViewCount(productPost, 30);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUser(userId)).willThrow(FeignException.Forbidden.class);
+		given(userClient.getUser(userId)).willThrow(new UserClientException.Unauthorized("Unauthorized"));
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(EXTERNAL_API_ERROR.getMessage());
+                .isInstanceOf(UserClientException.Unauthorized.class);
 
         verify(productPostRepository).findById(postId);
         verify(userClient).getUser(userId);
@@ -289,12 +287,11 @@ class GetProductPostTest {
         setViewCount(productPost, 40);
 
         given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
-        given(userClient.getUser(userId)).willThrow(mock(FeignException.class));
+		given(userClient.getUser(userId)).willThrow(new UserClientException.BadRequest("BadRequest"));
 
         // when & then
         assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(EXTERNAL_API_ERROR.getMessage());
+                .isInstanceOf(UserClientException.BadRequest.class);
 
         verify(productPostRepository).findById(postId);
         verify(userClient).getUser(userId);
