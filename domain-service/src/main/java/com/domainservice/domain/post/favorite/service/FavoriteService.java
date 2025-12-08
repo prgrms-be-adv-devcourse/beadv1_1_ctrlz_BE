@@ -4,7 +4,6 @@ import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 import java.util.List;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,16 +44,11 @@ public class FavoriteService {
 			.productPost(productPost)
 			.build();
 
-		try {
-
+			// db 레벨에서 중복 등록을 막기 위해 flush를 통해 쿼리 발송하도록 구현
 			favoriteRepository.saveAndFlush(favoriteProduct);
 			productPostRepository.incrementLikedCount(productPostId);
 
 			return new FavoritePostResponse(true, productPostId);
-
-		} catch (DataIntegrityViolationException e) {
-			throw new ProductPostException(FAVORITE_ALREADY_EXISTS); // DB 유니크 제약조건 위반 (동시 요청)
-		}
 
 	}
 

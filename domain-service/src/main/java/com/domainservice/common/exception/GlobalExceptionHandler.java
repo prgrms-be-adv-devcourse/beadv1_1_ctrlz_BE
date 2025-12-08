@@ -1,5 +1,6 @@
 package com.domainservice.common.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -83,6 +84,21 @@ public class GlobalExceptionHandler {
 		ErrorResponse response = ErrorResponse.of(
 			HttpStatus.BAD_REQUEST.value()
 			, "요청하신 API 엔드포인트를 찾을 수 없습니다."
+		);
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(response);
+	}
+
+	/**
+	 * DB 유니크 제약조건 위반 (동시 요청)
+	 */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleNoApiException(DataIntegrityViolationException e) {
+
+		ErrorResponse response = ErrorResponse.of(
+			HttpStatus.BAD_REQUEST.value()
+			, "이미 좋아요한 글입니다."
 		);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
