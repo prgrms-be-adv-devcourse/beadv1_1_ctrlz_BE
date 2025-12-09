@@ -8,6 +8,8 @@ import lombok.Builder;
 public record UserContext(
         String gender,
         int age,
-        List<String> recentSearchKeywords,
-        List<String> cartProductNames) {
+        List<String> searchKeywords,
+        List<String> cartProductNames,
+		List<String> viewedTitle
+) {
 }

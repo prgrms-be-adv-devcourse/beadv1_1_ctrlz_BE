@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -28,26 +29,21 @@ public class RecommendationMessageGenerator {
 
 	private final ChatClient chatClient;
 	private final UserContextService userContextService;
+	private final ChatOptions chatOptions;
 
-	/**
-	 * 사용자 검색 쿼리와 추천 상품 목록을 기반으로 LLM 메시지를 생성
-	 *
-	 * @param userId          사용자 ID
-	 * @param query           검색 쿼리
-	 * @param recommendations 추천 상품 목록
-	 * @return 생성된 추천 메시지, 실패 시 null
-	 */
 	public String toPrompt(String userId, String query, List<DocumentSearchResponse> recommendations) {
+
 		if (recommendations.isEmpty()) {
 			return null;
 		}
 
 		String userContext = buildUserContext(userId);
-		String searchContext = String.format("사용자가 '%s'라고 검색했습니다.", query);
+		String searchContext = "사용자가 '%s'라고 검색했습니다.".formatted(query);
 		String productList = buildProductList(recommendations);
 
 		PromptTemplate promptTemplate = new PromptTemplate(
-			new ClassPathResource("prompts/recommendation.st"));
+			new ClassPathResource("prompts/recommendation.st")
+		);
 
 		String finalPrompt = promptTemplate.render(Map.of(
 			"searchContext", searchContext,
@@ -57,7 +53,8 @@ public class RecommendationMessageGenerator {
 		try {
 			return chatClient.prompt()
 				.system(finalPrompt)
-				.user(query + "를 검색한 상황이야.")
+				.user(query)
+				.options(chatOptions)
 				.call()
 				.content();
 		} catch (Exception e) {
@@ -68,14 +65,17 @@ public class RecommendationMessageGenerator {
 
 	private String buildUserContext(String userId) {
 		UserContext ctx = userContextService.getUserContext(userId);
-		if (ctx == null) {
-			return "";
-		}
+		
 		return String.format(
-			"사용자 정보: [성별: %s, 나이: %d세, 최근 검색어: %s, 장바구니 상품: %s]",
+			"""
+			사용자 정보: [성별: %s, 나이: %d세, 최근 검색어: %s, 최근 30일 간 장바구니 상품들: %s]
+			최근 조회한 상품들 : [%s]
+			""",
 			ctx.gender(), ctx.age(),
-			String.join(", ", ctx.recentSearchKeywords()),
-			String.join(", ", ctx.cartProductNames()));
+			String.join(", ", ctx.searchKeywords()),
+			String.join(", ", ctx.cartProductNames()),
+			String.join(", ", ctx.viewedTitle())
+		);
 	}
 
 	private String buildProductList(List<DocumentSearchResponse> recommendations) {
@@ -84,7 +84,7 @@ public class RecommendationMessageGenerator {
 			String productId = (String)doc.metadata().get("productId");
 			Integer price = (Integer)doc.metadata().get("price");
 			String url = productBaseUrl + "/" + productId;
-			productList.append(String.format("- 가격: %d원, URL: %s\n", price, url));
+			productList.append("- 가격: %d원, URL: %s\n".formatted(price, url));
 		}
 		return productList.toString();
 	}
