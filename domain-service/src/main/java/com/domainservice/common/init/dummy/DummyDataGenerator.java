@@ -127,10 +127,10 @@ public class DummyDataGenerator {
 					}
 				);
 
-				log.info("✅ 카테고리 '{}': {}개 상품명 로드", categoryName, names.size());
+				log.info("카테고리 '{}': {}개 상품명 로드", categoryName, names.size());
 
 			} catch (Exception e) {
-				log.error("❌ 카테고리 '{}' 처리 중 오류: {}", categoryName, e.getMessage());
+				log.error("카테고리 '{}' 처리 중 오류: {}", categoryName, e.getMessage());
 			}
 		}
 
@@ -199,11 +199,11 @@ public class DummyDataGenerator {
 		);
 
 		if (productNamesList.isEmpty()) {
-			log.error("❌ product_names 테이블이 비어있습니다!");
+			log.error("product_names 테이블이 비어있습니다!");
 			return;
 		}
 
-		log.info("📊 사용 가능한 상품명: {}개", productNamesList.size());
+		log.info("사용 가능한 상품명: {}개", productNamesList.size());
 
 		// 2. 배치로 생성
 		int batchSize = 1000;
