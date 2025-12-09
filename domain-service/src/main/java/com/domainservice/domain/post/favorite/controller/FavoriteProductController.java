@@ -27,6 +27,10 @@ import com.domainservice.domain.post.post.exception.ProductPostException;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관심 상품(찜하기) 관련 API를 제공하는 컨트롤러입니다.
+ * 상품 좋아요 등록/취소, 내 관심 목록 조회, 좋아요 여부 확인 기능을 제공합니다.
+ */
 @RestController
 @RequestMapping("/api/users/favorites")
 @RequiredArgsConstructor
@@ -34,6 +38,15 @@ public class FavoriteProductController {
 
 	private final FavoriteService favoriteService;
 
+	/**
+	 * 관심 상품 등록 API
+	 * 특정 상품을 사용자의 관심 상품(좋아요) 목록에 추가합니다.
+	 *
+	 * @param userId 요청 헤더(X-REQUEST-ID)에서 추출한 사용자 ID (필수)
+	 * @param productPostId 상품 게시글 ID
+	 * @return 등록된 상품 Id와 성공 메시지
+	 * @throws ProductPostException 인증되지 않은 사용자(anonymous)이거나 이미 등록된 상품인 경우
+	 */
 	@PostMapping("/{productPostId}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<FavoritePostResponse> addFavoriteProduct(
@@ -45,6 +58,15 @@ public class FavoriteProductController {
 		return new BaseResponse<>(response, "관심 상품 등록에 성공했습니다.");
 	}
 
+	/**
+	 * 관심 상품 취소 API
+	 * 등록된 관심 상품을 목록에서 제거합니다.
+	 *
+	 * @param userId 요청 헤더(X-REQUEST-ID)에서 추출한 사용자 ID (필수)
+	 * @param productPostId 상품 게시글 ID
+	 * @return 취소된 상품 Id와 취소 성공 메시지
+	 * @throws ProductPostException 인증되지 않은 사용자이거나 등록 내역이 없는 경우
+	 */
 	@DeleteMapping("/{productPostId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<FavoritePostResponse> cancelFavoriteProduct(
@@ -56,6 +78,15 @@ public class FavoriteProductController {
 		return new BaseResponse<>(response, "관심 상품 취소에 성공했습니다.");
 	}
 
+	/**
+	 * 내 관심 상품 목록 조회 API
+	 * 사용자가 등록한 관심 상품 목록을 페이징 처리하여 조회합니다.
+	 *
+	 * @param userId 요청 헤더(X-REQUEST-ID)에서 추출한 사용자 ID (필수)
+	 * @param pageable 페이징 정보 (기본값: size=20, sort=createdAt DESC)
+	 * @return 페이징된 관심 상품 목록과 페이지 정보를 포함한 응답 객체
+	 * @throws ProductPostException 인증되지 않은 사용자일 경우
+	 */
 	@GetMapping("/my")
 	@ResponseStatus(HttpStatus.OK)
 	public PageResponse<List<FavoriteProductResponse>> getMyFavoriteProductList(
@@ -66,6 +97,15 @@ public class FavoriteProductController {
 		return favoriteService.getMyFavoriteProductList(userId, pageable);
 	}
 
+	/**
+	 * 관심 상품 여부 조회 API
+	 * 특정 상품에 대해 사용자가 '좋아요'를 눌렀는지 상태를 확인합니다.
+	 *
+	 * @param userId 요청 헤더(X-REQUEST-ID)에서 추출한 사용자 ID (필수)
+	 * @param productPostId 상품 게시글 ID
+	 * @return 해당 상품에 대한 관심 등록 여부(Boolean)를 포함한 응답 객체
+	 * @throws ProductPostException 인증되지 않은 사용자일 경우
+	 */
 	@GetMapping("/{productPostId}/status")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<FavoriteStatusResponse> checkWishListStatus(
@@ -81,6 +121,7 @@ public class FavoriteProductController {
     ================= private Method =================
      */
 
+	// 사용자 인증 검증 (헤더 값이 'anonymous'인 경우 예외 처리)
 	private void validateAuthentication(String userId) {
 		if (userId.equals("anonymous")) {
 			throw new ProductPostException(UNAUTHORIZED);

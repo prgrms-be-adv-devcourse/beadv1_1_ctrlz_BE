@@ -19,9 +19,6 @@ public interface FavoriteRepository extends JpaRepository<FavoriteProduct, Strin
 
 	// 찜하기 존재 여부 확인
 	boolean existsByUserIdAndProductPost(String userId, ProductPost productPost);
-
 	boolean existsByUserIdAndProductPostId(String userId, String productPostId);
-
-	Long deleteByUserIdAndProductPost(String userId, ProductPost productPost);
 
 }
