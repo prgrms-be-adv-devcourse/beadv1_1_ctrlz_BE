@@ -95,6 +95,10 @@ custom:
     topic:
       event: product-post-events
 
+  search:
+    topic:
+      event: search-word-events
+
   feign:
     url:
       user-service: http://account-svc:8080
