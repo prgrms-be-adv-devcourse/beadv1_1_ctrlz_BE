@@ -19,7 +19,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
+    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
   jpa:
@@ -65,7 +65,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
       properties:
-        spring.json.trusted.packages: com.common.event, com.common.event.productPost
+        spring.json.trusted.packages: "com.common.event.**"
         allow.auto.create.topics: false
         delivery.timeout.ms: 120000
         linger.ms: 300
@@ -80,8 +80,8 @@ spring:
 
 # k8s 설정
 eureka:
-#  instance:
-#    prefer-ip-address: true
+  instance:
+    prefer-ip-address: true
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
@@ -108,7 +108,7 @@ custom:
   product-post:
     topic:
       event: product-post-events
-      
+
   order:
     topic:
       command: order-command
