@@ -5,7 +5,7 @@ plugins {
 }
 ext {
     springCloudVersion = "2025.0.0"
-    set('springAiVersion', "1.0.0-M6")
+    set('springAiVersion', "1.0.3")
 }
 
 group = 'com'
@@ -23,27 +23,18 @@ repositories {
 }
 
 dependencies {
-
     runtimeOnly project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
 
-
-    //ai
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-
-    //qdrant
-    implementation 'org.springframework.ai:spring-ai-qdrant-store-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-qdrant'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.kafka:spring-kafka'
 
-
-
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-
 
     //eureka
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
@@ -54,6 +45,7 @@ dependencies {
     //lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
@@ -65,6 +57,7 @@ dependencies {
     //h2
     runtimeOnly 'com.h2database:h2'
 
+    implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
 }
 
 dependencyManagement {
