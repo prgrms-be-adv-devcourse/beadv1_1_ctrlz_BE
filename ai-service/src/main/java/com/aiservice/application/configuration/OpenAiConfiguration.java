@@ -1,5 +1,7 @@
 package com.aiservice.application.configuration;
 
+import java.util.List;
+
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -36,7 +38,7 @@ public class OpenAiConfiguration {
 
 	@Bean
 	public EmbeddingModel embeddingModel(OpenAiApi openAiApi) {
-		log.debug("운영 환경 openai embedding model 사용");
+		log.info("운영 환경 openai embedding model 사용");
 		return new OpenAiEmbeddingModel(
 			openAiApi,
 			MetadataMode.EMBED,
@@ -59,6 +61,7 @@ public class OpenAiConfiguration {
 		return OpenAiChatOptions.builder()
 			.model("gpt-4o-mini")
 			.temperature(0.7)
+			.stop(List.of("\n"))
 			.build();
 	}
 }

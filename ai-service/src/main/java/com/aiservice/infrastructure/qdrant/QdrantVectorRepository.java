@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QdrantVectorRepository implements VectorRepository {
 
-	private final VectorStore vectorStore;
+	private final VectorStore qdrantVectorStore;
 
 	@Override
 	public String addDocument(ProductVectorContent data) {
@@ -42,7 +42,7 @@ public class QdrantVectorRepository implements VectorRepository {
 
 		Document document = new Document(content, metadata);
 
-		vectorStore.add(List.of(document));
+		qdrantVectorStore.add(List.of(document));
 
 		return documentId;
 	}
@@ -56,8 +56,8 @@ public class QdrantVectorRepository implements VectorRepository {
 				.filterExpression(filter.eq("productId", productId).build())
 				.build();
 
-		List<Document> documents = vectorStore.similaritySearch(request);
-		if (documents != null && !documents.isEmpty()) {
+		List<Document> documents = qdrantVectorStore.similaritySearch(request);
+		if (!documents.isEmpty()) {
 			return Optional.of(documents.getFirst());
 		}
 		return Optional.empty();
@@ -72,8 +72,8 @@ public class QdrantVectorRepository implements VectorRepository {
 				.topK(maxResults)
 				.build();
 
-		List<Document> documents = vectorStore.similaritySearch(request);
-		if (documents == null || documents.isEmpty()) {
+		List<Document> documents = qdrantVectorStore.similaritySearch(request);
+		if (documents.isEmpty()) {
 			return List.of();
 		}
 
@@ -90,16 +90,16 @@ public class QdrantVectorRepository implements VectorRepository {
 	@Override
 	public void deleteDocument(String productId) {
 		FilterExpressionBuilder filter = new FilterExpressionBuilder();
-		List<Document> documents = vectorStore.similaritySearch(
+		List<Document> documents = qdrantVectorStore.similaritySearch(
 				SearchRequest.builder()
 						.query("")
 						.topK(5) // 혹시 중복된게 있을 수 있으니 여유있게
 						.filterExpression(filter.eq("productId", productId).build())
 						.build());
 
-		if (documents != null && !documents.isEmpty()) {
+		if (!documents.isEmpty()) {
 			List<String> ids = documents.stream().map(Document::getId).toList();
-			vectorStore.delete(ids);
+			qdrantVectorStore.delete(ids);
 			log.info("documentID 삭제: {}, count: {}", productId, ids.size());
 		}
 
