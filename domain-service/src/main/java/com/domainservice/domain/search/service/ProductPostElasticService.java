@@ -64,6 +64,10 @@ public class ProductPostElasticService {
 		);
 	}
 
+	/*
+    ================= private Method =================
+     */
+
 	private NativeQuery buildNativeQuery(ProductPostSearchRequest request, Pageable pageable) {
 
 		/*
