@@ -1,4 +1,4 @@
-package com.settlementservice.domain.entity;
+package com.settlement.domain.entity;
 
 public enum SettlementStatus {
 	PENDING,    // 생성만 된 상태, 정산 대기

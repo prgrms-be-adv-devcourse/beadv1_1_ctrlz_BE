@@ -66,6 +66,7 @@ spec:
     app: batch
 
   sessionAffinity: None
+  type: LoadBalancer
   ports:
     - name: http
       protocol: TCP

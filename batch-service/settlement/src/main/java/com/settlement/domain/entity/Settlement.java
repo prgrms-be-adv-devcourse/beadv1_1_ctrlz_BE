@@ -1,4 +1,4 @@
-package com.settlementservice.domain.entity;
+package com.settlement.domain.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

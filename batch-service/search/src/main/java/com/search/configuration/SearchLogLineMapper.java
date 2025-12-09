@@ -2,79 +2,158 @@ package com.search.configuration;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.batch.item.file.LineMapper;
-import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
-import com.search.dto.SearchHistoryDto;
+import com.search.dto.UserBehaviorDto;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
-public class SearchLogLineMapper implements LineMapper<SearchHistoryDto> {
+public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
 
     private final ObjectMapper objectMapper;
+    private final String behaviorType;
 
-    private static final Pattern QUERY_PATTERN = Pattern.compile("query\\s*=\\s*\"?([^,\"]+)\"?");
-    private static final Pattern USER_ID_PATTERN = Pattern.compile("userId\\s*=\\s*\"?([^,\"]+)\"?");
+    // Pattern을 상수로 선언하여 재사용 (성능 최적화)
+    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("(\\w+)\\s*=\\s*([^,]+)");
+
+    public SearchLogLineMapper(String behaviorType) {
+        this.objectMapper = new ObjectMapper();
+        this.behaviorType = behaviorType;
+    }
 
     @Override
-    public SearchHistoryDto mapLine(String line, int lineNumber) throws Exception {
+    public UserBehaviorDto mapLine(String line, int lineNumber) throws Exception {
         try {
-            JsonNode root = objectMapper.readTree(line);
-            String timestamp = root.get("@timestamp").asText();
-            String data = root.get("data").asText();
+            JsonNode jsonNode = objectMapper.readTree(line);
+            JsonNode dataNode = jsonNode.get("data");
 
-            String query = extractValue(QUERY_PATTERN, data);
-            String userId = extractValue(USER_ID_PATTERN, data);
+            validateDataNode(dataNode, lineNumber);
 
-            validateExtractedValues(query, userId, lineNumber, data);
+            ParsedData parsedData = parseDataNode(dataNode);
+            validateParsedValue(parsedData.value(), lineNumber, dataNode);
 
-            LocalDateTime createdAt = parseTimestamp(timestamp, lineNumber);
+            String timestamp = jsonNode.get("@timestamp").asText();
 
-            return SearchHistoryDto.builder()
-                    .id(UuidCreator.getTimeOrderedEpoch().toString())
-                    .userId(userId)
-                    .searchTerm(query)
-                    .createdAt(createdAt)
-                    .build();
+            // ANONYMOUS 사용자는 skip
+            validateUserId(parsedData.userId(), lineNumber);
 
+            return buildUserBehaviorDto(parsedData, timestamp);
+
+        } catch (JsonProcessingException e) {
+            log.warn("라인 {} JSON 파싱 오류: {}", lineNumber, e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.warn("라인 {} 처리 중 오류 발생: {}", lineNumber, e.getMessage());
+            log.warn("라인 {} 매핑 중 오류 발생: {}", lineNumber, e.getMessage());
             throw e;
         }
     }
 
-    private String extractValue(Pattern pattern, String data) {
-        Matcher matcher = pattern.matcher(data);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        }
-        return null;
-    }
-
-    private void validateExtractedValues(String query, String userId, int lineNumber, String data) {
-        if (query == null || userId == null || query.isEmpty() || userId.isEmpty()) {
-            log.warn("라인 {}: query 또는 userId 누락 - data: {}", lineNumber, data);
-            throw new IllegalArgumentException("query 또는 userId가 누락되었습니다");
+    /**
+     * data 노드 유효성 검증
+     */
+    private void validateDataNode(JsonNode dataNode, int lineNumber) {
+        if (dataNode == null) {
+            throw new IllegalArgumentException(
+                    String.format("Line %d: Invalid log format - 'data' field missing", lineNumber));
         }
     }
 
-    private LocalDateTime parseTimestamp(String timestamp, int lineNumber) {
-        try {
-            return LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            log.warn("라인 {}: 잘못된 타임스탬프 형식 - {}", lineNumber, timestamp);
-            throw e;
+    /**
+     * data 노드 파싱 (텍스트 또는 JSON 객체 형식 지원)
+     */
+    private ParsedData parseDataNode(JsonNode dataNode) {
+        if (dataNode.isTextual()) {
+            return parseTextualData(dataNode.asText());
+        } else {
+            return parseJsonData(dataNode);
         }
+    }
+
+    /**
+     * 텍스트 형식의 data 파싱 ("key = value, key2 = value2" 형식)
+     */
+    private ParsedData parseTextualData(String dataText) {
+        log.debug("Parsing data string: {}", dataText);
+
+        String userId = null;
+        String value = null;
+
+        Matcher matcher = KEY_VALUE_PATTERN.matcher(dataText);
+
+        while (matcher.find()) {
+            String key = matcher.group(1).trim();
+            String val = matcher.group(2).trim();
+
+            if ("userId".equals(key)) {
+                userId = val;
+            } else if ("SEARCH".equals(behaviorType) && "query".equals(key)) {
+                value = val;
+            } else if ("VIEW".equals(behaviorType) && "title".equals(key)) {
+                value = val;
+            }
+        }
+
+        return new ParsedData(userId, value);
+    }
+
+    /**
+     * JSON 객체 형식의 data 파싱
+     */
+    private ParsedData parseJsonData(JsonNode dataNode) {
+        String value;
+        if ("SEARCH".equals(behaviorType)) {
+            value = dataNode.path("query").asText(null);
+        } else if ("VIEW".equals(behaviorType)) {
+            value = dataNode.path("title").asText(null);
+        } else {
+            value = dataNode.path("value").asText(null);
+        }
+
+        String userId = dataNode.path("userId").asText(null);
+        return new ParsedData(userId, value);
+    }
+
+    /**
+     * 파싱된 값 유효성 검증
+     */
+    private void validateParsedValue(String value, int lineNumber, JsonNode dataNode) {
+        if (value == null || value.isEmpty()) {
+            log.warn("Line {}: Value is missing for type {}. Data: {}", lineNumber, behaviorType, dataNode);
+            throw new IllegalArgumentException("Missing value for behavior type: " + behaviorType);
+        }
+    }
+
+    /**
+     * userId 유효성 검증 (ANONYMOUS는 skip)
+     */
+    private void validateUserId(String userId, int lineNumber) {
+        if (userId == null || userId.isEmpty() || "ANONYMOUS".equalsIgnoreCase(userId)) {
+            log.debug("Line {}: ANONYMOUS 또는 빈 userId - skip 처리", lineNumber);
+        }
+    }
+
+    /**
+     * UserBehaviorDto 빌드
+     */
+    private UserBehaviorDto buildUserBehaviorDto(ParsedData parsedData, String timestamp) {
+        return UserBehaviorDto.builder()
+                .id(UuidCreator.getTimeOrderedEpoch().toString())
+                .userId(parsedData.userId())
+                .behaviorValue(parsedData.value())
+                .behaviorType(behaviorType)
+                .createdAt(LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME))
+                .build();
+    }
+
+
+    private record ParsedData(String userId, String value) {
     }
 }

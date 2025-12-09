@@ -7,7 +7,9 @@ plugins {
 dependencies {
     implementation project(':settlement')
     implementation project(':search')
-    
+    implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
+
     // Dependencies needed for the runnable application
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
@@ -49,14 +51,6 @@ allprojects {
     }
 }
 
-// Need to apply plugin first to allprojects if we want to use dependencyManagement block in allprojects? 
-// But dependencyManagement block comes from a plugin. 
-// Plugin must be applied. subprojects apply it. Root applies it.
-// So we can use a separate block *after* allprojects where we apply logic?
-// OR just duplicate strict configs for root. Moving to allprojects is tricky if plugins aren't applied yet.
-
-// Safer: Add dependencyManagement directly to the root level (it applies to root). 
-// And kept it in subprojects (wait, I just removed it from subprojects!).
 
 dependencyManagement {
     imports {
