@@ -1,4 +1,4 @@
-package com.settlementservice.service;
+package com.settlement.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.event.SettlementCompletedEvent;
 import com.common.event.SettlementFailedEvent;
 import com.common.exception.CustomException;
-import com.settlementservice.domain.entity.Settlement;
-import com.settlementservice.domain.entity.SettlementStatus;
-import com.settlementservice.repository.SettlementRepository;
+import com.settlement.domain.entity.Settlement;
+import com.settlement.domain.entity.SettlementStatus;
+import com.settlement.repository.SettlementRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

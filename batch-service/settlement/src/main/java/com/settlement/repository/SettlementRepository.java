@@ -1,11 +1,11 @@
-package com.settlementservice.repository;
+package com.settlement.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.settlementservice.domain.entity.Settlement;
-import com.settlementservice.domain.entity.SettlementStatus;
+import com.settlement.domain.entity.Settlement;
+import com.settlement.domain.entity.SettlementStatus;
 
 public interface SettlementRepository extends JpaRepository<Settlement, String> {
 

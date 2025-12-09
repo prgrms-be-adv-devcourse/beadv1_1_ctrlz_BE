@@ -7,6 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -17,26 +19,31 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "search_history")
-public class SearchHistory {
+@Table(name = "user_behavior")
+public class UserBehavior {
 
 	@Id
 	@UuidGenerator(style = UuidGenerator.Style.TIME)
-	private Long id;
+	private String id;
 
 	@Column(nullable = false, name = "user_id")
 	private String userId;
 
-	@Column(nullable = false, name = "search_term")
-	private String searchTerm;
+	@Column(nullable = false, name = "behavior_value")
+	private String value;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, name = "behavior_type")
+	private UserBehaviorType type;
 
 	@CreatedDate
 	@Column(updatable = false, name = "created_at")
 	private LocalDateTime createdAt;
 
 	@Builder
-	public SearchHistory(String userId, String searchTerm) {
+	public UserBehavior(String userId, String value, UserBehaviorType type) {
 		this.userId = userId;
-		this.searchTerm = searchTerm;
+		this.value = value;
+		this.type = type;
 	}
 }

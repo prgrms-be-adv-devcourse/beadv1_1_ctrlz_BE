@@ -1,4 +1,4 @@
-package com.settlementservice.service.producer;
+package com.settlement.service.producer;
 
 import java.math.BigDecimal;
 
