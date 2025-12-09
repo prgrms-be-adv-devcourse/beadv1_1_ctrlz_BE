@@ -1,14 +1,14 @@
-package com.settlementservice.service;
+package com.settlement.service;
 
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.settlementservice.domain.entity.Settlement;
-import com.settlementservice.domain.entity.SettlementStatus;
-import com.settlementservice.repository.SettlementRepository;
-import com.settlementservice.service.producer.SettlementReadyEventProducer;
+import com.settlement.domain.entity.Settlement;
+import com.settlement.domain.entity.SettlementStatus;
+import com.settlement.repository.SettlementRepository;
+import com.settlement.service.producer.SettlementReadyEventProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -36,3 +36,11 @@ spring:
 server:
   port: 8085
 
+# 배치 작업 설정
+batch:
+  search:
+    log-directory: /var/log/app
+    log-pattern: item-view.log*,search-view.log*
+    chunk-size: 1000
+    skip-limit: 100
+    pool-size: 4
