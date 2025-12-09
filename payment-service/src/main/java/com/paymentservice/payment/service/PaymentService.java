@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +30,7 @@ import com.paymentservice.payment.model.enums.PayType;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -40,6 +40,7 @@ public class PaymentService {
     private final OrderFeignClient orderFeignClient;
     private final DepositService depositService;
     private final OrderEventProducer orderEventProducer;
+    private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
 
     // 결제 정보
     public PaymentReadyResponse getPaymentReadyInfo(String orderId, String userId) {
