@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.paymentservice.common.configuration.feign.client.PaymentFeignClient;
 import com.paymentservice.deposit.model.dto.DepositConfirmRequest;
 import com.paymentservice.deposit.model.dto.TossChargeResponse;
+import com.paymentservice.deposit.model.dto.TossApproveDepositRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,13 +32,9 @@ public class DepositTossClient {
     public TossChargeResponse approve(String userId, DepositConfirmRequest request) {
 
         // Toss로 보내야하는 필수 필드
-        Map<String, Object> requestBody = Map.of(
-            "paymentKey", request.paymentKey(),
-            "orderId", request.orderId(),
-            "amount", request.amount()
-        );
+        TossApproveDepositRequest requestBody = TossApproveDepositRequest.from(request);
 
-        Map<String, Object> responseMap = paymentFeignClient.requestPayment(
+        Map<String, Object> responseMap = paymentFeignClient.requestDeposit(
             requestBody, authHeader()
         );
 

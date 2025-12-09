@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
+import com.paymentservice.deposit.model.entity.Deposit;
+import com.paymentservice.payment.client.PaymentTossClient;
 import com.paymentservice.payment.exception.PaymentNotFoundException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.PaymentReadyResponse;
 import com.paymentservice.payment.model.dto.PaymentResponse;
 import com.paymentservice.payment.model.dto.RefundResponse;
+import com.paymentservice.payment.model.dto.TossApprovalResponse;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.repository.PaymentRepository;
 import com.paymentservice.payment.service.PaymentService;
@@ -31,6 +34,7 @@ public class PaymentApiController {
 
     private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
+    private final PaymentTossClient paymentTossClient;
 
     /** 결제 승인 요청 처리 */
     @PostMapping("/confirm")
@@ -39,7 +43,14 @@ public class PaymentApiController {
         @RequestHeader(value = "X-REQUEST-ID") String userId
     ) {
         try {
-            PaymentResponse response = paymentService.tossPayment(request, userId);
+            // 사전 검증, 예치금 조회
+            Deposit deposit = paymentService.validateBeforeApprove(request, userId);
+            // 토스 외부 서버
+            TossApprovalResponse approve = paymentTossClient.approve(request);
+            // 승인 결과 db저장, 이벤트 발행
+            PaymentResponse response =
+                paymentService.completeTossPayment(request, userId, deposit, approve);
+
             return new BaseResponse<>(response, "결제 처리 완료");
         } catch (Exception e) {
             log.error("결제 처리 오류", e);
@@ -55,6 +66,7 @@ public class PaymentApiController {
     ) {
         try {
             PaymentResponse response = paymentService.depositPayment(request, userId);
+
             return new BaseResponse<>(response, "결제 처리 완료");
         } catch (Exception e) {
             log.error("결제 처리 오류", e);
@@ -81,13 +93,31 @@ public class PaymentApiController {
             PaymentEntity payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentNotFoundException());
 
-            boolean includeDeposit = payment.getDepositUsedAmount().compareTo(BigDecimal.ZERO) > 0;
-            return new BaseResponse<>(paymentService.refundOrder(payment, includeDeposit, userId), "환불 완료");
+            BigDecimal depositAmount = payment.getDepositUsedAmount();
+            BigDecimal tossAmount = payment.getTossChargedAmount();
+
+            boolean hasDeposit = depositAmount.compareTo(BigDecimal.ZERO) > 0;
+            boolean hasToss = tossAmount.compareTo(BigDecimal.ZERO) > 0;
+
+            RefundResponse refundResponse;
+
+            if (hasDeposit && hasToss) {
+                // Deposit + toss
+                RefundResponse tossRefund = paymentTossClient.refund(payment);
+                refundResponse = paymentService.refundTossDeposit(payment, userId, tossRefund);
+            } else if (hasDeposit) {
+                // deposit
+                refundResponse = paymentService.refundDeposit(payment, userId);
+            } else {
+                // toss
+                RefundResponse tossRefund = paymentTossClient.refund(payment);
+                refundResponse = paymentService.refundToss(payment, userId, tossRefund);
+            }
+            return new BaseResponse<>(refundResponse, "환불 완료");
+
         } catch (Exception e) {
             log.error("환불 처리 오류", e);
             return new BaseResponse<>(null, "환불 실패: " + e.getMessage());
         }
     }
-
-    // TODO: 결제 내역 목록 조회
 }

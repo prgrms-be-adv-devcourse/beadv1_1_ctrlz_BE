@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>결제 확인</title>
-    <link rel="stylesheet" href="../static/modal-page.css"/>
+    <link rel="stylesheet" th:href="@{/modal-page.css}" />
     <script src="https://js.tosspayments.com/v2/standard"></script>
 </head>
 
@@ -17,7 +17,7 @@
         <div class="product-info">
             <div class="product-details">
                 <h2>[[ ${orderName} ]]</h2>
-                <p>주문번호: [[ ${orderId} ]]</p>
+                <p>주문번호: <span id="orderId"></span></p>
             </div>
         </div>
 
@@ -79,6 +79,20 @@
 
 <script>
     const orderId = '[[ ${orderId} ]]';
+
+
+    if (orderId) {
+        const parts = orderId.split('-');
+
+        // 앞 3개의 파트만 가져와서 다시 합침
+        if (parts.length >= 3) {
+            displayOrderId = `${parts[0]}-${parts[1]}-${parts[2]}`;
+        }
+    }
+
+    // 화면에 값 표시
+    document.getElementById("orderId").innerText = displayOrderId;
+
     const orderName = '[[ ${orderName} ]]';
     const currentDeposit = [[ ${depositBalance}]];
     const totalAmount = [[ ${amount}]];

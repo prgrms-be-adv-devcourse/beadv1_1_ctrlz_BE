@@ -70,18 +70,14 @@ public class OrderController {
 			"주문 일부 취소 성공했습니다"
 		);
 	}
+
 	//  주문 상세 조회
 	@GetMapping("/{orderId}")
-	public BaseResponse<OrderResponse> getOrder(
-		@PathVariable String orderId,
+	public OrderResponse getOrderInfo(
+		@PathVariable("orderId") String orderId,
 		@RequestHeader(value = "X-REQUEST-ID") String userId
 	){
-		OrderResponse orderById = orderService.getOrderById(orderId, userId);
-		return new BaseResponse<>(
-			orderById,
-			"주문 상세 조회 성공했습니다"
-		);
-
+		return orderService.getOrderById(orderId, userId);
 	}
 
 	//  주문 목록 조회
