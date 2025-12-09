@@ -113,6 +113,11 @@ custom:
     topic:
       command: order-command
 
+  search:
+    topic:
+      event: search-word-events
+
+
   feign:
     url:
       user-service: localhost:8080
