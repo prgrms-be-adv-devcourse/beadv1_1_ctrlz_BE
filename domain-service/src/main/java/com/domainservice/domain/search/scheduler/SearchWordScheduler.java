@@ -11,9 +11,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
 import com.domainservice.domain.search.service.SearchWordSchedulerService;
 import com.domainservice.domain.search.service.dto.vo.DailyPopularWordLog;
 import com.domainservice.domain.search.service.dto.vo.KeywordLog;
+import com.domainservice.domain.search.service.kafka.producer.SearchWordEventProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,13 +49,21 @@ public class SearchWordScheduler {
 					batchExecutor
 				).thenAccept(result -> log.info("실시간 트렌드 검색어 업데이트 완료"));
 
-			CompletableFuture<Void> saveDBFuture =
-				CompletableFuture.runAsync(() ->
-						batchService.saveLogsToDataBase(logs),
-					batchExecutor
-				).thenAccept(result -> log.info("DB 저장 완료"));
+			//saveLogsToDataBase() 결과로 받아온 데이터를 upsertLogsToElasticsearch()에 넘겨줌
+			CompletableFuture<Void> saveDBAndElasticFuture =
+			    CompletableFuture.supplyAsync(() ->
+			            batchService.saveLogsToDataBase(logs),
+			        batchExecutor
+			    ).thenAcceptAsync(savedLogs -> {
+			        log.info("DB 저장 완료");
 
-			CompletableFuture.allOf(updateTrendFuture, saveDBFuture)
+			        //Elasticsearch에 데이터 추가 upsert로 일괄 추가. ElasticOperation으로 처리
+					if(!savedLogs.isEmpty()) {
+			        	batchService.upsertLogsToElasticsearch(savedLogs);
+					}
+			    }, batchExecutor).thenAccept(result -> log.info("Elasticsearch upsert 완료"));
+
+			CompletableFuture.allOf(updateTrendFuture, saveDBAndElasticFuture)
 				.exceptionally(ex -> {
 					log.error("Error during syncRealTimeTrends", ex);
 					return null;

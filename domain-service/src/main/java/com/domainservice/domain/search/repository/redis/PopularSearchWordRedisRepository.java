@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Repository;
 
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PopularSearchWordRedisRepository {
 
 	private final RedisTemplate<String, String> redisTemplate; //<String, >
+	private final RedisScript<Long> updateZSetWithDecayScript;
 	private static final String DAILY_POPULAR_PREFIX = "search:popular:daily:";
 	private static final String SEARCHED_AT_KEY_PREFIX = "search:trend:searchedAt:";
 
@@ -96,24 +98,37 @@ public class PopularSearchWordRedisRepository {
 	 * 실시간 인기 검색어 리스트 업데이트
 	 * (5분 마다 진행)
 	 */
+	/**
+	 * 실시간 인기 검색어 리스트 업데이트 (5분 마다)
+	 *  - Lua 스크립트로:
+	 *    1) 기존 점수 감쇠
+	 *    2) 이번 5분 동안의 count를 ZINCRBY로 반영
+	 */
 	public void updateRealTimeTrendWord(List<KeywordLog> wordList) {
-		// 1) 기존 점수 감쇠
-		double tauMillis = 20 * 60 * 1000.0;   // 20분 서서히 죽이기
-		double intervalMillis = 5 * 60 * 1000.0; // 배치 주기 5분
-		double epsilon = 0.01;                 // 이보다 작으면 제거
+		double tauMillis = 20 * 60 * 1000.0;   // 20분
+		double intervalMillis = 5 * 60 * 1000.0; // 5분 배치
+		double epsilon = 0.01;
 
-		applyDecayToZSet(TREND_ZSET_KEY, tauMillis, intervalMillis, epsilon);
+		// ARGV 구성: [tauMillis, intervalMillis, epsilon, keyword1, count1, keyword2, count2, ...]
+		List<String> args = new java.util.ArrayList<>();
+		args.add(String.valueOf(tauMillis));
+		args.add(String.valueOf(intervalMillis));
+		args.add(String.valueOf(epsilon));
 
-		// 2) 이번 5분 동안 검색된 횟수 반영
 		for (KeywordLog keywordLog : wordList) {
-			String keyword = keywordLog.keyword();
 			long currentCount = keywordLog.searchedAt().size();
 			if (currentCount <= 0) continue;
 
-			// 기존 점수에 currentCount 만큼 더하기
-			redisTemplate.opsForZSet()
-				.incrementScore(TREND_ZSET_KEY, keyword, currentCount);
+			args.add(keywordLog.keyword());
+			args.add(String.valueOf(currentCount));
 		}
+
+		// KEYS: [TREND_ZSET_KEY]
+		redisTemplate.execute(
+			updateZSetWithDecayScript,
+			List.of(TREND_ZSET_KEY),
+			args.toArray()
+		);
 	}
 
 
@@ -213,23 +228,45 @@ public class PopularSearchWordRedisRepository {
 	public void updateDailyPopularWordList(KeywordLog currentLog, Optional<DailyPopularWordLog> previousLog) {
 
 		String keyword = currentLog.keyword();
-
-		// 이번 배치에서 검색된 횟수
 		long currentCount = currentLog.searchedAt().size();
 
-		// 만약 이전 배치에 정보가 없다면 score가 없을 수도 있음
-		// redis에서 기존 점수 조회
-		Double prevScore = redisTemplate.opsForZSet().score(DAILY_ZSET_KEY, keyword);
-		double safePrevScore = prevScore != null ? prevScore : 0.0;
+		if (currentCount <= 0) {
+			log.info("[DAILY POPULAR] keyword={}, currentCount=0 (skip)", keyword);
+			return;
+		}
 
-		// 새로운 점수 = 기존 점수 + 이번 배치 수치
-		double newScore = safePrevScore + currentCount;
+		long previousCount = previousLog.map(DailyPopularWordLog::searchedCount).orElse(0L);
 
-		// ZSET 업데이트 (setScore)
-		redisTemplate.opsForZSet().add(DAILY_ZSET_KEY, keyword, newScore);
+		// === ⭐ 변화율 기반 weight 모델 ===
+		double weight;
+		if (previousCount == 0) {
+			weight = 1.2;  // 초기부스트
+		} else {
+			double rate = (double) currentCount / previousCount;
+			weight = Math.max(0.3, Math.min(2.0, rate));  // 너무 작은/큰 변동 방지
+		}
 
-		log.info("[DAILY POPULAR] keyword={}, prevScore={}, currentCount={}, newScore={}",
-			keyword, safePrevScore, currentCount, newScore);
+		long adjustedCount = Math.round(currentCount * weight);
+
+		double tauMillis = 6 * 60 * 60 * 1000.0;
+		double intervalMillis = 2 * 60 * 60 * 1000.0;
+		double epsilon = 0.1;
+
+		List<String> args = new java.util.ArrayList<>();
+		args.add(String.valueOf(tauMillis));
+		args.add(String.valueOf(intervalMillis));
+		args.add(String.valueOf(epsilon));
+		args.add(keyword);
+		args.add(String.valueOf(adjustedCount));
+
+		redisTemplate.execute(
+			updateZSetWithDecayScript,
+			java.util.List.of(DAILY_ZSET_KEY),
+			args.toArray()
+		);
+
+		log.info("[DAILY POPULAR][LUA] keyword={}, prev={}, curr={}, weight={}, final={}",
+			keyword, previousCount, currentCount, weight, adjustedCount);
 	}
 
 	/**
