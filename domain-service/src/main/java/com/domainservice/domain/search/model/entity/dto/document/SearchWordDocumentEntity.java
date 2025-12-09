@@ -1,10 +1,9 @@
 package com.domainservice.domain.search.model.entity.dto.document;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.ZoneId;
 import java.util.Objects;
-import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -14,6 +13,9 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
+
+import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
+import com.domainservice.domain.search.service.converter.PrefixConverter;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -26,16 +28,15 @@ import lombok.NoArgsConstructor;
 public class SearchWordDocumentEntity {
 
 	@Id
-	private String id;
-
 	@MultiField(
 		mainField = @Field(type = FieldType.Text, analyzer = "ngram_analyzer", searchAnalyzer = "nori_search_analyzer"),
 		otherFields = {
 			@InnerField(suffix = "raw", type = FieldType.Keyword),
-			@InnerField(suffix = "nori", type = FieldType.Text, analyzer = "nori_search_analyzer", searchAnalyzer = "nori_search_analyzer")
+			@InnerField(suffix = "nori", type = FieldType.Text, analyzer = "nori_search_analyzer", searchAnalyzer = "nori_search_analyzer"),
+			@InnerField(suffix = "eng", type = FieldType.Text, analyzer = "standard", searchAnalyzer = "standard")
 		}
 	)
-	private String koreanWord;
+	private String originValue;
 
 	@MultiField(
 		mainField = @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer"),
@@ -43,51 +44,31 @@ public class SearchWordDocumentEntity {
 	)
 	private String qwertyInput;
 
-	@MultiField(
-		mainField = @Field(type = FieldType.Text, analyzer = "nori_search_analyzer", searchAnalyzer = "nori_search_analyzer"),
-		otherFields = @InnerField(suffix = "raw", type = FieldType.Keyword)
-	)
-	private String category;
-
-	@MultiField(
-		mainField = @Field(type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer"),
-		otherFields = @InnerField(suffix = "raw", type = FieldType.Keyword)
-	)
-	private List<String> suggestions;
-
 	@Field(name = "created_at", type = FieldType.Date, format = DateFormat.date_time)
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 
 	@Field(name = "recent_searched_at", type = FieldType.Date, format = DateFormat.date_time)
-	private LocalDateTime recentSearchedAt;
+	private Instant recentSearchedAt;
 
 	@Builder
-	private SearchWordDocumentEntity(String id, String koreanWord, String qwertyInput, LocalDateTime recentSearchedAt,
-		String category, List<String> suggestions, LocalDateTime createdAt) {
-
-		this.id = id;
-		this.koreanWord = koreanWord;
+	private SearchWordDocumentEntity(String originValue, String qwertyInput, LocalDateTime recentSearchedAt,
+		LocalDateTime createdAt) {
+		this.originValue = originValue;
 		this.qwertyInput = qwertyInput;
-		this.recentSearchedAt = recentSearchedAt;
-		this.category = category;
-		this.suggestions = suggestions;
-		this.createdAt = createdAt;
+		this.recentSearchedAt = recentSearchedAt.atZone(ZoneId.systemDefault()).toInstant();
+		this.createdAt = createdAt.atZone(ZoneId.systemDefault()).toInstant();
 	}
 
 	public static SearchWordDocumentEntity createDocumentEntity(
-		String koreanWord,
-		String qwertyInput
+		SearchWordLog log
 	) {
-		LocalDateTime now = LocalDateTime.now();
-
+		String originValue = log.getWord();
+		LocalDateTime createdAt = log.getCreatedAt() == null ? log.getSearchedAt() : log.getCreatedAt();
 		return SearchWordDocumentEntity.builder()
-			.id(UUID.randomUUID().toString())
-			.koreanWord(koreanWord)
-			.qwertyInput(qwertyInput)
-			.category("기타")
-			.suggestions(new ArrayList<>())
-			.createdAt(now)
-			.recentSearchedAt(now)
+			.originValue(originValue)
+			.qwertyInput(PrefixConverter.convertToQwertyInput(originValue))
+			.createdAt(createdAt)
+			.recentSearchedAt(log.getSearchedAt())
 			.build();
 	}
 
@@ -98,11 +79,11 @@ public class SearchWordDocumentEntity {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		SearchWordDocumentEntity that = (SearchWordDocumentEntity)o;
-		return Objects.equals(koreanWord, that.koreanWord);
+		return Objects.equals(originValue, that.originValue);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(koreanWord);
+		return Objects.hash(originValue);
 	}
 }

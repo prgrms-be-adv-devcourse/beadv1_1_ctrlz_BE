@@ -159,4 +159,10 @@ public final class PrefixConverter {
 
 		return result.toString();
 	}
+
+	public static boolean isHangeul(String value) {
+		return value.chars().allMatch(
+			ch -> (ch >= 0xAC00 && ch <= 0xD7A3) || (ch >= 0x3131 && ch <= 0x318E)
+		);
+	}
 }
