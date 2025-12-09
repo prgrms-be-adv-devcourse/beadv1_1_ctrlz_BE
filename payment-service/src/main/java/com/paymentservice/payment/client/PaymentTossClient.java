@@ -16,6 +16,8 @@ import com.paymentservice.payment.exception.PaymentGatewayFailedException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.RefundResponse;
 import com.paymentservice.payment.model.dto.TossApprovalResponse;
+import com.paymentservice.payment.model.dto.TossApproveRequest;
+import com.paymentservice.payment.model.dto.TossCancelRequest;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.enums.PaymentStatus;
 
@@ -37,11 +39,7 @@ public class PaymentTossClient {
     public TossApprovalResponse approve(PaymentConfirmRequest request) {
 
         // Toss로 보내야하는 필수 필드
-        Map<String, Object> requestBody = Map.of(
-            "paymentKey", request.paymentKey(),
-            "orderId", request.orderId(),
-            "amount", request.totalAmount()
-        );
+        TossApproveRequest requestBody = TossApproveRequest.from(request);
 
         Map<String, Object> responseMap = paymentFeignClient.requestPayment(
             requestBody, authHeader()
@@ -84,12 +82,9 @@ public class PaymentTossClient {
     public RefundResponse refund(PaymentEntity payment) {
 
         // Toss로 보내야하는 필수 필드
-        Map<String, Object> cancelBody = Map.of(
-            "cancelAmount", payment.getTossChargedAmount(),
-            "cancelReason", "사용자 요청 환불"
-        );
+        TossCancelRequest cancelBody = TossCancelRequest.from(payment);
 
-        RefundResponse  response = paymentFeignClient.refundPayment(
+        RefundResponse response = paymentFeignClient.refundPayment(
             payment.getPaymentKey(),
             cancelBody,
             authHeader()

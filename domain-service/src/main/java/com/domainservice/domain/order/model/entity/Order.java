@@ -61,8 +61,9 @@ public class Order extends BaseEntity {
         this.orderStatus = orderStatus;
     }
 
-    public void orderConfirmed() {
+    public void orderConfirmed(String paymentId) {
         orderStatus = PURCHASE_CONFIRMED;
+        this.paymentId = paymentId;
         orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED));
     }
 
@@ -71,8 +72,9 @@ public class Order extends BaseEntity {
         orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.CANCELLED));
     }
 
-    public void orderRefundedAfterPayment() {
+    public void orderRefundedAfterPayment(String paymentId) {
         orderStatus = REFUND_AFTER_PAYMENT;
+        this.paymentId = paymentId;
         orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT));
     }
 

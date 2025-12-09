@@ -5,5 +5,7 @@ public enum PaymentStatus {
     SUCCESS,
     FAILED,
     CANCELED,
-    REFUNDED
+    REFUNDED,
+    PAYMENT_COMPLETED, // kafka event
+    REFUND_AFTER_PAYMENT  // kafka event
 }
