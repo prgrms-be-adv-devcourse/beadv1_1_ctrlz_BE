@@ -41,6 +41,7 @@ public class UserContextProvider implements UserContextService {
 		}
 	}
 
+
 	public CompletableFuture<UserContext> getUserContextAsync(String userId) {
 		// 1. DB에서 사용자 행동 이력 조회 (비동기)
 		CompletableFuture<List<UserBehavior>> behaviorsFuture = CompletableFuture.supplyAsync(
