@@ -398,6 +398,5 @@ public class ProductPostService {
 
 	// TODO: 내가 구매한 상품 조회
 	// TODO: 내가 판매한 상품 조회
-	// TODO: 좋아요 로직 구현
-	// TODO: 찜한 게시물
+
 }
