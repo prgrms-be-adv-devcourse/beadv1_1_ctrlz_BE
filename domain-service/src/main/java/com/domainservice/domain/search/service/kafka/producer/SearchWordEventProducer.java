@@ -19,7 +19,7 @@ public class SearchWordEventProducer {
 	private final KafkaTemplate<String, Object> kafkaTemplate;
 
 	public void publishSearchWordEventToAi(String word, String userId) {
-		kafkaTemplate.send(searchWordEventTopic, new SearchWordSavedEvent(word, userId));
+		kafkaTemplate.send(searchWordEventTopic, new SearchWordSavedEvent(userId, word));
 	}
 
 }
