@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSearchFilter.Config> {
 
-	private static final Logger view_logger = LoggerFactory.getLogger("ITEM_VIEW");
+	private static final Logger search_logger = LoggerFactory.getLogger("SEARCH_VIEW");
 	private static final Logger log = LoggerFactory.getLogger("API." + ProductSearchFilter.class);
 	@Value("${jwt.secret}")
 	private String secretKey;
@@ -40,11 +40,10 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 		return (exchange, chain) -> {
 			ServerHttpRequest request = exchange.getRequest();
 			Optional<String> tokenOptional = resolveToken(request);
-
 			List<String> q = request.getQueryParams().get("q");
-			String query = q.getFirst();
 
-			if (tokenOptional.isPresent()) {
+			if (tokenOptional.isPresent() && q != null) {
+				String query = q.getFirst();
 				try {
 					Jws<Claims> claims = getClaims(tokenOptional.get());
 					String userId = claims.getPayload().get("userId").toString();
@@ -52,7 +51,7 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 						.header("X-REQUEST-ID", userId)
 						.build();
 					log.info("ProductSearchFilter: User identified: {}", userId);
-					view_logger.info("query = {}, userId = {}", query, userId);
+					search_logger.info("query = {}, userId = {}", query, userId);
 					return chain.filter(exchange.mutate().request(authorizedRequest).build());
 				} catch (Exception e) {
 					log.warn("ProductSearchFilter: Token validation failed. Proceeding as anonymous.", e);

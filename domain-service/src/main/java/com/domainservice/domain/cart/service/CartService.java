@@ -1,6 +1,6 @@
 package com.domainservice.domain.cart.service;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +31,9 @@ public class CartService {
 	private final ProductPostService productPostService;
 
 	/**
-	 * 1. userid로 장바구니 조회 - 없으면 생성 <p></p>
+	 * 1. userid로 장바구니 조회 - 없으면 생성
+	 * <p>
+	 * </p>
 	 * 2. 장바구니id로 장바구니 아이템 리스트 조회
 	 */
 	@Transactional(readOnly = true)
@@ -43,8 +45,9 @@ public class CartService {
 
 		for (CartItem cartItem : cartItemList) {
 			ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
-			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
-				BigDecimal.valueOf(productPostById.price()),
+			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(),
+				productPostById.name(),
+				productPostById.price(),
 				cartItem.isSelected());
 			response.add(cartItemResponse);
 		}
@@ -67,10 +70,14 @@ public class CartService {
 	}
 
 	/**
-	 * 장바구니 아이템 추가 <p>
-	 * 사용자 정보로 장바구니 조회 <p>
-	 * 장바구니 아이템을 순회하며 이미 추가된 아이템인지 조회 <p>
-	 * 추가된 아이템이면 수량만 업데이트 <p>
+	 * 장바구니 아이템 추가
+	 * <p>
+	 * 사용자 정보로 장바구니 조회
+	 * <p>
+	 * 장바구니 아이템을 순회하며 이미 추가된 아이템인지 조회
+	 * <p>
+	 * 추가된 아이템이면 수량만 업데이트
+	 * <p>
 	 */
 	public CartItemResponse addItem(String userId, String productPostId, int quantity) {
 		Cart cart = getCartByUserId(userId);
@@ -100,32 +107,37 @@ public class CartService {
 		cartJpaRepository.save(cart);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
+		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),
+			productPostById.price(),
 			targetItem.isSelected());
 
 	}
 
 	// /**
-	//  * 장바구니 아이템 수량 변경 <p>
-	//  * 아이템 ID로 장바구니 아이템 조회 <p>
-	//  * 수량 업데이트 <p>
-	//  * 변경사항 저장 <p>
-	//  */
+	// * 장바구니 아이템 수량 변경 <p>
+	// * 아이템 ID로 장바구니 아이템 조회 <p>
+	// * 수량 업데이트 <p>
+	// * 변경사항 저장 <p>
+	// */
 	// public CartItemResponse updateQuantity(String itemId, int quantity) {
-	// 	CartItem cartItem = cartItemJpaRepository.findById(itemId)
-	// 		.orElseThrow(() -> new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
+	// CartItem cartItem = cartItemJpaRepository.findById(itemId)
+	// .orElseThrow(() -> new
+	// CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage()));
 	//
-	// 	cartItem.updateQuantity(quantity);
+	// cartItem.updateQuantity(quantity);
 	//
-	// 	CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
-	// 	ProductPostResponse productPostById = productPostService.getProductPostById(savedCartItem.getProductPostId());
-	// 	return new CartItemResponse(productPostById.title(), productPostById.name(), getTotalPrice(savedCartItem),
-	// 		savedCartItem.getQuantity(),
-	// 		savedCartItem.isSelected());
+	// CartItem savedCartItem = cartItemJpaRepository.save(cartItem);
+	// ProductPostResponse productPostById =
+	// productPostService.getProductPostById(savedCartItem.getProductPostId());
+	// return new CartItemResponse(productPostById.title(), productPostById.name(),
+	// getTotalPrice(savedCartItem),
+	// savedCartItem.getQuantity(),
+	// savedCartItem.isSelected());
 	// }
 
 	/**
-	 * 아이템 ID로 장바구니 아이템 조회 <p>
+	 * 아이템 ID로 장바구니 아이템 조회
+	 * <p>
 	 * 선택 상태 업데이트
 	 * 변경사항 저장
 	 */
@@ -140,15 +152,19 @@ public class CartService {
 		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
 		return new CartItemResponse(cartItem.getId(), productPostById.title(),
 			productPostById.name(),
-			BigDecimal.valueOf(productPostById.price()),
+			productPostById.price(),
 			savedItem.isSelected());
 	}
 
 	/**
-	 * 장바구니에서 아이템 삭제 <p>
-	 * 1. 아이템 ID로 장바구니 아이템 조회 <p>
-	 * 2. 장바구니와 아이템 간의 연결 해제 <p>
-	 * 3. 아이템 삭제 <p>
+	 * 장바구니에서 아이템 삭제
+	 * <p>
+	 * 1. 아이템 ID로 장바구니 아이템 조회
+	 * <p>
+	 * 2. 장바구니와 아이템 간의 연결 해제
+	 * <p>
+	 * 3. 아이템 삭제
+	 * <p>
 	 * 4. 장바구니 상태 업데이트
 	 */
 	public void removeItem(String cartItemId) {
@@ -162,5 +178,26 @@ public class CartService {
 
 		cartJpaRepository.save(cart);
 
+	}
+
+	/**
+	 * 최근 한 달 동안 장바구니에 추가되거나 삭제된 아이템 조회
+	 */
+	@Transactional(readOnly = true)
+	public List<CartItemResponse> getRecentCartItems(String userId) {
+		LocalDateTime oneMonthAgo = java.time.LocalDateTime.now().minusMonths(1);
+		List<CartItem> recentItems = cartItemJpaRepository.findRecentCartItemsByUserId(userId, oneMonthAgo);
+
+		return recentItems.stream()
+			.map(cartItem -> {
+				ProductPostResponse product = productPostService.getProductPostById(cartItem.getProductPostId());
+				return new CartItemResponse(
+					cartItem.getId(),
+					product.title(),
+					product.name(),
+					product.price(),
+					cartItem.isSelected());
+			})
+			.toList();
 	}
 }
