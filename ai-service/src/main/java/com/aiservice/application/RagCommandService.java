@@ -18,7 +18,7 @@ public class RagCommandService implements RagService<CreateProductVectorCommand>
 
 	@Override
 	public String uploadData(CreateProductVectorCommand data) {
-		// 중복된 상품이 있으면 삭제 후 업데이트
+		
 		vectorRepository.findDocumentByProductId(data.productId())
 				.ifPresent(doc -> {
 					log.info("기존 상품 벡터 삭제: {}", data.productId());

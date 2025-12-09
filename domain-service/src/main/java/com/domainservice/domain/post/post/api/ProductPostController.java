@@ -4,6 +4,8 @@ import static com.common.exception.vo.ProductPostExceptionCode.*;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -29,7 +31,6 @@ import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/product-posts")
 public class ProductPostController {
 
+	private static final Logger logger = LoggerFactory.getLogger("ITEM_VIEW");
 	private final ProductPostService productPostService;
 
 	/**
@@ -110,11 +112,13 @@ public class ProductPostController {
 	 */
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
-	public BaseResponse<ProductPostWithSellerResponse> getProductPostById(
+	public BaseResponse<ProductPostResponse> getProductPostById(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
-		ProductPostWithSellerResponse response = productPostService.getProductPostById(userId, postId);
+
+		ProductPostResponse response = productPostService.getProductPostById(userId, postId);
+		logger.info("title = {}", response.title());
 		return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
 	}
 

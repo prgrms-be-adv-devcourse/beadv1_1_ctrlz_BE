@@ -35,6 +35,7 @@ import com.user.infrastructure.feign.dto.ImageResponse;
 import com.user.infrastructure.reader.port.TokenWriterPort;
 import com.user.infrastructure.reader.port.UserReaderPort;
 import com.user.infrastructure.reader.port.dto.TokenResponse;
+import com.user.infrastructure.reader.port.dto.UserDemographicDescription;
 import com.user.infrastructure.reader.port.dto.UserDescription;
 
 import jakarta.validation.Valid;
@@ -89,6 +90,11 @@ public class UserController {
 	public UserDescription getUser(@PathVariable("id") String id) {
 		log.info("회원 정보 조회");
 		return userReaderPort.getUserDescription(id);
+	}
+
+	@GetMapping("/recommendation-info/{userId}")
+	public UserDemographicDescription getRecommendationInfo(@PathVariable("userId") String userId) {
+		return userReaderPort.getUserDemographicDescription(userId);
 	}
 
 	@PostMapping("/sellers")
