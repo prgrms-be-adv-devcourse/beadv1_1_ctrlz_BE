@@ -14,6 +14,7 @@ import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
 import com.domainservice.domain.post.tag.model.entity.Tag;
+import com.domainservice.domain.post.favorite.model.entity.FavoriteProduct;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -39,6 +40,9 @@ public class ProductPost extends BaseEntity {
 
 	@Column(name = "category_id", nullable = false)
 	private String categoryId;
+
+	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<FavoriteProduct> favoriteProducts = new ArrayList<>();
 
 	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProductPostTag> productPostTags = new ArrayList<>();
@@ -97,10 +101,6 @@ public class ProductPost extends BaseEntity {
      =============== 비즈니스 로직 ===============
     */
 
-	public void incrementViewCount() {
-		this.viewCount++;
-	}
-
 	public void update(ProductPostRequest request) {
 		this.title = request.title();
 		this.name = request.name();
@@ -126,6 +126,26 @@ public class ProductPost extends BaseEntity {
 	public void markAsSellingAgain() {
 		this.tradeStatus = TradeStatus.SELLING;
 		this.update();
+	}
+
+	public void incrementViewCount() {
+		this.viewCount++;
+	}
+
+	/*
+     =============== 게시글 좋아요 ===============
+    */
+
+	public void incrementLikedCount() {
+		this.likedCount++;
+		this.update();
+	}
+
+	public void decrementLikedCount() {
+		if (this.likedCount > 0) {
+			this.likedCount--;
+			this.update();
+		}
 	}
 
     /*
