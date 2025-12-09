@@ -37,12 +37,13 @@ public abstract class BaseEntity {
 
 	@PrePersist // persist() 를 호출하기 전, 새로운 엔티티가 영속성 컨텍스트에 관리되기 직전에 호출
 	protected void onCreate() {
-
-		String UUIDv7 = UuidCreator.getTimeOrderedEpoch().toString();
-		this.id = UUIDv7 + "-" + getEntitySuffix();
-
+		this.id = createEntityId();
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
+	}
+
+	public static String createEntityId() {
+		return UuidCreator.getTimeOrderedEpoch().toString();
 	}
 
 	public void delete() {
