@@ -81,7 +81,7 @@ class FavoriteServiceTest {
 		setEntityId(productPost, productPostId);
 
 		given(productPostRepository.findById(productPostId)).willReturn(Optional.of(productPost));
-		given(favoriteRepository.save(any(FavoriteProduct.class))).willAnswer(invocation -> invocation.getArgument(0));
+		given(favoriteRepository.saveAndFlush(any(FavoriteProduct.class))).willAnswer(invocation -> invocation.getArgument(0));
 
 		// when
 		FavoritePostResponse result = favoriteService.addFavoriteProduct(userId, productPostId);
@@ -91,7 +91,7 @@ class FavoriteServiceTest {
 		assertThat(result.isFavorite()).isTrue();
 
 		verify(productPostRepository).findById(productPostId);
-		verify(favoriteRepository).save(any(FavoriteProduct.class));
+		verify(favoriteRepository).saveAndFlush(any(FavoriteProduct.class));
 	}
 
 	@DisplayName("이미 찜한 상품을 다시 누르면 찜 목록에서 삭제된다.")
@@ -108,9 +108,13 @@ class FavoriteServiceTest {
 		setEntityId(productPost, productPostId);
 		productPost.incrementLikedCount();
 
-		given(productPostRepository.findById(productPostId)).willReturn(Optional.of(productPost));
+		FavoriteProduct favoriteProduct = FavoriteProduct.builder()
+			.userId("user-123")
+			.productPost(productPost)
+			.build();
 
-		given(favoriteRepository.deleteByUserIdAndProductPost(userId, productPost)).willReturn(1L);
+		given(favoriteRepository
+			.findByUserIdAndProductPostId(anyString(), anyString())).willReturn(Optional.of(favoriteProduct));
 
 		// when
 		FavoritePostResponse result = favoriteService.cancelFavoriteProduct(userId, productPostId);
@@ -119,8 +123,9 @@ class FavoriteServiceTest {
 		assertThat(result).isNotNull();
 		assertThat(result.isFavorite()).isFalse();
 
-		verify(favoriteRepository).deleteByUserIdAndProductPost(userId, productPost);
+		verify(favoriteRepository).delete(favoriteProduct);
 	}
+
 
 	@DisplayName("찜하지 않은 상품을 취소하려고 하면 예외가 발생한다.")
 	@Test
@@ -129,12 +134,8 @@ class FavoriteServiceTest {
 		String userId = "user-123";
 		String productPostId = "product-123";
 
-		ProductPost productPost = ProductPost.builder().title("맥북").build();
-		setEntityId(productPost, productPostId);
-
-		given(productPostRepository.findById(productPostId)).willReturn(Optional.of(productPost));
-
-		given(favoriteRepository.deleteByUserIdAndProductPost(userId, productPost)).willReturn(0L);
+		given(favoriteRepository.findByUserIdAndProductPostId(userId, productPostId))
+			.willReturn(Optional.empty());
 
 		// when & then
 		ProductPostException exception = assertThrows(
@@ -143,6 +144,12 @@ class FavoriteServiceTest {
 		);
 
 		assertThat(exception.getCode()).isEqualTo(FAVORITE_NOT_FOUND.getCode());
+
+		// 조회 메서드는 호출됨
+		verify(favoriteRepository).findByUserIdAndProductPostId(userId, productPostId);
+
+		verify(favoriteRepository, never()).saveAndFlush(any(FavoriteProduct.class));
+		verify(favoriteRepository, never()).delete(any(FavoriteProduct.class));
 	}
 
 	@DisplayName("존재하지 않는 상품을 찜하려고 하면 예외가 발생한다.")
