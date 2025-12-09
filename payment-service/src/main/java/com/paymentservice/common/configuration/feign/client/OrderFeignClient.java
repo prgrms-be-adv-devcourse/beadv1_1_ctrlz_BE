@@ -16,7 +16,8 @@ import com.paymentservice.common.model.order.OrderResponse;
 public interface OrderFeignClient {
 
     @GetMapping("/api/orders/{orderId}")
-    OrderResponse getOrder(@PathVariable String orderId,
+    OrderResponse getOrderInfo(@PathVariable String orderId,
         @RequestHeader(value = "X-REQUEST-ID") String userId
     );
+
 }

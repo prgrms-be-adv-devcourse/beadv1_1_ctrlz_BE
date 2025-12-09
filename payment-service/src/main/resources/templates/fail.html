@@ -50,8 +50,19 @@
         const usedDepositAmount = parseInt(urlParams.get("usedDepositAmount")) || 0;
         const totalAmount = parseInt(urlParams.get("totalAmount")) || 0;
 
+        let displayOrderId = orderId;
+
+        if (orderId) {
+            const parts = orderId.split('-');
+
+            // 앞 3개의 파트만 가져와서 다시 합침
+            if (parts.length >= 3) {
+                displayOrderId = `${parts[0]}-${parts[1]}-${parts[2]}`;
+            }
+        }
+
         // 화면에 값 표시
-        document.getElementById("orderId").innerText = orderId;
+        document.getElementById("orderId").innerText = displayOrderId;
         document.getElementById("orderName").innerText = orderName;
         document.getElementById("usedDepositAmount").innerText = `₩ ${usedDepositAmount.toLocaleString()}`;
         document.getElementById("amount").innerText = `₩ ${totalAmount.toLocaleString()}`;
