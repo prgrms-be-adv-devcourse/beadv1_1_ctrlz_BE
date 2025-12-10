@@ -90,10 +90,10 @@ public class CartController {
 	 * 최근 한 달 동안 장바구니에 추가되거나 삭제된 아이템 조회
 	 */
 	@GetMapping("/recent/{userId}")
-	public BaseResponse<List<CartItemResponse>> getRecentCartItems(
-			@PathVariable String userId) {
-		return new BaseResponse<>(
-				cartService.getRecentCartItems(userId),
-				"최근 한 달 장바구니 아이템 조회 성공했습니다");
+	public List<CartItemResponse> getRecentCartItems(
+			@PathVariable("userId") String userId
+	) {
+		return cartService.getRecentCartItems(userId);
+
 	}
 }
