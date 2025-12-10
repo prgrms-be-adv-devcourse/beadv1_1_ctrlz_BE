@@ -157,7 +157,7 @@ spring:
               uri: lb://AI-SERVICE
               predicates:
                 - Path=/api/recommendations/**
-                - Method=GET
+                - Method=GET,POST
               filters:
                 - name: AuthenticationFilter
                   args:

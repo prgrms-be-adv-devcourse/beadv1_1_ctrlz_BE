@@ -192,3 +192,4 @@ application-window.yml
 # Bin directories
 bin/
 application-dev.yml
+**/application-me.yml
