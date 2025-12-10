@@ -27,26 +27,29 @@ public class ProductRecommendationService implements RecommendService {
 	private final RecommendationMessageGenerator recommendationMessageGenerator;
 
 	@Override
-	public void recommendProductsByQuery(String userId, String query) {
+	public RecommendationResult recommendProductsByQuery(String userId, String query) {
 		log.info("추천 생성 시작 - 사용자: {}, 쿼리: {}", userId, query);
 
-		// 1. 추천 제한 체크
+		// 추천 제한 체크
 		if (isLimitReached(userId)) {
 			log.info("사용자 추천 제한 ({}) 도달: {}", recommendationLimit, userId);
-			sessionService.publishRecommendationData(userId, RecommendationResult.limitReached());
-			return;
+			RecommendationResult limitResult = RecommendationResult.limitReached();
+			sessionService.publishRecommendationData(userId, limitResult);
+			return limitResult;
 		}
 
-		// 2. 하이브리드 검색
+		// 하이브리드 검색
 		List<DocumentSearchResponse> searchResults = hybridSearchProcessor.search(query, 20);
 
-		// 3. 메시지 생성 및 결과 구성
+		// 메시지 생성 및 결과 구성
 		RecommendationResult result = buildResult(userId, query, searchResults);
 
-		// 4. 세션에 발행
+		// 세션에 발행
 		sessionService.publishRecommendationData(userId, result);
 		sessionService.incrementRecommendationCount(userId);
 		log.info("{} 개의 추천 결과 저장 완료 - 사용자: {} (쿼리: {})", searchResults.size(), userId, query);
+
+		return result;
 	}
 
 	private boolean isLimitReached(String userId) {
