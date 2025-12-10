@@ -23,7 +23,30 @@ management:
     web:
       exposure:
         include: "*"
+---
+spring:
+  config:
+    activate:
+      on-profile: me
 
+management:
+  tracing:
+    sampling:
+      probability: 0.8
+
+    propagation:
+      consume: b3
+      produce: b3
+      type: b3
+    brave:
+      span-joining-supported: true
+  zipkin:
+    sender:
+      type: kafka
+    kafka:
+      topic: zipkin
+    tracing:
+      endpoint: http://192.168.200.100:9411/api/v2/spans
 ---
 spring:
   config:

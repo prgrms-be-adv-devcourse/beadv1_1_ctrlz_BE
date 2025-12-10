@@ -27,7 +27,7 @@ public class ChatClientConfiguration {
 		);
 	}
 
-	@Profile("local")
+	@Profile("local || me")
 	@Bean
 	public ChatOptions chatOptions() {
 		log.info("로컬 환경 openai embedding model 사용");
