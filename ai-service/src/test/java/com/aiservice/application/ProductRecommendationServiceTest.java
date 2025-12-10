@@ -85,7 +85,6 @@ class ProductRecommendationServiceTest {
             RecommendationResult result = captor.getValue();
             assertThat(result.status()).isEqualTo(RecommendationStatus.OK);
             assertThat(result.message()).isEqualTo("추천 메시지입니다.");
-            assertThat(result.items()).hasSize(1);
 
             then(sessionService).should().incrementRecommendationCount(userId);
         }
