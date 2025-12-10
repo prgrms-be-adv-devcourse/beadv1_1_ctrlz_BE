@@ -1,0 +1,91 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "more_like_this": {
+            "fields": [
+              "name",
+              "title",
+              "description",
+              "category_name"
+            ],
+            "like": [
+              {
+                "_index": "product-posts",
+                "_id": "기준_상품_ID_입력"
+              }
+            ],
+            "min_term_freq": 1,
+            "min_doc_freq": 1,
+            "max_query_terms": 25,
+            "minimum_should_match": "20%"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "name.keyword": {
+              "query": "기준_상품_이름",
+              "boost": 10.0
+            }
+          }
+        },
+        {
+          "multi_match": {
+            "query": "기준_상품_이름",
+            "fields": [
+              "name^3",
+              "name.ngram^2",
+              "title^4",
+              "title.ngram^2",
+              "description^2"
+            ],
+            "type": "best_fields",
+            "fuzziness": "AUTO",
+            "boost": 5.0
+          }
+        },
+        {
+          "match": {
+            "category_name": {
+              "query": "기준_카테고리명",
+              "boost": 5.0
+            }
+          }
+        },
+        {
+          "terms": {
+            "tags": [
+              "태그1",
+              "태그2"
+            ],
+            "boost": 2.0
+          }
+        }
+      ],
+      "minimum_should_match": "1",
+      "filter": [
+        {
+          "bool": {
+            "must_not": [
+              {
+                "term": {
+                  "_id": "기준_상품_ID_입력"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "term": {
+            "delete_status": "N"
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 10
+}

@@ -71,13 +71,13 @@ public class ProductPostSearchController {
 	 * - 현재 상품과 유사한 상품 추천
 	 *
 	 * @param productPostId 기준 상품 ID
-	 * @param pageable 페이징 정보
+	 * @param pageable 페이징 정보, size: 10(default)
 	 * @return 유사 상품 목록
 	 */
 	@GetMapping("/{productPostId}/similar")
 	public PageResponse<List<ProductPostSearchResponse>> getSimilarProducts(
-		@PathVariable Long productPostId,
-		@PageableDefault(size = 10) Pageable pageable
+		@PathVariable String productPostId,
+		@PageableDefault Pageable pageable
 	) {
 		return productPostRecommendationService.findSimilarProducts(productPostId, pageable);
 	}
