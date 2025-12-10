@@ -40,10 +40,9 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 		return (exchange, chain) -> {
 			ServerHttpRequest request = exchange.getRequest();
 			Optional<String> tokenOptional = resolveToken(request);
-			List<String> q = request.getQueryParams().get("q");
 
-			if (tokenOptional.isPresent() && q != null) {
-				String query = q.getFirst();
+
+			if (tokenOptional.isPresent()) {
 				try {
 					Jws<Claims> claims = getClaims(tokenOptional.get());
 					String userId = claims.getPayload().get("userId").toString();
@@ -51,7 +50,7 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 						.header("X-REQUEST-ID", userId)
 						.build();
 					log.info("ProductSearchFilter: User identified: {}", userId);
-					search_logger.info("query = {}, userId = {}", query, userId);
+					searchInfoLogging(request, userId);
 					return chain.filter(exchange.mutate().request(authorizedRequest).build());
 				} catch (Exception e) {
 					log.warn("ProductSearchFilter: Token validation failed. Proceeding as anonymous.", e);
@@ -61,6 +60,15 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 			log.info("ProductSearchFilter: No token found. Proceeding as anonymous.");
 			return chain.filter(exchange);
 		};
+	}
+
+	private void searchInfoLogging(ServerHttpRequest request, String userId) {
+		List<String> q = request.getQueryParams().get("q");
+		if(q == null || q.isEmpty()) {
+			return;
+		}
+		String query = q.getFirst();
+		search_logger.info("query = {}, userId = {}", query, userId);
 	}
 
 	private Optional<String> resolveToken(ServerHttpRequest request) {

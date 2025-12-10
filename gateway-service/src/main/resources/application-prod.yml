@@ -25,40 +25,59 @@ spring:
       server:
         webflux:
           routes:
+            # ============================================
+            # PUBLIC APIs (인증 불필요)
+            # ============================================
+            
+            # 태그 조회
             - id: tag-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/tags
                 - Method=GET
 
+            # 카테고리 조회
             - id: category-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/categories
                 - Method=GET
 
-            - id: tag-search-public
+            # 상품 검색 (공개)
+            - id: post-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
-                - Path=/api/tags
+                - Path=/api/product-posts/**
                 - Method=GET
-
-            - id: category-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/categories
-                - Method=GET
-
-            - id: favorite-api-protected
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/users/favorites/**
-                - Method=GET,POST,DELETE
               filters:
-                - name: AuthenticationFilter
-                  args:
-                    requiredRole: USER
+                - name: ProductSearchFilter
 
+            # 검색어 API
+            - id: search-word-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/**
+                - Method=GET,POST
+
+            # 검색어 Redis 테스트
+            - id: search-word-redis-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/redis-test
+                - Method=GET,DELETE
+
+            # 결제 API (공개)
+            - id: payment-api-open
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
+
+            # ============================================
+            # ACCOUNT SERVICE (회원 관련)
+            # ============================================
+            
+            # 회원가입 (IP/Token 캡처)
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -68,6 +87,7 @@ spring:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
 
+            # 회원 정보 조회/수정/삭제 (USER 권한 필요)
             - id: user-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -78,17 +98,22 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 토큰 재발급 (IP/Token 캡처)
             - id: auth-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/auth/reissue
-                - Method=POST  # CSRF 방어를 위해 POST 사용
-
+                - Method=POST
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
                 - name: ReissueTokenFilter
 
+            # ============================================
+            # DOMAIN SERVICE (상품/주문/장바구니)
+            # ============================================
+            
+            # 상품 등록/수정/삭제 (SELLER 권한 필요)
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -99,6 +124,7 @@ spring:
                   args:
                     requiredRole: SELLER
 
+            # 장바구니 (USER 권한 필요)
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -109,6 +135,7 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 예치금 (USER 권한 필요)
             - id: deposit-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -119,6 +146,7 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 주문 (USER 권한 필요)
             - id: order-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -129,32 +157,11 @@ spring:
                   args:
                     requiredRole: USER
 
-            - id: payment-api-open
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/payments/**
-                - Method=GET,POST,PATCH,DELETE
-
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/product-posts/**
-                - Method=GET
-              filters:
-                - name: ProductSearchFilter
-
-            - id: search-word-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/searches/**
-                - Method=GET,POST
-
-            - id: search-word-redis-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/searches/redis-test
-                - Method=GET,DELETE
-
+            # ============================================
+            # AI SERVICE (추천 시스템)
+            # ============================================
+            
+            # SSE 스트리밍 (USER 권한 필요)
             - id: ai-service-sse
               uri: lb://AI-SERVICE
               predicates:
@@ -165,15 +172,17 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 추천 API (USER 권한 필요)
             - id: ai-service-polling
               uri: lb://AI-SERVICE
               predicates:
                 - Path=/api/recommendations/**
-                - Method=GET
+                - Method=GET,POST
               filters:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
+
 services:
   account:
     url: lb://ACCOUNT-SERVICE

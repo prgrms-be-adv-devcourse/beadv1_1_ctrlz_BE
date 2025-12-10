@@ -24,18 +24,32 @@ public class ServletRequestUtils {
 		// X-Real-IP 헤더 확인 (프록시/로드밸런서 뒤에 있을 경우)
 		String xff = request.getHeaders().getFirst(X_REAL_IP);
 		if (xff != null && !xff.isEmpty()) {
-			return xff.split(",")[0].trim();
+			return normalizeIp(xff.split(",")[0].trim());
 		}
 
 		InetSocketAddress remoteAddress = request.getRemoteAddress();
 		if (remoteAddress != null) {
 			if (remoteAddress.getAddress() != null) {
-				return remoteAddress.getAddress().getHostAddress();
+				return normalizeIp(remoteAddress.getAddress().getHostAddress());
 			} else {
-				return remoteAddress.getHostString();
+				return normalizeIp(remoteAddress.getHostString());
 			}
 		}
 		return "unknown";
+	}
+
+	/**
+	 * IPv6 localhost를 IPv4로 정규화
+	 */
+	private static String normalizeIp(String ip) {
+		if (ip == null) {
+			return "unknown";
+		}
+		// IPv6 localhost → IPv4 localhost
+		if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+			return "127.0.0.1";
+		}
+		return ip;
 	}
 
 	public static Optional<String> resolveToken(ServerHttpRequest request) {
