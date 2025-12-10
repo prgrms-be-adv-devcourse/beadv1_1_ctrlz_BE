@@ -44,6 +44,7 @@ public class ProductRecommendationService implements RecommendService {
 		// 메시지 생성 및 결과 구성
 		RecommendationResult result = buildResult(userId, query, searchResults);
 
+
 		// 세션에 발행
 		sessionService.publishRecommendationData(userId, result);
 		sessionService.incrementRecommendationCount(userId);
@@ -62,7 +63,6 @@ public class ProductRecommendationService implements RecommendService {
 				.map(msg -> RecommendationResult.builder()
 						.status(RecommendationStatus.OK)
 						.message(msg)
-						.items(searchResults)
 						.build())
 				.orElseGet(RecommendationResult::noResults);
 	}

@@ -1,7 +1,5 @@
 package com.aiservice.application.configuration;
 
-import java.util.List;
-
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -26,42 +24,44 @@ public class OpenAiConfiguration {
 	@Value("${spring.ai.openai.api-key}")
 	private String apiKey;
 
-	@Value("${spring.ai.openai.embedding.options.model}")
+	@Value("${spring.ai.openai.embedding.options.model:test}")
 	private String model;
+
+	@Value("${vectorstore.qdrant.embedding-dimensions:1536}")
+	private int embeddingDimensions;
 
 	@Bean
 	public OpenAiApi openAiApi() {
 		return OpenAiApi.builder()
-			.apiKey(apiKey)
-			.build();
+				.apiKey(apiKey)
+				.build();
 	}
 
 	@Bean
 	public EmbeddingModel embeddingModel(OpenAiApi openAiApi) {
-		log.info("운영 환경 openai embedding model 사용");
+		log.info("운영 환경 openai embedding model 사용 - dimensions: {}", embeddingDimensions);
 		return new OpenAiEmbeddingModel(
-			openAiApi,
-			MetadataMode.EMBED,
-			OpenAiEmbeddingOptions.builder()
-				.model(model)
-				.build(),
-			RetryUtils.DEFAULT_RETRY_TEMPLATE
-		);
+				openAiApi,
+				MetadataMode.EMBED,
+				OpenAiEmbeddingOptions.builder()
+						.model("text-embedding-3-small")
+						.dimensions(embeddingDimensions) // yml에서 읽어온 값 사용
+						.build(),
+				RetryUtils.DEFAULT_RETRY_TEMPLATE);
 	}
 
 	@Bean
 	public ChatModel chatModel(OpenAiApi openAiApi) {
 		return OpenAiChatModel.builder()
-			.openAiApi(openAiApi)
-			.build();
+				.openAiApi(openAiApi)
+				.build();
 	}
 
 	@Bean
 	public OpenAiChatOptions recommendationChatOptions() {
 		return OpenAiChatOptions.builder()
-			.model("gpt-4o-mini")
-			.temperature(0.7)
-			.stop(List.of("\n"))
-			.build();
+				.model("gpt-4o-mini")
+				.temperature(0.7)
+				.build();
 	}
 }

@@ -19,12 +19,4 @@ spring:
       api-key: ${OPENAI_API_KEY}
       base-url: https://api.groq.com/openai/v1
 
-    transformers:
-      embedding:
-        onnx:
-          # 검증된 다국어 모델 (한국어 지원 우수) - XLMRobertaModel 1024 dimensions
-          model-uri: classpath:/onnx_kure_embedding/model.onnx
-          tokenizer-uri: classpath:/onnx_kure_embedding/tokenizer.json
-        cache:
-          enabled: true
-          directory: /tmp/spring-ai-onnx-cache
+
