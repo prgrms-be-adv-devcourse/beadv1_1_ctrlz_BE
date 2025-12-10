@@ -26,6 +26,7 @@ public class SearchMapper {
 	public static ProductPostSearchResponse toSearchResponse(ProductPostDocumentEntity document) {
 		return ProductPostSearchResponse.builder()
 			.id(document.getId())
+			.userId(document.getUserId())
 			.name(document.getName())
 			.title(document.getTitle())
 			.description(document.getDescription())
@@ -52,7 +53,7 @@ public class SearchMapper {
 
 	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertedEvent event) {
 		return new ProductPostDocumentEntity(
-			event.id(), event.name(), event.title(), event.description(), event.tags(),
+			event.id(), event.userId(), event.name(), event.title(), event.description(), event.tags(),
 			event.categoryName(), event.price(), event.likedCount(), event.viewCount(),
 			event.status(), event.tradeStatus(), event.deleteStatus(), event.createdAt()
 		);

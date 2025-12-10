@@ -25,6 +25,9 @@ public class ProductPostDocumentEntity {
 	@Id
 	private String id;
 
+	@Field(name = "user_id", type = FieldType.Keyword)
+	private String userId;
+
 	@MultiField(
 		// nori로 한글 형태소 분석 후 일반 검색에 사용
 		mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_synonym_analyzer"),
@@ -107,8 +110,6 @@ public class ProductPostDocumentEntity {
 	// @Field(name = "priority_score", type = FieldType.Double)
 	// private Double priorityScore;
 
-	// @Field(name = "account_code", type = FieldType.Keyword)
-	// private String accountCode;
 }
 
 

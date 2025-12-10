@@ -11,6 +11,7 @@ import lombok.Builder;
 @Builder
 public record ProductPostSearchResponse(
 	String id,
+	String userId,
 	String name,
 	String title,
 	String description,

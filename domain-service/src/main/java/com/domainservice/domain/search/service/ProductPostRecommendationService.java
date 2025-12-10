@@ -71,13 +71,13 @@ public class ProductPostRecommendationService {
 		);
 	}
 
-	public PageResponse<List<ProductPostSearchResponse>> findPopularInCategory(
+	public PageResponse<List<ProductPostSearchResponse>> findSellerProducts(
 		Long productPostId, Pageable pageable) {
 		return null;
 	}
 
-	public PageResponse<List<ProductPostSearchResponse>> findSellerProducts(
-		Long productPostId, String sort, Pageable pageable) {
+	public PageResponse<List<ProductPostSearchResponse>> findPopularInCategory(
+		Long productPostId, Pageable pageable) {
 		return null;
 	}
 
