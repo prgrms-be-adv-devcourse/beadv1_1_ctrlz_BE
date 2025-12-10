@@ -28,6 +28,7 @@ import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
@@ -173,12 +174,16 @@ public class ProductPostService {
 	 * 조회 시 조회수가 증가합니다.
 	 *
 	 * @param postId 조회할 게시글 ID
-	 * @return 게시글 정보
+	 * @return 게시글 정보 (판매자 닉네임 포함)
 	 * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
 	 */
-	public ProductPostResponse getProductPostById(String postId) {
+	public ProductPostWithSellerResponse getProductPostById(String postId) {
+
 		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		return ProductPostMapper.toResponse(productPost);
+		UserResponse userInfo = getUserInfoByFeignClient(productPost.getUserId());
+
+		return ProductPostMapper.toWithSellerResponse(productPost, userInfo.nickname());
+
 	}
 
 	/**
@@ -187,20 +192,21 @@ public class ProductPostService {
 	 * 조회 시 조회수가 증가하며 redis에 최근 본 상품으로 등록됩니다.
 	 *
 	 * @param postId 조회할 게시글 ID
-	 * @return 게시글 정보
+	 * @return 게시글 정보 (판매자 닉네임 포함)
 	 * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
 	 */
-	public ProductPostResponse getProductPostById(String userId, String postId) {
+	public ProductPostWithSellerResponse getProductPostById(String userId, String postId) {
 
 		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		log.info("userId = {}", userId);
+		UserResponse userInfo = getUserInfoByFeignClient(productPost.getUserId());
+
 		// 실제 유저인 경우 redis에 최근 본 상품 목록으로 저장
 		if (!userId.equals("anonymous")) {
 			getUserInfoByFeignClient(userId); // user-service에 해당 유저가 존재하는지 확인
 			recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
 		}
 
-		return ProductPostMapper.toResponse(productPost);
+		return ProductPostMapper.toWithSellerResponse(productPost, userInfo.nickname());
 
 	}
 
