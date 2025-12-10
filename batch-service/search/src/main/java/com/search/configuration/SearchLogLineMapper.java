@@ -37,7 +37,11 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
 
             validateDataNode(dataNode, lineNumber);
 
-            ParsedData parsedData = parseDataNode(dataNode);
+            // userId는 JSON 루트 레벨에서 먼저 확인 (item-view.log)
+            // 없으면 data 내부에서 파싱 (search-view.log)
+            String userIdFromRoot = jsonNode.path("userId").asText(null);
+
+            ParsedData parsedData = parseDataNode(dataNode, userIdFromRoot);
             validateParsedValue(parsedData.value(), lineNumber, dataNode);
 
             String timestamp = jsonNode.get("@timestamp").asText();
@@ -69,21 +73,21 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
     /**
      * data 노드 파싱 (텍스트 또는 JSON 객체 형식 지원)
      */
-    private ParsedData parseDataNode(JsonNode dataNode) {
+    private ParsedData parseDataNode(JsonNode dataNode, String userId) {
         if (dataNode.isTextual()) {
-            return parseTextualData(dataNode.asText());
+            return parseTextualData(dataNode.asText(), userId);
         } else {
-            return parseJsonData(dataNode);
+            return parseJsonData(dataNode, userId);
         }
     }
 
     /**
      * 텍스트 형식의 data 파싱 ("key = value, key2 = value2" 형식)
      */
-    private ParsedData parseTextualData(String dataText) {
+    private ParsedData parseTextualData(String dataText, String userIdFromRoot) {
         log.debug("Parsing data string: {}", dataText);
 
-        String userId = null;
+        String userId = userIdFromRoot; // 먼저 루트 레벨 userId 사용
         String value = null;
 
         Matcher matcher = KEY_VALUE_PATTERN.matcher(dataText);
@@ -92,6 +96,7 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
             String key = matcher.group(1).trim();
             String val = matcher.group(2).trim();
 
+            // data 내부에 userId가 있으면 사용 (search-view.log 케이스)
             if ("userId".equals(key)) {
                 userId = val;
             } else if ("SEARCH".equals(behaviorType) && "query".equals(key)) {
@@ -107,7 +112,7 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
     /**
      * JSON 객체 형식의 data 파싱
      */
-    private ParsedData parseJsonData(JsonNode dataNode) {
+    private ParsedData parseJsonData(JsonNode dataNode, String userId) {
         String value;
         if ("SEARCH".equals(behaviorType)) {
             value = dataNode.path("query").asText(null);
@@ -117,7 +122,7 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
             value = dataNode.path("value").asText(null);
         }
 
-        String userId = dataNode.path("userId").asText(null);
+        // userId는 이미 파라미터로 전달받음
         return new ParsedData(userId, value);
     }
 
@@ -152,7 +157,6 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
                 .createdAt(LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME))
                 .build();
     }
-
 
     private record ParsedData(String userId, String value) {
     }
