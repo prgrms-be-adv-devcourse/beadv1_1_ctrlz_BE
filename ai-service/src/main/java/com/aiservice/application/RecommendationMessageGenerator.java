@@ -78,7 +78,7 @@ public class RecommendationMessageGenerator {
 		StringBuilder productList = new StringBuilder();
 		for (DocumentSearchResponse doc : recommendations) {
 			String productId = (String)doc.metadata().get("productId");
-			Integer price = (Integer)doc.metadata().get("price");
+			Long price = (Long)doc.metadata().get("price");
 			String url = productBaseUrl + "/" + productId;
 			productList.append("- 가격: %d원, URL: %s\n".formatted(price, url));
 		}
