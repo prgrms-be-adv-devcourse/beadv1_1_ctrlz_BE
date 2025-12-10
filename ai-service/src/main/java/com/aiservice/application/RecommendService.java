@@ -1,5 +1,7 @@
 package com.aiservice.application;
 
+import com.aiservice.domain.model.RecommendationResult;
+
 public interface RecommendService {
-	void recommendProductsByQuery(String userId, String query);
+	RecommendationResult recommendProductsByQuery(String userId, String query);
 }

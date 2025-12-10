@@ -26,9 +26,7 @@ public class ProductCommandEventListener {
 	@KafkaHandler
 	public void handleProductUpsert(@Payload ProductPostUpsertedEvent event) {
 		log.info("ProductPostUpsertedEvent 수신: {}", event);
-		try {
-
-			CreateProductVectorCommand command = new CreateProductVectorCommand(
+		CreateProductVectorCommand command = new CreateProductVectorCommand(
 				event.id(),
 				event.title(),
 				event.name(),
@@ -38,20 +36,13 @@ public class ProductCommandEventListener {
 				event.description(),
 				event.tags());
 
-			String documentId = ragService.uploadData(command);
-			log.info("vector DB 저장 성공: {}", documentId);
-		} catch (Exception e) {
-			log.error("상품 벡터 업데이트 실패: {}", event.id(), e);
-		}
+		String documentId = ragService.uploadData(command);
+		log.info("vector DB 저장 성공: {}", documentId);
 	}
 
 	@KafkaHandler
 	public void handleProductDelete(@Payload ProductPostDeletedEvent event) {
-		try {
-			ragService.deleteData(event.postId());
-			log.info("vector DB 삭제 성공: {}", event.postId());
-		} catch (Exception e) {
-			log.error("상품 벡터 삭제 실패: {}", event.postId(), e);
-		}
+		ragService.deleteData(event.postId());
+		log.info("vector DB 삭제 성공: {}", event.postId());
 	}
 }
