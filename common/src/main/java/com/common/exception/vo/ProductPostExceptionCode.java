@@ -10,6 +10,7 @@ public enum ProductPostExceptionCode {
     // ===== 400 Bad Request =====
     IMAGE_REQUIRED(400, "이미지는 최소 1개 이상 첨부해야 합니다."),
     TOO_MANY_IMAGES(400, "이미지는 최대 10개까지 등록 가능합니다."),
+	FAVORITE_ALREADY_EXISTS(400, "이미 좋아요한 글입니다."),
 
     // ===== 401 Unauthorized =====
     UNAUTHORIZED(401, "로그인된 회원만 이용 가능합니다."),
@@ -22,6 +23,7 @@ public enum ProductPostExceptionCode {
 	CATEGORY_NOT_FOUND(404, "존재하지 않는 카테고리입니다."),
     TAG_NOT_FOUND(404, "존재하지 않는 태그가 포함되어있습니다."),
     PRODUCT_POST_NOT_FOUND(404, "해당 글은 존재하지 않습니다."),
+	FAVORITE_NOT_FOUND(404, "좋아요하지 않은 글입니다."),
     PRODUCT_POST_DELETED(404, "해당 게시글은 삭제되어 조회할 수 없습니다."),
 
     // ===== 409 Conflict =====

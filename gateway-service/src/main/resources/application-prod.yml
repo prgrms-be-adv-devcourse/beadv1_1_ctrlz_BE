@@ -49,6 +49,16 @@ spring:
                 - Path=/api/categories
                 - Method=GET
 
+            - id: favorite-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/users/favorites/**
+                - Method=GET,POST,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
+import com.domainservice.domain.search.service.SearchWordRedisService;
 import com.domainservice.domain.search.service.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class SearchController {
 
 	private final SearchWordElasticService searchWordElasticService;
+	private final SearchWordRedisService searchWordRedisService;
 
 	/**
 	 * 검색어 자동완성 api
@@ -57,10 +59,10 @@ public class SearchController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
 		@RequestParam String searchWord,
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymity") String userId
+		@RequestHeader(value = "X-REQUEST-ID", required = false) String userId
 	) {
 
-		searchWordElasticService.saveSearchWord(searchWord, userId);
+		searchWordRedisService.saveSearchWord(searchWord, userId);
 		return new BaseResponse<>(
 			null,
 			"검색어 저장 완료"
@@ -70,7 +72,7 @@ public class SearchController {
 	@GetMapping("/trend")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getTrendWordList() {
-		List<SearchWordResponse> response = searchWordElasticService.getTrendWordList();
+		List<SearchWordResponse> response = searchWordRedisService.getTrendWordList();
 		return new BaseResponse<>(
 			response,
 			""
@@ -84,10 +86,28 @@ public class SearchController {
 	@GetMapping("/popular-daily")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getDailyPopularWord() {
-		List<SearchWordResponse> response = searchWordElasticService.getDailyPopularWord();
+		List<SearchWordResponse> response = searchWordRedisService.getDailyPopularWord();
 		return new BaseResponse<>(
 			response,
 			""
+		);
+	}
+
+	/**
+	 * 검색어 저장 test api
+	 * @param userId
+	 * @return
+	 */
+	@PostMapping("test")
+	@ResponseStatus(HttpStatus.CREATED)
+	public BaseResponse<Void> addSearchWord(
+		@RequestHeader(value = "X-REQUEST-ID", required = false) String userId
+	) {
+
+		searchWordRedisService.saveSearchWordForTest();
+		return new BaseResponse<>(
+			null,
+			"검색어 저장 완료"
 		);
 	}
 }

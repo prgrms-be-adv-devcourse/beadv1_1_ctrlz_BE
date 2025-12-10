@@ -9,7 +9,7 @@ import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocum
 public interface SearchWordRepository extends
 	ElasticsearchRepository<SearchWordDocumentEntity, String>, SearchWordQueryRepository {
 
-	Optional<SearchWordDocumentEntity> findByKoreanWord(String koreanWord);
+	Optional<SearchWordDocumentEntity> findByOriginValue(String koreanWord);
 	Optional<SearchWordDocumentEntity> findByQwertyInput(String qwertyInput);
 
 }

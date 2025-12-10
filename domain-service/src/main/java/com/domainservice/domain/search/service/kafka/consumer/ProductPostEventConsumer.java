@@ -1,4 +1,4 @@
-package com.domainservice.domain.search.service.kafka;
+package com.domainservice.domain.search.service.kafka.consumer;
 
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;

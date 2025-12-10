@@ -1,4 +1,4 @@
-package com.domainservice.domain.search.repository.jpa;
+package com.domainservice.domain.search.repository;
 
 import java.util.List;
 
@@ -6,5 +6,5 @@ import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
 
 public interface SearchWordLogCommandRepository {
 
-	void insertAll(List<SearchWordLog> logs);
+	List<SearchWordLog> insertAll(List<SearchWordLog> logs);
 }
