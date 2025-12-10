@@ -14,7 +14,7 @@ import com.paymentservice.payment.model.dto.RefundResponse;
 import com.paymentservice.payment.model.dto.TossApproveRequest;
 import com.paymentservice.payment.model.dto.TossCancelRequest;
 
-@FeignClient(name = "tossPaymentClient", url = "https://api.tosspayments.com/v1/payments")
+@FeignClient(name = "tossPaymentClient", url = "${custom.payment.toss.targetUrl}")
 public interface PaymentFeignClient {
 
     @PostMapping(value = "/confirm", consumes = MediaType.APPLICATION_JSON_VALUE)

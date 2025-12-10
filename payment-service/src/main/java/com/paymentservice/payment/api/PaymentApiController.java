@@ -43,6 +43,12 @@ public class PaymentApiController {
         @RequestHeader(value = "X-REQUEST-ID") String userId
     ) {
         try {
+            // 멱등성체크
+            if (paymentRepository.existsByOrderId(request.orderId())) {
+                PaymentResponse existingPayment = paymentService.findByOrderId(request.orderId());
+                return new BaseResponse<>(existingPayment, "이미 처리된 결제입니다.");
+            }
+
             // 사전 검증, 예치금 조회
             Deposit deposit = paymentService.validateBeforeApprove(request, userId);
             // 토스 외부 서버
@@ -65,8 +71,13 @@ public class PaymentApiController {
         @RequestHeader(value = "X-REQUEST-ID") String userId
     ) {
         try {
-            PaymentResponse response = paymentService.depositPayment(request, userId);
+            // 멱등성체크
+            if (paymentRepository.existsByOrderId(request.orderId())) {
+                PaymentResponse existingPayment = paymentService.findByOrderId(request.orderId());
+                return new BaseResponse<>(existingPayment, "이미 처리된 결제입니다.");
+            }
 
+            PaymentResponse response = paymentService.depositPayment(request, userId);
             return new BaseResponse<>(response, "결제 처리 완료");
         } catch (Exception e) {
             log.error("결제 처리 오류", e);
