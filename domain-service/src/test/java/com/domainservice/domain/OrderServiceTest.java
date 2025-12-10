@@ -26,7 +26,7 @@ import com.domainservice.domain.order.model.entity.OrderStatus;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.OrderService;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +49,7 @@ class OrderServiceTest {
 
 	private String userId;
 	private CartItem cartItem;
-	private ProductPostResponse productResponse;
+	private ProductPostWithSellerResponse productResponse;
 	private Order order;
 
 	@BeforeEach
@@ -60,10 +60,11 @@ class OrderServiceTest {
 			.productPostId("product1")
 			.build();
 
-		productResponse = new ProductPostResponse(
+		productResponse = new ProductPostWithSellerResponse(
 			"product1",
 			"seller1",
 			"category1",
+			"테스트 닉네임",
 			"상품A",
 			"상품A 상세명",
 			10000,
