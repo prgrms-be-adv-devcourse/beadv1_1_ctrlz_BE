@@ -1,0 +1,66 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  kafka:
+    bootstrap-servers: localhost:9090
+    listener:
+      auto-startup: false
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      properties:
+        allow.auto.create.topics: false
+
+    consumer:
+      group-id: test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+custom:
+  feign:
+    url:
+      user-service: http://localhost:8080
+      order-service: http://localhost:8081
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+
+  payment:
+    toss:
+      targetUrl: https://api.tosspayments.com/v1/payments
+      test_secret_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  order:
+    topic:
+      command: order-command
+aes:
+  key: 5525111015115343
+
+eureka:
+  client:
+    enabled: false
