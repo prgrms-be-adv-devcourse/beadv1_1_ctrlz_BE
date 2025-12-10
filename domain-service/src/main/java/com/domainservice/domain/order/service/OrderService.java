@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.common.event.SettlementCreatedEvent;
 import com.common.event.productPost.EventType;
 import com.common.exception.CustomException;
 import com.common.exception.vo.CartExceptionCode;
@@ -27,7 +26,6 @@ import com.domainservice.domain.order.model.entity.OrderItem;
 import com.domainservice.domain.order.model.entity.OrderItemStatus;
 import com.domainservice.domain.order.model.entity.OrderStatus;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
-import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
@@ -41,7 +39,6 @@ public class OrderService {
 	private final OrderJpaRepository orderJpaRepository;
 	private final CartItemJpaRepository cartItemJpaRepository;
 	private final ProductPostService productPostService;
-	private final PurchaseConfirmedEventProducer settlementProducer;
 	private final ProductPostEventProducer eventProducer;
 
 	/**
@@ -221,11 +218,7 @@ public class OrderService {
 			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
 				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
 				productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SOLDOUT);
-				// kafka 메시지 발행
-				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
-					productPostService.getProductPostById(item.getProductPostId()).userId(),
-					item.getPriceSnapshot()
-				));
+
 			}
 
 		}
