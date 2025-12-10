@@ -78,23 +78,27 @@ public class ProductPostDocumentEntity {
 
 	// 테이블에 들어가는 이름(liked_count)과 Field name을 안맞춰주면 매핑을 못해서 null 값 가져옴
 	// 카멜케이스로 필드 선언했을 때 체크해주기
-	@Field(name = "liked_count",type = FieldType.Long)
+	@Field(name = "liked_count", type = FieldType.Long)
 	private Long likedCount;
 
-	@Field(name = "view_count",type = FieldType.Long)
+	@Field(name = "view_count", type = FieldType.Long)
 	private Long viewCount;
 
 	@Field(type = FieldType.Keyword)
 	private String status;
 
-	@Field(name = "trade_status",type = FieldType.Keyword)
+	@Field(name = "trade_status", type = FieldType.Keyword)
 	private String tradeStatus;
 
-	@Field(name = "delete_status",type = FieldType.Keyword)
+	@Field(name = "delete_status", type = FieldType.Keyword)
 	private String deleteStatus;
 
-	@Field(name = "created_at", type = FieldType.Date,
-		format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss")
+	@Field(
+		name = "created_at",
+		type = FieldType.Date,
+		format = {},
+		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS'Z'||uuuu-MM-dd'T'HH:mm:ss.SSS'Z'||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss"
+	)
 	private LocalDateTime createdAt;
 
 	// @Field(type = FieldType.Date, format = DateFormat.date_time)
