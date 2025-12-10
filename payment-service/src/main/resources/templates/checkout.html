@@ -189,8 +189,11 @@
 
 
                     if (response.ok && result.data) {
-                        alert("예치금 결제가 완료되었습니다.");
-
+                        if (result.message === "이미 처리된 결제입니다.") {
+                            alert("이미 처리된 결제입니다.");
+                        } else {
+                            alert("예치금 결제가 완료되었습니다.")
+                        }
                         const queryParams = new URLSearchParams({
                             orderId: orderId,
                             orderName: orderName,

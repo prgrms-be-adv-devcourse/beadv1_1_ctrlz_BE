@@ -3,6 +3,8 @@ package com.paymentservice.payment.service;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +20,7 @@ import com.paymentservice.payment.model.enums.PaymentStatus;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentTxService {
@@ -28,7 +28,7 @@ public class PaymentTxService {
     private final PaymentRepository paymentRepository;
     private final DepositService depositService;
     private final OrderEventProducer orderEventProducer;
-
+    private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
 
     // 기존 PaymentService에 있던 메서드로, 같은 클래스 내부에서 this.processDepositPayment()형태로 호출되면 @Transactional이 아예 동작하지 않는다.
     // 스프링 AOP는 프록시 기반이라 외부 호출만 트랜잭션 적용됨
