@@ -63,7 +63,7 @@ class RecommendationMessageGeneratorTest {
         DocumentSearchResponse doc = new DocumentSearchResponse(
                 "doc1",
                 "노트북 설명",
-                Map.of("productId", "p1", "price", 1000000),
+                Map.of("productId", "p1", "price", 1000000L),
                 0.9);
         List<DocumentSearchResponse> recommendations = List.of(doc);
 
@@ -77,7 +77,6 @@ class RecommendationMessageGeneratorTest {
 
         when(userContextService.getUserContext(userId)).thenReturn(userContext);
         when(promptTemplate.render(anyMap())).thenReturn("Rendered Prompt");
-
 
         ChatClient.ChatClientRequestSpec requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
         ChatClient.CallResponseSpec responseSpec = mock(ChatClient.CallResponseSpec.class);
@@ -108,7 +107,7 @@ class RecommendationMessageGeneratorTest {
         DocumentSearchResponse doc = new DocumentSearchResponse(
                 "doc1",
                 "desc",
-                Map.of("productId", "p1", "price", 100),
+                Map.of("productId", "p1", "price", 100L),
                 0.5);
 
         when(userContextService.getUserContext(userId)).thenReturn(UserContext.builder()
