@@ -13,14 +13,12 @@ import com.aiservice.domain.model.RecommendationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 사용자 검색어 기반으로 추천(LLM Trigger)을 수행하는 컨트롤러
- */
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/recommendations")
-public class RecommendationCommandController {
+public class RecommendationController {
 
 	private final RecommendService recommendService;
 

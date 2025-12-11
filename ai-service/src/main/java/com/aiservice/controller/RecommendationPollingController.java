@@ -13,8 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Polling 방식으로 추천 데이터를 조회하는 REST API 컨트롤러
- * 기존 Redis Pub/Sub 기반 SSE 방식과 병행하여 사용 가능
+ * @Deprecated 프론트엔드 진행 작업에 따라 사용 여부가 달라집니다.
  */
 @Slf4j
 @RestController

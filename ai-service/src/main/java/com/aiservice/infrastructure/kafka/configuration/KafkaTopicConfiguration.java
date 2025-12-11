@@ -26,10 +26,8 @@ public class KafkaTopicConfiguration {
 			.build();
 	}
 
-	/**
+	/*
 	 * DLT 생성
-	 * - 메시지 처리 실패 시 최종적으로 저장되는 토픽
-	 * - 원본 토픽과 동일한 파티션/복제 수 사용으로 순서 보장
 	 */
 	@Bean
 	public NewTopic createProductPostDLT() {

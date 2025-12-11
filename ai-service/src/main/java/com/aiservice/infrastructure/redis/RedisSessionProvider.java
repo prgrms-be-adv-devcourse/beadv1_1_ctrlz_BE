@@ -11,6 +11,9 @@ import com.aiservice.domain.model.RecommendationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @Deprecated 프론트엔드 진행 작업에 따라 사용 여부가 달라집니다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class RedisSessionProvider implements SessionService {
 		redisTemplate.convertAndSend(channel, result);
 		log.info("채널로 추천 결과 발행: {}", channel);
 	}
-	//TODO: 이 내역도 저장해야되나????
+
 	@Override
 	public RecommendationResult getRecommendations(String userId) {
 		String key = KEY_PREFIX + userId;

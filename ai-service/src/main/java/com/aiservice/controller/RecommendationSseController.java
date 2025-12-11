@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * SSE 엔드포인트: Redis Pub/Sub에서 추천 결과를 구독하여 클라이언트에게 전달 (MVC 방식)
+ * @Deprecated 프론트엔드 진행 작업에 따라 사용 여부가 달라집니다.
  */
 @Slf4j
 @RestController

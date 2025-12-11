@@ -10,7 +10,6 @@ import lombok.Builder;
 @Builder
 public record ProductPostUpsertedEvent(
 		String id,
-		String name,
 		String title,
 		String description,
 		List<String> tags,
