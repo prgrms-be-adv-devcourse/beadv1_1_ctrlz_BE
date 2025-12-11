@@ -7,14 +7,14 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.settlement.job.dto.SettlementModel;
+import com.settlement.job.dto.SettlementVO;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 @StepScope
-public class SettlementFeeProcessor implements ItemProcessor<SettlementModel, SettlementModel> {
+public class SettlementFeeProcessor implements ItemProcessor<SettlementVO, SettlementVO> {
 
     @Value("${settlement.fee.rate.toss:0.03}") // 카드 수수료율 (기본 3%)
     private BigDecimal tossRate;
@@ -26,7 +26,7 @@ public class SettlementFeeProcessor implements ItemProcessor<SettlementModel, Se
     private BigDecimal depositRate;
 
     @Override
-    public SettlementModel process(SettlementModel item) throws Exception {
+    public SettlementVO process(SettlementVO item) throws Exception {
         log.info("정산 수수료 계산 - ID: {}, PayType: {}", item.getId(), item.getPayType());
 
         item.calculateFee(tossRate, depositTossRate, depositRate);

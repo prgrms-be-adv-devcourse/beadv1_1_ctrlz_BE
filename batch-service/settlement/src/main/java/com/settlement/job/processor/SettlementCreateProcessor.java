@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.settlement.dto.PaymentResponse;
 import com.settlement.domain.entity.SettlementStatus;
-import com.settlement.job.dto.SettlementModel;
+import com.settlement.job.dto.SettlementVO;
 import com.settlement.job.dto.SettlementSourceDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @StepScope
-public class SettlementCreateProcessor implements ItemProcessor<SettlementSourceDto, SettlementModel> {
+public class SettlementCreateProcessor implements ItemProcessor<SettlementSourceDto, SettlementVO> {
 
     @Override
-    public SettlementModel process(SettlementSourceDto item) throws Exception {
+    public SettlementVO process(SettlementSourceDto item) throws Exception {
         PaymentResponse payment = item.getPayment();
 
         // 결제 완료 상태가 아니면 필터링 (이미 Payment Service에서 걸러줄 수도 있지만 안전장치)
-        if (!"PAID".equals(payment.status())) { // PaymentStatus.PAID.name() assuming string "PAID"
+        if (!"PAID".equals(payment.status())) {
             return null;
         }
 
-        return SettlementModel.builder()
+        return SettlementVO.builder()
                 .id(UUID.randomUUID().toString())
                 .orderItemId(payment.orderItemId())
                 .userId(item.getUserId())

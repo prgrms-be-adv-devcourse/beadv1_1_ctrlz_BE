@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.settlement.job.dto.SettlementModel;
+import com.settlement.job.dto.SettlementVO;
 import com.settlement.job.dto.SettlementSourceDto;
 import com.settlement.job.processor.SettlementCreateProcessor;
 import com.settlement.job.reader.PaymentSettlementItemReader;
@@ -45,7 +45,7 @@ public class SettlementCreateStepConfig {
     public Step settlementCreateStep() {
         log.info("SettlementCreateStep 설정: 재시도 {}회, 스킵 {}회", RETRY_LIMIT, SKIP_LIMIT);
         return new StepBuilder("settlementCreateStep", jobRepository)
-                .<SettlementSourceDto, SettlementModel>chunk(1000, transactionManager)
+                .<SettlementSourceDto, SettlementVO>chunk(1000, transactionManager)
                 .reader(paymentSettlementItemReader)
                 .processor(settlementCreateProcessor)
                 .writer(settlementCreateWriter())
@@ -65,8 +65,8 @@ public class SettlementCreateStepConfig {
     }
 
     @Bean
-    public JdbcBatchItemWriter<SettlementModel> settlementCreateWriter() {
-        return new JdbcBatchItemWriterBuilder<SettlementModel>()
+    public JdbcBatchItemWriter<SettlementVO> settlementCreateWriter() {
+        return new JdbcBatchItemWriterBuilder<SettlementVO>()
                 .dataSource(dataSource)
                 .sql("INSERT INTO settlements (id, order_item_id, user_id, amount, fee, net_amount, pay_type, status, settled_at, created_at, updated_at) "
                         +

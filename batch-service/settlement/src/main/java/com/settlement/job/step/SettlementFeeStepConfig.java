@@ -21,7 +21,7 @@ import org.springframework.dao.TransientDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.settlement.job.dto.SettlementModel;
+import com.settlement.job.dto.SettlementVO;
 import com.settlement.job.processor.SettlementFeeProcessor;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class SettlementFeeStepConfig {
     public Step settlementFeeStep() {
         log.info("SettlementFeeStep 설정: 재시도 {}회, 스킵 {}회", RETRY_LIMIT, SKIP_LIMIT);
         return new StepBuilder("settlementFeeStep", jobRepository)
-                .<SettlementModel, SettlementModel>chunk(1000, transactionManager)
+                .<SettlementVO, SettlementVO>chunk(1000, transactionManager)
                 .reader(settlementFeeReader())
                 .processor(settlementFeeProcessor)
                 .writer(settlementUpdateWriter())
@@ -61,13 +61,13 @@ public class SettlementFeeStepConfig {
     }
 
     @Bean
-    public JdbcPagingItemReader<SettlementModel> settlementFeeReader() {
-        return new JdbcPagingItemReaderBuilder<SettlementModel>()
+    public JdbcPagingItemReader<SettlementVO> settlementFeeReader() {
+        return new JdbcPagingItemReaderBuilder<SettlementVO>()
                 .name("settlementFeeReader")
                 .dataSource(dataSource)
                 .pageSize(1000)
                 .fetchSize(1000)
-                .rowMapper(new BeanPropertyRowMapper<>(SettlementModel.class))
+                .rowMapper(new BeanPropertyRowMapper<>(SettlementVO.class))
                 .queryProvider(createPendingSettlementQueryProvider())
                 .build();
     }
@@ -92,8 +92,8 @@ public class SettlementFeeStepConfig {
     }
 
     @Bean
-    public JdbcBatchItemWriter<SettlementModel> settlementUpdateWriter() {
-        return new JdbcBatchItemWriterBuilder<SettlementModel>()
+    public JdbcBatchItemWriter<SettlementVO> settlementUpdateWriter() {
+        return new JdbcBatchItemWriterBuilder<SettlementVO>()
                 .dataSource(dataSource)
                 .sql("UPDATE settlements SET fee = :fee, net_amount = :netAmount, status = :status, settled_at = :settledAt, updated_at = NOW() WHERE id = :id")
                 .beanMapped()

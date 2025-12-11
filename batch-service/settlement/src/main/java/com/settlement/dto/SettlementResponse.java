@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SettlementDto {
+public class SettlementResponse {
     private String id;
     private String orderItemId;
     private String userId;
@@ -27,8 +27,8 @@ public class SettlementDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static SettlementDto from(Settlement settlement) {
-        return SettlementDto.builder()
+    public static SettlementResponse from(Settlement settlement) {
+        return SettlementResponse.builder()
                 .id(settlement.getId())
                 .orderItemId(settlement.getOrderItemId())
                 .userId(settlement.getUserId())

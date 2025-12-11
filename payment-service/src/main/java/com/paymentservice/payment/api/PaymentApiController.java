@@ -1,13 +1,16 @@
 package com.paymentservice.payment.api;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
@@ -88,8 +91,8 @@ public class PaymentApiController {
     /** 정산용 결제 내역 조회 (Batch) */
     @GetMapping("/settlement")
     public BaseResponse<java.util.List<PaymentResponse>> getPaymentsForSettlement(
-            @org.springframework.web.bind.annotation.RequestParam("startDate") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
-            @org.springframework.web.bind.annotation.RequestParam("endDate") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate) {
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         return new BaseResponse<>(
                 paymentService.getPaymentsForSettlement(startDate, endDate),
                 "정산 내역 조회 성공");

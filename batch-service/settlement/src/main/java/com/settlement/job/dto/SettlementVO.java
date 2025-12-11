@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SettlementModel {
+public class SettlementVO {
     private String id;
     private String orderItemId;
     private String userId;

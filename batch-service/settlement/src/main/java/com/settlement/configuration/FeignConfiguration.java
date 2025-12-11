@@ -2,14 +2,14 @@ package com.settlement.configuration;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import feign.Request;
+import feign.Request.Options;
 import feign.Retryer;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
@@ -32,15 +32,14 @@ public class FeignConfiguration implements WebMvcConfigurer {
         return new SpringFormEncoder();
     }
 
-    /**
-     * Feign 재시도 설정
+    /*
+     * feign 재시도 설정
      * - 최대 3회 재시도
      * - 초기 대기 시간: 1초
      * - 최대 대기 시간: 3초
      */
     @Bean
     public Retryer feignRetryer() {
-        log.info("Feign 재시도 로직 설정: 최대 3회, 초기 대기 1초, 최대 대기 3초");
         return new Retryer.Default(1000, TimeUnit.SECONDS.toMillis(3), 3);
     }
 
@@ -50,8 +49,7 @@ public class FeignConfiguration implements WebMvcConfigurer {
      * - 읽기 타임아웃: 10초
      */
     @Bean
-    public Request.Options feignRequestOptions() {
-        log.info("Feign 타임아웃 설정: 연결 타임아웃 5초, 읽기 타임아웃 10초");
-        return new Request.Options(5, TimeUnit.SECONDS, 10, TimeUnit.SECONDS, true);
+    public Options feignRequestOptions() {
+        return new Options(5, TimeUnit.SECONDS, 10, TimeUnit.SECONDS, true);
     }
 }
