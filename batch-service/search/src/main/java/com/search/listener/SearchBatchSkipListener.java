@@ -10,10 +10,6 @@ import com.search.dto.UserBehaviorDto;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 배치 처리 중 발생하는 예외에 대한 스킵(Skip) 리스너
- * 잘못된 형식의 로그 라인 등을 건너뛰고 로깅
- */
 @Slf4j
 @Component
 public class SearchBatchSkipListener implements SkipListener<UserBehaviorDto, UserBehaviorDto> {

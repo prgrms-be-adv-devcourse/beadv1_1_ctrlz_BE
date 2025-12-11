@@ -96,11 +96,6 @@ public class UserEntity extends BaseEntity {
 		this.gender = gender;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return UserEntity.class.getAnnotation(Table.class).name();
-	}
-
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
 	}

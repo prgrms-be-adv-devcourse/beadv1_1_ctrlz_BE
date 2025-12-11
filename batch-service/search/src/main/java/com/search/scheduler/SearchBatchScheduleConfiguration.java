@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Quartz 스케줄링 설정
- * 매일 새벽 2시 (KST)에 배치 실행
+ * 매일 새벽 2시에 배치 실행
  */
 @Configuration
-public class SearchBatchScheduleConfig {
+public class SearchBatchScheduleConfiguration {
 
     @Bean
     public JobDetail searchBatchJobDetail() {
@@ -27,7 +27,6 @@ public class SearchBatchScheduleConfig {
 
     @Bean
     public Trigger searchBatchTrigger(JobDetail searchBatchJobDetail) {
-        // 매일 새벽 2시 (KST)
         return TriggerBuilder.newTrigger()
                 .forJob(searchBatchJobDetail)
                 .withIdentity("searchBatchTrigger", "batchGroup")

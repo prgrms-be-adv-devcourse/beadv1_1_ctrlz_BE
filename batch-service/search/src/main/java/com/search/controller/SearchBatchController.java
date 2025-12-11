@@ -1,6 +1,7 @@
 package com.search.controller;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -27,10 +28,12 @@ public class SearchBatchController {
 	 */
 	@PostMapping("/manual")
 	public String runSearchBatch() {
-		log.info("수동 배치 실행 요청: {}", LocalDateTime.now());
+		LocalDateTime now = LocalDateTime.now();
+		log.info("수동 배치 실행 요청: {}", now);
 		try {
 			JobParameters jobParameters = new JobParametersBuilder()
-				.addString("manualExecutedAt", LocalDateTime.now().toString())
+				.addString("manualExecutedAt",
+					LocalDateTime.parse(now.toString(), DateTimeFormatter.ISO_DATE_TIME).toString())
 				.toJobParameters();
 
 			jobLauncher.run(searchHistoryJob, jobParameters);
