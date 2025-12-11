@@ -16,6 +16,7 @@ import com.domainservice.domain.search.mapper.SearchMapper;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 import com.domainservice.domain.search.repository.ProductPostElasticRepository;
+import com.domainservice.domain.search.service.search.query.DailyProductQueryBuilder;
 import com.domainservice.domain.search.service.search.query.SellerProductQueryBuilder;
 import com.domainservice.domain.search.service.search.query.SimilarProductQueryBuilder;
 
@@ -31,6 +32,7 @@ public class RecommendationService {
 
 	private final SimilarProductQueryBuilder similarProductQueryBuilder;
 	private final SellerProductQueryBuilder sellerProductQueryBuilder;
+	private final DailyProductQueryBuilder dailyProductQueryBuilder;
 
 	private final ProductPostElasticRepository productPostElasticRepository;
 
@@ -75,6 +77,25 @@ public class RecommendationService {
 
 		// 검색 실행 및 dto로 반환
 		return executeSearch(sellerProductNativeQuery, pageable);
+	}
+
+	/**
+	 * 오늘의 추천 상품 조회 메서드
+	 *
+	 * 최근 72시간 내 등록된 상품 중 좋아요와 조회수를 종합하여 인기 상품을 조회합니다.
+	 * 카테고리가 지정된 경우 해당 카테고리 내에서만 검색합니다.
+	 *
+	 * @param category 카테고리명 ( default : "all" )
+	 * @param pageable 페이징 정보 (page, size, sort)
+	 * @return 오늘의 추천 상품 페이지 결과
+	 */
+	public PageResponse<List<ProductPostSearchResponse>> getDailyBestProductList(String category, Pageable pageable) {
+
+		// 오늘의 추천 상품 검색을 위한 Native Query 생성
+		NativeQuery dailyBestProductNativeQuery = dailyProductQueryBuilder.build(category, pageable);
+
+		// 검색 실행 및 dto로 반환
+		return executeSearch(dailyBestProductNativeQuery, pageable);
 	}
 
 	/*

@@ -57,7 +57,7 @@ public class ProductPostSearchController {
 		// ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
 		@RequestParam(defaultValue = "score") String sort,
 
-		@PageableDefault(size = 20) Pageable pageable
+		@PageableDefault(size = 24) Pageable pageable
 	) {
 
 		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
@@ -71,13 +71,13 @@ public class ProductPostSearchController {
 	 * - 현재 상품과 유사한 상품 추천
 	 *
 	 * @param productPostId 기준 상품 ID
-	 * @param pageable 페이징 정보, size: 10(default)
+	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 유사 상품 목록
 	 */
 	@GetMapping("/{productPostId}/similar")
 	public PageResponse<List<ProductPostSearchResponse>> getSimilarProducts(
 		@PathVariable String productPostId,
-		@PageableDefault Pageable pageable
+		@PageableDefault(size = 12) Pageable pageable
 	) {
 		return recommendationService.findSimilarProductList(productPostId, pageable);
 	}
@@ -87,31 +87,32 @@ public class ProductPostSearchController {
 	 * - 같은 판매자가 판매 중인 다른 상품 추천
 	 *
 	 * @param productPostId 기준 상품 ID
-	 * @param pageable 페이징 정보, size: 10(default)
+	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 판매자의 다른 상품 목록
 	 */
 	@GetMapping("/{productPostId}/by-seller")
 	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
 		@PathVariable String productPostId,
-		@PageableDefault Pageable pageable
+		@PageableDefault(size = 12) Pageable pageable
 	) {
 		return recommendationService.getSellerProductList(productPostId, pageable);
 	}
 
-	// /**
-	//  * 카테고리/태그 기반 인기 상품 추천 API
-	//  * - 같은 카테고리 내에서 인기 상품 추천
-	//  *
-	//  * @param productPostId 기준 상품 ID
-	//  * @param pageable 페이징 정보
-	//  * @return 인기 상품 목록
-	//  */
-	// @GetMapping("/{productPostId}/popular-in-category")
-	// public PageResponse<List<ProductPostSearchResponse>> getPopularInCategory(
-	// 	@PathVariable Long productPostId,
-	// 	@PageableDefault(size = 10) Pageable pageable
-	// ) {
-	// 	return productPostRecommendationService.findPopularInCategory(productPostId, pageable);
-	// }
+	/**
+	 * 오늘의 추천 상품 API
+	 * - 최근 3일(72시간) 내 등록된 상품 중 인기 상품 선정
+	 * - 요청 파라메터에 카테고리 입력 시 해당 카테고리의 인기상품 검색 가능
+	 *
+	 * @param category 카테고리명 (선택)
+	 * @param pageable 페이징 정보, size: 12(default)
+	 * @return 오늘의 추천 상품 목록
+	 */
+	@GetMapping("/daily")
+	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
+		@RequestParam(defaultValue = "all") String category,
+		@PageableDefault(size = 12) Pageable pageable
+	) {
+		return recommendationService.getDailyBestProductList(category, pageable);
+	}
 
 }

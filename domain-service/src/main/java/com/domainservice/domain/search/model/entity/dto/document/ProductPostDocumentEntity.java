@@ -117,9 +117,4 @@ public class ProductPostDocumentEntity {
 	@Field(name = "primary_image_url", type = FieldType.Keyword)
 	private String primaryImageUrl;
 
-	// @Field(name = "priority_score", type = FieldType.Double)
-	// private Double priorityScore;
-
 }
-
-
