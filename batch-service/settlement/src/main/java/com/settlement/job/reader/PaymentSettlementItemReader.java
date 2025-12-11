@@ -10,8 +10,8 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.settlement.common.configuration.feign.client.PaymentFeignClient;
-import com.settlement.common.model.payment.PaymentResponse;
+import com.settlement.common.feign.PaymentFeignClient;
+import com.settlement.dto.PaymentResponse;
 import com.settlement.job.dto.SettlementSourceDto;
 
 import lombok.RequiredArgsConstructor;

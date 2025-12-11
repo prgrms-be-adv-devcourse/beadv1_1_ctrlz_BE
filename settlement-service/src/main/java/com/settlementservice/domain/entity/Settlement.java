@@ -41,6 +41,10 @@ public class Settlement extends BaseEntity {
 	@Column(name = "status", nullable = false)
 	private SettlementStatus settlementStatus;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "pay_type")
+	private PayType payType;
+
 	@Column(name = "settled_at")
 	private LocalDateTime settledAt;
 

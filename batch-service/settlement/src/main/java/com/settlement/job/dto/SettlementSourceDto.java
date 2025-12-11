@@ -1,6 +1,6 @@
 package com.settlement.job.dto;
 
-import com.settlement.common.model.payment.PaymentResponse;
+import com.settlement.dto.PaymentResponse;
 
 import lombok.Builder;
 import lombok.Data;

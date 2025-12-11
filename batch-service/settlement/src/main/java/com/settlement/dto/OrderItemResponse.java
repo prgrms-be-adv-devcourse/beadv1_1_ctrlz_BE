@@ -1,4 +1,4 @@
-package com.settlement.common.model.order;
+package com.settlement.dto;
 
 import java.math.BigDecimal;
 

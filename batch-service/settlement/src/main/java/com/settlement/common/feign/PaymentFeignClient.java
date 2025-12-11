@@ -1,4 +1,4 @@
-package com.settlement.common.configuration.feign.client;
+package com.settlement.common.feign;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.common.model.web.BaseResponse;
-import com.settlement.common.model.payment.PaymentResponse;
+import com.settlement.dto.PaymentResponse;
 
 @FeignClient(name = "payment-service", url = "${custom.feign.url.payment-service}")
 public interface PaymentFeignClient {

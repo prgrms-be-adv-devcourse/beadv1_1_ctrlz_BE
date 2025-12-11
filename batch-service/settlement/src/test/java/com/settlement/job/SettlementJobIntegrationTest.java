@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -24,8 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.common.model.web.BaseResponse;
-import com.settlement.common.configuration.feign.client.PaymentFeignClient;
-import com.settlement.common.model.payment.PaymentResponse;
+import com.settlement.common.feign.PaymentFeignClient;
+import com.settlement.dto.PaymentResponse;
 import com.settlement.domain.entity.Settlement;
 import com.settlement.domain.entity.SettlementStatus;
 import com.settlement.repository.SettlementRepository;
@@ -58,8 +57,9 @@ public class SettlementJobIntegrationTest {
                 String userId = "user1";
                 BigDecimal amount = new BigDecimal("10000");
 
+                // TOSS 결제 -> 수수료 3%
                 PaymentResponse paymentResponse = new PaymentResponse(paymentId, orderItemId, userId, amount, "PAID",
-                                now);
+                                now, "TOSS");
 
                 when(paymentFeignClient.getPaymentsForSettlement(any(), any()))
                                 .thenReturn(new BaseResponse<>(List.of(paymentResponse), "SUCCESS"));
@@ -85,7 +85,7 @@ public class SettlementJobIntegrationTest {
                 assertThat(settlement.getUserId()).isEqualTo(userId);
                 assertThat(settlement.getAmount()).isEqualByComparingTo(amount);
 
-                // Fee Calculation Check (3% of 10000 = 300)
+                // Fee Calculation Check (TOSS: 3% of 10000 = 300)
                 BigDecimal expectedFee = new BigDecimal("300");
                 assertThat(settlement.getFee()).isEqualByComparingTo(expectedFee);
 
@@ -93,10 +93,8 @@ public class SettlementJobIntegrationTest {
                 BigDecimal expectedNet = new BigDecimal("9700");
                 assertThat(settlement.getNetAmount()).isEqualByComparingTo(expectedNet);
 
-                // Status Check (Should be COMPLETED or READY? The new logic marks it COMPLETED?
-                // No, markCompleted in Processor)
-                // Check SettlementFeeProcessor -> settlement.markCompleted()
-                // But Settlement.markCompleted() sets status to COMPLETED.
+                // PayType Check
+                assertThat(settlement.getPayType().name()).isEqualTo("TOSS");
 
                 assertThat(settlement.getSettlementStatus()).isEqualTo(SettlementStatus.COMPLETED);
         }

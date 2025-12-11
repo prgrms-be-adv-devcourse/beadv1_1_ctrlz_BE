@@ -7,7 +7,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
-import com.settlement.common.model.payment.PaymentResponse;
+import com.settlement.dto.PaymentResponse;
 import com.settlement.domain.entity.SettlementStatus;
 import com.settlement.job.dto.SettlementModel;
 import com.settlement.job.dto.SettlementSourceDto;
@@ -33,6 +33,7 @@ public class SettlementCreateProcessor implements ItemProcessor<SettlementSource
                 .orderItemId(payment.orderItemId())
                 .userId(item.getUserId())
                 .amount(payment.amount())
+                .payType(payment.payType())
                 .status(SettlementStatus.PENDING.name())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

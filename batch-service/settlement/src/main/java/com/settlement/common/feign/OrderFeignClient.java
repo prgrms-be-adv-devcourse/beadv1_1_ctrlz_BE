@@ -1,4 +1,4 @@
-package com.settlement.common.configuration.feign.client;
+package com.settlement.common.feign;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.common.model.web.BaseResponse;
-import com.settlement.common.model.order.OrderResponse;
+import com.settlement.dto.OrderResponse;
 
 @FeignClient(name = "order-service", url = "${custom.feign.url.order-service}"
 // configuration = {UserClientConfiguration.class} // 필요시 추가
