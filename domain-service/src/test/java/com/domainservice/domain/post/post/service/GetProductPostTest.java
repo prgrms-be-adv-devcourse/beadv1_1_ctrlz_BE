@@ -19,8 +19,10 @@ import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.common.configuration.feign.exception.UserClientException;
+import com.domainservice.domain.post.category.model.entity.Category;
+import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 
@@ -35,6 +37,9 @@ class GetProductPostTest {
 
 	@Mock
 	private ProductPostRepository productPostRepository;
+
+	@Mock
+	private CategoryRepository categoryRepository;
 
 	@Mock
 	private UserFeignClient userClient;
@@ -62,6 +67,12 @@ class GetProductPostTest {
 		field.set(productPost, id);
 	}
 
+	private Category createCategory(String categoryName) {
+		return Category.builder()
+			.name(categoryName)
+			.build();
+	}
+
 	@DisplayName("익명 사용자는 게시글을 조회할 수 있다.")
 	@Test
 	void test1() throws Exception {
@@ -69,10 +80,11 @@ class GetProductPostTest {
 		String userId = "anonymous";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("아이폰 15 Pro")
 			.name("iPhone 15 Pro")
 			.price(1200000)
@@ -84,14 +96,14 @@ class GetProductPostTest {
 		setViewCount(productPost, 10);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 
 		// when
-		ProductPostWithSellerResponse result = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription result = productPostService.getProductPostById(userId, postId);
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.userId()).isEqualTo(sellerId);
 		assertThat(result.title()).isEqualTo("아이폰 15 Pro");
 		assertThat(result.name()).isEqualTo("iPhone 15 Pro");
 		assertThat(result.price()).isEqualTo(1200000);
@@ -100,6 +112,7 @@ class GetProductPostTest {
 		assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SELLING);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회는 항상 발생
 		verify(userClient, never()).getUser(userId); // 익명 사용자는 조회하지 않음
 		verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
@@ -112,11 +125,12 @@ class GetProductPostTest {
 		String userId = "anonymous";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 		int initialViewCount = 100;
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("아이폰 15 Pro")
 			.name("iPhone 15 Pro")
 			.price(1200000)
@@ -127,6 +141,7 @@ class GetProductPostTest {
 		setViewCount(productPost, initialViewCount);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 
 		// when
@@ -137,6 +152,7 @@ class GetProductPostTest {
 		assertThat(currentViewCount).isEqualTo(initialViewCount + 1);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회
 		verify(userClient, never()).getUser(userId); // 익명 사용자는 조회하지 않음
 		verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
@@ -149,10 +165,11 @@ class GetProductPostTest {
 		String userId = "user-456";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("갤럭시 S24 Ultra")
 			.name("Galaxy S24 Ultra")
 			.price(1500000)
@@ -164,18 +181,20 @@ class GetProductPostTest {
 		setViewCount(productPost, 20);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 		given(userClient.getUser(userId)).willReturn(UserViewFactory.createUser(userId));
 		doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
 		// when
-		ProductPostWithSellerResponse result = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription result = productPostService.getProductPostById(userId, postId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.title()).isEqualTo("갤럭시 S24 Ultra");
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회
 		verify(userClient).getUser(userId); // 조회자 유효성 확인
 		verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
@@ -188,10 +207,11 @@ class GetProductPostTest {
 		String userId = "nonexistent-user";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("맥북 프로 16")
 			.name("MacBook Pro 16")
 			.price(3000000)
@@ -202,6 +222,7 @@ class GetProductPostTest {
 		setViewCount(productPost, 15);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 		given(userClient.getUser(userId)).willThrow(new UserClientException.NotFound("Not Found"));
 
@@ -210,6 +231,7 @@ class GetProductPostTest {
 			.isInstanceOf(UserClientException.NotFound.class);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보는 먼저 조회됨
 		verify(userClient).getUser(userId); // 조회자 확인 시 예외 발생
 		verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
@@ -222,10 +244,11 @@ class GetProductPostTest {
 		String userId = "user-789";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("에어팟 프로 2세대")
 			.name("AirPods Pro 2nd")
 			.price(350000)
@@ -236,6 +259,7 @@ class GetProductPostTest {
 		setViewCount(productPost, 25);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 		given(userClient.getUser(userId)).willThrow(new UserClientException.Unauthorized("Unauthorized"));
 
@@ -244,6 +268,7 @@ class GetProductPostTest {
 			.isInstanceOf(UserClientException.Unauthorized.class);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보는 먼저 조회됨
 		verify(userClient).getUser(userId); // 조회자 인증 실패
 		verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
@@ -255,10 +280,11 @@ class GetProductPostTest {
 		// given
 		String userId = "user-123";
 		String postId = "post-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId("user-123")
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("아이폰 15 Pro")
 			.name("iPhone 15 Pro")
 			.price(1200000)
@@ -276,6 +302,7 @@ class GetProductPostTest {
 			.hasMessage(PRODUCT_POST_DELETED.getMessage());
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository, never()).findById(anyString());
 		verify(userClient, never()).getUser(anyString());
 	}
 
@@ -286,10 +313,11 @@ class GetProductPostTest {
 		String userId = "anonymous";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("아이폰 15 Pro (판매완료)")
 			.name("iPhone 15 Pro")
 			.price(1200000)
@@ -300,16 +328,18 @@ class GetProductPostTest {
 		setViewCount(productPost, 50);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 
 		// when
-		ProductPostWithSellerResponse result = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription result = productPostService.getProductPostById(userId, postId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회
 		verify(userClient, never()).getUser(userId); // 익명 사용자는 조회하지 않음
 	}
@@ -321,10 +351,11 @@ class GetProductPostTest {
 		String userId = "anonymous";
 		String postId = "post-123";
 		String sellerId = "user-123";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("아이폰 15 Pro (거래중)")
 			.name("iPhone 15 Pro")
 			.price(1200000)
@@ -335,16 +366,18 @@ class GetProductPostTest {
 		setViewCount(productPost, 30);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 
 		// when
-		ProductPostWithSellerResponse result = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription result = productPostService.getProductPostById(userId, postId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.tradeStatus()).isEqualTo(TradeStatus.PROCESSING);
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회
 		verify(userClient, never()).getUser(userId); // 익명 사용자는 조회하지 않음
 	}
@@ -356,10 +389,11 @@ class GetProductPostTest {
 		String userId = "seller-123";
 		String postId = "post-123";
 		String sellerId = "user-456";
+		String categoryId = "category-123";
 
 		ProductPost productPost = ProductPost.builder()
 			.userId(sellerId)
-			.categoryId("category-123")
+			.categoryId(categoryId)
 			.title("맥북 에어 M2")
 			.name("MacBook Air M2")
 			.price(1500000)
@@ -371,21 +405,58 @@ class GetProductPostTest {
 		setViewCount(productPost, 5);
 
 		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.of(createCategory("전자기기")));
 		given(userClient.getUser(sellerId)).willReturn(UserViewFactory.createUser(sellerId));
 		given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
 		doNothing().when(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
 
 		// when
-		ProductPostWithSellerResponse result = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription result = productPostService.getProductPostById(userId, postId);
 
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.title()).isEqualTo("맥북 에어 M2");
 
 		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
 		verify(userClient).getUser(sellerId); // 판매자 정보 조회
 		verify(userClient).getUser(userId); // 조회자 유효성 확인
 		verify(recentlyViewedService).addRecentlyViewedPost(userId, postId, MAX_COUNT);
+	}
+
+	@DisplayName("존재하지 않는 카테고리의 게시글 조회 시 예외가 발생한다.")
+	@Test
+	void test10() throws Exception {
+		// given
+		String userId = "anonymous";
+		String postId = "post-123";
+		String sellerId = "user-123";
+		String categoryId = "nonexistent-category";
+
+		ProductPost productPost = ProductPost.builder()
+			.userId(sellerId)
+			.categoryId(categoryId)
+			.title("아이폰 15 Pro")
+			.name("iPhone 15 Pro")
+			.price(1200000)
+			.status(ProductStatus.GOOD)
+			.tradeStatus(TradeStatus.SELLING)
+			.build();
+
+		setViewCount(productPost, 10);
+
+		given(productPostRepository.findById(postId)).willReturn(Optional.of(productPost));
+		given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> productPostService.getProductPostById(userId, postId))
+			.isInstanceOf(ProductPostException.class)
+			.hasMessage(CATEGORY_NOT_FOUND.getMessage());
+
+		verify(productPostRepository).findById(postId);
+		verify(categoryRepository).findById(categoryId);
+		verify(userClient, never()).getUser(anyString());
+		verify(recentlyViewedService, never()).addRecentlyViewedPost(anyString(), anyString(), anyInt());
 	}
 
 }

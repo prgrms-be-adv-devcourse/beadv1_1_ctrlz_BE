@@ -24,11 +24,13 @@ import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.category.model.entity.Category;
+import com.domainservice.domain.post.category.repository.CategoryRepository;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
@@ -55,6 +57,7 @@ public class ProductPostService {
 	private final RecentlyViewedService recentlyViewedService;
 
 	private final TagRepository tagRepository;
+	private final CategoryRepository categoryRepository;
 	private final ProductPostRepository productPostRepository;
 
 	private static final int MAX_COUNT = 10;    // 최근 본 상품으로 조회할 최대 개수
@@ -174,40 +177,43 @@ public class ProductPostService {
 	 * 조회 시 조회수가 증가합니다.
 	 *
 	 * @param postId 조회할 게시글 ID
+	 * @param viewerId 게시글을 조회한 유저 ID
 	 * @return 게시글 정보 (판매자 닉네임 포함)
 	 * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
 	 */
-	public ProductPostWithSellerResponse getProductPostById(String postId) {
+	public ProductPostDescription getProductPostById(String viewerId, String postId) {
 
-		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		UserResponse userInfo = getUserInfoByFeignClient(productPost.getUserId());
+		ProductPost productPost = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
 
-		return ProductPostMapper.toWithSellerResponse(productPost, userInfo.nickname());
+		if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
+			throw new ProductPostException(PRODUCT_POST_DELETED);
+		}
+
+		productPostRepository.incrementViewCount(postId); // @Modifying을 통해 DB에 조회수 증가를 적용하기 (조회수 정합성 관리)
+		productPost.incrementViewCount(); // db에는 조회수 증가가 적용되었으나 entity의 값은 변경되지 않음, dto로 반환 시 값을 맞춰주기 위해 증가
+
+		String categoryName = categoryRepository.findById(productPost.getCategoryId())
+			.map(Category::getName)
+			.orElseThrow(() -> new ProductPostException(CATEGORY_NOT_FOUND));
+
+		UserResponse sellerInfo = getUserInfoByFeignClient(productPost.getUserId());
+
+		// 게시글을 조회한 유저가 로그인한 회원이라면 redis에 최근 본 상품 목록으로 저장
+		if (!viewerId.equals("anonymous")) {
+			getUserInfoByFeignClient(viewerId); // 해당 유저가 존재하는지 검증
+			recentlyViewedService.addRecentlyViewedPost(viewerId, productPost.getId(), MAX_COUNT);
+		}
+
+		return ProductPostMapper.toDescription(productPost, sellerInfo.nickname(), categoryName, viewerId);
 
 	}
 
-	/**
-	 * 단일 상품 게시글을 조회합니다.
-	 * 로그인 된 회원 조회 (userId 필요)
-	 * 조회 시 조회수가 증가하며 redis에 최근 본 상품으로 등록됩니다.
-	 *
-	 * @param postId 조회할 게시글 ID
-	 * @return 게시글 정보 (판매자 닉네임 포함)
-	 * @throws ProductPostException 게시글이 존재하지 않거나 삭제된 경우
-	 */
-	public ProductPostWithSellerResponse getProductPostById(String userId, String postId) {
-
-		ProductPost productPost = getPostAndIncrementViewCount(postId);
-		UserResponse userInfo = getUserInfoByFeignClient(productPost.getUserId());
-
-		// 실제 유저인 경우 redis에 최근 본 상품 목록으로 저장
-		if (!userId.equals("anonymous")) {
-			getUserInfoByFeignClient(userId); // user-service에 해당 유저가 존재하는지 확인
-			recentlyViewedService.addRecentlyViewedPost(userId, productPost.getId(), MAX_COUNT);
-		}
-
-		return ProductPostMapper.toWithSellerResponse(productPost, userInfo.nickname());
-
+	// 내부 통신용 getProductPost 메소드
+	public ProductPostResponse getProductPostById(String postId) {
+		ProductPost productPost = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		return ProductPostMapper.toResponse(productPost);
 	}
 
 	/**
@@ -261,7 +267,7 @@ public class ProductPostService {
 			.toList();
 	}
 
-	public ProductPostResponse createDummyProductPost (
+	public ProductPostResponse createDummyProductPost(
 		ProductPostRequest request, String userId, List<MultipartFile> imageFiles) {
 
 		ProductPost productPost = ProductPost.builder()
@@ -360,19 +366,6 @@ public class ProductPostService {
 		}
 	}
 
-	private ProductPost getPostAndIncrementViewCount(String postId) {
-		ProductPost productPost = productPostRepository.findById(postId)
-			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
-
-		// Soft Delete로 삭제된 상품은 상세 조회 불가
-		if (productPost.getDeleteStatus() == BaseEntity.DeleteStatus.D) {
-			throw new ProductPostException(PRODUCT_POST_DELETED);
-		}
-
-		productPost.incrementViewCount();
-		return productPost;
-	}
-
 	// FeignClient(userClient)를 통해 userId로 사용자 정보를 조회합니다.
 	private UserResponse getUserInfoByFeignClient(String userId) {
 		return userFeignClient.getUser(userId);
@@ -386,7 +379,9 @@ public class ProductPostService {
 	}
 
 	public boolean isSellingTradeStatus(String id) {
-		return this.getProductPostById(id).tradeStatus() == TradeStatus.SELLING;
+		ProductPost productPost = productPostRepository.findById(id)
+			.orElseThrow(() -> new ProductPostException(PRODUCT_POST_NOT_FOUND));
+		return productPost.getTradeStatus() == TradeStatus.SELLING;
 	}
 
 	public void updateTradeStatusById(String postId, TradeStatus tradeStatus) {

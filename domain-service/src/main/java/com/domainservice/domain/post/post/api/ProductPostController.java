@@ -28,8 +28,8 @@ import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import jakarta.validation.Valid;
@@ -110,11 +110,11 @@ public class ProductPostController {
 	 */
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
-	public BaseResponse<ProductPostWithSellerResponse> getProductPostById(
+	public BaseResponse<ProductPostDescription> getProductPostById(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
-		ProductPostWithSellerResponse response = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription response = productPostService.getProductPostById(userId, postId);
 		return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
 	}
 

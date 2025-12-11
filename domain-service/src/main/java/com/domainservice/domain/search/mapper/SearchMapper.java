@@ -27,18 +27,13 @@ public class SearchMapper {
 		return ProductPostSearchResponse.builder()
 			.id(document.getId())
 			.userId(document.getUserId())
-			.name(document.getName())
 			.title(document.getTitle())
-			.description(document.getDescription())
-			.tags(document.getTags())
-			.categoryName(document.getCategoryName())
 			.price(document.getPrice())
-			.likedCount(document.getLikedCount())
 			.viewCount(document.getViewCount())
-			.status(document.getStatus())
+			.likedCount(document.getLikedCount())
 			.tradeStatus(document.getTradeStatus())
-			.deleteStatus(document.getDeleteStatus())
-			.createdAt(document.getCreatedAt())
+			.primaryImageUrl(document.getPrimaryImageUrl())
+			.updatedAt(document.getUpdatedAt())
 			.build();
 	}
 
@@ -52,11 +47,24 @@ public class SearchMapper {
 	}
 
 	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertedEvent event) {
-		return new ProductPostDocumentEntity(
-			event.id(), event.userId(), event.name(), event.title(), event.description(), event.tags(),
-			event.categoryName(), event.price(), event.likedCount(), event.viewCount(),
-			event.status(), event.tradeStatus(), event.deleteStatus(), event.createdAt()
-		);
+		return ProductPostDocumentEntity.builder()
+			.id(event.id())
+			.userId(event.userId())
+			.name(event.name())
+			.title(event.title())
+			.price(event.price())
+			.categoryName(event.categoryName())
+			.description(event.description())
+			.tags(event.tags())
+			.likedCount(event.likedCount())
+			.viewCount(event.viewCount())
+			.status(event.status())
+			.tradeStatus(event.tradeStatus())
+			.deleteStatus(event.deleteStatus())
+			.primaryImageUrl(event.primaryImageUrl())
+			.createdAt(event.createdAt())
+			.updatedAt(event.updatedAt())
+			.build();
 	}
 
 	// 태그 파싱 : 아이폰,중고 -> [아이폰, 중고]
