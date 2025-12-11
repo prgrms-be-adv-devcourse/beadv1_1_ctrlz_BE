@@ -26,7 +26,6 @@ public class SearchMapper {
 	public static ProductPostSearchResponse toSearchResponse(ProductPostDocumentEntity document) {
 		return ProductPostSearchResponse.builder()
 			.id(document.getId())
-			.userId(document.getUserId())
 			.title(document.getTitle())
 			.price(document.getPrice())
 			.viewCount(document.getViewCount())

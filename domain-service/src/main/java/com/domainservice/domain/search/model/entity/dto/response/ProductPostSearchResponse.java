@@ -10,7 +10,6 @@ import lombok.Builder;
 @Builder
 public record ProductPostSearchResponse(
 	String id,
-	String userId,
 	String title,
 	Long price,
 	Long likedCount,
