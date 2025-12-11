@@ -30,7 +30,7 @@ import com.domainservice.domain.order.repository.OrderItemRepository;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
@@ -65,7 +65,7 @@ public class OrderService {
             throw new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage());
         }
 
-        Map<String, ProductPostWithSellerResponse> productMap = cartItems.stream()
+        Map<String, ProductPostResponse> productMap = cartItems.stream()
             .collect(Collectors.toMap(
                 CartItem::getProductPostId,
                 item -> productPostService.getProductPostById(item.getProductPostId())
@@ -80,7 +80,7 @@ public class OrderService {
             .build();
 
         for (CartItem cartItem : cartItems) {
-			ProductPostWithSellerResponse product = productMap.get(cartItem.getProductPostId());
+			ProductPostResponse product = productMap.get(cartItem.getProductPostId());
 
             if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
                 throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
@@ -246,7 +246,7 @@ public class OrderService {
      * 장바구니 아이템 목록으로부터 주문 이름 생성
      * "첫번째 상품명 외 N건" 형식으로 생성
      */
-    private String generateOrderName(List<CartItem> cartItems, Map<String, ProductPostWithSellerResponse> productMap) {
+    private String generateOrderName(List<CartItem> cartItems, Map<String, ProductPostResponse> productMap) {
         String firstItemName = productMap.get(cartItems.getFirst().getProductPostId()).title();
         return (cartItems.size() == 1)
             ? firstItemName
