@@ -13,6 +13,7 @@ public class KafkaEventMapper {
 	public static ProductPostUpsertedEvent toUpsertEvent(ProductPost productPost, String categoryName, EventType eventType) {
 
 		List<String> tagNames = productPost.getTagNames();
+		String primaryImageUrl = productPost.getPrimaryImageUrl();
 
 		return ProductPostUpsertedEvent.builder()
 			.id(productPost.getId())
@@ -27,6 +28,8 @@ public class KafkaEventMapper {
 			.status(productPost.getStatus().name())
 			.tradeStatus(productPost.getTradeStatus().name())
 			.deleteStatus(productPost.getDeleteStatus().name())
+			.primaryImageUrl(primaryImageUrl)
+			.updatedAt(productPost.getUpdatedAt())
 			.createdAt(productPost.getCreatedAt())
 			.eventType(eventType)
 			.build();
