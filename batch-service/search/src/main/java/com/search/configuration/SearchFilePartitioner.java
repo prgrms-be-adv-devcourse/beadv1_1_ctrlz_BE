@@ -15,14 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 로그 파일을 파티션으로 분할하는 Partitioner
- * 각 파일을 독립적인 파티션으로 처리하여 병렬 실행 지원
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SearchFilePartitioner implements Partitioner {
 
-	private final SearchLogResourceProvider resourceProvider;
+	private final SearchLogResourceProvider searchLogResourceProvider;
 
 	@Value("${batch.search.log-directory:logs}")
 	private String logDirectory;
@@ -32,7 +31,7 @@ public class SearchFilePartitioner implements Partitioner {
 
 	@Override
 	public Map<String, ExecutionContext> partition(int gridSize) {
-		Resource[] resources = resourceProvider.createResources(logDirectory, logPattern);
+		Resource[] resources = searchLogResourceProvider.createResources(logDirectory, logPattern);
 		Map<String, ExecutionContext> partitions = new HashMap<>();
 
 		// gridSize 고려한 실제 파티션 수 계산

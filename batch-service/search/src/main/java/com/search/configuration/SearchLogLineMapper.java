@@ -21,7 +21,6 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
     private final ObjectMapper objectMapper;
     private final String behaviorType;
 
-    // Pattern을 상수로 선언하여 재사용 (성능 최적화)
     private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("(\\w+)\\s*=\\s*([^,]+)");
 
     public SearchLogLineMapper(String behaviorType) {
@@ -46,7 +45,6 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
 
             String timestamp = jsonNode.get("@timestamp").asText();
 
-            // ANONYMOUS 사용자는 skip
             validateUserId(parsedData.userId(), lineNumber);
 
             return buildUserBehaviorDto(parsedData, timestamp);
@@ -82,7 +80,7 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
     }
 
     /**
-     * 텍스트 형식의 data 파싱 ("key = value, key2 = value2" 형식)
+     * 텍스트 형식의 data 파싱
      */
     private ParsedData parseTextualData(String dataText, String userIdFromRoot) {
         log.debug("Parsing data string: {}", dataText);
@@ -141,13 +139,11 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
      */
     private void validateUserId(String userId, int lineNumber) {
         if (userId == null || userId.isEmpty() || "ANONYMOUS".equalsIgnoreCase(userId)) {
-            log.debug("Line {}: ANONYMOUS 또는 빈 userId - skip 처리", lineNumber);
+            log.info("Line {}: ANONYMOUS 또는 빈 userId - skip 처리", lineNumber);
         }
     }
 
-    /**
-     * UserBehaviorDto 빌드
-     */
+
     private UserBehaviorDto buildUserBehaviorDto(ParsedData parsedData, String timestamp) {
         return UserBehaviorDto.builder()
                 .id(UuidCreator.getTimeOrderedEpoch().toString())

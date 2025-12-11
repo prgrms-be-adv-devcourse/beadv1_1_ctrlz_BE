@@ -29,12 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 검색 이력 배치 작업 설정
- * 파티셔닝을 통한 다중 로그 파일 병렬 처리 지원
+ * 파티셔닝 사용
  */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class SearchBatchConfig {
+public class SearchBatchConfiguration {
 
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
@@ -103,7 +103,6 @@ public class SearchBatchConfig {
 
 	@Bean
 	public TaskExecutor batchTaskExecutor() {
-
 		return new TaskExecutorAdapter(
 			new VirtualThreadTaskExecutor("batch-async-")
 		);
@@ -111,7 +110,6 @@ public class SearchBatchConfig {
 
 	/**
 	 * 파티션별 파일을 처리하는 Reader
-	 *
 	 * @param filePath StepExecutionContext에서 주입받는 파일 경로
 	 */
 	@Bean
@@ -132,13 +130,6 @@ public class SearchBatchConfig {
 			.build();
 	}
 
-	/**
-	 * 파일 경로에서 동작 타입 결정
-	 */
-	private String determineBehaviorType(String filePath) {
-		return (filePath != null && filePath.contains("item-view")) ? "VIEW" : "SEARCH";
-	}
-
 	@Bean
 	public JdbcBatchItemWriter<UserBehaviorDto> searchHistoryWriter() {
 		return new JdbcBatchItemWriterBuilder<UserBehaviorDto>()
@@ -146,5 +137,12 @@ public class SearchBatchConfig {
 			.sql(UPSERT_SQL)
 			.beanMapped()
 			.build();
+	}
+
+	/**
+	 * 파일 경로에서 동작 타입 결정
+	 */
+	private String determineBehaviorType(String filePath) {
+		return (filePath != null && filePath.contains("item-view")) ? "VIEW" : "SEARCH";
 	}
 }
