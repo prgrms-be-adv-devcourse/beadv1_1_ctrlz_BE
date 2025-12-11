@@ -56,23 +56,15 @@ public class GlobalSearchQueryBuilder {
 
 		// multi_match 쿼리 생성
 		if (request.hasQuery()) {
-			mustQueries.add(buildMultiMatchQuery(request.q()));
-		}
-
-		// 검색어 없으면 match_all
-		if (mustQueries.isEmpty()) {
-			mustQueries.add(
-				Query.of(queryBuilder -> queryBuilder.matchAll(
-					matchAllBuilder -> matchAllBuilder
-				))
-			);
+			mustQueries.add(buildMultiMatchQuery(request.q())); // 검색어가 있을 때 Multi-Match 수행
+		} else {
+			mustQueries.add(Query.of(q -> q.matchAll(m -> m))); // 검색어가 없을 때 전체 조회 (Match All)
 		}
 
 		// filter: 입력된 필수 조건들 적용
 		List<Query> filterQueries = new ArrayList<>();
 
 		// 삭제되지 않은 상품만 필터
-		// terms : “주어진 값 리스트 중 하나라도 일치하는 문서만 남겨라” 라는 필터/쿼리
 		filterQueries.add(
 			Query.of(queryBuilder -> queryBuilder.term(
 				TermQuery.of(termQueryBuilder -> termQueryBuilder
@@ -94,21 +86,21 @@ public class GlobalSearchQueryBuilder {
 			);
 		}
 
-		// 가격 범위
-		// gte: greater than or equal, 이 값 이상(≥)
-		// lte: less than or equal, 이 값 이하(≤)
-		if (request.hasPriceFilter()) {
-			filterQueries.add(
-				Query.of(queryBuilder -> queryBuilder.range(
-					rangeQueryBuilder -> rangeQueryBuilder.number(
-						numberRangeBuilder -> numberRangeBuilder
-							.field("price")
-							.gte(Double.valueOf(request.minPrice()))
-							.lte(Double.valueOf(request.maxPrice()))
-					)
-				))
-			);
-		}
+		/*
+		가격 범위
+		gte: greater than or equal, 이 값 이상(≥)
+		lte: less than or equal, 이 값 이하(≤)
+		 */
+		filterQueries.add(
+			Query.of(queryBuilder -> queryBuilder.range(
+				rangeQueryBuilder -> rangeQueryBuilder.number(
+					numberRangeBuilder -> numberRangeBuilder
+						.field("price")
+						.gte(Double.valueOf(request.minPrice()))
+						.lte(Double.valueOf(request.maxPrice()))
+				)
+			))
+		);
 
 		// 태그
 		if (request.hasTags()) {
@@ -123,6 +115,31 @@ public class GlobalSearchQueryBuilder {
 				);
 			}
 		}
+
+		// 상품 상태 ( "NEW", "GOOD", "ALL"(default) )
+		if (request.hasStatus()) {
+			filterQueries.add(
+				Query.of(queryBuilder -> queryBuilder.term(
+					TermQuery.of(termQueryBuilder -> termQueryBuilder
+						.field("status")
+						.value(request.status())
+					)
+				))
+			);
+		}
+
+		// 상품 판매 상태 ( "ALL", "SELLING"(default) )
+		if (!request.tradeStatus().equals("ALL")) {
+			filterQueries.add(
+				Query.of(queryBuilder -> queryBuilder.term(
+					TermQuery.of(termQueryBuilder -> termQueryBuilder
+						.field("trade_status")
+						.value(request.tradeStatus())
+					)
+				))
+			);
+		}
+
 
 		// 적용된 must와 filter를 Bool Query로 반환
 		return Query.of(queryBuilder -> queryBuilder.bool(

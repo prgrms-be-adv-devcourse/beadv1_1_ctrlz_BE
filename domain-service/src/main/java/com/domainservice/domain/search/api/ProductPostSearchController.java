@@ -42,26 +42,26 @@ public class ProductPostSearchController {
 	 * @param maxPrice 최대 가격 (optional, default: 999999999)
 	 * @param tags 태그 (optional)
 	 * @param sort 정렬 기준 (optional, default: score)
+	 *             			  - ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
+	 * @param status 상품 상태 (optional, default: ALL)
+	 * @param tradeStatus 상품 판매 상태 (optional, default: SELLING)
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
-		@RequestParam(required = false) String q,                 // ex) "아이폰"
-		@RequestParam(required = false) String category,          // ex) "전자기기"
-		@RequestParam(defaultValue = "0") Long minPrice,          // ex) "100000"
-		@RequestParam(defaultValue = "999999999") Long maxPrice,  // ex) "2000000"
-		@RequestParam(required = false) String tags,              // ex) "친환경,중고"
-		// TODO: 상품 판매 상태에 따른 정렬,
-
-		// ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
+		@RequestParam(required = false) String q,                    // ex) "아이폰"
+		@RequestParam(required = false) String category,             // ex) "전자기기"
+		@RequestParam(defaultValue = "0") Long minPrice,             // ex) "100000"
+		@RequestParam(defaultValue = "999999999") Long maxPrice,     // ex) "2000000"
+		@RequestParam(required = false) String tags,                 // ex) "친환경,중고"
+		@RequestParam(defaultValue = "ALL") String status,           // ex) "NEW", "GOOD", "ALL"
+		@RequestParam(defaultValue = "SELLING") String tradeStatus,  // ex) "SELLING", "ALL"
 		@RequestParam(defaultValue = "score") String sort,
-
 		@PageableDefault(size = 24) Pageable pageable
 	) {
-
 		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
-			q, category, minPrice, maxPrice, tags, sort);
+			q, category, minPrice, maxPrice, tags, status, tradeStatus, sort);
 
 		return globalSearchService.search(request, pageable);
 	}

@@ -17,11 +17,19 @@ import com.domainservice.domain.search.model.entity.dto.response.ProductPostSear
 public class SearchMapper {
 
 	// 검색 파라미터들을 검색 요청 DTO로 변환
-	public static ProductPostSearchRequest toSearchRequest(
-		String q, String category, Long minPrice, Long maxPrice, String tags, String sort) {
+	public static ProductPostSearchRequest toSearchRequest(String q, String category,
+		Long minPrice, Long maxPrice, String tags, String status, String tradeStatus, String sort) {
 
-		return new ProductPostSearchRequest(
-			q, category, minPrice, maxPrice, parseTagList(tags), sort);
+		return ProductPostSearchRequest.builder()
+			.q(q)
+			.category(category)
+			.minPrice(minPrice)
+			.maxPrice(maxPrice)
+			.tags(parseTagList(tags))
+			.status(status)
+			.tradeStatus(tradeStatus)
+			.sort(sort)
+			.build();
 	}
 
 	// Elasticsearch Document를 검색 응답 DTO로 변환
