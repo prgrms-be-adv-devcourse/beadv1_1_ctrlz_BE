@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.aiservice.domain.model.UserBehavior;
@@ -32,6 +33,7 @@ public class UserContextProvider implements UserContextService {
 	private final DomainServiceClient domainServiceClient;
 
 	@Override
+	@Cacheable(cacheNames = "userContext", key = "#userId")
 	public UserContext getUserContext(String userId) {
 		try {
 			return getUserContextAsync(userId).join();
@@ -43,34 +45,34 @@ public class UserContextProvider implements UserContextService {
 
 
 	public CompletableFuture<UserContext> getUserContextAsync(String userId) {
-		// 1. DB에서 사용자 행동 이력 조회 (비동기)
+		// 1. DB에서 사용자 행동 이력 조회
 		CompletableFuture<List<UserBehavior>> behaviorsFuture = CompletableFuture.supplyAsync(
 				() -> userBehaviorRepository.findByUserId(userId),
 				VIRTUAL_EXECUTOR)
-				.orTimeout(2, TimeUnit.SECONDS)
+				.orTimeout(1, TimeUnit.SECONDS)
 				.exceptionally(ex -> {
 					log.warn("사용자 행동 이력 조회 실패 - userId: {}, 에러: {}", userId, ex.getMessage());
-					return List.of(); 
+					return List.of();
 				});
 
-		// 2. 사용자 정보 조회 (비동기)
+		// 2. 사용자 정보 조회
 		CompletableFuture<UserDemographicDescription> demographicFuture = CompletableFuture.supplyAsync(
 				() -> userInfoClient.getRecommendationInfo(userId),
 				VIRTUAL_EXECUTOR)
-				.orTimeout(2, TimeUnit.SECONDS)
+				.orTimeout(1, TimeUnit.SECONDS)
 				.exceptionally(ex -> {
 					log.warn("유저정보 조회 실패 - userId: {}, 에러: {}", userId, ex.getMessage());
-					return new UserDemographicDescription(0, null); 
+					return new UserDemographicDescription(0, null);
 				});
 
-		// 3. 장바구니 정보 조회 (비동기)
+		// 3. 장바구니 정보 조회
 		CompletableFuture<List<CartItemResponse>> cartFuture = CompletableFuture.supplyAsync(
 				() -> domainServiceClient.getRecentCartItems(userId),
 				VIRTUAL_EXECUTOR)
-				.orTimeout(2, TimeUnit.SECONDS)
+				.orTimeout(1, TimeUnit.SECONDS)
 				.exceptionally(ex -> {
 					log.warn("장바구니 정보 조회 실패 - userId: {}, 에러: {}", userId, ex.getMessage());
-					return List.of(); 
+					return List.of();
 				});
 
 		// 모든 비동기 작업 완료 대기 후 결과 조합
