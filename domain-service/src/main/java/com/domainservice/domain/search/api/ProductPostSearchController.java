@@ -14,8 +14,8 @@ import com.common.model.web.PageResponse;
 import com.domainservice.domain.search.mapper.SearchMapper;
 import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
-import com.domainservice.domain.search.service.ProductPostElasticService;
-import com.domainservice.domain.search.service.ProductPostRecommendationService;
+import com.domainservice.domain.search.service.search.GlobalSearchService;
+import com.domainservice.domain.search.service.search.RecommendationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/product-posts/search")
 public class ProductPostSearchController {
 
-	private final ProductPostElasticService productPostElasticService;
-	private final ProductPostRecommendationService productPostRecommendationService;
+	private final GlobalSearchService globalSearchService;
+	private final RecommendationService recommendationService;
 
 	/**
 	 * 통합 검색 API
@@ -63,7 +63,7 @@ public class ProductPostSearchController {
 		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
 			q, category, minPrice, maxPrice, tags, sort);
 
-		return productPostElasticService.search(request, pageable);
+		return globalSearchService.search(request, pageable);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class ProductPostSearchController {
 		@PathVariable String productPostId,
 		@PageableDefault Pageable pageable
 	) {
-		return productPostRecommendationService.findSimilarProducts(productPostId, pageable);
+		return recommendationService.findSimilarProductList(productPostId, pageable);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class ProductPostSearchController {
 		@PathVariable String productPostId,
 		@PageableDefault Pageable pageable
 	) {
-		return productPostRecommendationService.getSellerProductList(productPostId, pageable);
+		return recommendationService.getSellerProductList(productPostId, pageable);
 	}
 
 	// /**

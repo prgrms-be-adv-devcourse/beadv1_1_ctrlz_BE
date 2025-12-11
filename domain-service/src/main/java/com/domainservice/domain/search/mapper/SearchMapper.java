@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
 import com.common.event.productPost.ProductPostUpsertedEvent;
+import com.common.model.web.PageResponse;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
@@ -66,6 +68,21 @@ public class SearchMapper {
 			.build();
 	}
 
+	public static PageResponse<List<ProductPostSearchResponse>> toPageResponse(
+		SearchHits<ProductPostDocumentEntity> searchHits, Pageable pageable) {
+
+		long totalHits = searchHits.getTotalHits();
+		int totalPages = (int)Math.ceil((double)totalHits / pageable.getPageSize());
+
+		return new PageResponse<>(
+			pageable.getPageNumber(),
+			totalPages,
+			pageable.getPageSize(),
+			pageable.getPageNumber() < totalPages - 1,
+			SearchMapper.toSearchResponseList(searchHits)
+		);
+	}
+
 	// 태그 파싱 : 아이폰,중고 -> [아이폰, 중고]
 	private static List<String> parseTagList(String tags) {
 		if (tags == null || tags.isEmpty()) {
@@ -77,5 +94,4 @@ public class SearchMapper {
 			.filter(s -> !s.isEmpty())
 			.toList();
 	}
-
 }
