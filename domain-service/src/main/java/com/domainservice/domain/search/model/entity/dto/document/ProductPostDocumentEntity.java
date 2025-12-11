@@ -12,10 +12,12 @@ import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(indexName = "product-posts")
@@ -93,12 +95,24 @@ public class ProductPostDocumentEntity {
 	@Field(name = "delete_status",type = FieldType.Keyword)
 	private String deleteStatus;
 
-	@Field(name = "created_at", type = FieldType.Date,
-		format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss")
+	@Field(
+		name = "created_at",
+		type = FieldType.Date,
+		format = {},
+		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX||uuuu-MM-dd'T'HH:mm:ss.SSSX||uuuu-MM-dd'T'HH:mm:ssX"
+	)
 	private LocalDateTime createdAt;
 
-	// @Field(type = FieldType.Date, format = DateFormat.date_time)
-	// private LocalDateTime updatedAt;
+	@Field(
+		name = "updated_at",
+		type = FieldType.Date,
+		format = {},
+		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX||uuuu-MM-dd'T'HH:mm:ss.SSSX||uuuu-MM-dd'T'HH:mm:ssX"
+	)
+	private LocalDateTime updatedAt;
+
+	@Field(name = "primary_image_url",type = FieldType.Keyword)
+	private String primaryImageUrl;
 
 	// @Field(name = "priority_score", type = FieldType.Double)
 	// private Double priorityScore;
