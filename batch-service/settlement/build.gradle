@@ -21,6 +21,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Quartz 스케줄러
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
 }
 
 
