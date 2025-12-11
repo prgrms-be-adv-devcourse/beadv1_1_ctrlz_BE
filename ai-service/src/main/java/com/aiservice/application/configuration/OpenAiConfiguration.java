@@ -45,7 +45,7 @@ public class OpenAiConfiguration {
 				MetadataMode.EMBED,
 				OpenAiEmbeddingOptions.builder()
 						.model("text-embedding-3-small")
-						.dimensions(embeddingDimensions) // yml에서 읽어온 값 사용
+						.dimensions(embeddingDimensions)
 						.build(),
 				RetryUtils.DEFAULT_RETRY_TEMPLATE);
 	}

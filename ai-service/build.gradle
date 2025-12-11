@@ -58,6 +58,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
 
     implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 }
 
 dependencyManagement {

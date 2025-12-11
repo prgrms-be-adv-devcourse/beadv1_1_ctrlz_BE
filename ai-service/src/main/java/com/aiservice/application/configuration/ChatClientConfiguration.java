@@ -38,19 +38,4 @@ public class ChatClientConfiguration {
 			.temperature(0.7)
 			.build();
 	}
-
-	// @Profile("local")
-	// @Bean
-	// public EmbeddingModel embeddingModel(OpenAiApi openAiApi) {
-	// 	log.info("로컬 환경  embedding model 사용");
-	//
-	// 	return new OpenAiEmbeddingModel(
-	// 		openAiApi,
-	// 		MetadataMode.EMBED,
-	// 		OpenAiEmbeddingOptions.builder()
-	// 			.model("sdfsdfsdf")
-	// 			.build(),
-	// 		RetryUtils.DEFAULT_RETRY_TEMPLATE
-	// 	);
-	// }
 }
