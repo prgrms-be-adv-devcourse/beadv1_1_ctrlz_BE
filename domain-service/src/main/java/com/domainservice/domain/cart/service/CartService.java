@@ -15,7 +15,7 @@ import com.domainservice.domain.cart.model.entity.Cart;
 import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.cart.repository.CartJpaRepository;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class CartService {
 		List<CartItem> cartItemList = cartItemJpaRepository.findByCart(cart);
 
 		for (CartItem cartItem : cartItemList) {
-			ProductPostWithSellerResponse productPostById = productPostService.getProductPostById(
+			ProductPostResponse productPostById = productPostService.getProductPostById(
 				cartItem.getProductPostId());
 			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
 				BigDecimal.valueOf(productPostById.price()),
@@ -100,7 +100,7 @@ public class CartService {
 		}
 		cartJpaRepository.save(cart);
 
-		ProductPostWithSellerResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
+		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
 		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
 			targetItem.isSelected());
 
@@ -138,7 +138,7 @@ public class CartService {
 
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
-		ProductPostWithSellerResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
+		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
 		return new CartItemResponse(cartItem.getId(), productPostById.title(),
 			productPostById.name(),
 			BigDecimal.valueOf(productPostById.price()),
