@@ -82,6 +82,22 @@ public class ProductPostSearchController {
 		return productPostRecommendationService.findSimilarProducts(productPostId, pageable);
 	}
 
+	/**
+	 * 판매자의 다른 상품 추천 API
+	 * - 같은 판매자가 판매 중인 다른 상품 추천
+	 *
+	 * @param productPostId 기준 상품 ID
+	 * @param pageable 페이징 정보, size: 10(default)
+	 * @return 판매자의 다른 상품 목록
+	 */
+	@GetMapping("/{productPostId}/by-seller")
+	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
+		@PathVariable String productPostId,
+		@PageableDefault Pageable pageable
+	) {
+		return productPostRecommendationService.getSellerProductList(productPostId, pageable);
+	}
+
 	// /**
 	//  * 카테고리/태그 기반 인기 상품 추천 API
 	//  * - 같은 카테고리 내에서 인기 상품 추천
@@ -96,28 +112,6 @@ public class ProductPostSearchController {
 	// 	@PageableDefault(size = 10) Pageable pageable
 	// ) {
 	// 	return productPostRecommendationService.findPopularInCategory(productPostId, pageable);
-	// }
-
-	// /**
-	//  * 판매자의 다른 상품 추천 API
-	//  * - 같은 판매자가 판매 중인 다른 상품 추천
-	//  *
-	//  * @param productPostId 기준 상품 ID
-	//  * @param sort 정렬 기준 (optional, default: newest)
-	//  *             - newest: 최신순
-	//  *             - popular: 인기순
-	//  *             - price_asc: 가격 낮은순
-	//  *             - price_desc: 가격 높은순
-	//  * @param pageable 페이징 정보
-	//  * @return 판매자의 다른 상품 목록
-	//  */
-	// @GetMapping("/{productPostId}/seller-products")
-	// public PageResponse<List<ProductPostSearchResponse>> getSellerProducts(
-	// 	@PathVariable Long productPostId,
-	// 	@RequestParam(defaultValue = "newest") String sort,
-	// 	@PageableDefault(size = 10) Pageable pageable
-	// ) {
-	// 	return productPostRecommendationService.findSellerProducts(productPostId, sort, pageable);
 	// }
 
 }

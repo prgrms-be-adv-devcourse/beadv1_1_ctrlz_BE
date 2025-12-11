@@ -19,6 +19,7 @@ import com.domainservice.domain.search.model.entity.dto.response.ProductPostSear
 import com.domainservice.domain.search.repository.ProductPostElasticRepository;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MoreLikeThisQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
@@ -37,7 +38,7 @@ public class ProductPostRecommendationService {
 
 	/**
 	 * 비슷한 상품 추천
-	 * - More Like This + Multi-Match 조합으로 정확한 유사도 검색
+	 * - More Like This + Multi-Match 조합으로 유사도 검색
 	 */
 	public PageResponse<List<ProductPostSearchResponse>> findSimilarProducts(
 		String postId, Pageable pageable) {
@@ -71,9 +72,48 @@ public class ProductPostRecommendationService {
 		);
 	}
 
-	public PageResponse<List<ProductPostSearchResponse>> findSellerProducts(
-		Long productPostId, Pageable pageable) {
-		return null;
+	/**
+	 * 판매자의 다른 상품 조회
+	 * - 같은 판매자(userId)의 다른 상품을 최신순으로 조회
+	 */
+	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
+		String productPostId, Pageable pageable) {
+
+		// 기준 상품 조회하여 판매자 정보 추출
+		ProductPostDocumentEntity postDocument = productPostElasticRepository.findById(productPostId)
+			.orElseThrow(() -> new ElasticSearchException(PRODUCT_POST_NOT_FOUND));
+
+		String sellerId = postDocument.getUserId();
+
+		if (sellerId == null || sellerId.isEmpty()) {
+			throw new ElasticSearchException(USER_NOT_FOUND);
+		}
+
+		// 판매자의 판매중인 다른 상품 검색 쿼리 생성
+		Query sellerProductQuery = buildSellerProductQuery(postDocument);
+
+		NativeQuery searchQuery = NativeQuery.builder()
+			.withQuery(sellerProductQuery)
+			.withSort(sort -> sort.field(f -> f
+				.field("created_at")
+				.order(SortOrder.Desc)
+			))
+			.withPageable(pageable)
+			.build();
+
+		SearchHits<ProductPostDocumentEntity> searchHits =
+			elasticsearchOperations.search(searchQuery, ProductPostDocumentEntity.class);
+
+		long totalHits = searchHits.getTotalHits();
+		int totalPages = (int)Math.ceil((double)totalHits / pageable.getPageSize());
+
+		return new PageResponse<>(
+			pageable.getPageNumber(),
+			totalPages,
+			pageable.getPageSize(),
+			pageable.getPageNumber() < totalPages - 1,
+			SearchMapper.toSearchResponseList(searchHits)
+		);
 	}
 
 	public PageResponse<List<ProductPostSearchResponse>> findPopularInCategory(
@@ -137,11 +177,11 @@ public class ProductPostRecommendationService {
 					.index("product-posts")
 					.id(baseProduct.getId())
 				))
-				// 키워드 추출 ( 어떤 단어를 기준으로 유사도를 검사할건지? )
-				.minTermFreq(1) 		 	    // 기준 문서 (like) 안에서 최소 1번만 등장해도 키워드 후보로 추출
-				.minDocFreq(1) 				// es의 전체 DB에서 1번만 등장해도 유효한 키워드로 인정
-				.maxQueryTerms(25)           // 추출된 후보 중 점수가 높은 상위 25개만 실제 검색 쿼리로 사용
-				.minimumShouldMatch("20%")   // 사용된 25개 키워드 중 20% 이상 일치하는 문서만 결과로 반환
+				// 키워드 추출 기준
+				.minTermFreq(1)                // 기준 문서 (like) 안에서 최소 1번만 등장해도 키워드 후보로 추출
+				.minDocFreq(1)                 // es의 전체 DB에서 1번만 등장해도 유효한 키워드로 인정
+				.maxQueryTerms(25)             // 추출된 후보 중 점수가 높은 상위 25개만 실제 검색 쿼리로 사용
+				.minimumShouldMatch("20%")     // 사용된 25개 키워드 중 20% 이상 일치하는 문서만 결과로 반환
 			)
 		));
 	}
@@ -203,5 +243,42 @@ public class ProductPostRecommendationService {
 		}
 
 		return shouldQueries;
+	}
+
+	/**
+	 * 판매자의 다른 상품 검색 쿼리 생성
+	 * - 같은 userId를 가진 상품 검색
+	 * - 현재 상품 제외
+	 * - 판매 가능한 상품만 필터링
+	 */
+	private Query buildSellerProductQuery(ProductPostDocumentEntity baseProduct) {
+		return Query.of(q -> q.bool(
+			BoolQuery.of(bool -> bool
+				.must(
+					// 같은 판매자의 상품
+					Query.of(must -> must.term(
+						term -> term.field("user_id").value(baseProduct.getUserId())
+					))
+				)
+				.filter(List.of(
+					// 현재 상품 제외
+					Query.of(filter -> filter.bool(
+						b -> b.mustNot(
+							Query.of(mustNot -> mustNot.term(
+								term -> term.field("_id").value(baseProduct.getId())
+							))
+						)
+					)),
+					// 삭제되지 않은 상품만
+					Query.of(filter -> filter.term(
+						term -> term.field("delete_status").value("N")
+					)),
+					// trade_status가 SELLING인 것만
+					Query.of(filter -> filter.term(
+					    term -> term.field("trade_status").value("SELLING")
+					))
+				))
+			)
+		));
 	}
 }
