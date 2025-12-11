@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/fail-page.css}" />
+    <title>결제 실패</title>
+</head>
+<body>
+<div class="failure-container">
+
+    <div class="failure-icon">✕</div>
+
+    <h1 class="failure-title">충전에 실패했습니다.</h1>
+    <p class="failure-subtitle">충전 과정에서 문제가 발생했습니다.</p>
+
+    <div class="order-summary">
+        <h3>충전 정보</h3>
+        <div class="summary-row">
+            <span class="summary-label">충전번호</span>
+            <span class="summary-value" id="orderId"></span>
+        </div>
+
+        <div class="summary-row">
+            <span class="summary-label">충전금액</span>
+            <span class="summary-value" id="amount"></span>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/" class="btn btn-primary">다시 시도</a>
+        <a href="/" class="btn btn-secondary">홈으로</a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const orderId = urlParams.get("orderId") || "";
+        const amount = parseInt(urlParams.get("amount")) || 0;
+
+        let displayOrderId = orderId;
+
+        if (orderId) {
+            // orderId 문자열을 '-' 기준으로 분할
+            const parts = orderId.split('-');
+
+            // 분할된 배열의 마지막 요소가 존재하면 (UUID의 마지막 부분)
+            if (parts.length > 0) {
+                displayOrderId = parts[parts.length - 1].slice(-12);
+            }
+        }
+
+        // 화면에 값 표시
+        document.getElementById("orderId").innerText = displayOrderId;
+        document.getElementById("amount").innerText = `₩ ${amount.toLocaleString()}`;
+    });
+</script>
+</body>
+</html>

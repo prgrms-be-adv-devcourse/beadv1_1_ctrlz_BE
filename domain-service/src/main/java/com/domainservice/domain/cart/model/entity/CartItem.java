@@ -33,7 +33,7 @@ public class CartItem extends BaseEntity {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-		this.updateTime();
+		this.update();
 	}
 
 	public void setCart(Cart cart) {

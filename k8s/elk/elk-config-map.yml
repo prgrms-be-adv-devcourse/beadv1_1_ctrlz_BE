@@ -14,4 +14,4 @@ data:
   MYSQL_PASSWORD: "1234"
   
   # Kibana 설정
-  ELASTICSEARCH_HOSTS: "http://elastic-search-service:9200"
+#  ELASTICSEARCH_HOSTS: "http://elasticsearch-svc:9200"

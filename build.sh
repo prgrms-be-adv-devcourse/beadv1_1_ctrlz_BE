@@ -10,8 +10,9 @@ SERVICES=(
   "domain-service"
   "gateway-service"
   "settlement-service"
+  "payment-service"
 )
-
+z
 # buildx builder 설정 (멀티 플랫폼 지원)
 # echo "Setting up Docker buildx for multi-platform builds..."
 # docker buildx create --name multiarch --use 2>/dev/null || docker buildx use multiarch

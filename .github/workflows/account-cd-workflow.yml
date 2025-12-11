@@ -4,10 +4,13 @@ on:
   push: # 메인에 push 될때 수행됨.
     branches:
       - main
+      - deploytest
     paths:
       - 'account-service/**'
       - 'common/**'
-      - '.github/workflows/**'
+      - 'observability-config/**'
+      - '**/*.dockerfile'
+      - '.github/workflows/account-cd-workflow.yml'
 
 jobs:
   releasing:
@@ -31,9 +34,10 @@ jobs:
     needs: releasing
     uses: ./.github/workflows/deploy-workflow.yml
     secrets: inherit
+
     with:
       pod-name: account-service-app # pod랑 같은 이름
-      deploy-name: account-service-deploy # deployment랑 같은 이름
+      deploy-name: account-deploy # deployment랑 같은 이름
       label-name: account # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 

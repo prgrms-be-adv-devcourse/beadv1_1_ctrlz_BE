@@ -7,13 +7,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.tag.model.entity.ProductPostTag;
 import com.domainservice.domain.post.tag.model.entity.Tag;
+import com.domainservice.domain.post.favorite.model.entity.FavoriteProduct;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -39,6 +40,9 @@ public class ProductPost extends BaseEntity {
 
 	@Column(name = "category_id", nullable = false)
 	private String categoryId;
+
+	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<FavoriteProduct> favoriteProducts = new ArrayList<>();
 
 	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProductPostTag> productPostTags = new ArrayList<>();
@@ -97,10 +101,6 @@ public class ProductPost extends BaseEntity {
      =============== 비즈니스 로직 ===============
     */
 
-	public void incrementViewCount() {
-		this.viewCount++;
-	}
-
 	public void update(ProductPostRequest request) {
 		this.title = request.title();
 		this.name = request.name();
@@ -115,17 +115,37 @@ public class ProductPost extends BaseEntity {
 	 */
 	public void markAsProcessing() {
 		this.tradeStatus = TradeStatus.PROCESSING;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSoldout() {
 		this.tradeStatus = TradeStatus.SOLDOUT;
-		this.updateTime();
+		this.update();
 	}
 
 	public void markAsSellingAgain() {
 		this.tradeStatus = TradeStatus.SELLING;
-		this.updateTime();
+		this.update();
+	}
+
+	public void incrementViewCount() {
+		this.viewCount++;
+	}
+
+	/*
+     =============== 게시글 좋아요 ===============
+    */
+
+	public void incrementLikedCount() {
+		this.likedCount++;
+		this.update();
+	}
+
+	public void decrementLikedCount() {
+		if (this.likedCount > 0) {
+			this.likedCount--;
+			this.update();
+		}
 	}
 
     /*
@@ -151,6 +171,12 @@ public class ProductPost extends BaseEntity {
 		if (newTags != null) {
 			addTags(newTags);
 		}
+	}
+
+	public List<String> getTagNames() {
+		return this.productPostTags.stream()
+			.map(ppt -> ppt.getTag().getName())
+			.toList();
 	}
 
     /*

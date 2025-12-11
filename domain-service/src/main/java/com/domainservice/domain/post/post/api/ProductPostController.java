@@ -22,13 +22,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class ProductPostController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<ProductPostResponse> createProductPost(
-		@RequestHeader(value = "X-REQUEST-ID", required = false, defaultValue = "anonymous") String userId,
+		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
@@ -109,11 +110,11 @@ public class ProductPostController {
 	 */
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
-	public BaseResponse<ProductPostResponse> getProductPostById(
+	public BaseResponse<ProductPostDescription> getProductPostById(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId
 	) {
-		ProductPostResponse response = productPostService.getProductPostById(userId, postId);
+		ProductPostDescription response = productPostService.getProductPostById(userId, postId);
 		return new BaseResponse<>(response, "상품 게시글이 조회되었습니다.");
 	}
 

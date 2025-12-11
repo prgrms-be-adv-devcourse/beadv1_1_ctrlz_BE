@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mysql-service
+  name: mysql-sts
   labels:
     app: mysql
 
@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: mysql
+  serviceName: mysql-svc
 
   template:
     metadata:
@@ -17,6 +18,14 @@ spec:
         app: mysql
 
     spec:
+      volumes:
+        - name: mysql-init-volume
+          configMap:
+            name: mysql-init-config
+            # ConfigMap의 init.sql 키를 볼륨의 init.sql 파일로 매핑
+            items:
+              - key: init.sql
+                path: init.sql
       containers:
         - name: mysql1
           image: mysql:latest
@@ -25,12 +34,26 @@ spec:
           envFrom:
             - configMapRef:
                 name: mysql-config-map
+          volumeMounts:
+            - name: mysql-init-volume
+              mountPath: /docker-entrypoint-initdb.d/
+              readOnly: true
+            - name: mysql-data
+              mountPath: /var/lib/mysql
 
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-service
+  name: mysql-svc
 
 spec:
   type: NodePort

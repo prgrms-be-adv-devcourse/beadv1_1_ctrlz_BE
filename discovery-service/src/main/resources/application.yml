@@ -15,6 +15,3 @@ eureka:
     fetch-registry: false
     register-with-eureka: false
 
-
-
-

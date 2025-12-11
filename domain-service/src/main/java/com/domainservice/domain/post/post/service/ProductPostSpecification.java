@@ -1,14 +1,16 @@
 package com.domainservice.domain.post.post.service;
 
-import com.common.model.persistence.BaseEntity;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.jpa.domain.Specification;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
+import com.domainservice.domain.post.post.model.entity.ProductPost;
+
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * 사용자가 입력한 필터링을 받아서 동적으로 검색 조건을 생성해주는 클래스

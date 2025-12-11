@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: discovery-service-deploy
+  name: discovery-deploy
   labels:
     app: discovery
 spec:
@@ -13,8 +13,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
+      maxUnavailable: 0 # 새 pod ready시 까지 유지
+      maxSurge: 1 # 새 pod 생성
   template:
     metadata:
       labels:
@@ -56,7 +56,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: discovery-service
+  name: discovery-svc
 spec:
   type: NodePort
   selector:

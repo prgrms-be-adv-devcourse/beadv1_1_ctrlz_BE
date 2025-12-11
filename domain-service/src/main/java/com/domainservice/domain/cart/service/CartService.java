@@ -19,7 +19,9 @@ import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -40,8 +42,9 @@ public class CartService {
 		List<CartItem> cartItemList = cartItemJpaRepository.findByCart(cart);
 
 		for (CartItem cartItem : cartItemList) {
-			ProductPostResponse productPostById = productPostService.getProductPostById(cartItem.getProductPostId());
-			CartItemResponse cartItemResponse = new CartItemResponse(productPostById.title(), productPostById.name(),
+			ProductPostResponse productPostById = productPostService.getProductPostById(
+				cartItem.getProductPostId());
+			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
 				BigDecimal.valueOf(productPostById.price()),
 				cartItem.isSelected());
 			response.add(cartItemResponse);
@@ -61,6 +64,7 @@ public class CartService {
 			throw new CustomException(CartExceptionCode.CART_ALREADY_EXISTS.getMessage());
 		}
 		cartJpaRepository.save(Cart.builder().userId(userId).build());
+		log.info("카트 생성 완료 userId = {}", userId);
 	}
 
 	/**
@@ -97,7 +101,7 @@ public class CartService {
 		cartJpaRepository.save(cart);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
+		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
 			targetItem.isSelected());
 
 	}
@@ -135,7 +139,7 @@ public class CartService {
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
-		return new CartItemResponse(productPostById.title(),
+		return new CartItemResponse(cartItem.getId(), productPostById.title(),
 			productPostById.name(),
 			BigDecimal.valueOf(productPostById.price()),
 			savedItem.isSelected());

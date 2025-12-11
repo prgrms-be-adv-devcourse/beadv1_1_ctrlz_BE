@@ -1,0 +1,81 @@
+application:
+  title: yeongeunMarket
+  version: 1.0
+
+server:
+  port: 8083
+
+spring:
+  application:
+    name: payment-service
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
+    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
+    username: admin
+    password: 1234
+  #    username: "${custom.db.username}"
+  #    password: "${custom.db.password}"
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+  data:
+    redis:
+      port: 6379
+      host: redis-server
+      password: 1234
+  #      password: "${REDIS_PASSWORD}"
+  kafka:
+    bootstrap-servers: kafka-svc:9090
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: payment-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.common.event"
+
+    listener:
+      immediate-stop: false # default 값 명시
+
+custom:
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  feign:
+    url:
+      user-service: http://account-svc:8080
+      order-service: http://domain-svc:8081
+# k8s 설정
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: payment-service
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-svc:8761/eureka/
+    enabled: true
+
