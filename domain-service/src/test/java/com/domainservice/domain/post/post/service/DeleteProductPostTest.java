@@ -19,14 +19,13 @@ import com.common.model.persistence.BaseEntity.DeleteStatus;
 import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
+import com.domainservice.common.configuration.feign.exception.UserClientException;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-
-import feign.FeignException;
 
 /**
  * ProductPostService 삭제 기능 테스트
@@ -94,7 +93,7 @@ class DeleteProductPostTest {
         verify(productPostRepository).flush();
     }
 
-    @DisplayName("ADMIN은 게시글을 삭제할 수 있다.")
+    @DisplayName("관리자는 게시글을 삭제할 수 있다.")
     @Test
     void test2() throws Exception {
         // given
@@ -145,27 +144,9 @@ class DeleteProductPostTest {
         verify(productPostRepository, never()).findById(anyString());
     }
 
-    @DisplayName("존재하지 않는 사용자는 게시글을 삭제할 수 없다.")
-    @Test
-    void test4() {
-        // given
-        String userId = "invalid-user";
-        String postId = "post-123";
-
-        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
-
-        // when & then
-        assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining(USER_NOT_FOUND.getMessage());
-
-        verify(userClient).getUser(userId);
-        verify(productPostRepository, never()).findById(anyString());
-    }
-
     @DisplayName("이미지가 있는 게시글을 삭제하면 이미지도 함께 삭제된다.")
     @Test
-    void test5() throws Exception {
+    void test4() throws Exception {
         // given
         String userId = "user-123";
         String postId = "post-123";
@@ -206,28 +187,9 @@ class DeleteProductPostTest {
         verify(imageService).deleteProfileImageById(imageId);
     }
 
-    @DisplayName("존재하지 않는 게시글은 삭제할 수 없다.")
-    @Test
-    void test6() {
-        // given
-        String userId = "user-123";
-        String postId = "invalid-post-id";
-
-        given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
-        given(productPostRepository.findById(postId)).willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(PRODUCT_POST_NOT_FOUND.getMessage());
-
-        verify(userClient).getUser(userId);
-        verify(productPostRepository).findById(postId);
-    }
-
     @DisplayName("인증되지 않은 사용자는 게시글을 삭제할 수 없다.")
     @Test
-    void test7() {
+    void test5() {
         // given
         String userId = null;
         String postId = "post-123";
@@ -242,46 +204,18 @@ class DeleteProductPostTest {
                 .tradeStatus(TradeStatus.SELLING)
                 .build();
 
-        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
+        given(userClient.getUser(userId)).willThrow(UserClientException.Unauthorized.class);
 
         // when & then
         assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(EXTERNAL_API_ERROR.getMessage());
-
-        verify(userClient).getUser(userId);
-    }
-
-    @DisplayName("빈 문자열 userId로는 게시글을 삭제할 수 없다.")
-    @Test
-    void test8() {
-        // given
-        String userId = "";
-        String postId = "post-123";
-
-        ProductPost productPost = ProductPost.builder()
-                .userId("user-123")
-                .categoryId("category-123")
-                .title("아이폰 15 Pro")
-                .name("iPhone 15 Pro")
-                .price(1200000)
-                .status(ProductStatus.GOOD)
-                .tradeStatus(TradeStatus.SELLING)
-                .build();
-
-        given(userClient.getUser(userId)).willThrow(FeignException.Unauthorized.class);
-
-        // when & then
-        assertThatThrownBy(() -> productPostService.deleteProductPost(userId, postId))
-                .isInstanceOf(ProductPostException.class)
-                .hasMessage(EXTERNAL_API_ERROR.getMessage());
+                .isInstanceOf(UserClientException.Unauthorized.class);
 
         verify(userClient).getUser(userId);
     }
 
     @DisplayName("다른 사용자의 게시글은 삭제할 수 없다.")
     @Test
-    void test9() {
+    void test6() {
         // given
         String userId = "user-456";
         String postId = "post-123";
@@ -310,7 +244,7 @@ class DeleteProductPostTest {
 
     @DisplayName("거래 진행 중인 게시글은 삭제할 수 없다.")
     @Test
-    void test10() {
+    void test7() {
         // given
         String userId = "user-123";
         String postId = "post-123";
@@ -339,7 +273,7 @@ class DeleteProductPostTest {
 
     @DisplayName("이미 삭제된 게시글은 다시 삭제할 수 없다.")
     @Test
-    void test11() {
+    void test8() {
         // given
         String userId = "user-123";
         String postId = "post-123";

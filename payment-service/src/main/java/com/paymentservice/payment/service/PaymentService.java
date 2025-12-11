@@ -65,6 +65,17 @@ public class PaymentService {
     public PaymentResponse depositPayment(PaymentConfirmRequest request, String userId) {
         OrderResponse order = orderFeignClient.getOrderInfo(request.orderId(), userId);
 
+        // 멱등성 체크: 이미 처리된 결제인지 확인
+        if (paymentRepository.existsByOrderId(
+            request.orderId()
+        )) {
+            log.info("이미 처리된 결제입니다. DB 정보를 반환합니다. orderId={}", request.orderId());
+            PaymentEntity existingPayment = paymentRepository.findByOrderId(request.orderId())
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보 불일치"));
+
+            return PaymentResponse.from(existingPayment);
+        }
+
         // 실제 결제 총액 검증
         if (order.totalAmount().compareTo(request.usedDepositAmount()) != 0) {
             throw new InvalidOrderAmountException();
@@ -90,7 +101,6 @@ public class PaymentService {
         Deposit deposit, TossApprovalResponse approve) {
 
         try {
-
             // DB 저장 및 예치금 차감
             BigDecimal usedDepositAmount = approve.depositUsedAmount();     // deposit 사용 금액
             PayType payType;
@@ -234,7 +244,8 @@ public class PaymentService {
     }
 
     // 환불 공통 메서드
-    private PaymentRefundEntity createRefundEntity(PaymentEntity payment, BigDecimal refundAmount, OffsetDateTime canceledAt) {
+    private PaymentRefundEntity createRefundEntity(PaymentEntity payment, BigDecimal refundAmount,
+        OffsetDateTime canceledAt) {
         PaymentRefundEntity refund = PaymentRefundEntity.of(
             payment.getPaymentKey(),
             payment.getOrderId(),
@@ -250,5 +261,11 @@ public class PaymentService {
 
     private void afterRefundProcess(PaymentEntity payment) {
         orderEventProducer.publishOrderRefunded(payment.getOrderId(), payment.getId());
+    }
+
+    public PaymentResponse findByOrderId(String orderId) {
+        PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다: " + orderId));
+        return PaymentResponse.from(paymentEntity);
     }
 }

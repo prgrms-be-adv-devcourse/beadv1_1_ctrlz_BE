@@ -8,7 +8,7 @@ public record SearchWordResponse(
 ) {
 	public static SearchWordResponse from(SearchWordDocumentEntity documentEntity) {
 		return new SearchWordResponse(
-			documentEntity.getKoreanWord(),
+			documentEntity.getOriginValue(),
 			documentEntity.getQwertyInput()
 		);
 	}

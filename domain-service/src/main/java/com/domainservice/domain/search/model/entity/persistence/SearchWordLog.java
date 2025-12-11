@@ -42,6 +42,6 @@ public class SearchWordLog extends BaseEntity {
 
 	@Override
 	protected String getEntitySuffix() {
-		return "search--word-log";
+		return "search-word-log";
 	}
 }

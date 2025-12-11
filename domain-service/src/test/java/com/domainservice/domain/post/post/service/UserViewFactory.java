@@ -1,12 +1,11 @@
 package com.domainservice.domain.post.post.service;
 
-import com.domainservice.common.model.user.UserResponse;
-
 import java.util.List;
 
+import com.domainservice.common.model.user.UserResponse;
+
 /**
- * 테스트용 UserResponse 팩토리 클래스
- * 반복적인 UserResponse 생성을 간편하게 해줍니다.
+ 테스트용 UserResponse 팩토리 클래스
  */
 public class UserViewFactory {
 

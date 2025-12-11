@@ -1,5 +1,6 @@
 package com.domainservice.domain.search.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,15 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.domainservice.domain.search.model.vo.SearchWord;
-import com.domainservice.domain.search.repository.redis.PopularSearchWordRedisRepository;
+import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
 import com.domainservice.domain.search.service.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
 import com.domainservice.domain.search.repository.SearchWordRepository;
-import com.domainservice.domain.search.repository.redis.SearchLogRedisRepository;
 import com.domainservice.domain.search.service.analyzer.PrefixAnalyzer;
-import com.domainservice.domain.search.service.dto.vo.KeywordLog;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SearchWordElasticService {
 
-	private final SearchWordRepository searchWordRepository;
-	private final SearchLogRedisRepository searchLogRedisRepository;
-	private final PopularSearchWordRedisRepository popularRedisRepository;
 	private final PrefixAnalyzer prefixAnalyzer;
+
+	private final SearchWordRedisService searchWordRedisService;
+
+	private final SearchWordRepository searchWordRepository;
 
 	/**
 	 * 검색어를 받음
@@ -55,28 +54,36 @@ public class SearchWordElasticService {
 
 		//검색어가 없는 경우
 		String originValue = prefix.value();
-		if (!userId.isEmpty() && !StringUtils.hasText(originValue)) {
-			// 최근에 내가 검색한 목록들 조회. -> Redis
-			return responseList;
+		if (!StringUtils.hasText(originValue)) {
+			// Redis에서 내가 검색한 키워드 리스트 조회.
+			return !userId.isEmpty() ?
+				getRecentSearchKeywords(userId) :
+				searchWordRedisService.getTrendWordList();
 		}
 
 		String convertedValue = prefix.getQwertyInput();
 
 		List<SearchWordDocumentEntity> findWordList;
-		if (!prefix.isEnglish()) {
-			//입력값이 한글인 경우 (+ 유사도가 높은 한글 단어로 조회)
-			findWordList = findWordListForKorean(prefix);
-
-		} else if (!prefixAnalyzer.existsInDictionary(convertedValue)) {
+		if (!prefixAnalyzer.existsInDictionary(convertedValue)) {
 			//사전에 없는 영어입력값이면 -> convertedValue와 일치하는 검색후 -> 유사 검색
 			findWordList = findWordListForUnknownEnglish(prefix);
 		} else {
-			findWordList = findWordListForKnownEnglish(prefix);
+			//사전에 있거나 한글이면.
+			findWordList = findWordListForOrigin(prefix);
 		}
+
+		log.info("findWordList = {}", findWordList);
 		//koreanWord값이 같으면 중복처리
-		findWordList.stream().distinct().map(SearchWordResponse::from).forEach(responseList::add);
+		findWordList.stream()
+			.distinct()
+			.map(SearchWordResponse::from)
+			.forEach(responseList::add);
 
 		return responseList;
+	}
+
+	private List<SearchWordResponse> getRecentSearchKeywords(String userId) {
+		return searchWordRedisService.getRecentSearchWordList(userId);
 	}
 
 	/**
@@ -86,18 +93,11 @@ public class SearchWordElasticService {
 	 */
 	private List<SearchWordDocumentEntity> findWordListForUnknownEnglish(Prefix prefix) {
 		SearchWordDocumentEntity findEntity = searchWordRepository.findByQwertyInput(prefix.value())
-			.orElseGet(() -> SearchWordDocumentEntity.createDocumentEntity(prefix.getKoreanWord(), prefix.value()));
+			.orElseGet(() -> SearchWordDocumentEntity.createDocumentEntity(
+				SearchWordLog.create(prefix.value(), LocalDateTime.now())
+			));
 
-		return findWordListForKorean(new Prefix(findEntity.getKoreanWord()));
-	}
-
-	/**
-	 * 사전에 있는 영어일 경우에 조회
-	 * @param prefix
-	 * @return
-	 */
-	private List<SearchWordDocumentEntity> findWordListForKnownEnglish(Prefix prefix) {
-		return searchWordRepository.findAllByQwertyInput(prefix.getQwertyInput());
+		return findWordListForOrigin(new Prefix(findEntity.getOriginValue()));
 	}
 
 	/**
@@ -105,45 +105,14 @@ public class SearchWordElasticService {
 	 * @param prefix 사용자가 한국어로 입력한 값
 	 * @return
 	 */
-	private List<SearchWordDocumentEntity> findWordListForKorean(Prefix prefix) {
-		String convertedValue = prefix.getQwertyInput();
+	private List<SearchWordDocumentEntity> findWordListForOrigin(Prefix prefix) {
 		String originValue = prefix.value();
 
 		List<SearchWordDocumentEntity> findSearchWord = new ArrayList<>(
-			searchWordRepository.findAllByKoreanWord(originValue)
+			searchWordRepository.findAllByOriginValue(originValue)
 		);
 
-		if (findSearchWord.isEmpty()) {
-			SearchWordDocumentEntity newDocument = SearchWordDocumentEntity.createDocumentEntity(originValue,
-				convertedValue);
-			findSearchWord.add(newDocument);
-		}
 		log.info("findSearchWord = {}", findSearchWord);
 		return findSearchWord;
 	}
-
-	@Transactional(readOnly = true)
-	public List<SearchWordResponse> getTrendWordList() {
-		return popularRedisRepository.findTrendWordList();
-	}
-
-	@Transactional(readOnly = true)
-	public List<SearchWordResponse> getDailyPopularWord() {
-		return popularRedisRepository.findDailyPopularWord();
-	}
-
-	/**
-	 * 검색창에 입력한 단어 or 자동완성으로 나온 단어 선택 후 검색 결과 화면에서 보여지는 단어 저장하는 메서드.
-	 * @param word 검색창에 입력한 단어
-	 * @param userId user PK
-	 */
-	public void saveSearchWord(String word, String userId) {
-		SearchWord searchWord = new SearchWord(word);
-
-		if(!userId.isEmpty()) //userId는 null 값일 수 있음.
-			searchLogRedisRepository.save(searchWord, userId);
-
-		popularRedisRepository.save(searchWord);
-	}
-
 }
