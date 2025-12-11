@@ -13,7 +13,7 @@ import lombok.Builder;
 @Builder
 public record ProductPostDescription(
 	String id,
-	String nickName,
+	String nickname,
 	String name,
 	String title,
 	String categoryName,
