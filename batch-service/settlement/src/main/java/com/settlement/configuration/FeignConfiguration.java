@@ -50,6 +50,6 @@ public class FeignConfiguration implements WebMvcConfigurer {
      */
     @Bean
     public Options feignRequestOptions() {
-        return new Options(5, TimeUnit.SECONDS, 10, TimeUnit.SECONDS, true);
+        return new Options(5, TimeUnit.SECONDS, 5, TimeUnit.SECONDS, true);
     }
 }

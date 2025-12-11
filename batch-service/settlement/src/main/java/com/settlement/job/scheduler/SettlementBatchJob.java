@@ -2,14 +2,15 @@ package com.settlement.job.scheduler;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 
+import org.quartz.JobExecutionContext;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -35,14 +36,13 @@ public class SettlementBatchJob extends QuartzJobBean {
             log.info("정산 배치 스케줄링 시작");
 
             // 전월 1일 ~ 마지막날 계산
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.parse(LocalDateTime.now().toString(), DateTimeFormatter.ISO_DATE_TIME);
             YearMonth lastMonth = YearMonth.from(now.minusMonths(1));
             LocalDateTime startDate = lastMonth.atDay(1).atStartOfDay();
             LocalDateTime endDate = lastMonth.atEndOfMonth().atTime(23, 59, 59);
 
             log.info("정산 기간: {} ~ {}", startDate, endDate);
 
-            // JobParameters 생성 (timestamp를 추가하여 매번 새로운 JobInstance 생성)
             JobParameters jobParameters = new JobParametersBuilder()
                     .addString("startDate", startDate.toString())
                     .addString("endDate", endDate.toString())

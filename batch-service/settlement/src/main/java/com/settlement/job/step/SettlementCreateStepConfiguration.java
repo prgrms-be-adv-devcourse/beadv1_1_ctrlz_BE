@@ -3,6 +3,8 @@ package com.settlement.job.step;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -13,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.settlement.job.dto.SettlementVO;
 import com.settlement.job.dto.SettlementSourceDto;
+import com.settlement.job.dto.SettlementVO;
 import com.settlement.job.processor.SettlementCreateProcessor;
 import com.settlement.job.reader.PaymentSettlementItemReader;
 
@@ -23,12 +25,10 @@ import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sql.DataSource;
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class SettlementCreateStepConfig {
+public class SettlementCreateStepConfiguration {
 
     private static final int RETRY_LIMIT = 3;
     private static final int SKIP_LIMIT = 10;
@@ -40,7 +40,6 @@ public class SettlementCreateStepConfig {
     private final PaymentSettlementItemReader paymentSettlementItemReader;
     private final SettlementCreateProcessor settlementCreateProcessor;
 
-    // Step 1: 주문 서비스에서 데이터 가져와서 정산 데이터 생성 (PENDING, Fee/Amt = 0)
     @Bean
     public Step settlementCreateStep() {
         log.info("SettlementCreateStep 설정: 재시도 {}회, 스킵 {}회", RETRY_LIMIT, SKIP_LIMIT);

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class SettlementJobConfig {
+public class SettlementJobConfiguration {
 
     private final JobRepository jobRepository;
 

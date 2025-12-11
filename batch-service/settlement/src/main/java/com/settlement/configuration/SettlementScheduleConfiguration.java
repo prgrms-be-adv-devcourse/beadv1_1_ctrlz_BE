@@ -16,11 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Quartz 스케줄러 설정
- * 정산 배치를 매달 15일 새벽 3시(KST)에 자동 실행합니다.
+ * 정산 배치를 매달 15일 새벽 3시에 자동 실행합니다.
  */
 @Slf4j
 @Configuration
-public class SettlementScheduleConfig {
+public class SettlementScheduleConfiguration {
 
     /**
      * 정산 배치 JobDetail 설정
@@ -41,7 +41,7 @@ public class SettlementScheduleConfig {
      */
     @Bean
     public Trigger settlementTrigger(JobDetail settlementJobDetail) {
-        log.info("정산 배치 Trigger 생성 - Cron: 0 0 3 15 * ? (매달 15일 새벽 3시, Asia/Seoul)");
+        log.info("정산 배치 Trigger 생성 - Cron: 0 0 3 15 * ? (매달 15일 새벽 3시)");
 
         CronScheduleBuilder scheduleBuilder = CronScheduleBuilder
                 .cronSchedule("0 0 3 15 * ?")

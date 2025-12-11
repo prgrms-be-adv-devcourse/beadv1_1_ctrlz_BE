@@ -1,6 +1,5 @@
 package com.settlement.service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,11 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.common.event.SettlementCompletedEvent;
-import com.common.event.SettlementFailedEvent;
 import com.common.exception.CustomException;
 import com.settlement.domain.entity.Settlement;
-import com.settlement.domain.entity.SettlementStatus;
 import com.settlement.dto.SettlementResponse;
 import com.settlement.repository.SettlementRepository;
 
@@ -22,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class SettlementService {
 
@@ -49,6 +44,7 @@ public class SettlementService {
 				.collect(Collectors.toList());
 	}
 
+	@Transactional
 	public void deleteSettlement(String id) {
 		Settlement settlement = settlementRepository.findById(id)
 				.orElseThrow(() -> new CustomException("정산 내역을 찾을 수 없습니다. id=" + id));

@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Settlement extends BaseEntity {
+
 	@Column(name = "order_item_id", nullable = false)
 	private String orderItemId;
 
@@ -48,35 +49,6 @@ public class Settlement extends BaseEntity {
 	@Column(name = "settled_at")
 	private LocalDateTime settledAt;
 
-	// 정산 상태
-	public void markCompleted() {
-		this.settlementStatus = SettlementStatus.COMPLETED;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public void markFailed() {
-		this.settlementStatus = SettlementStatus.FAILED;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public void markReady() {
-		this.settlementStatus = SettlementStatus.READY;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public void markPendingAgain() {
-		this.settlementStatus = SettlementStatus.PENDING;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public String getSettlementStatusString() {
-		return this.settlementStatus.name();
-	}
-
-	public void complete() {
-		this.settlementStatus = SettlementStatus.COMPLETED;
-		this.settledAt = LocalDateTime.now();
-	}
 
 	public void calculateFee(BigDecimal feeRate) {
 		this.fee = this.amount.multiply(feeRate).setScale(0, java.math.RoundingMode.HALF_UP);
@@ -93,10 +65,4 @@ public class Settlement extends BaseEntity {
 				.settlementStatus(SettlementStatus.PENDING)
 				.build();
 	}
-
-	@Override
-	protected String getEntitySuffix() {
-		return "Settlement";
-	}
-
 }

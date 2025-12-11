@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class SettlementFeeStepConfig {
+public class SettlementFeeStepConfiguration {
 
     private static final int RETRY_LIMIT = 3;
     private static final int SKIP_LIMIT = 10;
@@ -41,7 +41,6 @@ public class SettlementFeeStepConfig {
 
     private final SettlementFeeProcessor settlementFeeProcessor;
 
-    // Step 2: 생성된 정산 데이터(PENDING) 조회하여 수수료 계산 및 업데이트 (COMPLETED)
     @Bean
     public Step settlementFeeStep() {
         log.info("SettlementFeeStep 설정: 재시도 {}회, 스킵 {}회", RETRY_LIMIT, SKIP_LIMIT);

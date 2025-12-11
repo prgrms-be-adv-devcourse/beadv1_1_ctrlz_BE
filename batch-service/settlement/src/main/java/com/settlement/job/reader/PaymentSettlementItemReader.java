@@ -1,6 +1,7 @@
 package com.settlement.job.reader;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,66 +18,66 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 @StepScope
+@Component
 @RequiredArgsConstructor
 public class PaymentSettlementItemReader implements ItemReader<SettlementSourceDto> {
 
-    private final PaymentFeignClient paymentFeignClient;
+	private final PaymentFeignClient paymentFeignClient;
 
-    @Value("#{jobParameters['startDate']}")
-    private String startDateStr;
+	@Value("#{jobParameters['startDate']}")
+	private String startDateStr;
 
-    @Value("#{jobParameters['endDate']}")
-    private String endDateStr;
+	@Value("#{jobParameters['endDate']}")
+	private String endDateStr;
 
-    private List<SettlementSourceDto> settlementItems;
-    private int currentIndex = 0;
+	private List<SettlementSourceDto> settlementItems;
+	private int currentIndex = 0;
 
-    @Override
-    public SettlementSourceDto read() {
-        if (settlementItems == null) {
-            initializePayments();
-        }
+	@Override
+	public SettlementSourceDto read() {
+		if (settlementItems == null) {
+			initializePayments();
+		}
 
-        if (currentIndex < settlementItems.size()) {
-            return settlementItems.get(currentIndex++);
-        }
+		if (currentIndex < settlementItems.size()) {
+			return settlementItems.get(currentIndex++);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private void initializePayments() {
-        try {
-            LocalDateTime startDate = LocalDateTime.parse(startDateStr);
-            LocalDateTime endDate = LocalDateTime.parse(endDateStr);
+	private void initializePayments() {
+		try {
+			LocalDateTime startDate = LocalDateTime.parse(startDateStr, DateTimeFormatter.ISO_DATE_TIME);
+			LocalDateTime endDate = LocalDateTime.parse(endDateStr, DateTimeFormatter.ISO_DATE_TIME);
 
-            log.info("Fetching payments from {} to {}", startDate, endDate);
+			log.info("정산 날짜 from {} to {}", startDate, endDate);
 
-            List<PaymentResponse> payments = fetchPayments(startDate, endDate);
-            this.settlementItems = convertToSettlementItems(payments);
+			List<PaymentResponse> payments = fetchPayments(startDate, endDate);
+			this.settlementItems = convertToSettlementItems(payments);
 
-            log.info("Successfully fetched {} payments", settlementItems.size());
-        } catch (Exception e) {
-            log.error("Failed to initialize payments", e);
-            this.settlementItems = Collections.emptyList();
-        }
-    }
+			log.info("payment 조회 완료 {} payments", settlementItems.size());
+		} catch (Exception e) {
+			log.error("payment 조회에 실패했습니다.", e);
+			this.settlementItems = Collections.emptyList();
+		}
+	}
 
-    private List<PaymentResponse> fetchPayments(LocalDateTime startDate, LocalDateTime endDate) {
-        List<PaymentResponse> payments = paymentFeignClient
-                .getPaymentsForSettlement(startDate, endDate)
-                .data();
+	private List<PaymentResponse> fetchPayments(LocalDateTime startDate, LocalDateTime endDate) {
+		List<PaymentResponse> payments = paymentFeignClient
+			.getPaymentsForSettlement(startDate, endDate)
+			.data();
 
-        return payments != null ? payments : Collections.emptyList();
-    }
+		return payments != null ? payments : Collections.emptyList();
+	}
 
-    private List<SettlementSourceDto> convertToSettlementItems(List<PaymentResponse> payments) {
-        return payments.stream()
-                .map(payment -> SettlementSourceDto.builder()
-                        .userId(payment.userId())
-                        .payment(payment)
-                        .build())
-                .toList();
-    }
+	private List<SettlementSourceDto> convertToSettlementItems(List<PaymentResponse> payments) {
+		return payments.stream()
+			.map(payment -> SettlementSourceDto.builder()
+				.userId(payment.userId())
+				.payment(payment)
+				.build())
+			.toList();
+	}
 }
