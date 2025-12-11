@@ -31,10 +31,10 @@ public class Settlement extends BaseEntity {
 	@Column(name = "amount", nullable = false)
 	private BigDecimal amount; // 실제 정산 금액 (수수료 제외 전)
 
-	@Column(name = "fee", nullable = false)
+	@Column(name = "fee", nullable = true)
 	private BigDecimal fee; // 정산 수수료
 
-	@Column(name = "net_amount", nullable = false)
+	@Column(name = "net_amount", nullable = true)
 	private BigDecimal netAmount; // 실제 예치금에 들어갈 금액 = amount - fee
 
 	@Enumerated(EnumType.STRING)
@@ -65,16 +65,29 @@ public class Settlement extends BaseEntity {
 		this.settledAt = LocalDateTime.now();
 	}
 
-	public static Settlement create(String orderItemId, String userId, BigDecimal amount,
-		BigDecimal fee, BigDecimal netAmount) {
+	public String getSettlementStatusString() {
+		return this.settlementStatus.name();
+	}
+
+	public void complete() {
+		this.settlementStatus = SettlementStatus.COMPLETED;
+		this.settledAt = LocalDateTime.now();
+	}
+
+	public void calculateFee(BigDecimal feeRate) {
+		this.fee = this.amount.multiply(feeRate).setScale(0, java.math.RoundingMode.HALF_UP);
+		this.netAmount = this.amount.subtract(this.fee);
+	}
+
+	public static Settlement create(String orderItemId, String userId, BigDecimal amount) {
 		return Settlement.builder()
-			.orderItemId(orderItemId)
-			.userId(userId)
-			.amount(amount)
-			.fee(fee)
-			.netAmount(netAmount)
-			.settlementStatus(SettlementStatus.PENDING)
-			.build();
+				.orderItemId(orderItemId)
+				.userId(userId)
+				.amount(amount)
+				.fee(BigDecimal.ZERO)
+				.netAmount(BigDecimal.ZERO)
+				.settlementStatus(SettlementStatus.PENDING)
+				.build();
 	}
 
 	@Override

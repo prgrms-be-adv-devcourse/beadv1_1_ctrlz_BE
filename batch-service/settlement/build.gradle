@@ -1,0 +1,35 @@
+
+description = 'settlement'
+
+dependencies {
+    implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
+    implementation project(':common')
+
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // h2
+    runtimeOnly 'com.h2database:h2'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
+
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
