@@ -26,7 +26,7 @@ COPY domain-service/src ./domain-service/src
 #빌드
 WORKDIR /app/domain-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
 
 #jar 생성
 # 이미지 압축 라이브러리 호환성을 위해
