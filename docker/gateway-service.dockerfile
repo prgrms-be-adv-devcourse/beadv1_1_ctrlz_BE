@@ -5,7 +5,6 @@ WORKDIR /app
 
 COPY gateway-service/build.gradle gateway-service/settings.gradle gateway-service/gradlew gateway-service/gradlew.bat ./gateway-service/
 COPY gateway-service/gradle ./gateway-service/gradle
-COPY gateway-service/gradlew gateway-service/gradlew.bat ./gateway-service/
 
 COPY observability-config ./observability-config
 COPY gateway-service/src ./gateway-service/src

@@ -4,11 +4,11 @@ FROM gradle:jdk21 AS build
 WORKDIR /app
 
 COPY ai-service/build.gradle  ai-service/settings.gradle  ai-service/gradlew ai-service/gradlew.bat ./ai-service/
-COPY ai-service/gradle ./ai-service//gradle
-COPY ai-service/build.gradle ./ai-service/
+COPY ai-service/gradle ./ai-service/gradle
+
 
 COPY observability-config ./observability-config
-COPY ai-service ./ai-service
+COPY ai-service/src ./ai-service/src
 
 WORKDIR /app/ai-service
 # Build project

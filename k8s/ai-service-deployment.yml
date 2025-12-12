@@ -26,26 +26,12 @@ spec:
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: redis-password
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: openai-api-key
+            - name: LOG_PATH
+              value: "/app/logs"
+
+          envFrom:
+            - secretRef:
+                name: spring-prod-secret
           ports:
             - containerPort: 8084
           readinessProbe:
@@ -64,6 +50,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/ai-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1

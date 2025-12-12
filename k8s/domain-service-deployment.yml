@@ -26,30 +26,20 @@ spec:
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: redis-password
+            - name: LOG_PATH
+              value: "/app/logs"
+          envFrom:
+            - secretRef:
+                name: spring-prod-secret
           ports:
             - containerPort: 8081
-#          resources:
-#            requests:
-#              memory: "256Mi"
-#              cpu: "250m"
-#            limits:
-#              memory: "512Mi"
-#              cpu: "500m"
+          #          resources:
+          #            requests:
+          #              memory: "256Mi"
+          #              cpu: "250m"
+          #            limits:
+          #              memory: "512Mi"
+          #              cpu: "500m"
           #  Pod가 트래픽을 받을 준비가 되었는지 확인
           readinessProbe:
             httpGet:
@@ -68,6 +58,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/domain-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1
@@ -76,11 +74,11 @@ kind: Service
 metadata:
   name: domain-svc
 spec:
-#  type: NodePort
+  #  type: NodePort
   selector:
     app: domain # 이 라벨을 가진 Pod들에게 트래픽 분산
 
-  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+  sessionAffinity: None # 기본값: 매 요청마다 무작위 Pod 선택
   # 로드밸런싱 설정
   #    sessionAffinity: ClientIP        # 같은 클라이언트 IP는 같은 Pod로 (세션 유지)
   #  sessionAffinityConfig:

@@ -26,16 +26,11 @@ spec:
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-password
+            - name: LOG_PATH
+              value: "/app/logs"
+          envFrom:
+            - secretRef:
+                name: spring-prod-secret
           ports:
             - containerPort: 8085
           readinessProbe:
@@ -54,6 +49,20 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+            - name: domain-logs
+              mountPath: /domain-logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/batch-service
+            type: DirectoryOrCreate
+        - name: domain-logs
+          hostPath:
+            path: /var/log/spring-apps/domain-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1

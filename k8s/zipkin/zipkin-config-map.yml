@@ -9,8 +9,8 @@ data:
   STORAGE_TYPE: "mysql"
   MYSQL_HOST: "mysql-svc"
   MYSQL_TCP_PORT: "3306"
-  MYSQL_USER: "admin"
-  MYSQL_PASS: "1234"
+  MYSQL_USER: "app"
+  MYSQL_PASS: "app123"
   MYSQL_DB: "zipkin"
 
 

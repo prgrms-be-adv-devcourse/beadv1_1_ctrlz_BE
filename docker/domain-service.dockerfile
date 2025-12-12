@@ -5,7 +5,6 @@ WORKDIR /app
 
 COPY domain-service/build.gradle domain-service/settings.gradle domain-service/gradlew domain-service/gradlew.bat ./domain-service/
 COPY domain-service/gradle ./domain-service/gradle
-COPY domain-service/gradlew domain-service/gradlew.bat ./domain-service/
 COPY common/build.gradle ./common/
 
 COPY common ./common

@@ -9,9 +9,9 @@ data:
   ES_CLUSTER_NAME: "cluster-exp"
 
   # Logstash 설정
-  MYSQL_DATABASE: "test_db"
-  MYSQL_USER: "admin"
-  MYSQL_PASSWORD: "1234"
+  MYSQL_DATABASE: "app_db"
+  MYSQL_USER: "app"
+  MYSQL_PASSWORD: "app123"
   
   # Kibana 설정
 #  ELASTICSEARCH_HOSTS: "http://elasticsearch-svc:9200"

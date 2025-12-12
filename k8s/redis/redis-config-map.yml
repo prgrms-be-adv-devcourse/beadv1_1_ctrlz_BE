@@ -6,7 +6,7 @@ metadata:
   name: redis-config-map
 #임시
 data:
-  redis-password: "1234"
+  redis-password: "app123"
 
 
 
