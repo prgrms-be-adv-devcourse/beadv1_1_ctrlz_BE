@@ -1,7 +1,11 @@
 package com.paymentservice.payment.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -28,6 +32,7 @@ import com.paymentservice.payment.model.dto.TossApprovalResponse;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.entity.PaymentRefundEntity;
 import com.paymentservice.payment.model.enums.PayType;
+import com.paymentservice.payment.model.enums.PaymentStatus;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -286,5 +291,25 @@ public class PaymentService {
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다: " + orderId));
         return PaymentResponse.from(paymentEntity);
+    }
+
+    // 정산용 결제 내역 조회 (Batch 호출)
+    @Transactional(readOnly = true)
+    public java.util.List<PaymentResponse> getPaymentsForSettlement(
+        LocalDateTime startDate,
+        LocalDateTime endDate) {
+        // LocalDateTime -> OffsetDateTime
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        ZoneOffset zoneOffset = zoneId.getRules().getOffset(LocalDateTime.now());
+
+        OffsetDateTime start = startDate.atOffset(zoneOffset);
+        OffsetDateTime end = endDate.atOffset(zoneOffset);
+
+        List<PaymentEntity> payments = paymentRepository.findByApprovedAtBetweenAndStatus(
+            start, end, PaymentStatus.SUCCESS);
+
+        return payments.stream()
+            .map(PaymentResponse::from)
+            .collect(java.util.stream.Collectors.toList());
     }
 }
