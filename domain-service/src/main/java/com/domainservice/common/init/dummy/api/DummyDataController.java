@@ -1,5 +1,6 @@
 package com.domainservice.common.init.dummy.api;
 
+import com.domainservice.common.init.dummy.service.DummyDataGenerator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DummyDataController {
 
 	private final DummyDataService generator;
+	private final DummyDataGenerator esGenerator;
 
 	@PostMapping("/generate")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -40,6 +42,26 @@ public class DummyDataController {
 			result,
 			"%d개의 상품 데이터를 %d초 만에 생성했습니다."
 				.formatted(result.productCount(), result.durationSeconds()));
+	}
+
+	@PostMapping("/generate/es")
+	@ResponseStatus(HttpStatus.CREATED)
+	public BaseResponse<DummyResultResponse> generateDummyDataEs(
+			@RequestParam(defaultValue = "100000") int count) {
+
+		log.info(" es 더미 데이터 생성 요청: {}개", count);
+		long startTime = System.currentTimeMillis();
+
+		esGenerator.syncProductsToElasticsearch(1000);
+
+		long duration = System.currentTimeMillis() - startTime;
+
+		DummyResultResponse result = DummyResultResponse.success(count, duration);
+
+		return new BaseResponse<>(
+				result,
+				"ES %d개의 상품 데이터를 %d초 만에 생성했습니다."
+						.formatted(result.productCount(), result.durationSeconds()));
 	}
 
 }
