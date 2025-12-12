@@ -12,10 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.exception.CustomException;
 import com.common.exception.vo.OrderExceptionCode;
 import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
+import com.paymentservice.common.configuration.feign.dto.OrderStatusUpdateRequest;
 import com.paymentservice.common.model.order.OrderResponse;
+import com.paymentservice.common.model.order.OrderStatus;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.event.producer.OrderEventProducer;
 import com.paymentservice.payment.exception.InvalidOrderAmountException;
 import com.paymentservice.payment.exception.PaymentFailedException;
 import com.paymentservice.payment.exception.PaymentNotFoundException;
@@ -39,7 +40,6 @@ public class PaymentService {
     private final PaymentTxService paymentTxService;
     private final OrderFeignClient orderFeignClient;
     private final DepositService depositService;
-    private final OrderEventProducer orderEventProducer;
     private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
 
     // 결제 정보
@@ -128,7 +128,13 @@ public class PaymentService {
             );
             PaymentEntity saved = paymentRepository.save(paymentEntity);
 
-            orderEventProducer.publishOrderCompleted(approve.orderId(), paymentEntity.getId());
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                request.orderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.PAYMENT_COMPLETED, saved
+                ),
+                userId);
 
             log.info("[토스 결제 성공] orderId={}, userId={}, paymentKey={}, request={}, approve={}",
                 request.orderId(), userId, request.paymentKey(), request, approve);
@@ -157,8 +163,13 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
-
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
             RefundResponse.from(refundEntity);
 
             log.info("[토스 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}",
@@ -191,7 +202,13 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
 
             RefundResponse response = RefundResponse.from(refundEntity);
 
@@ -227,8 +244,14 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
 
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
             RefundResponse response = RefundResponse.from(refundEntity);
 
             log.info("[혼합 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}, response={}",
@@ -257,10 +280,6 @@ public class PaymentService {
         );
         payment.linkRefund(refund);
         return refund;
-    }
-
-    private void afterRefundProcess(PaymentEntity payment) {
-        orderEventProducer.publishOrderRefunded(payment.getOrderId(), payment.getId());
     }
 
     public PaymentResponse findByOrderId(String orderId) {

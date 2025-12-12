@@ -43,7 +43,7 @@ public class PaymentTossClient {
     @Retryable(
         value = {FeignException.class, RuntimeException.class},
         maxAttempts = 3,
-        backoff = @Backoff(delay = 1000) // 3초 쉬고 다시 재시도
+        backoff = @Backoff(delay = 1000) // 1초 쉬고 다시 재시도
     )
     public TossApprovalResponse approve(PaymentConfirmRequest request) {
 
@@ -117,7 +117,7 @@ public class PaymentTossClient {
     @Retryable(
         value = {FeignException.class, RuntimeException.class},
         maxAttempts = 3,
-        backoff = @Backoff(delay = 3000)
+        backoff = @Backoff(delay = 1000)
     )
     public RefundResponse refund(PaymentEntity payment) {
 

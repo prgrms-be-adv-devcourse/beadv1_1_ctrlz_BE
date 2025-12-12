@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.order.model.dto.CreateOrderRequest;
 import com.domainservice.domain.order.model.dto.OrderResponse;
+import com.domainservice.domain.order.model.dto.OrderStatusUpdateRequest;
 import com.domainservice.domain.order.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -71,11 +73,11 @@ public class OrderController {
 		);
 	}
 
-	//  주문 상세 조회
-	@GetMapping("/{orderId}")
+
+	@GetMapping("/{orderId}/{userId}")
 	public OrderResponse getOrderInfo(
 		@PathVariable("orderId") String orderId,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
+		@PathVariable("userId") String userId
 	){
 		return orderService.getOrderById(orderId, userId);
 	}
@@ -89,5 +91,22 @@ public class OrderController {
 		PageResponse<List<OrderResponse>> orderListByUserId = orderService.getOrderListByUserId(userId, pageable);
 
 		return orderListByUserId;
+	}
+
+
+	// 주문 상태 변경
+	@PatchMapping("/{orderId}/status/{userId}")
+	public ResponseEntity<Void> updateOrderStatus(
+		@PathVariable String orderId,
+		@RequestBody OrderStatusUpdateRequest request,
+		@PathVariable String userId
+	) {
+		orderService.updateStatus(
+			orderId,
+			request.orderStatus(),
+			request.paymentId()
+		);
+
+		return ResponseEntity.ok().build();
 	}
 }

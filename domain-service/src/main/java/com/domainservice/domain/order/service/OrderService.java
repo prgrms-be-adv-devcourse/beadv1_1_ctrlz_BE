@@ -309,7 +309,7 @@ public class OrderService {
         );
     }
 
-    // 주문 상태 변경 (kafka event)
+    // 주문 상태 변경
     public void updateStatus(String orderId, OrderStatus orderStatus, String paymentId) {
         Order order = orderJpaRepository.findById(orderId)
             .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
