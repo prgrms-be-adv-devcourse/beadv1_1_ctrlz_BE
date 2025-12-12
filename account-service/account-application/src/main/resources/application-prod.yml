@@ -88,7 +88,8 @@ custom:
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-
+  feign:
+    domain-service: http://domain-svc:8081
 
 # k8s 설정
 eureka:
