@@ -1,0 +1,56 @@
+// POST /product-posts/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        // 검색어가 있는 경우 multi_match 실행 (없으면 match_all)
+        {
+          "multi_match": {
+            "query": "검색어", // request.q()
+            "fields": [
+              "name^5",
+              "name.ngram^3",
+              "title^4",
+              "title.ngram^2",
+              "description^1.5",
+              "tags^3",
+              "category_name^2"
+            ],
+            "type": "best_fields",
+            "fuzziness": "AUTO"
+          }
+        }
+      ],
+      "filter": [
+        // 기본 필터
+        { "term": { "delete_status": "N" } },
+
+        // 카테고리 필터 (선택)
+        { "match": { "category_name": "카테고리명" } }, // request.category()
+
+        // 가격 범위 필터 (선택)
+        {
+          "range": {
+            "price": {
+              "gte": 10000, // request.minPrice()
+              "lte": 50000  // request.maxPrice()
+            }
+          }
+        },
+
+        // 태그 필터 (AND 조건, 선택)
+        { "match": { "tags": "태그1" } },
+        { "match": { "tags": "태그2" } }
+      ]
+    }
+  },
+  "sort": [
+    // request.sort()에 따라 변경
+    // "newest" -> { "created_at": "desc" }
+    // "price_asc" -> { "price": "asc" }
+    // default -> { "_score": "desc" }
+    { "_score": "desc" }
+  ],
+  "from": 0,
+  "size": 20
+}

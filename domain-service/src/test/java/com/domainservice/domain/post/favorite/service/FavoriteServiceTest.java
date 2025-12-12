@@ -219,7 +219,7 @@ class FavoriteServiceTest {
 		FavoriteStatusResponse result = favoriteService.isFavorite(userId, productPostId);
 
 		// then
-		assertThat(result.isWishListed()).isTrue();
+		assertThat(result.isFavoritePost()).isTrue();
 		verify(favoriteRepository).existsByUserIdAndProductPostId(userId, productPostId);
 	}
 
