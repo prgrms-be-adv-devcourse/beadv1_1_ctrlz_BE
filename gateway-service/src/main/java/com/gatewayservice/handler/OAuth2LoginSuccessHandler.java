@@ -76,11 +76,11 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 							TokenType.REFRESH_TOKEN.getDuration());
 
 					// 쿠키 설정 주석 처리 (Cross-Domain 문제로 URL 파라미터 방식 사용)
-					// exchange.getResponse().addCookie(accessTokenCookie);
-					// exchange.getResponse().addCookie(refreshTokenCookie);
+					 exchange.getResponse().addCookie(accessTokenCookie);
+					 exchange.getResponse().addCookie(refreshTokenCookie);
 
 					// ip와 토큰 redis에 저장
-					if (userIp != null && response.accessToken() != null) {
+					if (response.accessToken() != null) {
 						userVerificationHandler.addTokenAndIp(response.accessToken(), userIp);
 						log.info("OAuth2 로그인 - IP/Token 저장 완료: ip={}", userIp);
 					}
@@ -93,8 +93,8 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 							.queryParam("email", response.email())
 							.queryParam("profileImage", response.profileImageUrl())
 							.queryParamIfPresent("provider", Optional.ofNullable(response.provider()))
-							.queryParam("accessToken", response.accessToken()) // 토큰 추가
-							.queryParam("refreshToken", response.refreshToken()) // 토큰 추가
+//							.queryParam("accessToken", response.accessToken()) // 토큰 추가
+//							.queryParam("refreshToken", response.refreshToken()) // 토큰 추가
 							.encode()
 							.toUriString();
 
