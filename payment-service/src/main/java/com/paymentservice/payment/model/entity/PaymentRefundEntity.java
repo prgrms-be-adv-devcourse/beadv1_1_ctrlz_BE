@@ -70,21 +70,16 @@ public class PaymentRefundEntity extends BaseEntity {
         this.payment = payment;
     }
 
-    @Override
-    protected String getEntitySuffix() {
-        return "refund";
-    }
-
     public static PaymentRefundEntity of(String paymentKey, String orderId, BigDecimal cancelAmount,
-        String cancelReason, PaymentStatus status, OffsetDateTime approvedAt, OffsetDateTime canceledAt) {
+            String cancelReason, PaymentStatus status, OffsetDateTime approvedAt, OffsetDateTime canceledAt) {
         return PaymentRefundEntity.builder()
-            .paymentKey(paymentKey)
-            .orderId(orderId)
-            .cancelAmount(cancelAmount)
-            .cancelReason(cancelReason)
-            .status(status)
-            .approvedAt(approvedAt)
-            .canceledAt(canceledAt)
-            .build();
+                .paymentKey(paymentKey)
+                .orderId(orderId)
+                .cancelAmount(cancelAmount)
+                .cancelReason(cancelReason)
+                .status(status)
+                .approvedAt(approvedAt)
+                .canceledAt(canceledAt)
+                .build();
     }
 }

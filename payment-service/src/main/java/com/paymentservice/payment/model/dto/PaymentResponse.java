@@ -10,27 +10,27 @@ import com.paymentservice.payment.model.enums.PaymentStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PaymentResponse(
-    String userId,
-    String paymentKey,
-    String orderId,
-    BigDecimal amount,
-    BigDecimal depositUsedAmount,
-    BigDecimal tossChargedAmount,
-    String currency,
-    PayType payType,
-    PaymentStatus status,
-    OffsetDateTime approvedAt) {
+        String userId,
+        String paymentKey,
+        String orderId,
+        BigDecimal amount,
+        BigDecimal depositUsedAmount,
+        BigDecimal tossChargedAmount,
+        String currency,
+        PayType payType,
+        PaymentStatus status,
+        OffsetDateTime approvedAt) {
     public static PaymentResponse from(PaymentEntity paymentEntity) {
         return new PaymentResponse(
-            paymentEntity.getUsersId(),
-            paymentEntity.getPaymentKey(),
-            paymentEntity.getOrderId(),
-            paymentEntity.getAmount(),
-            paymentEntity.getDepositUsedAmount(),
-            paymentEntity.getTossChargedAmount(),
-            paymentEntity.getCurrency(),
-            paymentEntity.getPayType(),
-            paymentEntity.getStatus(),
-            paymentEntity.getApprovedAt());
+                paymentEntity.getUsersId(),
+                paymentEntity.getPaymentKey(),
+                paymentEntity.getOrderId(),
+                paymentEntity.getAmount(),
+                paymentEntity.getDepositUsedAmount(),
+                paymentEntity.getTossChargedAmount(),
+                paymentEntity.getCurrency(),
+                paymentEntity.getPayType(),
+                paymentEntity.getStatus(),
+                paymentEntity.getApprovedAt());
     }
 }
