@@ -1,11 +1,13 @@
 package com.paymentservice.payment.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +17,9 @@ import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
 import com.paymentservice.common.model.order.OrderResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.event.producer.OrderEventProducer;
+import com.paymentservice.payment.client.PaymentTossClient;
 import com.paymentservice.payment.exception.InvalidOrderAmountException;
 import com.paymentservice.payment.exception.PaymentFailedException;
-import com.paymentservice.payment.exception.PaymentNotFoundException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.PaymentReadyResponse;
 import com.paymentservice.payment.model.dto.PaymentResponse;
@@ -27,245 +28,242 @@ import com.paymentservice.payment.model.dto.TossApprovalResponse;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.entity.PaymentRefundEntity;
 import com.paymentservice.payment.model.enums.PayType;
+import com.paymentservice.payment.model.enums.PaymentStatus;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
-    private final PaymentTxService paymentTxService;
-    private final OrderFeignClient orderFeignClient;
-    private final DepositService depositService;
-    private final OrderEventProducer orderEventProducer;
-    private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
+	private final PaymentRepository paymentRepository;
+	private final PaymentLogService paymentLogService;
+	private final OrderFeignClient orderFeignClient;
+	private final DepositService depositService;
+	private final PaymentTossClient paymentTossClient;
 
-    // 결제 정보
-    public PaymentReadyResponse getPaymentReadyInfo(String orderId, String userId) {
-        OrderResponse order = orderFeignClient.getOrderInfo(orderId, userId);
+	// 결제 정보
+	public PaymentReadyResponse getPaymentReadyInfo(String orderId, String userId) {
+		OrderResponse order = orderFeignClient.getOrder(orderId, userId);
+		// order의 buyerId와 로그인 된 userId가 같은지 검증
+		if (!Objects.equals(userId, order.buyerId())) {
+			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+		}
 
-        if (!Objects.equals(userId, order.buyerId())) {
-            throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
-        }
+		Deposit deposit = depositService.getDepositBalance(userId);
 
-        Deposit deposit = depositService.getDepositBalance(userId);
+		return new PaymentReadyResponse(
+			userId,
+			orderId,
+			order.totalAmount(),
+			deposit.getBalance(),
+			order.orderName());
+	}
 
-        return new PaymentReadyResponse(
-            userId,
-            orderId,
-            order.totalAmount(),
-            deposit.getBalance(),
-            order.orderName()
-        );
-    }
+	// deposit으로만 결제 할 경우
+	// order, 금액 검증
+	public PaymentResponse depositPayment(PaymentConfirmRequest request, String userId) {
+		OrderResponse order = orderFeignClient.getOrder(request.orderId(), userId);
 
-    // deposit으로만 결제 할 경우
-    public PaymentResponse depositPayment(PaymentConfirmRequest request, String userId) {
-        OrderResponse order = orderFeignClient.getOrderInfo(request.orderId(), userId);
+		// 실제 결제 총액 검증
+		if (order.totalAmount().compareTo(request.usedDepositAmount()) != 0) {
+			throw new InvalidOrderAmountException();
+		}
+		paymentLogService.logRequest(
+			userId, request.orderId(), request.paymentKey(), request);
 
-        // 멱등성 체크: 이미 처리된 결제인지 확인
-        if (paymentRepository.existsByOrderId(
-            request.orderId()
-        )) {
-            log.info("이미 처리된 결제입니다. DB 정보를 반환합니다. orderId={}", request.orderId());
-            PaymentEntity existingPayment = paymentRepository.findByOrderId(request.orderId())
-                .orElseThrow(() -> new IllegalArgumentException("결제 정보 불일치"));
+		return processDepositPayment(request, userId, order);
+	}
 
-            return PaymentResponse.from(existingPayment);
-        }
+	// 예치금 사용 & order 상태, DB 저장(트랜잭션)
+	@Transactional
+	public PaymentResponse processDepositPayment(PaymentConfirmRequest request, String userId, OrderResponse order) {
 
-        // 실제 결제 총액 검증
-        if (order.totalAmount().compareTo(request.usedDepositAmount()) != 0) {
-            throw new InvalidOrderAmountException();
-        }
+		try {
+			// 예치금 차감
+			depositService.useDeposit(userId, request.usedDepositAmount());
 
-        return paymentTxService.processDepositPayment(request, userId, order);
-    }
+			PaymentEntity paymentEntity = PaymentEntity.of(
+				userId,
+				order.orderId(),
+				order.totalAmount(),
+				request.amount(),
+				BigDecimal.ZERO,
+				"KRW",
+				PayType.DEPOSIT,
+				PaymentStatus.SUCCESS,
+				null,
+				OffsetDateTime.now());
+			paymentRepository.save(paymentEntity);
 
-    // toss payments 사용 결제
-    public Deposit validateBeforeApprove(PaymentConfirmRequest request, String userId) {
-        OrderResponse order = orderFeignClient.getOrderInfo(request.orderId(), userId);
+			// TODO: 비동기 주문 상태 변경 이벤트 발행
 
-        if (order.totalAmount().compareTo(request.amount()) != 0) {
-            throw new InvalidOrderAmountException();
-        }
+			paymentLogService.logSuccess(
+				request.orderId(), userId, null, request, paymentEntity);
 
-        return depositService.getDepositBalance(userId);
-    }
+			return PaymentResponse.from(paymentEntity);
+		} catch (Exception e) {
+			paymentLogService.logFail(
+				request.orderId(), userId, null, e.getMessage(), request);
+			throw new PaymentFailedException();
+		}
+	}
 
-    // DB저장 및 이벤트 처리(트랜잭션)
-    @Transactional
-    public PaymentResponse completeTossPayment(PaymentConfirmRequest request, String userId,
-        Deposit deposit, TossApprovalResponse approve) {
+	// toss payments 사용 결제
+	// order, deposit 조회 및 validation
+	public PaymentResponse tossPayment(PaymentConfirmRequest request, String userId) {
+		OrderResponse order = orderFeignClient.getOrder(request.orderId(), userId);
+		Deposit deposit = depositService.getDepositBalance(userId);
 
-        try {
-            // DB 저장 및 예치금 차감
-            BigDecimal usedDepositAmount = approve.depositUsedAmount();     // deposit 사용 금액
-            PayType payType;
+		// 실제 결제 총액 검증
+		if (order.totalAmount().compareTo(request.amount()) != 0) {
+			throw new InvalidOrderAmountException();
+		}
 
-            if (deposit.getBalance().compareTo(BigDecimal.ZERO) > 0
-                && usedDepositAmount.compareTo(BigDecimal.ZERO) > 0) {
-                // 예치금 차감
-                depositService.useDeposit(userId, usedDepositAmount);
-                payType = PayType.DEPOSIT_TOSS;
-            } else {
-                payType = PayType.TOSS;
-            }
+		paymentLogService.logRequest(
+			userId, request.orderId(), request.paymentKey(), request);
 
-            PaymentEntity paymentEntity = PaymentEntity.of(
-                userId,
-                approve.orderId(),
-                approve.amount(),
-                approve.depositUsedAmount(),
-                approve.tossChargedAmount(),
-                approve.currency(),
-                payType,
-                approve.paymentStatus(),
-                approve.paymentKey(),
-                approve.approvedAt()
-            );
-            PaymentEntity saved = paymentRepository.save(paymentEntity);
+		return processTossPayment(request, userId, deposit);
+	}
 
-            orderEventProducer.publishOrderCompleted(approve.orderId(), paymentEntity.getId());
+	// DB저장 및 이벤트 처리(트랜잭션)
+	@Transactional
+	public PaymentEntity completePayment(TossApprovalResponse approve, String userId, Deposit deposit) {
 
-            log.info("[토스 결제 성공] orderId={}, userId={}, paymentKey={}, request={}, approve={}",
-                request.orderId(), userId, request.paymentKey(), request, approve);
+		BigDecimal usedDepositAmount = approve.depositUsedAmount(); // deposit 사용 금액
+		PayType payType;
 
-            return PaymentResponse.from(saved);
-        } catch (Exception e) {
-            log.error("[토스 결제 실패] orderId={}, userId={}, paymentKey={}, request={}",
-                request.orderId(), userId, request.paymentKey(), request, e);
-            throw new PaymentFailedException();
-        }
-    }
+		if (deposit.getBalance().compareTo(BigDecimal.ZERO) > 0
+			&& usedDepositAmount.compareTo(BigDecimal.ZERO) > 0) {
+			// 예치금 차감
+			depositService.useDeposit(userId, usedDepositAmount);
+			payType = PayType.DEPOSIT_TOSS;
+		} else {
+			payType = PayType.TOSS;
+		}
 
-    // 환불 처리
-    @Transactional
-    public RefundResponse refundToss(PaymentEntity payment, String userId, RefundResponse refundResponse) {
-        try {
-            // 반드시 영속상태로 다시 조회해야 cascade 정상 작동함
-            payment = paymentRepository.findById(payment.getId())
-                .orElseThrow(() -> new PaymentNotFoundException());
+		PaymentEntity paymentEntity = PaymentEntity.of(
+			userId,
+			approve.orderId(),
+			approve.amount(),
+			approve.depositUsedAmount(),
+			approve.tossChargedAmount(),
+			approve.currency(),
+			payType,
+			approve.paymentStatus(),
+			approve.paymentKey(),
+			approve.approvedAt());
 
-            // 내부처리
-            BigDecimal tossRefund = payment.getTossChargedAmount();
+		// TODO: 비동기 주문 상태 변경 이벤트 발행
 
-            PaymentRefundEntity refundEntity = createRefundEntity(
-                payment, tossRefund, refundResponse.canceledAt()
-            );
+		return paymentRepository.save(paymentEntity);
+	}
 
-            refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
+	public PaymentResponse processTossPayment(PaymentConfirmRequest request, String userId,
+		Deposit deposit) {
 
-            RefundResponse.from(refundEntity);
+		try {
+			// toss payments api
+			TossApprovalResponse approve = paymentTossClient.approve(request);
 
-            log.info("[토스 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), refundResponse);
+			// DB 저장 및 예치금 차감
+			PaymentEntity paymentEntity = completePayment(approve, userId, deposit);
 
-            return refundResponse;
+			paymentLogService.logSuccess(
+				request.orderId(), userId, request.paymentKey(), request, approve);
 
-        } catch (Exception e) {
-            log.error("[토스 환불 실패] orderId={}, userId={}, paymentKey={}, refundResponse={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), refundResponse, e);
-            throw e;
-        }
-    }
+			return PaymentResponse.from(paymentEntity);
+		} catch (Exception e) {
+			paymentLogService.logFail(
+				request.orderId(), userId, request.paymentKey(), e.getMessage(), request);
+			throw new PaymentFailedException();
+		}
+	}
 
-    @Transactional
-    public RefundResponse refundDeposit(PaymentEntity payment, String userId) {
-        try {
-            // 반드시 영속상태로 다시 조회해야 cascade 정상 작동함
-            payment = paymentRepository.findById(payment.getId())
-                .orElseThrow(() -> new PaymentNotFoundException());
+	// 환불 처리
+	public RefundResponse refundOrder(PaymentEntity payment, boolean includeDeposit, String userId) {
+		paymentLogService.logRequest(
+			userId,
+			payment.getOrderId(),
+			payment.getPaymentKey(),
+			null);
 
-            // 내부처리
-            BigDecimal depositRefund = payment.getDepositUsedAmount();
+		RefundResponse approvalResponse = null;
+		RefundResponse response = null;
+		try {
+			// toss api
+			approvalResponse = paymentTossClient.refund(payment);
 
-            // 예치금 환불
-            depositService.refundDeposit(payment.getUsersId(), depositRefund);
+			// 내부처리
+			response = processRefundOrder(payment, approvalResponse, includeDeposit);
+			paymentLogService.logSuccess(
+				payment.getOrderId(),
+				userId,
+				payment.getPaymentKey(),
+				approvalResponse,
+				response);
+			return response;
 
-            PaymentRefundEntity refundEntity = createRefundEntity(
-                payment, depositRefund, OffsetDateTime.now()
-            );
+		} catch (Exception e) {
+			paymentLogService.logFail(
+				payment.getOrderId(),
+				userId,
+				payment.getPaymentKey(),
+				e.getMessage(),
+				response);
+			throw e;
+		}
 
-            refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
+	}
 
-            RefundResponse response = RefundResponse.from(refundEntity);
+	@Transactional
+	public RefundResponse processRefundOrder(PaymentEntity payment, RefundResponse response, boolean includeDeposit) {
 
-            log.info("[예치금 환불 성공] orderId={}, userId={}, paymentKey={}, response={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), response);
+		BigDecimal depositRefund = payment.getDepositUsedAmount();
+		BigDecimal tossRefund = payment.getTossChargedAmount();
 
-            return response;
+		PaymentRefundEntity refundEntity = PaymentRefundEntity.of(
+			payment.getPaymentKey(),
+			payment.getOrderId(),
+			depositRefund.add(tossRefund),
+			"사용자 요청 환불",
+			payment.getStatus(),
+			payment.getApprovedAt(),
+			response.canceledAt());
+		payment.linkRefund(refundEntity);
 
-        } catch (Exception e) {
-            log.error("[예치금 환불 실패] orderId={}, userId={}, paymentKey={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), e);
-            throw e;
-        }
-    }
+		// 예치금 환불
+		if (includeDeposit && depositRefund.compareTo(BigDecimal.ZERO) > 0) {
+			depositService.refundDeposit(payment.getUsersId(), depositRefund);
+		}
 
-    @Transactional
-    public RefundResponse refundTossDeposit(PaymentEntity payment, String userId, RefundResponse refundResponse) {
-        try {
-            // 반드시 영속상태로 다시 조회해야 cascade 정상 작동함
-            payment = paymentRepository.findById(payment.getId())
-                .orElseThrow(() -> new PaymentNotFoundException());
+		refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
 
-            // 내부처리
-            BigDecimal depositRefund = payment.getDepositUsedAmount();
-            BigDecimal tossRefund = payment.getTossChargedAmount();
-            BigDecimal totalRefund = depositRefund.add(tossRefund);
+		// TODO: 주문상태 이벤트
 
-            // 예치금 환불
-            depositService.refundDeposit(payment.getUsersId(), depositRefund);
+		return RefundResponse.from(refundEntity);
+	}
 
-            PaymentRefundEntity refundEntity = createRefundEntity(
-                payment, totalRefund, refundResponse.canceledAt()
-            );
+	// 정산용 결제 내역 조회 (Batch 호출)
+	@Transactional(readOnly = true)
+	public java.util.List<PaymentResponse> getPaymentsForSettlement(
+		LocalDateTime startDate,
+		LocalDateTime endDate) {
+		// LocalDateTime -> OffsetDateTime
+		ZoneId zoneId = ZoneId.of("Asia/Seoul");
+		ZoneOffset zoneOffset = zoneId.getRules().getOffset(LocalDateTime.now());
 
-            refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
+		OffsetDateTime start = startDate.atOffset(zoneOffset);
+		OffsetDateTime end = endDate.atOffset(zoneOffset);
 
-            RefundResponse response = RefundResponse.from(refundEntity);
+		List<PaymentEntity> payments = paymentRepository.findByApprovedAtBetweenAndStatus(
+			start, end, PaymentStatus.SUCCESS);
 
-            log.info("[혼합 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}, response={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), refundResponse, response);
-
-            return response;
-
-        } catch (Exception e) {
-            log.error("[혼합 환불 실패] orderId={}, userId={}, paymentKey={}",
-                payment.getOrderId(), userId, payment.getPaymentKey(), e);
-            throw e;
-        }
-    }
-
-    // 환불 공통 메서드
-    private PaymentRefundEntity createRefundEntity(PaymentEntity payment, BigDecimal refundAmount,
-        OffsetDateTime canceledAt) {
-        PaymentRefundEntity refund = PaymentRefundEntity.of(
-            payment.getPaymentKey(),
-            payment.getOrderId(),
-            refundAmount,
-            "사용자 요청 환불",
-            payment.getStatus(),
-            payment.getApprovedAt(),
-            canceledAt
-        );
-        payment.linkRefund(refund);
-        return refund;
-    }
-
-    private void afterRefundProcess(PaymentEntity payment) {
-        orderEventProducer.publishOrderRefunded(payment.getOrderId(), payment.getId());
-    }
-
-    public PaymentResponse findByOrderId(String orderId) {
-        PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다: " + orderId));
-        return PaymentResponse.from(paymentEntity);
-    }
+		return payments.stream()
+			.map(PaymentResponse::from)
+			.collect(java.util.stream.Collectors.toList());
+	}
 }

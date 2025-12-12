@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Settlement extends BaseEntity {
+
 	@Column(name = "order_item_id", nullable = false)
 	private String orderItemId;
 
@@ -31,55 +32,37 @@ public class Settlement extends BaseEntity {
 	@Column(name = "amount", nullable = false)
 	private BigDecimal amount; // 실제 정산 금액 (수수료 제외 전)
 
-	@Column(name = "fee", nullable = false)
+	@Column(name = "fee", nullable = true)
 	private BigDecimal fee; // 정산 수수료
 
-	@Column(name = "net_amount", nullable = false)
+	@Column(name = "net_amount", nullable = true)
 	private BigDecimal netAmount; // 실제 예치금에 들어갈 금액 = amount - fee
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
 	private SettlementStatus settlementStatus;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "pay_type")
+	private PayType payType;
+
 	@Column(name = "settled_at")
 	private LocalDateTime settledAt;
 
-	// 정산 상태
-	public void markCompleted() {
-		this.settlementStatus = SettlementStatus.COMPLETED;
-		this.settledAt = LocalDateTime.now();
+
+	public void calculateFee(BigDecimal feeRate) {
+		this.fee = this.amount.multiply(feeRate).setScale(0, java.math.RoundingMode.HALF_UP);
+		this.netAmount = this.amount.subtract(this.fee);
 	}
 
-	public void markFailed() {
-		this.settlementStatus = SettlementStatus.FAILED;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public void markReady() {
-		this.settlementStatus = SettlementStatus.READY;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public void markPendingAgain() {
-		this.settlementStatus = SettlementStatus.PENDING;
-		this.settledAt = LocalDateTime.now();
-	}
-
-	public static Settlement create(String orderItemId, String userId, BigDecimal amount,
-		BigDecimal fee, BigDecimal netAmount) {
+	public static Settlement create(String orderItemId, String userId, BigDecimal amount) {
 		return Settlement.builder()
-			.orderItemId(orderItemId)
-			.userId(userId)
-			.amount(amount)
-			.fee(fee)
-			.netAmount(netAmount)
-			.settlementStatus(SettlementStatus.PENDING)
-			.build();
+				.orderItemId(orderItemId)
+				.userId(userId)
+				.amount(amount)
+				.fee(BigDecimal.ZERO)
+				.netAmount(BigDecimal.ZERO)
+				.settlementStatus(SettlementStatus.PENDING)
+				.build();
 	}
-
-	@Override
-	protected String getEntitySuffix() {
-		return "Settlement";
-	}
-
 }
