@@ -97,9 +97,9 @@ custom:
     topic:
       command: deposit-command
 
-  order:
-    topic:
-      command: order-command
+#  order:
+#    topic:
+#      command: order-command
 
   feign:
     url:

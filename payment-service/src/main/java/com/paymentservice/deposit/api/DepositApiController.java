@@ -48,10 +48,12 @@ public class DepositApiController {
 
 	@PostMapping("/confirm")
 	public BaseResponse<DepositConfirmResponse> confirmDeposit(
-		@RequestBody DepositConfirmRequest request,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
+		@RequestBody DepositConfirmRequest request
+		// @RequestHeader(value = "X-REQUEST-ID") String userId
 	) {
 		try {
+			String userId = "user-001";
+
 			TossChargeResponse approve = depositService.tossApprove(request, userId);
 			DepositConfirmResponse response = depositService.tossPayment(approve, request, userId);
 			return new BaseResponse<>(response, "충전 완료");

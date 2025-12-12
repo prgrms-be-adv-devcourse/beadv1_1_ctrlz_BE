@@ -34,6 +34,11 @@ public class PaymentTossClient {
     private String secretApiKey;
 
     // 결제 승인
+    @Retryable(
+        value = {FeignException.class, RuntimeException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000) // 1초 쉬고 다시 재시도
+    )
     public TossApprovalResponse approve(PaymentConfirmRequest request) {
 
         // Toss로 보내야하는 필수 필드
@@ -77,6 +82,11 @@ public class PaymentTossClient {
     }
 
     // 환불
+    @Retryable(
+        value = {FeignException.class, RuntimeException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000)
+    )
     public RefundResponse refund(PaymentEntity payment) {
 
         // Toss로 보내야하는 필수 필드

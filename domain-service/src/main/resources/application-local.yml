@@ -85,7 +85,7 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-    enabled: true
+    enabled: false
 
 custom:
   image:
@@ -109,9 +109,9 @@ custom:
     topic:
       event: product-post-events
 
-  order:
-    topic:
-      command: order-command
+#  order:
+#    topic:
+#      command: order-command
 
   search:
     topic:
