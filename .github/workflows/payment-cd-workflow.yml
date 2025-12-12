@@ -29,7 +29,7 @@ jobs:
       service-name: payment-service-app
       service-dir: .
       secret-dir: payment-service/payment-application # payment-service 에는 /payment-application로 secret.yml 들어가게 설정
-      file-name: payment-service.dockerfile
+      file-name: docker/payment-service.dockerfile
 
   deploying:
     needs: releasing

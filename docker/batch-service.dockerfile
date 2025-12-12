@@ -19,7 +19,7 @@ COPY observability-config ./observability-config
 COPY batch-service ./batch-service
 
 WORKDIR /app/batch-service
-
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12

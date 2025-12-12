@@ -16,6 +16,7 @@ COPY account-service/user ./account-service/user
 COPY account-service/account-application ./account-service/account-application
 
 WORKDIR /app/account-service
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 FROM openjdk:21-ea-21-slim
