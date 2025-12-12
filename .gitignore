@@ -193,3 +193,4 @@ application-window.yml
 bin/
 application-dev.yml
 **/application-me.yml
+prod-secret.yml

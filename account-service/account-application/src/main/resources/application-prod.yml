@@ -2,9 +2,6 @@ spring:
   application:
     name: account-service
 
-  logging:
-    config: classpath:logback-prod.xml
-
   servlet:
     multipart:
       max-file-size: 10MB
@@ -12,13 +9,12 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always
       platform: mysql
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto:
     show-sql: false
     properties:
       hibernate:
@@ -31,26 +27,25 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    url: ${MYSQL_URL}
 
   data:
     redis:
-      host: redis-svc
+      host: ${REDIS_HOST}
       port: 6379
-      #      password: 1234
+      password: ${REDIS_PASSWORD}
       timeout: 3000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 0
-          min-idle: 0
-      password: ${REDIS_PASSWORD}
+
   kafka:
     bootstrap-servers:
-      - kafka-svc:9090
+      - $KAFKA_BOOTSTRAP_SERVERS}
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -71,8 +66,6 @@ spring:
 
       batch-size: 32768 #32kb
       buffer-memory: 67108864 # 64mb
-
-
 
     admin:
       auto-create: false # AdminClient 비활성화 (Kafka 토픽 자동 생성 안 쓰면 가능)
@@ -106,3 +99,6 @@ eureka:
     serviceUrl:
       defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
+
+logging:
+  config: classpath:logback-prod.xml
