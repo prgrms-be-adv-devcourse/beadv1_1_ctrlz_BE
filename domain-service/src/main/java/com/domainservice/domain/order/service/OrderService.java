@@ -1,6 +1,7 @@
 package com.domainservice.domain.order.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -345,6 +346,14 @@ public class OrderService {
 		} else {
 			throw new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage());
 		}
+	}
+
+	// 정산용 주문 목록 조회
+	@Transactional(readOnly = true)
+	public List<OrderResponse> getOrdersForSettlement(LocalDateTime startDate, LocalDateTime endDate) {
+		return orderJpaRepository.findAllByCreatedAtBetween(startDate, endDate).stream()
+			.map(this::toOrderResponse)
+			.toList();
 	}
 
 }
