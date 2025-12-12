@@ -19,7 +19,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto:
     show-sql: false
     properties:
       hibernate:
@@ -75,3 +75,5 @@ eureka:
       defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
+logging:
+  config: classpath:logback-prod.xml

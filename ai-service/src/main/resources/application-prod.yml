@@ -2,6 +2,9 @@ server:
   port: 8084
 
 spring:
+  application:
+    name: ai-service
+
   ai:
     vectorstore:
       qdrant:
@@ -26,14 +29,11 @@ spring:
       auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-
       properties:
-        properties:
-          spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
-          allow.auto.create.topics: false
-
-          observation:
-            enabled: true
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
   batch:
     jdbc:
@@ -56,13 +56,11 @@ spring:
         order_updates: true
         order_inserts: true
 
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
-
 
 eureka:
   instance:
@@ -78,8 +76,8 @@ custom:
       event: product-post-events
 
   recommendation:
-    limit: 3  # 최대 추천 제한 수
-    ttl-hours: 6  # 세션 유지 시간
+    limit: 3 # 최대 추천 제한 수
+    ttl-hours: 6 # 세션 유지 시간
 
   config:
     topic-partitions: 1
@@ -93,5 +91,5 @@ custom:
   product:
     base-url: http://domain-svc:8081/api/products
 
-
-
+logging:
+  config: classpath:logback-prod.xml

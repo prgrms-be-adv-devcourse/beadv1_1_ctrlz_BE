@@ -6,13 +6,13 @@ WORKDIR /app
 COPY batch-service/build.gradle batch-service/settings.gradle batch-service/gradlew batch-service/gradlew.bat ./batch-service/
 COPY batch-service/gradle ./batch-service/gradle
 
-COPY batch-service/settlement/build.gradle ./batch-service/settlement/
-COPY batch-service/search/build.gradle ./batch-service/search/
+COPY batch-service/settlement ./batch-service/settlement
+COPY batch-service/search ./batch-service/search
 COPY common/build.gradle ./common/
 
 COPY common ./common
 COPY observability-config ./observability-config
-COPY batch-service ./batch-service
+COPY batch-service/src ./batch-service/src
 
 WORKDIR /app/batch-service
 RUN sed -i 's/\r$//' ./gradlew

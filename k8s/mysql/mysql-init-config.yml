@@ -5,12 +5,12 @@ metadata:
 data:
   init.sql: |
     -- 데이터베이스와 사용자 생성 및 권한 부여
-    CREATE DATABASE IF NOT EXISTS test_db;
+    CREATE DATABASE IF NOT EXISTS app_db;
     CREATE DATABASE IF NOT EXISTS zipkin;
 
-    CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED BY '1234';
-    GRANT ALL PRIVILEGES ON test_db.* TO 'admin'@'%';
-    GRANT ALL PRIVILEGES ON zipkin.* TO 'admin'@'%';
+    CREATE USER IF NOT EXISTS 'app'@'%' IDENTIFIED BY 'app123';
+    GRANT ALL PRIVILEGES ON app_db.* TO 'app'@'%';
+    GRANT ALL PRIVILEGES ON zipkin.* TO 'app'@'%';
     FLUSH PRIVILEGES;
 
     -- Zipkin 스키마 설정
@@ -64,3 +64,490 @@ data:
       `error_count` BIGINT,
       PRIMARY KEY (`day`, `parent`, `child`)
     ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8 COLLATE utf8_general_ci;
+
+    -- ==============================================
+    -- app_db 스키마 설정 (애플리케이션 테이블)
+    -- ==============================================
+    USE app_db;
+
+    -- ==============================================
+    -- User Service 테이블
+    -- ==============================================
+    
+    -- users 테이블
+    CREATE TABLE IF NOT EXISTS users (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `oauth_id` VARCHAR(255) NOT NULL,
+      `name` TEXT NOT NULL,
+      `nickname` VARCHAR(255) NOT NULL UNIQUE,
+      `email` VARCHAR(255) NOT NULL UNIQUE,
+      `password` VARCHAR(255),
+      `profile_image_url` VARCHAR(1000),
+      `phone_number` TEXT NOT NULL,
+      `zip_code` VARCHAR(20),
+      `road_address` VARCHAR(500),
+      `jibun_address` VARCHAR(500),
+      `detail_address` VARCHAR(500),
+      `image_id` VARCHAR(36),
+      `age` INT NOT NULL,
+      `gender` VARCHAR(20) NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- users_roles 테이블 (ElementCollection)
+    CREATE TABLE IF NOT EXISTS user_entity_roles (
+      `user_entity_id` VARCHAR(36) NOT NULL,
+      `roles` ENUM('USER', 'SELLER', 'ADMIN') NOT NULL,
+      FOREIGN KEY (`user_entity_id`) REFERENCES users(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- user_events 테이블 (ExternalEventEntity)
+    CREATE TABLE IF NOT EXISTS user_events (
+      `id` VARCHAR(36) NOT NULL,
+      `user_id` VARCHAR(36),
+      `event_type` VARCHAR(255),
+      `command_type` VARCHAR(255),
+      `content` TEXT,
+      `published` BOOLEAN NOT NULL DEFAULT FALSE,
+      `published_at` DATETIME,
+      `created_at` DATETIME,
+      `updated_at` DATETIME,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Payment Service 테이블
+    -- ==============================================
+    
+    -- payments 테이블
+    CREATE TABLE IF NOT EXISTS payments (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `users_id` VARCHAR(36) NOT NULL,
+      `payment_key` TEXT,
+      `orders_id` VARCHAR(36) NOT NULL,
+      `requested_amount` DECIMAL(19, 2) NOT NULL,
+      `amount` DECIMAL(19, 2) NOT NULL,
+      `deposit_used_amount` DECIMAL(19, 2) NOT NULL,
+      `toss_charged_amount` DECIMAL(19, 2) NOT NULL,
+      `currency` VARCHAR(10) NOT NULL,
+      `pay_type` ENUM('DEPOSIT', 'TOSS', 'DEPOSIT_TOSS') NOT NULL,
+      `status` ENUM('READY', 'IN_PROGRESS', 'WAITING_FOR_DEPOSIT', 'DONE', 'CANCELED', 'PARTIAL_CANCELED', 'ABORTED', 'EXPIRED', 'FAILED', 'REFUNDED') NOT NULL,
+      `approved_at` DATETIME,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- refund 테이블
+    CREATE TABLE IF NOT EXISTS refund (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `payment_id` VARCHAR(36) UNIQUE,
+      `payment_key` TEXT,
+      `order_id` VARCHAR(36),
+      `cancel_amount` DECIMAL(19, 2) NOT NULL,
+      `cancel_reason` VARCHAR(255) NOT NULL,
+      `status` ENUM('READY', 'IN_PROGRESS', 'WAITING_FOR_DEPOSIT', 'DONE', 'CANCELED', 'PARTIAL_CANCELED', 'ABORTED', 'EXPIRED', 'FAILED', 'REFUNDED') NOT NULL,
+      `approved_at` DATETIME,
+      `canceled_at` DATETIME,
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`payment_id`) REFERENCES payments(`id`) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- payment_logs 테이블
+    CREATE TABLE IF NOT EXISTS payment_logs (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `orders_id` VARCHAR(36),
+      `users_id` VARCHAR(36),
+      `payment_key` VARCHAR(255),
+      `status` VARCHAR(50) NOT NULL,
+      `request_body` LONGTEXT,
+      `response_body` LONGTEXT,
+      `fail_reason` VARCHAR(1000),
+      `logged_at` DATETIME NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Category
+    -- ==============================================
+    
+    -- category 테이블
+    CREATE TABLE IF NOT EXISTS category (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `name` VARCHAR(255) NOT NULL UNIQUE,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Tag
+    -- ==============================================
+    
+    -- tag 테이블
+    CREATE TABLE IF NOT EXISTS tag (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `name` VARCHAR(100) NOT NULL UNIQUE,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Image
+    -- ==============================================
+    
+    -- images 테이블
+    CREATE TABLE IF NOT EXISTS images (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `original_file_name` VARCHAR(255) NOT NULL,
+      `stored_file_name` VARCHAR(255) NOT NULL,
+      `s3_url` VARCHAR(1000) NOT NULL,
+      `s3_key` VARCHAR(255) NOT NULL,
+      `original_file_size` BIGINT NOT NULL,
+      `original_content_type` VARCHAR(100) NOT NULL,
+      `compressed_file_size` BIGINT NOT NULL,
+      `converted_content_type` ENUM('JPG', 'JPEG', 'PNG', 'WEBP') NOT NULL,
+      `image_target` ENUM('NONE', 'USER', 'PRODUCT', 'REVIEW') NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - ProductPost
+    -- ==============================================
+    
+    -- product_post 테이블
+    CREATE TABLE IF NOT EXISTS product_post (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `category_id` VARCHAR(36) NOT NULL,
+      `title` VARCHAR(255) NOT NULL,
+      `name` VARCHAR(255) NOT NULL,
+      `price` INT NOT NULL,
+      `description` TEXT,
+      `status` ENUM('NEW', 'LIKE_NEW', 'GOOD', 'FAIR', 'POOR') NOT NULL,
+      `trade_status` ENUM('SELLING', 'PROCESSING', 'SOLDOUT') NOT NULL,
+      `view_count` INT NOT NULL DEFAULT 0,
+      `liked_count` INT NOT NULL DEFAULT 0,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- product_post_tag 테이블 (다대다 관계)
+    CREATE TABLE IF NOT EXISTS product_post_tag (
+      `id` BIGINT NOT NULL AUTO_INCREMENT,
+      `product_post_id` VARCHAR(36),
+      `tag_id` VARCHAR(36),
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`product_post_id`) REFERENCES product_post(`id`) ON DELETE CASCADE,
+      FOREIGN KEY (`tag_id`) REFERENCES tag(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- product_post_images 테이블
+    CREATE TABLE IF NOT EXISTS product_post_images (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `product_post_id` VARCHAR(36) NOT NULL,
+      `image_id` VARCHAR(36) NOT NULL,
+      `display_order` INT NOT NULL,
+      `is_primary` BOOLEAN NOT NULL DEFAULT FALSE,
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`product_post_id`) REFERENCES product_post(`id`) ON DELETE CASCADE,
+      FOREIGN KEY (`image_id`) REFERENCES images(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - FavoriteProduct
+    -- ==============================================
+    
+    -- favorite_product 테이블
+    CREATE TABLE IF NOT EXISTS favorite_product (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `product_post_id` VARCHAR(36) NOT NULL,
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `uk_favorite_user_product` (`user_id`, `product_post_id`),
+      FOREIGN KEY (`product_post_id`) REFERENCES product_post(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Review
+    -- ==============================================
+    
+    -- reviews 테이블
+    CREATE TABLE IF NOT EXISTS reviews (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `product_post_id` VARCHAR(36) NOT NULL,
+      `contents` TEXT NOT NULL,
+      `user_rating` INT NOT NULL,
+      `product_rating` INT NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Cart
+    -- ==============================================
+    
+    -- carts 테이블
+    CREATE TABLE IF NOT EXISTS carts (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- cart_items 테이블
+    CREATE TABLE IF NOT EXISTS cart_items (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `cart_id` VARCHAR(36) NOT NULL,
+      `productPost_id` VARCHAR(36) NOT NULL,
+      `selected` BOOLEAN NOT NULL DEFAULT TRUE,
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`cart_id`) REFERENCES carts(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Order
+    -- ==============================================
+    
+    -- orders 테이블
+    CREATE TABLE IF NOT EXISTS orders (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `order_name` VARCHAR(255) NOT NULL,
+      `order_status` ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETED', 'CANCELLED', 'REFUND_AFTER_PAYMENT', 'PURCHASE_CONFIRMED', 'SETTLED') NOT NULL,
+      `payment_id` VARCHAR(36),
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- Ordered_items 테이블
+    CREATE TABLE IF NOT EXISTS Ordered_items (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `productPost_id` VARCHAR(36) NOT NULL,
+      `order_id` VARCHAR(36) NOT NULL,
+      `price_snapshot` DECIMAL(19, 2) NOT NULL,
+      `order_item_status` ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETED', 'CANCELLED', 'REFUND_AFTER_PAYMENT', 'PURCHASE_CONFIRMED', 'SETTLED') NOT NULL,
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`order_id`) REFERENCES orders(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Domain Service 테이블 - Search
+    -- ==============================================
+    
+    -- search_word_logs 테이블
+    CREATE TABLE IF NOT EXISTS search_word_logs (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `searched_at` DATETIME,
+      `word` VARCHAR(255),
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- Batch Service 테이블 - Settlement
+    -- ==============================================
+    
+    -- settlements 테이블
+    CREATE TABLE IF NOT EXISTS settlements (
+      `id` VARCHAR(36) NOT NULL,
+      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
+      `created_at` DATETIME NOT NULL,
+      `updated_at` DATETIME NOT NULL,
+      `order_item_id` VARCHAR(36) NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `amount` DECIMAL(19, 2) NOT NULL,
+      `fee` DECIMAL(19, 2),
+      `net_amount` DECIMAL(19, 2),
+      `status` ENUM('PENDING', 'READY', 'COMPLETED', 'FAILED') NOT NULL,
+      `pay_type` ENUM('DEPOSIT', 'TOSS', 'DEPOSIT_TOSS'),
+      `settled_at` DATETIME,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    -- ==============================================
+    -- AI Service 테이블
+    -- ==============================================
+    
+    -- user_behavior 테이블
+    CREATE TABLE IF NOT EXISTS user_behavior (
+      `id` VARCHAR(36) NOT NULL,
+      `user_id` VARCHAR(36) NOT NULL,
+      `behavior_value` VARCHAR(255) NOT NULL,
+      `behavior_type` ENUM('SEARCH', 'VIEW') NOT NULL,
+      `created_at` DATETIME,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    ALTER TABLE user_behavior ADD INDEX idx_user_behavior_user_id(`user_id`);
+    ALTER TABLE user_behavior ADD INDEX idx_user_behavior_type(`behavior_type`);
+
+    -- ==============================================
+    -- Spring Batch 메타데이터 테이블
+    -- ==============================================
+    
+    -- BATCH_JOB_INSTANCE 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_INSTANCE (
+      JOB_INSTANCE_ID BIGINT NOT NULL PRIMARY KEY,
+      VERSION BIGINT,
+      JOB_NAME VARCHAR(100) NOT NULL,
+      JOB_KEY VARCHAR(32) NOT NULL,
+      CONSTRAINT JOB_INST_UN UNIQUE (JOB_NAME, JOB_KEY)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_JOB_EXECUTION 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_EXECUTION (
+      JOB_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+      VERSION BIGINT,
+      JOB_INSTANCE_ID BIGINT NOT NULL,
+      CREATE_TIME DATETIME(6) NOT NULL,
+      START_TIME DATETIME(6) DEFAULT NULL,
+      END_TIME DATETIME(6) DEFAULT NULL,
+      STATUS VARCHAR(10),
+      EXIT_CODE VARCHAR(2500),
+      EXIT_MESSAGE VARCHAR(2500),
+      LAST_UPDATED DATETIME(6),
+      CONSTRAINT JOB_INST_EXEC_FK FOREIGN KEY (JOB_INSTANCE_ID)
+        REFERENCES BATCH_JOB_INSTANCE(JOB_INSTANCE_ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_JOB_EXECUTION_PARAMS 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_EXECUTION_PARAMS (
+      JOB_EXECUTION_ID BIGINT NOT NULL,
+      PARAMETER_NAME VARCHAR(100) NOT NULL,
+      PARAMETER_TYPE VARCHAR(100) NOT NULL,
+      PARAMETER_VALUE VARCHAR(2500),
+      IDENTIFYING CHAR(1) NOT NULL,
+      CONSTRAINT JOB_EXEC_PARAMS_FK FOREIGN KEY (JOB_EXECUTION_ID)
+        REFERENCES BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_STEP_EXECUTION 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_STEP_EXECUTION (
+      STEP_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+      VERSION BIGINT NOT NULL,
+      STEP_NAME VARCHAR(100) NOT NULL,
+      JOB_EXECUTION_ID BIGINT NOT NULL,
+      CREATE_TIME DATETIME(6) NOT NULL,
+      START_TIME DATETIME(6) DEFAULT NULL,
+      END_TIME DATETIME(6) DEFAULT NULL,
+      STATUS VARCHAR(10),
+      COMMIT_COUNT BIGINT,
+      READ_COUNT BIGINT,
+      FILTER_COUNT BIGINT,
+      WRITE_COUNT BIGINT,
+      READ_SKIP_COUNT BIGINT,
+      WRITE_SKIP_COUNT BIGINT,
+      PROCESS_SKIP_COUNT BIGINT,
+      ROLLBACK_COUNT BIGINT,
+      EXIT_CODE VARCHAR(2500),
+      EXIT_MESSAGE VARCHAR(2500),
+      LAST_UPDATED DATETIME(6),
+      CONSTRAINT JOB_EXEC_STEP_FK FOREIGN KEY (JOB_EXECUTION_ID)
+        REFERENCES BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_STEP_EXECUTION_CONTEXT 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_STEP_EXECUTION_CONTEXT (
+      STEP_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+      SHORT_CONTEXT VARCHAR(2500) NOT NULL,
+      SERIALIZED_CONTEXT TEXT,
+      CONSTRAINT STEP_EXEC_CTX_FK FOREIGN KEY (STEP_EXECUTION_ID)
+        REFERENCES BATCH_STEP_EXECUTION(STEP_EXECUTION_ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_JOB_EXECUTION_CONTEXT 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_EXECUTION_CONTEXT (
+      JOB_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+      SHORT_CONTEXT VARCHAR(2500) NOT NULL,
+      SERIALIZED_CONTEXT TEXT,
+      CONSTRAINT JOB_EXEC_CTX_FK FOREIGN KEY (JOB_EXECUTION_ID)
+        REFERENCES BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    -- BATCH_JOB_SEQ 시퀀스 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_SEQ (
+      ID BIGINT NOT NULL,
+      UNIQUE_KEY CHAR(1) NOT NULL,
+      CONSTRAINT UNIQUE_KEY_UN UNIQUE (UNIQUE_KEY)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    INSERT INTO BATCH_JOB_SEQ (ID, UNIQUE_KEY) SELECT 0, '0' FROM DUAL WHERE NOT EXISTS (SELECT * FROM BATCH_JOB_SEQ);
+    
+    -- BATCH_JOB_EXECUTION_SEQ 시퀀스 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_JOB_EXECUTION_SEQ (
+      ID BIGINT NOT NULL,
+      UNIQUE_KEY CHAR(1) NOT NULL,
+      CONSTRAINT UNIQUE_KEY_UN2 UNIQUE (UNIQUE_KEY)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    INSERT INTO BATCH_JOB_EXECUTION_SEQ (ID, UNIQUE_KEY) SELECT 0, '0' FROM DUAL WHERE NOT EXISTS (SELECT * FROM BATCH_JOB_EXECUTION_SEQ);
+    
+    -- BATCH_STEP_EXECUTION_SEQ 시퀀스 테이블
+    CREATE TABLE IF NOT EXISTS BATCH_STEP_EXECUTION_SEQ (
+      ID BIGINT NOT NULL,
+      UNIQUE_KEY CHAR(1) NOT NULL,
+      CONSTRAINT UNIQUE_KEY_UN3 UNIQUE (UNIQUE_KEY)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+    INSERT INTO BATCH_STEP_EXECUTION_SEQ (ID, UNIQUE_KEY) SELECT 0, '0' FROM DUAL WHERE NOT EXISTS (SELECT * FROM BATCH_STEP_EXECUTION_SEQ);
+
+    
+    ALTER TABLE users ADD INDEX idx_users_oauth_id(`oauth_id`);
+    ALTER TABLE users ADD INDEX idx_users_email(`email`);
+    
+    ALTER TABLE payments ADD INDEX idx_payments_users_id(`users_id`);
+    ALTER TABLE payments ADD INDEX idx_payments_orders_id(`orders_id`);
+    ALTER TABLE payments ADD INDEX idx_payments_status(`status`);
+    
+    ALTER TABLE product_post ADD INDEX idx_product_post_user_id(`user_id`);
+    ALTER TABLE product_post ADD INDEX idx_product_post_category_id(`category_id`);
+    ALTER TABLE product_post ADD INDEX idx_product_post_trade_status(`trade_status`);
+    
+    ALTER TABLE reviews ADD INDEX idx_reviews_user_id(`user_id`);
+    ALTER TABLE reviews ADD INDEX idx_reviews_product_post_id(`product_post_id`);
+    
+    ALTER TABLE orders ADD INDEX idx_orders_user_id(`user_id`);
+    ALTER TABLE orders ADD INDEX idx_orders_status(`order_status`);
+    
+    ALTER TABLE settlements ADD INDEX idx_settlements_user_id(`user_id`);
+    ALTER TABLE settlements ADD INDEX idx_settlements_status(`status`);

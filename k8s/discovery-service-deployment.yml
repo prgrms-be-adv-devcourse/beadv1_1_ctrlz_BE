@@ -23,6 +23,9 @@ spec:
       containers:
         - name: discovery-service-app
           image: docker.io/beatchoi156/discovery-service:latest
+          env:
+            - name: LOG_PATH
+              value: "/app/logs"
           ports:
             - containerPort: 8761
           #          resources:
@@ -50,6 +53,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/discovery-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1
@@ -62,7 +73,7 @@ spec:
   selector:
     app: discovery # 이 라벨을 가진 Pod들에게 트래픽 분산
 
-  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+  sessionAffinity: None # 기본값: 매 요청마다 무작위 Pod 선택
   # 로드밸런싱 설정
   #    sessionAffinity: ClientIP        # 같은 클라이언트 IP는 같은 Pod로 (세션 유지)
   #  sessionAffinityConfig:
