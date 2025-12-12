@@ -23,7 +23,7 @@ import com.domainservice.domain.cart.model.entity.CartItem;
 import com.domainservice.domain.cart.repository.CartItemJpaRepository;
 import com.domainservice.domain.cart.repository.CartJpaRepository;
 import com.domainservice.domain.cart.service.CartService;
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +42,7 @@ class CartServiceTest {
 
 	private String userId;
 	private Cart cart;
-	private ProductPostWithSellerResponse productPostResponse;
+	private ProductPostResponse productPostResponse;
 
 	@BeforeEach
 	void setUp() {
@@ -51,11 +51,10 @@ class CartServiceTest {
 			.userId(userId)
 			.cartItems(new ArrayList<>())
 			.build();
-		productPostResponse = new ProductPostWithSellerResponse(
+		productPostResponse = new ProductPostResponse(
 			"p1",
 			"seller1",
 			"category1",
-			"테스트 닉네임",
 			"테스트 상품",
 			"테스트 이름",
 			1000,

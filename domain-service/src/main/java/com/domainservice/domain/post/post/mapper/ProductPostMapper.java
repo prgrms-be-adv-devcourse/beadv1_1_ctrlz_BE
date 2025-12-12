@@ -2,7 +2,7 @@ package com.domainservice.domain.post.post.mapper;
 
 import java.util.List;
 
-import com.domainservice.domain.post.post.model.dto.response.ProductPostWithSellerResponse;
+import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 
@@ -38,8 +38,8 @@ public class ProductPostMapper {
 
 	}
 
-	public static ProductPostWithSellerResponse toWithSellerResponse(ProductPost productPost, String nickname) {
-
+	public static ProductPostDescription toDescription(
+		ProductPost productPost, String sellerNickname, String categoryName, String viewerId) {
 		// 태그 이름 목록
 		List<String> tagNames = productPost.getTagNames();
 
@@ -49,22 +49,25 @@ public class ProductPostMapper {
 		// 대표 이미지 URL
 		String primaryImageUrl = productPost.getPrimaryImageUrl();
 
-		return ProductPostWithSellerResponse.builder()
+		return ProductPostDescription.builder()
 			.id(productPost.getId())
-			.userId(productPost.getUserId())
-			.categoryId(productPost.getCategoryId())
-			.nickname(nickname)
-			.title(productPost.getTitle())
+			.nickName(sellerNickname)
 			.name(productPost.getName())
-			.price(productPost.getPrice())
+			.title(productPost.getTitle())
 			.description(productPost.getDescription())
+			.categoryName(categoryName)
+			.tags(tagNames)
+			.price(productPost.getPrice())
+			.likedCount(productPost.getLikedCount())
+			.viewCount(productPost.getViewCount())
 			.status(productPost.getStatus())
 			.tradeStatus(productPost.getTradeStatus())
-			.imageUrls(imageUrls)
-			.primaryImageUrl(primaryImageUrl)
-			.tags(tagNames)
+			.deleteStatus(productPost.getDeleteStatus())
 			.createdAt(productPost.getCreatedAt())
 			.updatedAt(productPost.getUpdatedAt())
+			.imageUrls(imageUrls)
+			.primaryImageUrl(primaryImageUrl)
+			.isMine(productPost.getUserId().equals(viewerId))
 			.build();
 
 	}
