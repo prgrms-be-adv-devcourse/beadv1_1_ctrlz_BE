@@ -78,9 +78,4 @@ public class Order extends BaseEntity {
         orderItems.forEach(item -> item.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT));
     }
 
-    @Override
-    protected String getEntitySuffix() {
-        return "order";
-    }
-
 }

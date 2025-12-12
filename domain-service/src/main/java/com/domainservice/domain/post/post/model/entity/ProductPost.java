@@ -92,11 +92,6 @@ public class ProductPost extends BaseEntity {
 		this.likedCount = 0;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "product";
-	}
-
     /*
      =============== 비즈니스 로직 ===============
     */

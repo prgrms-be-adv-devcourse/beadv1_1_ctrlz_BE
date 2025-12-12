@@ -42,8 +42,4 @@ public class Cart extends BaseEntity {
 		cartItem.setCart(null);
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "cart";
-	}
 }
