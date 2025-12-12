@@ -17,4 +17,6 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, String> 
             OffsetDateTime start,
             OffsetDateTime end,
             PaymentStatus status);
+
+	boolean existsByOrderId(String orderId);
 }

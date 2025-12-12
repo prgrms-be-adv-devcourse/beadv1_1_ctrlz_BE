@@ -50,10 +50,6 @@ public class DepositLog extends BaseEntity {
 	@Column(name = "reference_id")
 	private String referenceId;
 
-	@Override
-	protected String getEntitySuffix() {
-		return "depositlog";
-	}
 
 	public static DepositLog create(String userId, Deposit deposit, TransactionType type, BigDecimal amount,
 		BigDecimal before,
