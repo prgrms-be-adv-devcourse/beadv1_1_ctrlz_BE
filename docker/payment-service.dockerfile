@@ -26,6 +26,7 @@ COPY payment-service/src ./payment-service/src
 
 #빌드
 WORKDIR /app/payment-service
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 #jar 생성
