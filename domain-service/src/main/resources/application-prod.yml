@@ -22,10 +22,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
     url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
-    username: admin
-    password: 1234
-  #    username: "${custom.db.username}"
-  #    password: "${custom.db.password}"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     open-in-view: false
@@ -48,8 +46,7 @@ spring:
     redis:
       port: 6379
       host: redis-svc
-      password: 1234
-  #      password: "${REDIS_PASSWORD}"
+      password: ${REDIS_PASSWORD}
   kafka:
     bootstrap-servers: kafka-svc:9090
     producer:

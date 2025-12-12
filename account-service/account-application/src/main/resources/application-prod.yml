@@ -31,11 +31,8 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    password: 1234
-    #    username: "${DB_USERNAME}"
-    #    password: "${DB_PASSWORD}"
-    #    url: jdbc:mysql://mysql-service:3306/test_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
 
   data:
@@ -49,8 +46,8 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
-      password: 1234
-  #      password: "${REDIS_PASSWORD}"
+          min-idle: 0
+      password: ${REDIS_PASSWORD}
   kafka:
     bootstrap-servers:
       - kafka-svc:9090

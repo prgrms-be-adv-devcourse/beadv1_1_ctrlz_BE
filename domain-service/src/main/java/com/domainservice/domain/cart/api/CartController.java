@@ -27,47 +27,45 @@ public class CartController {
 	private final CartService cartService;
 
 	/**
-	 *  장바구니 조회
-	 *  현재 로그인한 사용자의 장바구니 내역 전체 조회
+	 * 장바구니 조회
+	 * 현재 로그인한 사용자의 장바구니 내역 전체 조회
 	 */
 	@GetMapping
 	public BaseResponse<List<CartItemResponse>> getMyCart(
-		@RequestHeader(value = "X-REQUEST-ID") String userId
-	) {
+			@RequestHeader(value = "X-REQUEST-ID") String userId) {
 		return new BaseResponse<>(cartService.getCartItemList(userId), "장바구니 아이템 리스트 조회 성공했습니다");
 	}
 
 	/**
-	 *  장바구니에 상품 추가
+	 * 장바구니에 상품 추가
 	 * - 기존 아이템이 있으면 수량만 증가
 	 * 현재는 재고 적용 X, 기존 아이템 있으면 에러발생
 	 */
 	@PostMapping("/items")
 	public BaseResponse<CartItemResponse> addItemToCart(
-		@RequestParam("productPostId") String productPostId,
-		@RequestHeader(value = "X-REQUEST-ID") String userId
-	) {
-		return new BaseResponse<>(cartService.addItem(userId, productPostId, 1)
-			, "장바구니 아이템 추가 성공했습니다");
+			@RequestParam("productPostId") String productPostId,
+			@RequestHeader(value = "X-REQUEST-ID") String userId) {
+		return new BaseResponse<>(cartService.addItem(userId, productPostId, 1), "장바구니 아이템 추가 성공했습니다");
 	}
 
 	// /**
-	//  *  장바구니 아이템 수량 변경
-	//  */
+	// * 장바구니 아이템 수량 변경
+	// */
 	// @PatchMapping("/items/{itemId}/quantity")
-	// public BaseResponse<CartItemResponse> updateItemQuantity(@PathVariable String itemId, @RequestParam int quantity) {
-	// 	return new BaseResponse<>(
-	// 		cartService.updateQuantity(itemId, quantity), "장바구니 아이템 수량 변경 성공했습니다");
+	// public BaseResponse<CartItemResponse> updateItemQuantity(@PathVariable String
+	// itemId, @RequestParam int quantity) {
+	// return new BaseResponse<>(
+	// cartService.updateQuantity(itemId, quantity), "장바구니 아이템 수량 변경 성공했습니다");
 	// }
 
 	/**
-	 *  장바구니 아이템 선택/해제
+	 * 장바구니 아이템 선택/해제
 	 */
 	@PatchMapping("/items/{itemId}/select")
 	public BaseResponse<CartItemResponse> toggleItemSelection(@PathVariable String itemId,
-		@RequestParam boolean selected) {
+			@RequestParam boolean selected) {
 		return new BaseResponse<>(
-			cartService.setItemSelected(itemId, selected), selected ? "장바구니에서 체크선택 했습니다" : "장바구니에서 체크해제했습니다");
+				cartService.setItemSelected(itemId, selected), selected ? "장바구니에서 체크선택 했습니다" : "장바구니에서 체크해제했습니다");
 	}
 
 	/**
@@ -86,5 +84,16 @@ public class CartController {
 	@PostMapping
 	public void createCart(@RequestBody CreateCartRequest request) {
 		cartService.addCart(request.userId());
+	}
+
+	/**
+	 * 최근 한 달 동안 장바구니에 추가되거나 삭제된 아이템 조회
+	 */
+	@GetMapping("/recent/{userId}")
+	public List<CartItemResponse> getRecentCartItems(
+			@PathVariable("userId") String userId
+	) {
+		return cartService.getRecentCartItems(userId);
+
 	}
 }

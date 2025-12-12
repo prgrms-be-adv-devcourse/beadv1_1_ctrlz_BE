@@ -31,7 +31,7 @@ spring:
           batch_size: 1000
         order_updates: true
         order_inserts: true
-    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
+    defer-datasource-initialization: true # Hibernate 초기화 후 data.sql 실행
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -39,16 +39,15 @@ spring:
     username: app
     password: 1234
 
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#    url: jdbc:h2:mem:user-db
-#  #
-#  h2:
-#    console:
-#      enabled: true
-
+  # datasource:
+  #   driver-class-name: org.h2.Driver
+  #   username: sa
+  #   password:
+  #   url: jdbc:h2:mem:user-db
+  # #
+  # h2:
+  #   console:
+  #     enabled: true
 
   data:
     redis:
@@ -115,7 +114,6 @@ logging:
   level:
     io.awspring.cloud: DEBUG
     org.springframework.batch: DEBUG
-
 
 # k8s 설정
 eureka:

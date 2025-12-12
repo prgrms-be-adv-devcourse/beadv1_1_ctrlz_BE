@@ -26,6 +26,21 @@ spec:
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: db-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: redis-password
           ports:
             - containerPort: 8081
 #          resources:
