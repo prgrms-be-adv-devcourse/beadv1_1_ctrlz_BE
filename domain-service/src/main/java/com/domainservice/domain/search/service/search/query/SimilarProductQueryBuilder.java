@@ -43,9 +43,10 @@ public class SimilarProductQueryBuilder {
 							.mustNot(
 								Query.of(mustNot -> mustNot.term(term -> term.field("_id").value(baseProduct.getId())))
 							))),
-						Query.of(filter -> filter.term(term -> term.field("delete_status").value("N")
-						))
-					))
+						Query.of(filter -> filter.term(term -> term.field("delete_status").value("N"))),
+						Query.of(filter -> filter.term(term -> term.field("trade_status").value("SELLING")))
+					)
+				)
 			)
 		));
 

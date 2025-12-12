@@ -55,7 +55,7 @@ public class ProductPostSearchController {
 		@RequestParam(defaultValue = "999999999") Long maxPrice,     // ex) "2000000"
 		@RequestParam(required = false) String tags,                 // ex) "친환경,중고"
 		@RequestParam(defaultValue = "ALL") String status,           // ex) "NEW", "GOOD", "ALL"
-		@RequestParam(defaultValue = "ALL") String tradeStatus,  // ex) "SELLING", "ALL"
+		@RequestParam(defaultValue = "ALL") String tradeStatus,      // ex) "SELLING", "ALL"
 
 		// ex) "score", "popular", "price_asc", "price_desc", "newest"
 		@RequestParam(defaultValue = "score") String sort,
