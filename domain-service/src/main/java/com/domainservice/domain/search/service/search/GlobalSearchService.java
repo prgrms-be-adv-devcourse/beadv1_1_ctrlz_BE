@@ -29,8 +29,7 @@ public class GlobalSearchService {
 
 	/**
 	 * 상품 통합 검색 요청 메서드
-	 *
-	 * 검색어(q), 카테고리, 가격 범위, 태그 등 다양한 필터 조건을 조합하여 상품을 검색합니다.
+	 * - 검색어(q), 카테고리, 가격 범위, 태그 등 다양한 필터 조건을 조합하여 상품을 검색
 	 *
 	 * @param request  검색 조건 DTO (검색어, 카테고리, 최소/최대 가격, 태그 등 포함)
 	 * @param pageable 페이징 정보 (page, size, sort)

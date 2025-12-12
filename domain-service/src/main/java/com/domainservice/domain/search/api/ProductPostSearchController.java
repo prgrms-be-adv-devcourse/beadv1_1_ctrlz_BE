@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 상품 게시글 elasticSearch 기능에 대한 REST API를 제공하는 컨트롤러입니다.
+ * elasticSearch를 사용하여 상품 게시글 검색 및 추천 기능을 제공하는 REST API 컨트롤러입니다.
  */
 @Slf4j
 @RestController
@@ -42,7 +42,6 @@ public class ProductPostSearchController {
 	 * @param maxPrice 최대 가격 (optional, default: 999999999)
 	 * @param tags 태그 (optional)
 	 * @param sort 정렬 기준 (optional, default: score)
-	 *             			  - ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
 	 * @param status 상품 상태 (optional, default: ALL)
 	 * @param tradeStatus 상품 판매 상태 (optional, default: SELLING)
 	 * @param pageable 페이징 정보
@@ -57,7 +56,10 @@ public class ProductPostSearchController {
 		@RequestParam(required = false) String tags,                 // ex) "친환경,중고"
 		@RequestParam(defaultValue = "ALL") String status,           // ex) "NEW", "GOOD", "ALL"
 		@RequestParam(defaultValue = "SELLING") String tradeStatus,  // ex) "SELLING", "ALL"
+
+		// ex) "score", "popular", "price_asc", "price_desc", "newest"
 		@RequestParam(defaultValue = "score") String sort,
+
 		@PageableDefault(size = 24) Pageable pageable
 	) {
 		ProductPostSearchRequest request = SearchMapper.toSearchRequest(

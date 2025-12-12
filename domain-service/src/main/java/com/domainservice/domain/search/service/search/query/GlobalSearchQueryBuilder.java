@@ -47,21 +47,20 @@ public class GlobalSearchQueryBuilder {
 	}
 
 	// Bool Query 생성
-	// bool : 여러 쿼리들을 AND/OR처럼 묶어서 한 번에 평가하는 상위 컨테이너
 	private Query buildBoolQuery(ProductPostSearchRequest request) {
 
 		// must 쿼리 생성
-		// must: 검색 점수에도 반영되는 “필수 조건” 영역, 내부 필드가 반드시 만족해야 문서가 검색됨
+		// 검색 점수에 반영되는 필수 조건 영역, 내부 필드가 반드시 만족해야 문서가 검색됨
 		List<Query> mustQueries = new ArrayList<>();
 
 		// multi_match 쿼리 생성
 		if (request.hasQuery()) {
 			mustQueries.add(buildMultiMatchQuery(request.q())); // 검색어가 있을 때 Multi-Match 수행
 		} else {
-			mustQueries.add(Query.of(q -> q.matchAll(m -> m))); // 검색어가 없을 때 전체 조회 (Match All)
+			mustQueries.add(Query.of(q -> q.matchAll(m -> m))); // 검색어가 없을 때는 전체 조회 (Match All)
 		}
 
-		// filter: 입력된 필수 조건들 적용
+		// filter: request로 입력된 필터 조건들 적용
 		List<Query> filterQueries = new ArrayList<>();
 
 		// 삭제되지 않은 상품만 필터
@@ -74,7 +73,7 @@ public class GlobalSearchQueryBuilder {
 			))
 		);
 
-		// 카테고리
+		// 카테고리 필터가 존재하면 적용
 		if (request.hasCategory()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.match(
@@ -87,7 +86,7 @@ public class GlobalSearchQueryBuilder {
 		}
 
 		/*
-		가격 범위
+		가격 범위 필터가 존재하면 적용 (default: 0 ~ 999999999)
 		gte: greater than or equal, 이 값 이상(≥)
 		lte: less than or equal, 이 값 이하(≤)
 		 */
@@ -102,7 +101,7 @@ public class GlobalSearchQueryBuilder {
 			))
 		);
 
-		// 태그
+		// 태그 필터가 존재하면 적용
 		if (request.hasTags()) {
 			for (String tag : request.tags()) {
 				filterQueries.add(
@@ -116,7 +115,7 @@ public class GlobalSearchQueryBuilder {
 			}
 		}
 
-		// 상품 상태 ( "NEW", "GOOD", "ALL"(default) )
+		// 상품 상태 필터가 존재하면 적용 ( "ALL"(default), "NEW", "GOOD" )
 		if (request.hasStatus()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.term(
@@ -128,7 +127,7 @@ public class GlobalSearchQueryBuilder {
 			);
 		}
 
-		// 상품 판매 상태 ( "ALL", "SELLING"(default) )
+		// 상품 판매 상태 필터가 존재하면 적용 ( "SELLING"(default), "ALL" )
 		if (!request.tradeStatus().equals("ALL")) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.term(
@@ -140,7 +139,6 @@ public class GlobalSearchQueryBuilder {
 			);
 		}
 
-
 		// 적용된 must와 filter를 Bool Query로 반환
 		return Query.of(queryBuilder -> queryBuilder.bool(
 			BoolQuery.of(boolQueryBuilder -> boolQueryBuilder
@@ -151,7 +149,7 @@ public class GlobalSearchQueryBuilder {
 	}
 
 	// Multi-Match 쿼리 생성 (검색어)
-	// multi_match: 하나의 검색어를 여러 필드(name, title, description 등)에 동시에 매칭시키는 검색 쿼리
+	// 하나의 검색어를 여러 필드(name, title, description 등)에 동시에 매칭시키는 검색 쿼리
 	private Query buildMultiMatchQuery(String queryString) {
 		return Query.of(queryBuilder -> queryBuilder.multiMatch(
 			MultiMatchQuery.of(multiMatchBuilder -> multiMatchBuilder
@@ -178,7 +176,6 @@ public class GlobalSearchQueryBuilder {
 			case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");              // 높은 가격순
 			case "popular" -> Sort.by(Sort.Direction.DESC, "liked_count");           // 좋아요순
 			case "newest" -> Sort.by(Sort.Direction.DESC, "created_at");             // 최신순
-			case "listing_count_desc" -> Sort.by(Sort.Direction.DESC, "view_count"); // TODO: 인기순 기준(view_count 외) 적용 필요
 			default -> Sort.by(Sort.Direction.DESC, "_score");                       // 기본값: _score 기준 정렬
 		};
 	}
