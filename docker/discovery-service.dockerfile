@@ -12,7 +12,7 @@ COPY discovery-service/src ./discovery-service/src
 
 WORKDIR /app/discovery-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12
 
