@@ -7,6 +7,7 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,7 +27,7 @@ public class SearchBatchScheduleConfiguration {
     }
 
     @Bean
-    public Trigger searchBatchTrigger(JobDetail searchBatchJobDetail) {
+    public Trigger searchBatchTrigger(@Qualifier("searchBatchJobDetail") JobDetail searchBatchJobDetail) {
         return TriggerBuilder.newTrigger()
                 .forJob(searchBatchJobDetail)
                 .withIdentity("searchBatchTrigger", "batchGroup")

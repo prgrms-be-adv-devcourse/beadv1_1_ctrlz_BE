@@ -1,7 +1,9 @@
 package com.search.configuration;
 
-import javax.sql.DataSource;
-
+import com.search.dto.UserBehaviorDto;
+import com.search.listener.SearchBatchSkipListener;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -12,6 +14,7 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +24,7 @@ import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.search.dto.UserBehaviorDto;
-import com.search.listener.SearchBatchSkipListener;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.sql.DataSource;
 
 /**
  * 검색 이력 배치 작업 설정
@@ -69,6 +68,7 @@ public class SearchBatchConfiguration {
 			"behavior_type = :behaviorType, " +
 			"created_at = :createdAt";
 
+	@Qualifier("searchHistoryJob")
 	@Bean
 	public Job searchHistoryJob() {
 		log.info("검색 이력 배치 작업 초기화 (파티셔닝 모드) - chunkSize: {}, skipLimit: {}, poolSize: {}, directory: {}, pattern: {}",
