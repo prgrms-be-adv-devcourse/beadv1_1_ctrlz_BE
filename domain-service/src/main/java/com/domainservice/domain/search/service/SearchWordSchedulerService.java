@@ -3,7 +3,6 @@ package com.domainservice.domain.search.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -74,24 +73,7 @@ public class SearchWordSchedulerService {
 	@TimeTrace
 	@Transactional
 	public void updateDailyPopularWordList(List<KeywordLog> logList, Map<String, DailyPopularWordLog> previousLogMap) {
-		popularWordRedisRepository.decayDailyPopularScores();
-
-		logList
-			.forEach(log -> {
-					DailyPopularWordLog previousLog = previousLogMap.get(log.keyword());
-					popularWordRedisRepository.updateDailyPopularWordList(log, Optional.ofNullable(previousLog));
-				}
-			);
-
-	}
-
-	/**
-	 * DB -> Elasticsearch 최신화
-	 * Kafka Connect 방식 고려
-	 */
-	@Transactional
-	public void updateElasticsearch() {
-		throw new UnsupportedOperationException();
+		popularWordRedisRepository.updateDailyPopularWordList(logList, previousLogMap);
 	}
 
 	/**
@@ -123,7 +105,6 @@ public class SearchWordSchedulerService {
 	@TimeTrace
 	@Transactional
 	public void upsertLogsToElasticsearch(List<SearchWordLog> savedLogs) {
-
 		searchWordRepository.upsertByOriginValue(
 			savedLogs.stream()
 				.map(SearchWordDocumentEntity::createDocumentEntity)

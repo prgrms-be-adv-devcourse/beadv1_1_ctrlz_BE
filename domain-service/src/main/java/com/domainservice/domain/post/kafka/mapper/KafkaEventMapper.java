@@ -17,6 +17,7 @@ public class KafkaEventMapper {
 
 		return ProductPostUpsertedEvent.builder()
 			.id(productPost.getId())
+			.userId(productPost.getUserId())
 			.name(productPost.getName())
 			.title(productPost.getTitle())
 			.description(productPost.getDescription())

@@ -7,7 +7,6 @@ import lombok.Builder;
 /**
  * Elasticsearch 검색 결과 전용 응답 DTO
  */
-
 @Builder
 public record ProductPostSearchResponse(
 	String id,

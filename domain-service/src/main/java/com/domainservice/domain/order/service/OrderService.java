@@ -26,60 +26,56 @@ import com.domainservice.domain.order.model.entity.Order;
 import com.domainservice.domain.order.model.entity.OrderItem;
 import com.domainservice.domain.order.model.entity.OrderItemStatus;
 import com.domainservice.domain.order.model.entity.OrderStatus;
-import com.domainservice.domain.order.repository.OrderItemRepository;
 import com.domainservice.domain.order.repository.OrderJpaRepository;
 import com.domainservice.domain.order.service.producer.PurchaseConfirmedEventProducer;
 import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrderService {
-    private final OrderJpaRepository orderJpaRepository;
-    private final CartItemJpaRepository cartItemJpaRepository;
-    private final ProductPostService productPostService;
-    private final PurchaseConfirmedEventProducer settlementProducer;
-    private final ProductPostEventProducer eventProducer;
-    private final OrderItemRepository orderItemRepository;
+	private final OrderJpaRepository orderJpaRepository;
+	private final CartItemJpaRepository cartItemJpaRepository;
+	private final ProductPostService productPostService;
+	private final PurchaseConfirmedEventProducer settlementProducer;
+	private final ProductPostEventProducer eventProducer;
 
-    /**
-     * 주문 생성
-     * 장바구니 아이템 조회
-     * 주문 엔티티 생성
-     * 주문 아이템 생성 및 주문에 추가
-     * 주문 저장
-     * Order -> PAYMENT_PENDING
-     * OrderItem -> PAYMENT_PENDING
-     */
-    public OrderResponse createOrder(String userId, List<String> cartItemIds) {
+	/**
+	 * 주문 생성
+	 * 장바구니 아이템 조회
+	 * 주문 엔티티 생성
+	 * 주문 아이템 생성 및 주문에 추가
+	 * 주문 저장
+	 * Order -> PAYMENT_PENDING
+	 * OrderItem -> PAYMENT_PENDING
+	 */
+	public OrderResponse createOrder(String userId, List<String> cartItemIds) {
 
-        List<CartItem> cartItems = cartItemJpaRepository.findAllByIdIn(cartItemIds);
+		List<CartItem> cartItems = cartItemJpaRepository.findAllByIdIn(cartItemIds);
 
-        if (cartItems.isEmpty() || cartItems.size() != cartItemIds.size()) {
-            throw new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage());
-        }
+		if (cartItems.isEmpty() || cartItems.size() != cartItemIds.size()) {
+			throw new CustomException(CartExceptionCode.CARTITEM_NOT_FOUND.getMessage());
+		}
 
-        Map<String, ProductPostResponse> productMap = cartItems.stream()
-            .collect(Collectors.toMap(
-                CartItem::getProductPostId,
-                item -> productPostService.getProductPostById(item.getProductPostId())
-            ));
+		Map<String, ProductPostResponse> productMap = cartItems.stream()
+				.collect(Collectors.toMap(
+						CartItem::getProductPostId,
+						item -> productPostService.getProductPostById(item.getProductPostId())));
 
-        String orderName = generateOrderName(cartItems, productMap);
+		String orderName = generateOrderName(cartItems, productMap);
 
-        Order order = Order.builder()
-            .buyerId(userId)
-            .orderName(orderName)
-            .orderStatus(OrderStatus.PAYMENT_PENDING)
-            .build();
+		Order order = Order.builder()
+				.buyerId(userId)
+				.orderName(orderName)
+				.orderStatus(OrderStatus.PAYMENT_PENDING)
+				.build();
 
-        for (CartItem cartItem : cartItems) {
+		for (CartItem cartItem : cartItems) {
 			ProductPostResponse product = productMap.get(cartItem.getProductPostId());
 
             if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {

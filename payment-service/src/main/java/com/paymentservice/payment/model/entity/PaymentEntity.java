@@ -85,28 +85,23 @@ public class PaymentEntity extends BaseEntity {
         this.status = newStatus;
     }
 
-    @Override
-    protected String getEntitySuffix() {
-        return "payment";
-    }
-
     public static PaymentEntity of(String userId, String orderId, BigDecimal requestedAmount,
-        BigDecimal depositUsedAmount, BigDecimal tossChargedAmount,
-        String currency, PayType payType,
-        PaymentStatus status, String paymentKey, OffsetDateTime approvedAt) {
+            BigDecimal depositUsedAmount, BigDecimal tossChargedAmount,
+            String currency, PayType payType,
+            PaymentStatus status, String paymentKey, OffsetDateTime approvedAt) {
         BigDecimal actualAmount = depositUsedAmount.add(tossChargedAmount);
         return PaymentEntity.builder()
-            .usersId(userId)
-            .orderId(orderId)
-            .requestedAmount(requestedAmount)
-            .amount(actualAmount)
-            .depositUsedAmount(depositUsedAmount)
-            .tossChargedAmount(tossChargedAmount)
-            .currency(currency)
-            .payType(payType)
-            .status(status)
-            .paymentKey(paymentKey)
-            .approvedAt(approvedAt)
-            .build();
+                .usersId(userId)
+                .orderId(orderId)
+                .requestedAmount(requestedAmount)
+                .amount(actualAmount)
+                .depositUsedAmount(depositUsedAmount)
+                .tossChargedAmount(tossChargedAmount)
+                .currency(currency)
+                .payType(payType)
+                .status(status)
+                .paymentKey(paymentKey)
+                .approvedAt(approvedAt)
+                .build();
     }
 }

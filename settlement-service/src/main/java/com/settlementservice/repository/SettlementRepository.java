@@ -1,13 +1,8 @@
-package com.settlementservice.repository;
-
-import java.util.List;
+package com.settlement.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.settlementservice.domain.entity.Settlement;
-import com.settlementservice.domain.entity.SettlementStatus;
+import com.settlement.domain.entity.Settlement;
 
 public interface SettlementRepository extends JpaRepository<Settlement, String> {
-
-	List<Settlement> findTop100BySettlementStatusOrderByCreatedAtAsc(SettlementStatus status);
 }

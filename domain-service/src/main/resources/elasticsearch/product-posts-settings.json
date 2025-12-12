@@ -40,10 +40,18 @@
         "type": "synonym_graph",
         "synonyms": [
           "노트북,랩탑,laptop",
-          "핸드폰,휴대폰,스마트폰,smartphone",
+          "핸드폰,휴대폰,스마트폰,smartphone,휴대전화,폰",
           "삼성,샘숭,삼송,samsung",
           "애플,에플,apple,aple",
-          "lg,엘지,앨지,엘쥐,앨쥐"
+          "lg,엘지,앨지,엘쥐,앨쥐",
+          "공기계,자급제",
+          "중고폰,리퍼폰",
+          "갤럭시,갤럭,갤,galaxy,galxy,겔럭시,겔럭,겔",
+          "아이폰,아폰,iphone",
+          "프로,pro",
+          "프로맥스,프맥,pro max,promax",
+          "플러스,플,plus",
+          "미니,mini"
         ],
         "lenient": true
       }

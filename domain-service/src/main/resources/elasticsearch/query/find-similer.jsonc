@@ -1,0 +1,52 @@
+// POST /product-posts/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "more_like_this": {
+            "fields": ["name", "title", "description", "category_name"],
+            "like": [ { "_index": "product-posts", "_id": "현재 조회된 상품 id" } ],
+            "min_term_freq": 1,
+            "min_doc_freq": 1,
+            "max_query_terms": 25,
+            "minimum_should_match": "20%"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": { "name.keyword": { "query": "상품명", "boost": 10.0 } }
+        },
+        {
+          "multi_match": {
+            "query": "상품명",
+            "fields": [
+              "name^3",
+              "name.ngram^2",
+              "title^4",
+              "title.ngram^2",
+              "description^2"
+            ],
+            "type": "best_fields",
+            "fuzziness": "AUTO",
+            "boost": 5.0
+          }
+        },
+        {
+          "match": { "category_name": { "query": "카테고리명", "boost": 5.0 } }
+        },
+        {
+          "terms": { "tags": ["태그1", "태그2"], "boost": 2.0 }
+        }
+      ],
+      "minimum_should_match": "1",
+      "filter": [
+        { "bool": { "must_not": [ { "term": { "_id": "현재 조회된 상품 id" } } ] } },
+        { "term": { "delete_status": "N" } }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 20
+}
