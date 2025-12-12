@@ -1,6 +1,6 @@
 package com.domainservice.domain.cart.service;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class CartService {
 			ProductPostResponse productPostById = productPostService.getProductPostById(
 				cartItem.getProductPostId());
 			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
-				BigDecimal.valueOf(productPostById.price()),
+				productPostById.price(),
 				cartItem.isSelected());
 			response.add(cartItemResponse);
 		}
@@ -101,7 +101,7 @@ public class CartService {
 		cartJpaRepository.save(cart);
 
 		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(),BigDecimal.valueOf(productPostById.price()),
+		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(), productPostById.price(),
 			targetItem.isSelected());
 
 	}
@@ -141,7 +141,7 @@ public class CartService {
 		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
 		return new CartItemResponse(cartItem.getId(), productPostById.title(),
 			productPostById.name(),
-			BigDecimal.valueOf(productPostById.price()),
+			productPostById.price(),
 			savedItem.isSelected());
 	}
 
@@ -163,5 +163,26 @@ public class CartService {
 
 		cartJpaRepository.save(cart);
 
+	}
+
+	/**
+	 * 최근 한 달 동안 장바구니에 추가되거나 삭제된 아이템 조회
+	 */
+	@Transactional(readOnly = true)
+	public List<CartItemResponse> getRecentCartItems(String userId) {
+		LocalDateTime oneMonthAgo = java.time.LocalDateTime.now().minusMonths(1);
+		List<CartItem> recentItems = cartItemJpaRepository.findRecentCartItemsByUserId(userId, oneMonthAgo);
+
+		return recentItems.stream()
+			.map(cartItem -> {
+				ProductPostResponse product = productPostService.getProductPostById(cartItem.getProductPostId());
+				return new CartItemResponse(
+					cartItem.getId(),
+					product.title(),
+					product.name(),
+					product.price(),
+					cartItem.isSelected());
+			})
+			.toList();
 	}
 }
