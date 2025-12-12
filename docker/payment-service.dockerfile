@@ -8,9 +8,6 @@ COPY payment-service/gradle ./payment-service/gradle
 COPY payment-service/gradlew payment-service/gradlew.bat ./payment-service/
 COPY common/build.gradle ./common/
 
-WORKDIR /app/payment-service
-RUN chmod +x ./gradlew && \
-    ./gradlew dependencies --no-daemon --build-cache
 
 WORKDIR /app
 COPY common ./common
@@ -20,7 +17,7 @@ COPY payment-service/src ./payment-service/src
 
 WORKDIR /app/payment-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
 
 
 FROM eclipse-temurin:21-jre-jammy

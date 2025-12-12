@@ -1,9 +1,4 @@
 
-
-plugins {
-    id 'org.springframework.boot'
-}
-
 dependencies {
     implementation project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
@@ -42,3 +37,4 @@ tasks.named('test') {
 jar {
     enabled = true
 }
+

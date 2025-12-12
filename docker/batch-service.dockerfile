@@ -8,19 +8,15 @@ COPY batch-service/gradle ./batch-service/gradle
 
 COPY batch-service/settlement/build.gradle ./batch-service/settlement/
 COPY batch-service/search/build.gradle ./batch-service/search/
+COPY common/build.gradle ./common/
 
-
-WORKDIR /app/batch-service
-RUN chmod +x ./gradlew && \
-    ./gradlew dependencies --no-daemon --build-cache
-
-WORKDIR /app
+COPY common ./common
 COPY observability-config ./observability-config
 COPY batch-service ./batch-service
 
 WORKDIR /app/batch-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12
 
