@@ -73,7 +73,7 @@ public class DummyDataGenerator {
 	 * 로드된 데이터로 임시 테이블 생성
 	 */
 	private void createValueTables() {
-		// 1. 제목 접두사 테이블 생성
+		// 제목 접두사 테이블 생성
 		jdbcTemplate.execute("""
 			CREATE TEMPORARY TABLE IF NOT EXISTS title_prefixes (
 				id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,7 +88,7 @@ public class DummyDataGenerator {
 			(ps, prefix) -> ps.setString(1, prefix)
 		);
 
-		// 2. 상품명 테이블 생성
+		// 상품명 테이블 생성
 		jdbcTemplate.execute("""
 			CREATE TEMPORARY TABLE IF NOT EXISTS product_names (
 				id INT AUTO_INCREMENT PRIMARY KEY,
@@ -111,7 +111,6 @@ public class DummyDataGenerator {
 				);
 
 				if (categoryIds.isEmpty()) {
-					log.warn("⚠️  카테고리를 찾을 수 없음: '{}'", categoryName);
 					continue;
 				}
 
@@ -126,15 +125,12 @@ public class DummyDataGenerator {
 						ps.setString(2, name);
 					}
 				);
-
-				log.info("✅ 카테고리 '{}': {}개 상품명 로드", categoryName, names.size());
-
 			} catch (Exception e) {
-				log.error("❌ 카테고리 '{}' 처리 중 오류: {}", categoryName, e.getMessage());
+				log.error("카테고리 '{}' 처리 중 오류: {}", categoryName, e.getMessage());
 			}
 		}
 
-		// 3. 상태 키워드 테이블 생성
+		// 상태 키워드 테이블 생성
 		jdbcTemplate.execute("""
 			CREATE TEMPORARY TABLE IF NOT EXISTS condition_words (
 				id INT AUTO_INCREMENT PRIMARY KEY,
@@ -149,7 +145,7 @@ public class DummyDataGenerator {
 			(ps, word) -> ps.setString(1, word)
 		);
 
-		// 4. 설명 접두사 테이블 생성
+		// 설명 접두사 테이블 생성
 		jdbcTemplate.execute("""
 			CREATE TEMPORARY TABLE IF NOT EXISTS description_prefixes (
 				id INT AUTO_INCREMENT PRIMARY KEY,
@@ -164,7 +160,7 @@ public class DummyDataGenerator {
 			(ps, prefix) -> ps.setString(1, prefix)
 		);
 
-		// 5. 설명 템플릿 테이블 생성
+		// 설명 템플릿 테이블 생성
 		jdbcTemplate.execute("""
 			CREATE TEMPORARY TABLE IF NOT EXISTS desc_templates (
 				id INT AUTO_INCREMENT PRIMARY KEY,
@@ -178,8 +174,6 @@ public class DummyDataGenerator {
 			descriptions.size(),
 			(ps, desc) -> ps.setString(1, desc)
 		);
-
-		log.info("값 테이블 생성 완료");
 	}
 
 	private record ProductNameData(String categoryId, String name) {
@@ -187,9 +181,8 @@ public class DummyDataGenerator {
 
 	@Transactional
 	public void generateProductPosts(int count) {
-		log.info("상품 데이터 생성 시작: {}개", count);
 
-		// 1. 모든 상품명을 메모리에 로드
+		// 모든 상품명을 메모리에 로드
 		List<ProductNameData> productNamesList = jdbcTemplate.query(
 			"SELECT category_id, name FROM product_names",
 			(rs, rowNum) -> new ProductNameData(
@@ -199,70 +192,90 @@ public class DummyDataGenerator {
 		);
 
 		if (productNamesList.isEmpty()) {
-			log.error("❌ product_names 테이블이 비어있습니다!");
+			log.error("product_names 테이블이 비어있습니다.");
 			return;
 		}
 
-		log.info("📊 사용 가능한 상품명: {}개", productNamesList.size());
-
-		// 2. 배치로 생성
+		// 배치 설정
 		int batchSize = 1000;
 		List<Object[]> batchData = new ArrayList<>();
-
 		Random random = new Random();
 
-		for (int i = 0; i < count; i++) {
-			// 랜덤하게 상품 선택
-			ProductNameData product = productNamesList.get(random.nextInt(productNamesList.size()));
+		// 유저당 생성 로직 설정
+		int productsPerUser = 5; // 한 유저당 생성할 상품 수
+		int totalUsers = (int) Math.ceil((double) count / productsPerUser);
+		int createdCount = 0; // 현재까지 생성된 총 상품 수 추적
 
-			String productId = UUID.randomUUID().toString() + "-product";
+		// 이중 루프: 유저 반복 -> 상품 반복
+		for (int u = 0; u < totalUsers; u++) {
+			// 새로운 유저 ID 생성 (5개 상품이 공유)
 			String userId = UUID.randomUUID().toString() + "-user";
-			String categoryId = product.categoryId();
-			String productName = product.name();
 
-			// 랜덤 값 생성
-			String titlePrefix = titlePrefixes.get(random.nextInt(titlePrefixes.size()));
-			String conditionWord = conditionWords.get(random.nextInt(conditionWords.size()));
-			String descriptionPrefix = descriptionPrefixes.get(random.nextInt(descriptionPrefixes.size()));
-			String descriptionTemplate = descriptions.get(random.nextInt(descriptions.size()));
+			// 해당 유저의 상품 생성
+			for (int p = 0; p < productsPerUser && createdCount < count; p++) {
 
-			String title = productName + " " + conditionWord + " " + titlePrefix;
-			int price = (random.nextInt(2001) * 1000) + 500000;
-			String description = productName + " " + descriptionPrefix + " " + descriptionTemplate;
-			String status = new String[] {"NEW", "GOOD", "FAIR"}[random.nextInt(3)];
-			String tradeStatus = new String[] {"SELLING", "PROCESSING", "SOLDOUT"}[random.nextInt(3)];
-			int viewCount = random.nextInt(1001);
-			int likedCount = random.nextInt(101);
+				// 랜덤하게 상품 선택
+				ProductNameData product = productNamesList.get(random.nextInt(productNamesList.size()));
 
-			LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(365));
+				String productId = UUID.randomUUID().toString() + "-product";
+				// categoryId, productName 등 추출
+				String categoryId = product.categoryId();
+				String productName = product.name();
 
-			batchData.add(new Object[] {
-				productId, userId, categoryId, title, productName, price, description,
-				status, tradeStatus, viewCount, likedCount, "N", createdAt, createdAt
-			});
+				// 랜덤 값 생성 (제목, 가격, 설명 등)
+				String titlePrefix = titlePrefixes.get(random.nextInt(titlePrefixes.size()));
+				String conditionWord = conditionWords.get(random.nextInt(conditionWords.size()));
+				String descriptionPrefix = descriptionPrefixes.get(random.nextInt(descriptionPrefixes.size()));
+				String descriptionTemplate = descriptions.get(random.nextInt(descriptions.size()));
 
-			// 배치 실행
-			if (batchData.size() >= batchSize || i == count - 1) {
-				jdbcTemplate.batchUpdate(
-					"""
-						INSERT INTO product_post 
-						(id, user_id, category_id, title, name, price, description, 
-						 status, trade_status, view_count, liked_count, delete_status, 
-						 created_at, updated_at)
-						VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-						""",
-					batchData
-				);
+				String title = productName + " " + conditionWord + " " + titlePrefix;
+				int price = (random.nextInt(2001) * 1000) + 500000;
+				String description = productName + " " + descriptionPrefix + " " + descriptionTemplate;
+				String status = new String[] {"NEW", "GOOD", "FAIR"}[random.nextInt(3)];
+				String tradeStatus = new String[] {"SELLING", "PROCESSING", "SOLDOUT"}[random.nextInt(3)];
+				int viewCount = random.nextInt(1001);
+				int likedCount = random.nextInt(101);
 
-				batchData.clear();
+				LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(365));
+
+				// 데이터 추가
+				batchData.add(new Object[] {
+					productId, userId, categoryId, title, productName, price, description,
+					status, tradeStatus, viewCount, likedCount, "N", createdAt, createdAt
+				});
+
+				createdCount++;
+
+				// 배치 사이즈가 차면 DB에 저장
+				if (batchData.size() >= batchSize) {
+					saveBatch(batchData);
+				}
 			}
 		}
 
-		log.info("{}개의 상품 데이터 생성 완료", count);
+		// 남은 데이터가 있다면 마지막으로 저장
+		if (!batchData.isEmpty()) {
+			saveBatch(batchData);
+		}
+	}
+
+	// 배치 저장 로직 분리 (중복 코드 제거)
+	private void saveBatch(List<Object[]> batchData) {
+		jdbcTemplate.batchUpdate(
+			"""
+			   INSERT INTO product_post 
+			   (id, user_id, category_id, title, name, price, description, 
+				status, trade_status, view_count, liked_count, delete_status, 
+				created_at, updated_at)
+			   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			   """,
+			batchData
+		);
+		batchData.clear();
 	}
 
 	/**
-	 * Step 3: 이미지 데이터 생성
+	 * 이미지 데이터 생성
 	 */
 	@Transactional
 	public void generateImages(int productCount) {
@@ -295,11 +308,10 @@ public class DummyDataGenerator {
 			""";
 
 		jdbcTemplate.update(sql, productCount);
-		log.info("{}개의 이미지 데이터 생성 완료", productCount);
 	}
 
 	/**
-	 * Step 4: 상품-이미지 관계 생성
+	 * 상품-이미지 관계 생성
 	 */
 	@Transactional
 	public void generateProductPostImages() {

@@ -1,0 +1,26 @@
+// POST /product-posts/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "user_id": "판매자 id" } }
+      ],
+      "filter": [
+        {
+          "bool": {
+            "must_not": [
+              { "term": { "_id": "현재 조회된 상품 id" } }
+            ]
+          }
+        },
+        { "term": { "delete_status": "N" } },
+        { "term": { "trade_status": "SELLING" } }
+      ]
+    }
+  },
+  "sort": [
+    { "created_at": "desc" }
+  ],
+  "from": 0,
+  "size": 20
+}
