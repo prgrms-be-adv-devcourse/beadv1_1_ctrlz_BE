@@ -55,8 +55,4 @@ public class OrderItem extends BaseEntity {
 		this.orderItemStatus = orderItemStatus;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "OrderItems";
-	}
 }

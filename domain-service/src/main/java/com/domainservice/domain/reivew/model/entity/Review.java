@@ -30,11 +30,6 @@ public class Review extends BaseEntity {
     @Column(name = "product_rating", nullable = false)
     private Integer productRating;  //판매자가 판마한 상품에 대한 평점
 
-    @Override
-    protected String getEntitySuffix() {
-        return "comment";
-    }
-
     @Builder
     public Review(
             String userId,

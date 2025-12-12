@@ -45,11 +45,6 @@ public class ProductPostImage extends BaseEntity {
         this.isPrimary = isPrimary != null ? isPrimary : false;
     }
 
-    @Override
-    protected String getEntitySuffix() {
-        return "product_post_images";
-    }
-
     @Builder
     public ProductPostImage(ProductPost productPost, Image image) {
         this.productPost = productPost;
