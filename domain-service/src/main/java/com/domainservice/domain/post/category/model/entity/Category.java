@@ -16,11 +16,6 @@ public class Category extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Override
-    protected String getEntitySuffix() {
-        return "category";
-    }
-
     @Builder
     public Category(String name) {
         this.name = name;
