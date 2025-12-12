@@ -5,20 +5,20 @@ spring:
   ai:
     vectorstore:
       qdrant:
-        host: qdrant-svc
+        host: ${QDRANT_HOST}
         port: 6334
         # api-key: your-api-key  # 필요한 경우 주석 해제
-        collection-name: products
+        collection-name: ${QDRANT_COLLECTION_NAME}
         initialize-schema: true
 
   data:
     redis:
-      host: redis-svc
+      host: ${REDIS_HOST}
       port: 6379
       password: ${REDIS_PASSWORD}
 
   kafka:
-    bootstrap-servers: kafka-svc:9090
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     listener:
       auto-startup: false
     consumer:
@@ -59,9 +59,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
 
 eureka:

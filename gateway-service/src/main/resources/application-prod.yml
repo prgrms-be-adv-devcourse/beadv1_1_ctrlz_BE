@@ -11,7 +11,7 @@ spring:
   data:
     redis:
       port: 6379
-      host: redis-svc
+      host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
 
   cloud:
