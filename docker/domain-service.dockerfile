@@ -25,6 +25,7 @@ COPY domain-service/src ./domain-service/src
 
 #빌드
 WORKDIR /app/domain-service
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 #jar 생성
