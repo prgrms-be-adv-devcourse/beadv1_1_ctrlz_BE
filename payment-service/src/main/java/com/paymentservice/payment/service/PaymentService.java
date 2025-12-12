@@ -1,13 +1,11 @@
 package com.paymentservice.payment.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +17,9 @@ import com.paymentservice.common.model.order.OrderResponse;
 import com.paymentservice.common.model.order.OrderStatus;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.client.PaymentTossClient;
 import com.paymentservice.payment.exception.InvalidOrderAmountException;
 import com.paymentservice.payment.exception.PaymentFailedException;
+import com.paymentservice.payment.exception.PaymentNotFoundException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.PaymentReadyResponse;
 import com.paymentservice.payment.model.dto.PaymentResponse;
@@ -30,13 +28,10 @@ import com.paymentservice.payment.model.dto.TossApprovalResponse;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.entity.PaymentRefundEntity;
 import com.paymentservice.payment.model.enums.PayType;
-import com.paymentservice.payment.model.enums.PaymentStatus;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {

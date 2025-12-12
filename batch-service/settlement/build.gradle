@@ -1,5 +1,4 @@
 
-description = 'settlement'
 
 plugins {
     id 'org.springframework.boot'
@@ -37,7 +36,6 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
 
 
 jar {
