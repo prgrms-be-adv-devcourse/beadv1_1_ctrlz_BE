@@ -40,7 +40,7 @@ public class DepositService {
 	public Deposit getDepositByUserId(String userId) {
 		return depositJpaRepository.findByUserId(userId)
 			.orElseGet(
-				() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(BigDecimal.ZERO).build()));
+				() -> depositJpaRepository.save(Deposit.builder().userId(userId).balance(BigDecimal.ZERO).paymentKey("default-payment-key").build()));
 	}
 
 

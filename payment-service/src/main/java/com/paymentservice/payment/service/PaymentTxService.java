@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
+import com.paymentservice.common.configuration.feign.dto.OrderStatusUpdateRequest;
 import com.paymentservice.common.model.order.OrderResponse;
+import com.paymentservice.common.model.order.OrderStatus;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.event.producer.OrderEventProducer;
 import com.paymentservice.payment.exception.PaymentFailedException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.PaymentResponse;
@@ -27,7 +29,7 @@ public class PaymentTxService {
 
     private final PaymentRepository paymentRepository;
     private final DepositService depositService;
-    private final OrderEventProducer orderEventProducer;
+    private final OrderFeignClient orderFeignClient;
     private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
 
     // 기존 PaymentService에 있던 메서드로, 같은 클래스 내부에서 this.processDepositPayment()형태로 호출되면 @Transactional이 아예 동작하지 않는다.
@@ -55,8 +57,13 @@ public class PaymentTxService {
             );
             paymentRepository.save(paymentEntity);
 
-            // 상태 변경 이벤트
-            orderEventProducer.publishOrderCompleted(order.orderId(), paymentEntity.getId());
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                request.orderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.PAYMENT_COMPLETED, paymentEntity
+                ),
+                userId);
 
             log.info("[예치금 결제 성공] orderId={}, userId={}, request={}",
                 request.orderId(), userId, request);

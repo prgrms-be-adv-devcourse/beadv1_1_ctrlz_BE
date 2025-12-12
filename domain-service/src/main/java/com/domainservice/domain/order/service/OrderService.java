@@ -78,233 +78,270 @@ public class OrderService {
 		for (CartItem cartItem : cartItems) {
 			ProductPostResponse product = productMap.get(cartItem.getProductPostId());
 
-			if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
-				throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
-			}
-			productPostService.updateTradeStatusById(cartItem.getProductPostId(), TradeStatus.PROCESSING);
+            if (!productPostService.isSellingTradeStatus(cartItem.getProductPostId())) {
+                throw new CustomException(OrderExceptionCode.PRODUCT_NOT_AVAILABLE.getMessage());
+            }
+            productPostService.updateTradeStatusById(cartItem.getProductPostId(), TradeStatus.PROCESSING);
 
-			OrderItem orderItem = OrderItem.builder()
-					.productPostId(product.id())
-					.priceSnapshot(BigDecimal.valueOf(product.price()))
-					.orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
-					.build();
+            OrderItem orderItem = OrderItem.builder()
+                .productPostId(product.id())
+                .priceSnapshot(BigDecimal.valueOf(product.price()))
+                .orderItemStatus(OrderItemStatus.PAYMENT_PENDING)
+                .build();
 
-			order.addOrderItem(orderItem);
-		}
+            order.addOrderItem(orderItem);
+        }
 
-		Order savedOrder = orderJpaRepository.save(order);
+        Order savedOrder = orderJpaRepository.save(order);
 
-		// 주문 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
-		publishProductPostUpdateEvents(savedOrder);
+        // 주문 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+        publishProductPostUpdateEvents(savedOrder);
 
-		return toOrderResponse(savedOrder);
+        return toOrderResponse(savedOrder);
 
-	}
+    }
 
-	/**
-	 * 주문 취소 요청
-	 * - 결제 상태에 따라 결제전/결제후 취소 메서드 분기
-	 * Order -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
-	 * OrderItem -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
-	 */
-	public OrderResponse cancelOrder(String orderId, String userId) {
-		Order order = orderJpaRepository.findById(orderId)
-				.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+    /**
+     * 주문 취소 요청
+     * - 결제 상태에 따라 결제전/결제후 취소 메서드 분기
+     * Order -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
+     * OrderItem -> 결제전 : CANCELLED, 결제후 : REFUND_AFTER_PAYMENT
+     */
+    public OrderResponse cancelOrder(String orderId, String userId) {
+        Order order = orderJpaRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
 
-		if (!order.getBuyerId().equals(userId)) {
-			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
-		}
-		switch (order.getOrderStatus()) {
-			case PAYMENT_PENDING -> {
-				order.orderCanceled();
-			}
-			case PAYMENT_COMPLETED -> {
-				// TODO PG사 환불 처리
-				// paymentService.refund(order);
-				order.orderRefundedAfterPayment();
-			}
-			default -> throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
-		}
+        if (!order.getBuyerId().equals(userId)) {
+            throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+        }
+        switch (order.getOrderStatus()) {
+            case PAYMENT_PENDING -> {
+                order.orderCanceled();
+            }
+            case PAYMENT_COMPLETED -> {
+                // TODO PG사 환불 처리
+                // paymentService.refund(order);
+                // order.orderRefundedAfterPayment();
+            }
+            default -> throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
+        }
 
-		for (OrderItem item : order.getOrderItems()) {
-			productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SELLING);
-		}
-		Order savedOrder = orderJpaRepository.save(order);
+        for (OrderItem item : order.getOrderItems()) {
+            productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SELLING);
+        }
+        Order savedOrder = orderJpaRepository.save(order);
 
-		// 취소 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
-		publishProductPostUpdateEvents(savedOrder);
+        // 취소 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+        publishProductPostUpdateEvents(savedOrder);
 
-		return toOrderResponse(savedOrder);
-	}
+        return toOrderResponse(savedOrder);
+    }
 
-	/**
-	 * 주문 일부 취소
-	 * 주문 ID, 사용자 ID와 주문 아이템 ID 를 받아 해당 주문아이템만 취소
-	 * 주문 상태가 '결제대기' 또는 '결제완료' 상태인 경우에만 취소 가능
-	 * 취소된 주문은 결제 대기 시 취소, 결제완료에서는 환불로 상태 변경
-	 */
-	public OrderResponse cancelOrderItem(String orderId, String userId, String orderItemId) {
-		Order order = orderJpaRepository.findById(orderId)
-				.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+    /**
+     * 주문 일부 취소
+     * 주문 ID, 사용자 ID와 주문 아이템 ID 를 받아 해당 주문아이템만 취소
+     * 주문 상태가 '결제대기' 또는 '결제완료' 상태인 경우에만 취소 가능
+     * 취소된 주문은 결제 대기 시 취소, 결제완료에서는 환불로 상태 변경
+     */
+    public OrderResponse cancelOrderItem(String orderId, String userId, String orderItemId) {
+        Order order = orderJpaRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
 
-		if (!order.getBuyerId().equals(userId)) {
-			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
-		}
+        if (!order.getBuyerId().equals(userId)) {
+            throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+        }
 
-		OrderItem targetItem = order.getOrderItems().stream()
-				.filter(item -> item.getId().equals(orderItemId))
-				.findFirst()
-				.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDERITEM_NOT_FOUND.getMessage()));
+        OrderItem targetItem = order.getOrderItems().stream()
+            .filter(item -> item.getId().equals(orderItemId))
+            .findFirst()
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDERITEM_NOT_FOUND.getMessage()));
 
-		switch (order.getOrderStatus()) {
-			case PAYMENT_PENDING:
-				targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
-				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
-				break;
-			case PAYMENT_COMPLETED:
-				// paymentService.refundItem(targetItem);
-				targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
-				productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
-				break;
-			default:
-				throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
-		}
+        switch (order.getOrderStatus()) {
+            case PAYMENT_PENDING:
+                targetItem.setOrderItemStatus(OrderItemStatus.CANCELLED);
+                productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
+                break;
+            case PAYMENT_COMPLETED:
+                // paymentService.refundItem(targetItem);
+                targetItem.setOrderItemStatus(OrderItemStatus.REFUND_AFTER_PAYMENT);
+                productPostService.updateTradeStatusById(targetItem.getProductPostId(), TradeStatus.SELLING);
+                break;
+            default:
+                throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CANCEL.getMessage());
+        }
 
-		boolean allCanceledOrRefunded = order.getOrderItems().stream()
-				.allMatch(item -> item.getOrderItemStatus() == OrderItemStatus.CANCELLED
-						|| item.getOrderItemStatus() == OrderItemStatus.REFUND_AFTER_PAYMENT);
+        boolean allCanceledOrRefunded = order.getOrderItems().stream()
+            .allMatch(item -> item.getOrderItemStatus() == OrderItemStatus.CANCELLED
+                || item.getOrderItemStatus() == OrderItemStatus.REFUND_AFTER_PAYMENT);
 
-		// 모든 아이템이 취소/환불이면 주문 상태도 변경
-		if (allCanceledOrRefunded) {
-			if (order.getOrderStatus() == OrderStatus.PAYMENT_PENDING) {
-				order.setOrderStatus(OrderStatus.CANCELLED);
-			} else if (order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED) {
-				order.setOrderStatus(OrderStatus.REFUND_AFTER_PAYMENT);
-			}
-		}
+        // 모든 아이템이 취소/환불이면 주문 상태도 변경
+        if (allCanceledOrRefunded) {
+            if (order.getOrderStatus() == OrderStatus.PAYMENT_PENDING) {
+                order.setOrderStatus(OrderStatus.CANCELLED);
+            } else if (order.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED) {
+                order.setOrderStatus(OrderStatus.REFUND_AFTER_PAYMENT);
+            }
+        }
 
-		Order savedOrder = orderJpaRepository.save(order);
+        Order savedOrder = orderJpaRepository.save(order);
 
-		// 취소 완료된 target 상품 정보를 ElasticSearch 상품 데이터와 동기화
-		eventProducer.sendUpsertEventById(targetItem.getProductPostId(), EventType.UPDATE);
+        // 취소 완료된 target 상품 정보를 ElasticSearch 상품 데이터와 동기화
+        eventProducer.sendUpsertEventById(targetItem.getProductPostId(), EventType.UPDATE);
 
-		return toOrderResponse(savedOrder);
+        return toOrderResponse(savedOrder);
 
-	}
+    }
 
-	/**
-	 * 주문 구매 확정
-	 * 주문자 일치 여부 확인
-	 * 주문 상태 확인 및 구매확정 가능 여부 판단
-	 * 주문 상태를 구매확정으로 변경
-	 * 변경된 주문 저장
-	 * 응답 데이터 구성 및 반환
-	 * ORDER -> PURCHASE_CONFIRMED
-	 * ORDERItem -> PURCHASE_CONFIRMED
-	 */
-	public OrderResponse confirmPurchase(String orderId, String userId) {
-		Order order = orderJpaRepository.findById(orderId)
-				.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+    /**
+     * 주문 구매 확정
+     * 주문자 일치 여부 확인
+     * 주문 상태 확인 및 구매확정 가능 여부 판단
+     * 주문 상태를 구매확정으로 변경
+     * 변경된 주문 저장
+     * 응답 데이터 구성 및 반환
+     * ORDER -> PURCHASE_CONFIRMED
+     * ORDERItem -> PURCHASE_CONFIRMED
+     */
+    public OrderResponse confirmPurchase(String orderId, String userId) {
+        Order order = orderJpaRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
 
-		if (!order.getBuyerId().equals(userId)) {
-			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
-		}
+        if (!order.getBuyerId().equals(userId)) {
+            throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+        }
 
-		if (order.getOrderStatus() != OrderStatus.PAYMENT_COMPLETED) {
-			throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
-		}
+        if (order.getOrderStatus() != OrderStatus.PAYMENT_COMPLETED) {
+            throw new CustomException(OrderExceptionCode.ORDER_CANNOT_CONFIRM.getMessage());
+        }
 
-		// 주문 상태만 변경
-		order.setOrderStatus(OrderStatus.PURCHASE_CONFIRMED);
-		// 각 아이템 상태는 부분취소 여부에 따라 조건부 변경
-		for (OrderItem item : order.getOrderItems()) {
-			if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
-				item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
-				productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SOLDOUT);
-				// kafka 메시지 발행
-				settlementProducer.send(new SettlementCreatedEvent(item.getId(),
-						productPostService.getProductPostById(item.getProductPostId()).userId(),
-						item.getPriceSnapshot()));
-			}
+        // 주문 상태만 변경
+        order.setOrderStatus(OrderStatus.PURCHASE_CONFIRMED);
+        // 각 아이템 상태는 부분취소 여부에 따라 조건부 변경
+        for (OrderItem item : order.getOrderItems()) {
+            if (item.getOrderItemStatus() == OrderItemStatus.PAYMENT_COMPLETED) {
+                item.setOrderItemStatus(OrderItemStatus.PURCHASE_CONFIRMED);
+                productPostService.updateTradeStatusById(item.getProductPostId(), TradeStatus.SOLDOUT);
+                // kafka 메시지 발행
+                settlementProducer.send(new SettlementCreatedEvent(item.getId(),
+                    productPostService.getProductPostById(item.getProductPostId()).userId(),
+                    item.getPriceSnapshot()
+                ));
+            }
 
-		}
+        }
 
-		Order savedOrder = orderJpaRepository.save(order);
+        Order savedOrder = orderJpaRepository.save(order);
 
-		// 구매 확정 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
-		publishProductPostUpdateEvents(savedOrder);
+        // 구매 확정 완료된 상품 정보를 ElasticSearch 상품 데이터와 동기화
+        publishProductPostUpdateEvents(savedOrder);
 
-		return toOrderResponse(savedOrder);
-	}
+        return toOrderResponse(savedOrder);
+    }
 
-	/**
-	 * 장바구니 아이템 목록으로부터 주문 이름 생성
-	 * "첫번째 상품명 외 N건" 형식으로 생성
-	 */
-	private String generateOrderName(List<CartItem> cartItems, Map<String, ProductPostResponse> productMap) {
-		String firstItemName = productMap.get(cartItems.getFirst().getProductPostId()).title();
-		return (cartItems.size() == 1)
-				? firstItemName
-				: firstItemName + " 외 " + (cartItems.size() - 1) + "건";
-	}
+    /**
+     * 장바구니 아이템 목록으로부터 주문 이름 생성
+     * "첫번째 상품명 외 N건" 형식으로 생성
+     */
+    private String generateOrderName(List<CartItem> cartItems, Map<String, ProductPostResponse> productMap) {
+        String firstItemName = productMap.get(cartItems.getFirst().getProductPostId()).title();
+        return (cartItems.size() == 1)
+            ? firstItemName
+            : firstItemName + " 외 " + (cartItems.size() - 1) + "건";
+    }
 
-	/**
-	 * 공통 응답 변환
-	 */
-	private OrderResponse toOrderResponse(Order order) {
-		return new OrderResponse(
-				order.getOrderName(),
-				order.getId(),
-				order.getBuyerId(),
-				order.getCreatedAt(),
-				order.getTotalAmount(),
-				order.getOrderStatus(),
-				order.getOrderItems().stream()
-						.filter(x -> x.getOrderItemStatus() != OrderItemStatus.CANCELLED
-								&& x.getOrderItemStatus() != OrderItemStatus.REFUND_AFTER_PAYMENT)
-						.map(x -> new OrderItemResponse(
-								x.getId(),
-								x.getPriceSnapshot(),
-								x.getOrderItemStatus()))
-						.toList());
-	}
+    /**
+     * 공통 응답 변환
+     */
+    private OrderResponse toOrderResponse(Order order) {
+        OrderResponse orderResponse = new OrderResponse(
+            order.getOrderName(),
+            order.getId(),
+            order.getBuyerId(),
+            order.getCreatedAt(),
+            order.getTotalAmount(),
+            order.getOrderStatus(),
+            order.getOrderItems().stream()
+                .filter(x -> x.getOrderItemStatus() != OrderItemStatus.CANCELLED
+                    && x.getOrderItemStatus() != OrderItemStatus.REFUND_AFTER_PAYMENT)
+                .map(x -> new OrderItemResponse(
+                    x.getId(),
+                    x.getPriceSnapshot(),
+                    x.getOrderItemStatus()))
+                .toList()
+        );
+        log.info("orderResponse={}", orderResponse.orderId());
 
-	private void publishProductPostUpdateEvents(Order order) {
-		order.getOrderItems().stream()
-				.map(OrderItem::getProductPostId)
-				.forEach(postId -> eventProducer.sendUpsertEventById(postId, EventType.UPDATE));
-	}
+        return orderResponse;
+    }
 
-	// 주문 상세 조회
-	@Transactional(readOnly = true)
-	public OrderResponse getOrderById(String orderId, String userId) {
-		Order order = orderJpaRepository.findById(orderId)
-				.orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+    private void publishProductPostUpdateEvents(Order order) {
+        order.getOrderItems().stream()
+            .map(OrderItem::getProductPostId)
+            .forEach(postId -> eventProducer.sendUpsertEventById(postId, EventType.UPDATE));
+    }
 
-		if (!Objects.equals(userId, order.getBuyerId())) {
-			throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
-		}
+    // 주문 상세 조회
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(String orderId, String userId) {
+        Order order = orderJpaRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+        if (!Objects.equals(userId, order.getBuyerId())) {
+            throw new CustomException(OrderExceptionCode.ORDER_UNAUTHORIZED.getMessage());
+        }
 
-		return toOrderResponse(order);
-	}
+        return toOrderResponse(order);
+    }
 
-	// 주문 목록 조회
-	public PageResponse<List<OrderResponse>> getOrderListByUserId(String userId, Pageable pageable) {
-		Page<Order> orderList = orderJpaRepository.findByBuyerId(userId, pageable);
+    // 주문 목록 조회
+    public PageResponse<List<OrderResponse>> getOrderListByUserId(String userId, Pageable pageable) {
+        Page<Order> orderList = orderJpaRepository.findByBuyerId(userId, pageable);
 
-		return new PageResponse<>(
-				orderList.getNumber(),
-				orderList.getTotalPages(),
-				orderList.getSize(),
-				orderList.hasNext(),
-				orderList.getContent().stream().map(this::toOrderResponse).toList());
-	}
+        return new PageResponse<>(
+            orderList.getNumber(),
+            orderList.getTotalPages(),
+            orderList.getSize(),
+            orderList.hasNext(),
+            orderList.getContent().stream().map(this::toOrderResponse).toList()
+        );
+    }
 
-	// 정산용 주문 목록 조회
-	@Transactional(readOnly = true)
-	public List<OrderResponse> getOrdersForSettlement(LocalDateTime startDate, LocalDateTime endDate) {
-		return orderJpaRepository.findAllByCreatedAtBetween(startDate, endDate).stream()
-				.map(this::toOrderResponse)
-				.toList();
-	}
+    // 주문 상태 변경
+    public void updateStatus(String orderId, OrderStatus orderStatus, String paymentId) {
+        Order order = orderJpaRepository.findById(orderId)
+            .orElseThrow(() -> new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage()));
+
+        // 주문에 연결된 모든 orderItem 조회
+        List<OrderItem> orderItems = orderItemRepository.findOrderItemByOrder(order);
+
+        if (orderItems.isEmpty()) {
+            throw new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage());
+        }
+
+        if (orderStatus.equals(OrderStatus.PAYMENT_COMPLETED)) {
+            order.orderConfirmed(paymentId);
+
+            // 모든 상품 상태 변경
+            for (OrderItem item : orderItems) {
+                productPostService.updateTradeStatusById(
+                    item.getProductPostId(),
+                    TradeStatus.SOLDOUT
+                );
+            }
+
+        } else if (orderStatus.equals(OrderStatus.REFUND_AFTER_PAYMENT)) {
+            order.orderRefundedAfterPayment(paymentId);
+
+            // 모든 상품 상태 원복
+            for (OrderItem item : orderItems) {
+                productPostService.updateTradeStatusById(
+                    item.getProductPostId(),
+                    TradeStatus.PROCESSING
+                );
+            }
+
+        } else {
+            throw new CustomException(OrderExceptionCode.ORDER_NOT_FOUND.getMessage());
+        }
+    }
+
 }

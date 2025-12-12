@@ -22,7 +22,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
@@ -35,7 +35,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true
     username: app
     password: 1234
 
