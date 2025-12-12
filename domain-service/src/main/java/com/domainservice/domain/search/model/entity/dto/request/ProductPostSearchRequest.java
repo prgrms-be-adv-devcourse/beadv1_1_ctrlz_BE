@@ -34,4 +34,6 @@ public record ProductPostSearchRequest(
 
 	public boolean hasStatus() { return !status.equals("ALL"); }
 
+	public boolean hasTradeStatus() { return !tradeStatus.equals("ALL"); }
+
 }

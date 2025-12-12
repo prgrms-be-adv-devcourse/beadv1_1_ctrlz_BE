@@ -127,8 +127,8 @@ public class GlobalSearchQueryBuilder {
 			);
 		}
 
-		// 상품 판매 상태 필터가 존재하면 적용 ( "SELLING"(default), "ALL" )
-		if (!request.tradeStatus().equals("ALL")) {
+		// 상품 판매 상태 필터가 존재하면 적용 ( "ALL" (default), "SELLING" )
+		if (request.hasTradeStatus()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.term(
 					TermQuery.of(termQueryBuilder -> termQueryBuilder
