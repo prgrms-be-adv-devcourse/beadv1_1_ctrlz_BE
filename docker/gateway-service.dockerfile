@@ -11,6 +11,7 @@ COPY observability-config ./observability-config
 COPY gateway-service/src ./gateway-service/src
 
 WORKDIR /app/gateway-service
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12

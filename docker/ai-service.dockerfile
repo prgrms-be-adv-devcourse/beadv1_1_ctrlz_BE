@@ -23,6 +23,7 @@ COPY ai-service ./ai-service
 
 WORKDIR /app/ai-service
 # Build project
+RUN sed -i 's/\r$//' ../gradlew
 RUN ../gradlew build -x test --parallel --no-daemon --build-cache
 
 FROM gcr.io/distroless/java21-debian12

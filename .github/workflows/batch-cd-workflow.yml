@@ -41,7 +41,7 @@ jobs:
       service-name: batch-service-app
       service-dir: .
       secret-dir: batch-service
-      file-name: batch-service.dockerfile
+      file-name: docker/batch-service.dockerfile
 
   deploying:
     needs: releasing

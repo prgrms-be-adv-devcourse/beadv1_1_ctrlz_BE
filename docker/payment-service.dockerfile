@@ -19,6 +19,7 @@ COPY payment-service/src ./payment-service/src
 
 
 WORKDIR /app/payment-service
+RUN sed -i 's/\r$//' ./gradlew
 RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 
