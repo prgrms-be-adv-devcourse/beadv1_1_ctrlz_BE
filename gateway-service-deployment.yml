@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway-service-deploy
+  name: gateway-deploy
   labels:
     app: gateway # deploy 식별 라벨
 spec:   # deployment 면세
@@ -14,8 +14,8 @@ spec:   # deployment 면세
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+      maxUnavailable: 0 # 새 pod ready시 까지 유지
+      maxSurge: 1 # 새 pod 생성
 
   ####### pod 영역
   template:
@@ -28,9 +28,14 @@ spec:   # deployment 면세
           image: docker.io/beatchoi156/gateway-service:latest
           env:
             - name: discovery_default_zone
-              value: "http://discovery-service:8761/eureka/"
+              value: "http://discovery-svc:8761/eureka/"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: redis-password
           ports:
-            - containerPort: 8000
+            - containerPort: 8082
 #          resources:
 #            requests:
 #              memory: "256Mi"
@@ -42,7 +47,7 @@ spec:   # deployment 면세
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8000
+              port: 8082
             initialDelaySeconds: 85
             periodSeconds: 5
             timeoutSeconds: 3
@@ -51,7 +56,7 @@ spec:   # deployment 면세
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8000
+              port: 8082
             initialDelaySeconds: 85
             periodSeconds: 10
             timeoutSeconds: 3
@@ -63,7 +68,7 @@ apiVersion: v1
 kind: Service
 
 metadata:
-  name: gateway-service
+  name: gateway-svc
 spec:
   type: NodePort # 외부 통신 가능하게함
   selector:
@@ -79,6 +84,6 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 8000 # 어디로 포워딩 할건지
-      targetPort: 8000 # 컨테이너 포트 번호
+      port: 8082 # 어디로 포워딩 할건지
+      targetPort: 8082 # 컨테이너 포트 번호
       nodePort: 30000 # 외부와 통신 가능한 포트

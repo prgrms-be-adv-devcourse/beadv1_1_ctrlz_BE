@@ -1,0 +1,56 @@
+name: batch-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+      - deploytest
+    paths:
+      - 'batch-service/**'
+      - 'common/**'
+      - '**/*.dockerfile'
+      - '.github/workflows/batch-cd-workflow.yml'
+      - 'observability-config/**'
+
+  workflow_dispatch:
+    inputs:
+      service-name:
+        description: 'yeongeun-Market batch service for deployment'
+        required: false
+        default: 'sa-batch-service'
+      force-deploy:
+        description: 'Force deployment even without changes'
+        required: false
+        type: boolean
+        default: false
+
+
+jobs:
+
+  releasing:
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: batch-service-app
+      service-dir: .
+      secret-dir: batch-service
+      file-name: batch-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: batch-service-app # pod랑 같은 이름
+      deploy-name: batch-deploy # deployment랑 같은 이름
+      label-name: batch # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+

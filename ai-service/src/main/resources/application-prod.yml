@@ -1,0 +1,97 @@
+server:
+  port: 8084
+
+spring:
+  ai:
+    vectorstore:
+      qdrant:
+        host: qdrant-svc
+        port: 6334
+        # api-key: your-api-key  # 필요한 경우 주석 해제
+        collection-name: products
+        initialize-schema: true
+
+  data:
+    redis:
+      host: redis-svc
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
+  kafka:
+    bootstrap-servers: kafka-svc:9090
+    listener:
+      auto-startup: false
+    consumer:
+      group-id: ai-service-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        properties:
+          spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+          allow.auto.create.topics: false
+
+          observation:
+            enabled: true
+
+  batch:
+    jdbc:
+      platform: mysql
+
+    job:
+      enabled: false
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto:
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-svc:8761/eureka/
+    enabled: true
+
+custom:
+  product-post:
+    topic:
+      event: product-post-events
+
+  recommendation:
+    limit: 3  # 최대 추천 제한 수
+    ttl-hours: 6  # 세션 유지 시간
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  feign:
+    url:
+      domain-service: http://domain-svc:8081
+      account-service: http://account-svc:8080
+
+  product:
+    base-url: http://domain-svc:8081/api/products
+
+
+

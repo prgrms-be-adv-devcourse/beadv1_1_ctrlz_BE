@@ -14,6 +14,8 @@
     <property name="INFO_LOG_FILE" value="${LOG_PATH}/application-info.log"/>
     <property name="WARN_LOG_FILE" value="${LOG_PATH}/application-warn.log"/>
     <property name="ERROR_LOG_FILE" value="${LOG_PATH}/application-error.log"/>
+    <property name="ITEM_VIEW_LOG_FILE" value="${LOG_PATH}/item-view.log"/>
+    <property name="SEARCH_VIEW_LOG_FILE" value="${LOG_PATH}/search-view.log"/>
 
     <!-- appender 첨부 -->
     <include resource="appender-system.xml"/>
@@ -22,6 +24,8 @@
     <include resource="appender-warn.xml"/>
     <include resource="appender-error.xml"/>
     <include resource="appender-logstash.xml"/>
+    <include resource="appender-item-view.xml"/>
+    <include resource="appender-search-view.xml"/>
 
     <!-- prod -->
     <root level="INFO">
@@ -32,6 +36,8 @@
     <logger name="API" level="INFO" additivity="false">
         <appender-ref ref="LOGSTASH"/>
         <appender-ref ref="API_FILE"/>
+        <appender-ref ref="ITEM_VIEW_FILE"/>
+        <appender-ref ref="SEARCH_VIEW_FILE"/>
     </logger>
     
     <!-- name="com" : com 패키지 아래에 생기는 로그만 저장 -->
@@ -41,5 +47,7 @@
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
+        <appender-ref ref="ITEM_VIEW_FILE"/>
+        <appender-ref ref="SEARCH_VIEW_FILE"/>
     </logger>
 </configuration>
