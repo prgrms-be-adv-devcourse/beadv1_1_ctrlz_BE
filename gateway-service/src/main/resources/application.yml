@@ -38,6 +38,13 @@ spring:
               filters:
                 - StripPrefix=1
 
+            - id: ai-service
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/ai-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
