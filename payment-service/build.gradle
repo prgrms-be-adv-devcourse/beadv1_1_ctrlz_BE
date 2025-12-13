@@ -99,10 +99,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 // QueryDSL 설정
 tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))

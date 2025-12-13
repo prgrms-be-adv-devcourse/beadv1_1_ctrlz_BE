@@ -74,8 +74,10 @@ public class EmbeddedRedisConfiguration {
 	@Bean
 	public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 		RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-				.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-				.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+				.serializeKeysWith(
+						RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+				.serializeValuesWith(RedisSerializationContext.SerializationPair
+						.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
 		Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 		cacheConfigurations.put(CacheType.VERIFICATION_TRY.name(), defaultConfig.entryTtl(Duration.ofMinutes(2)));
@@ -99,18 +101,14 @@ public class EmbeddedRedisConfiguration {
 				port = findAvailablePort();
 			}
 
-			redisServer = RedisServer.builder()
-					.port(port)
-					.setting("daemonize no")
-					.setting("appendonly no")
-					.setting("save \"\"")
-					.build();
+			redisServer = new RedisServer(port);
 
 			redisServer.start();
 			log.info("Embedded Redis started successfully on port {}", port);
 
 		} catch (Exception e) {
-			log.error("Failed to start embedded Redis on port {}. Tests will run without Redis cache. Error: {}", port, e.getMessage());
+			log.error("Failed to start embedded Redis on port {}. Tests will run without Redis cache. Error: {}", port,
+					e.getMessage());
 			// Redis 없이도 테스트 진행 가능하도록 예외 던지지 않음
 		}
 	}
@@ -160,7 +158,7 @@ public class EmbeddedRedisConfiguration {
 	// Unix/macOS용
 	private boolean isPortInUseOnUnix(int port) {
 		try {
-			String[] command = {"/bin/sh", "-c", "lsof -i :" + port + " | grep LISTEN"};
+			String[] command = { "/bin/sh", "-c", "lsof -i :" + port + " | grep LISTEN" };
 			Process process = Runtime.getRuntime().exec(command);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				return reader.readLine() != null;
