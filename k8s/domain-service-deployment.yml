@@ -74,7 +74,7 @@ kind: Service
 metadata:
   name: domain-svc
 spec:
-  #  type: NodePort
+  type: NodePort
   selector:
     app: domain # 이 라벨을 가진 Pod들에게 트래픽 분산
 
@@ -90,3 +90,4 @@ spec:
       protocol: TCP
       port: 8081 # 어디로 포워딩 할건지
       targetPort: 8081 # 컨테이너 포트 번호
+      nodePort: 30002

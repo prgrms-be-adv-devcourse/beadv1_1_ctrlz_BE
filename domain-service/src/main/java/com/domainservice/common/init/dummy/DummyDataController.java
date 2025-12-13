@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DummyDataController {
 
-	private final DummyDataGenerator generator;
+	private final K8sDummyDataGenerator generator;
 
 	@PostMapping("/generate")
 	@ResponseStatus(HttpStatus.CREATED)
