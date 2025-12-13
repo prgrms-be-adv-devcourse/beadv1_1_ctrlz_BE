@@ -54,30 +54,27 @@ public class SecurityConfiguration {
 		CorsConfiguration config = new CorsConfiguration();
 
 		// 프론트 실제 origin
-		config.setAllowedOrigins(List.of("http://localhost:8080"));
+		config.setAllowedOrigins(List.of(""));
 
 		// 허용 HTTP 메서드
 		config.setAllowedMethods(List.of(
-			HttpMethod.GET.name(),
-			HttpMethod.POST.name(),
-			HttpMethod.PUT.name(),
-			HttpMethod.PATCH.name(),
-			HttpMethod.DELETE.name(),
-			HttpMethod.OPTIONS.name()
-		));
+				HttpMethod.GET.name(),
+				HttpMethod.POST.name(),
+				HttpMethod.PUT.name(),
+				HttpMethod.PATCH.name(),
+				HttpMethod.DELETE.name(),
+				HttpMethod.OPTIONS.name()));
 
 		// 허용 헤더
 		config.setAllowedHeaders(List.of(
-			HttpHeaders.AUTHORIZATION,
-			HttpHeaders.CONTENT_TYPE,
-			"X-REQUEST-ID",
-			"X-Real-IP"
-		));
+				HttpHeaders.AUTHORIZATION,
+				HttpHeaders.CONTENT_TYPE,
+				"X-REQUEST-ID",
+				"X-Real-IP"));
 
 		// 노출 헤더
 		config.setExposedHeaders(List.of(
-			HttpHeaders.AUTHORIZATION
-		));
+				HttpHeaders.AUTHORIZATION));
 
 		config.setAllowCredentials(true);
 		config.setMaxAge(3600L);
