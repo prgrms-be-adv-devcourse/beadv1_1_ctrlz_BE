@@ -63,9 +63,21 @@ spring:
                 - Path=/api/searches/redis-test
                 - Method=GET,DELETE
 
-            # 결제 API (공개)
+            # 결제 API
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/success
+                - Method=GET
+
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/fail
+                - Method=GET
+
             - id: payment-api-protected
-              uri: lb://DOMAIN-SERVICE
+              uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
