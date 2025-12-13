@@ -17,25 +17,23 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class SpringDocConfiguration {
 
+	@Value("${openapi.service.url}")
+	private String gatewayUrl;
+
 	@Bean
-	public OpenAPI customOpenAPI(
-		@Value("${openapi.service.url}") String gatewayUrl
-	) throws IOException {
+	public OpenAPI customOpenAPI() throws IOException {
 
 		ClassPathResource resource = new ClassPathResource("docs/responseDescription.txt");
 		String description = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
 		return new OpenAPI()
-			.servers(List.of(
-				new Server().url(gatewayUrl).description("Gateway Server"),
-				new Server().url("http://localhost:8081").description("Direct Access")
-			))
-			.servers(List.of(new Server().url(gatewayUrl).description("Gateway Server")))
+			.servers(
+				List.of(new Server().url(gatewayUrl).description("Gateway Server"))
+			)
 			.info(new Info()
 				.title("연근마켓 - Domain Service API")
 				.version("v1.0.0")
 				.description(description)
 			);
 	}
-
 }
