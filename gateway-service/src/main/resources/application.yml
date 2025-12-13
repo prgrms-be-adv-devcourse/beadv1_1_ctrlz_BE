@@ -31,6 +31,13 @@ spring:
               filters:
                 - StripPrefix=1
 
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/payment-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
@@ -202,4 +209,6 @@ springdoc:
     urls:
       - name: domain-service
         url: /domain-service/v3/api-docs
+      - name: payment-service
+        url: /payment-service/v3/api-docs
     path: /swagger-ui.html

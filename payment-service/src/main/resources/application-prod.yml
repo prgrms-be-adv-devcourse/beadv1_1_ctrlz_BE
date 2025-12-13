@@ -76,3 +76,14 @@ eureka:
       defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
