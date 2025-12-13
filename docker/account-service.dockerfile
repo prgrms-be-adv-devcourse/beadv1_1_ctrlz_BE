@@ -28,8 +28,7 @@ COPY account-service/account-application ./account-service/account-application
 
 #빌드
 WORKDIR /app/account-service
-RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 
 
