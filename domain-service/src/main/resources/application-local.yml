@@ -126,8 +126,16 @@ custom:
 logging:
   config: classpath:logback-local.xml
 
+openapi:
+  service:
+    url: http://localhost:8082
+
 springdoc:
   # response의 mediaType을 json으로 통일
   # 파일을 첨부하는 multipart/form-data 형태의 경우 문서에 직접 작성해주어야 함
   default-produces-media-type: application/json
   default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

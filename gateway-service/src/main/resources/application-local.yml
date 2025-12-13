@@ -23,6 +23,18 @@ spring:
       server:
         webflux:
           routes:
+          # ============================================
+          # SWAGGER UI 관련
+          # ============================================
+
+            # 1. domain-service api-docs (하위 경로 포함!)
+            - id: domain-service-docs
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/domain-service-docs/**
+              filters:
+                - StripPrefix=1
+
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
@@ -184,6 +196,16 @@ spring:
 
 logging:
   config: classpath:logback-local.xml
+  level:
+    org.springframework.cloud.gateway: TRACE
+    reactor.netty.http.client: DEBUG
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: domain-service-docs
+        url: /domain-service-docs/v3/api-docs
+    path: /swagger-ui.html
 
 services:
   account:
