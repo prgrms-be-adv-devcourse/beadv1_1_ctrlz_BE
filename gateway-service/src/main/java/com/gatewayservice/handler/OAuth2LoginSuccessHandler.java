@@ -1,9 +1,11 @@
 package com.gatewayservice.handler;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
-
+import com.gatewayservice.client.AccountServiceClient;
+import com.gatewayservice.dto.LoginRequest;
+import com.gatewayservice.utils.CookieProvider;
+import com.gatewayservice.utils.ServletRequestUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -15,15 +17,11 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.gatewayservice.client.AccountServiceClient;
-import com.gatewayservice.dto.LoginRequest;
-import com.gatewayservice.utils.CookieProvider;
-import com.gatewayservice.utils.ServletRequestUtils;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -77,8 +75,9 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 							response.refreshToken(),
 							TokenType.REFRESH_TOKEN.getDuration());
 
-					exchange.getResponse().addCookie(accessTokenCookie);
-					exchange.getResponse().addCookie(refreshTokenCookie);
+					// 쿠키 설정 주석 처리 (Cross-Domain 문제로 URL 파라미터 방식 사용)
+					// exchange.getResponse().addCookie(accessTokenCookie);
+					// exchange.getResponse().addCookie(refreshTokenCookie);
 
 					// ip와 토큰 redis에 저장
 					if (userIp != null && response.accessToken() != null) {
@@ -86,7 +85,7 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 						log.info("OAuth2 로그인 - IP/Token 저장 완료: ip={}", userIp);
 					}
 
-					String targetPath = response.isNewUser() ? "/signup" : "/";
+					String targetPath = response.isNewUser() ? "/signup" : "";
 
 					String redirectUrl = UriComponentsBuilder.fromUriString(this.redirectUrl)
 							.path(targetPath)
@@ -94,6 +93,8 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 							.queryParam("email", response.email())
 							.queryParam("profileImage", response.profileImageUrl())
 							.queryParamIfPresent("provider", Optional.ofNullable(response.provider()))
+							.queryParam("accessToken", response.accessToken()) // 토큰 추가
+							.queryParam("refreshToken", response.refreshToken()) // 토큰 추가
 							.encode()
 							.toUriString();
 

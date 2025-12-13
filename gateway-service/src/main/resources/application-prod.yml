@@ -198,7 +198,7 @@ eureka:
 
 custom:
   # 수정 필요
-  redirect-url: https://yeongeun.vercel.app/
+  redirect-url: https://yeongeun.vercel.app
 
 logging:
   config: classpath:logback-prod.xml

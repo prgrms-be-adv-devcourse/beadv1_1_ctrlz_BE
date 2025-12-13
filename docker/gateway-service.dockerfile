@@ -24,7 +24,7 @@ COPY gateway-service/src ./gateway-service/src
 
 #빌드
 WORKDIR /app/gateway-service
-RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew build -x test --parallel --no-daemon --build-cache
 
 #jar 생성
 # 이미지 압축 라이브러리 호환성을 위해 jammy 유지
