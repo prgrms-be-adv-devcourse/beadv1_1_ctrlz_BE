@@ -87,7 +87,7 @@ data:
       `password` VARCHAR(255),
       `profile_image_url` VARCHAR(1000),
       `phone_number` VARCHAR(255) NOT NULL,
-      `zip_code` VARCHAR(20),
+      `zip_code` VARCHAR(500),
       `city` VARCHAR(500),
       `street` VARCHAR(500),
       `state` VARCHAR(500),
@@ -142,7 +142,40 @@ data:
       `approved_at` DATETIME,
       PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        
+    CREATE TABLE deposits
+    (
+        id            VARCHAR(255) NOT NULL,
+        delete_status VARCHAR(255) NULL,
+        created_at    datetime     NOT NULL,
+        updated_at    datetime     NOT NULL,
+        users_id      VARCHAR(255) NOT NULL,
+        balance       DECIMAL      NOT NULL,
+        payment_key   VARCHAR(255) NULL,
+        CONSTRAINT pk_deposits PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
+    
+    CREATE TABLE deposit_logs
+    (
+        id               VARCHAR(255) NOT NULL,
+        delete_status    VARCHAR(255) NULL,
+        created_at       datetime     NOT NULL,
+        updated_at       datetime     NOT NULL,
+        users_id         VARCHAR(255) NOT NULL,
+        deposit_id       VARCHAR(255) NOT NULL,
+        transaction_type VARCHAR(255) NOT NULL,
+        amount           DECIMAL      NOT NULL,
+        before_balance   DECIMAL      NOT NULL,
+        after_balance    DECIMAL      NOT NULL,
+        reference_id     VARCHAR(255) NULL,
+        CONSTRAINT pk_deposit_logs PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+        ALTER TABLE deposit_logs
+            ADD CONSTRAINT FK_DEPOSIT_LOGS_ON_DEPOSIT FOREIGN KEY (deposit_id) REFERENCES deposits (id);
+
+        
     -- refund 테이블
     CREATE TABLE IF NOT EXISTS refund (
       `id` VARCHAR(36) NOT NULL,
@@ -332,7 +365,7 @@ data:
       `created_at` DATETIME NOT NULL,
       `updated_at` DATETIME NOT NULL,
       `cart_id` VARCHAR(36) NOT NULL,
-      `productPost_id` VARCHAR(36) NOT NULL,
+      `product_post_id` VARCHAR(36) NOT NULL,
       `selected` BOOLEAN NOT NULL DEFAULT TRUE,
       PRIMARY KEY (`id`),
       FOREIGN KEY (`cart_id`) REFERENCES carts(`id`) ON DELETE CASCADE
@@ -356,12 +389,12 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
     -- Ordered_items 테이블
-    CREATE TABLE IF NOT EXISTS Ordered_items (
+    CREATE TABLE IF NOT EXISTS ordered_items (
       `id` VARCHAR(36) NOT NULL,
       `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
       `created_at` DATETIME NOT NULL,
       `updated_at` DATETIME NOT NULL,
-      `productPost_id` VARCHAR(36) NOT NULL,
+      `product_post_id` VARCHAR(36) NOT NULL,
       `order_id` VARCHAR(36) NOT NULL,
       `price_snapshot` DECIMAL(19, 2) NOT NULL,
       `order_item_status` ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETED', 'CANCELLED', 'REFUND_AFTER_PAYMENT', 'PURCHASE_CONFIRMED', 'SETTLED') NOT NULL,
@@ -531,8 +564,9 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
     INSERT INTO BATCH_STEP_EXECUTION_SEQ (ID, UNIQUE_KEY) SELECT 0, '0' FROM DUAL WHERE NOT EXISTS (SELECT * FROM BATCH_STEP_EXECUTION_SEQ);
+  
+  
 
-    
     ALTER TABLE users ADD INDEX idx_users_oauth_id(`oauth_id`);
     ALTER TABLE users ADD INDEX idx_users_email(`email`);
     
