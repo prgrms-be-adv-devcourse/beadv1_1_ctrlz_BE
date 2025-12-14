@@ -60,11 +60,11 @@ public class K8sDummyDataGenerator {
         log.info("=== 더미 데이터 생성 완료 ===");
         log.info("소요 시간: {}초", duration / 1000);
 
-        titlePrefixes.clear();
-        productNames.clear();
-        conditionWords.clear();
-        descriptionPrefixes.clear();
-        descriptions.clear();
+        // titlePrefixes.clear();
+        // productNames.clear();
+        // conditionWords.clear();
+        // descriptionPrefixes.clear();
+        // descriptions.clear();
 
     }
 
@@ -242,10 +242,10 @@ public class K8sDummyDataGenerator {
                  converted_content_type, image_target, delete_status, created_at, updated_at)
                 SELECT
                 	CONCAT(UUID(), '-images'),
-                	CONCAT('product_', SUBSTRING(p.id, 1, 8), '.jpg'),
-                	CONCAT('product_', SUBSTRING(p.id, 1, 8), '.webp'),
-                	CONCAT('https://s3.amazonaws.com/products/', SUBSTRING(p.id, 1, 8), '.webp'),
-                	CONCAT('products/', SUBSTRING(p.id, 1, 8), '.webp'),
+                	CONCAT('product_', p.id, '.jpg'),
+                	CONCAT('product_', p.id, '.webp'),
+                	CONCAT('https://s3.amazonaws.com/products/', p.id, '.webp'),
+                	CONCAT('products/', p.id, '.webp'),
                 	FLOOR(1000000 + RAND() * 2000000),
                 	'image/jpeg',
                 	FLOOR(250000 + RAND() * 500000),
@@ -257,7 +257,7 @@ public class K8sDummyDataGenerator {
                 FROM product_post p
                 WHERE NOT EXISTS (
                 	SELECT 1 FROM images i
-                	WHERE i.s3_key = CONCAT('products/', SUBSTRING(p.id, 1, 8), '.webp')
+                	WHERE i.s3_key = CONCAT('products/', p.id, '.webp')
                 )
                 AND p.id NOT LIKE '01939a8c-40__-7000-8000-000000000001-product'
                 LIMIT ?
@@ -285,7 +285,7 @@ public class K8sDummyDataGenerator {
                 	p.created_at,
                 	p.created_at
                 FROM product_post p
-                INNER JOIN images i ON i.s3_key = CONCAT('products/', SUBSTRING(p.id, 1, 8), '.webp')
+                INNER JOIN images i ON i.s3_key = CONCAT('products/', p.id, '.webp')
                 WHERE NOT EXISTS (
                 	SELECT 1 FROM product_post_images ppi
                 	WHERE ppi.product_post_id = p.id
