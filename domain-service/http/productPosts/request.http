@@ -4,7 +4,7 @@
 ### 상품 등록
 POST http://127.0.0.1:30000/api/product-posts
 Content-Type: multipart/form-data; boundary=WebAppBoundary
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTliMTg3Zi0xZWE0LTdmM2YtYWUyZi1jMDE5MTljMmQ5OGQiLCJ1c2VySWQiOiIwMTliMTg3Zi0xZWE0LTdmM2YtYWUyZi1jMDE5MTljMmQ5OGQiLCJyb2xlcyI6WyJVU0VSIiwiU0VMTEVSIiwiQURNSU4iXSwiaWF0IjoxNzY1Njc2NzYxLCJleHAiOjE3NjY1NzY3NjF9.Zf1idMbTfSPElkAZhfVv0mQi0R2hEA3wpb5XWchFhJGARWhkdW7zUhWUQIiSf7se
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTliMWJmYy1iNjExLTcwZjMtODM4OS1lYjk2ZmUwMzc3ZWEiLCJ1c2VySWQiOiIwMTliMWJmYy1iNjExLTcwZjMtODM4OS1lYjk2ZmUwMzc3ZWEiLCJyb2xlcyI6WyJVU0VSIiwiU0VMTEVSIl0sImlhdCI6MTc2NTcwNDY2NSwiZXhwIjoxNzY2NjA0NjY1fQ.m3nD6EVOBVaRJ8Dy4l7MAe3DUlAVKR9d5nbG7DCjh1Gr92eAZ9l1KMPEbpdrIv1b
 
 --WebAppBoundary
 Content-Disposition: form-data; name="images"; filename="test.png"
@@ -21,7 +21,7 @@ Content-Type: application/json
 "name": "아이폰 15 프로 256GB 블랙 티타늄",
 "price": 1250000,
 "description": "구매한지 3개월 되 상태 매우 좋습니다. 풀박스입니다.",
- "categoryId": "01939a8c-1234-7000-8000-000000000006-category",
+ "categoryId": "01939a8c-1234-7000-8000-000000000006",
  "status": "NEW",
  "tagIds": []
 }

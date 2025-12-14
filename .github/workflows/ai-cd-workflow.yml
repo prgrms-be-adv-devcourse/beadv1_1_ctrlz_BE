@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - deploytest
+      - pushtest
     paths:
       - 'ai-service/**'
       - 'observability-config/**'
@@ -42,15 +42,15 @@ jobs:
       secret-dir: ai-service
       file-name: docker/ai-service.dockerfile
 
-  deploying:
-    needs: releasing
-    uses: ./.github/workflows/deploy-workflow.yml
-    secrets: inherit
-    with:
-      pod-name: ai-service-app # pod랑 같은 이름
-      deploy-name: ai-deploy # deployment랑 같은 이름
-      label-name: ai # pod 라벨 이름
-      image-tag: ${{ needs.releasing.outputs.tag_name }}
+#  deploying:
+#    needs: releasing
+#    uses: ./.github/workflows/deploy-workflow.yml
+#    secrets: inherit
+#    with:
+#      pod-name: ai-service-app # pod랑 같은 이름
+#      deploy-name: ai-deploy # deployment랑 같은 이름
+#      label-name: ai # pod 라벨 이름
+#      image-tag: ${{ needs.releasing.outputs.tag_name }}
 
 
 
