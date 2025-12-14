@@ -48,7 +48,7 @@
     <!-- name="com" : com 패키지 아래에 생기는 로그만 저장 -->
     <!-- additivity="false" : 로그 중복 방지 -->
     <logger name="com" level="INFO" additivity="false">
-
+        <appender-ref ref="CONSOLE"/>
 <!--        <appender-ref ref="LOGSTASH"/>-->
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
