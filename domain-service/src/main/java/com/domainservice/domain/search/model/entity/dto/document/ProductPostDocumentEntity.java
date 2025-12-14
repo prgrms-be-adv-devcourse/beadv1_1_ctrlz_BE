@@ -102,7 +102,7 @@ public class ProductPostDocumentEntity {
 		name = "created_at",
 		type = FieldType.Date,
 		format = {},
-		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX||uuuu-MM-dd'T'HH:mm:ss.SSSX||uuuu-MM-dd'T'HH:mm:ssX"
+		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss"
 	)
 	private LocalDateTime createdAt;
 
@@ -110,7 +110,7 @@ public class ProductPostDocumentEntity {
 		name = "updated_at",
 		type = FieldType.Date,
 		format = {},
-		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX||uuuu-MM-dd'T'HH:mm:ss.SSSX||uuuu-MM-dd'T'HH:mm:ssX"
+		pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSSSS||uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss"
 	)
 	private LocalDateTime updatedAt;
 
