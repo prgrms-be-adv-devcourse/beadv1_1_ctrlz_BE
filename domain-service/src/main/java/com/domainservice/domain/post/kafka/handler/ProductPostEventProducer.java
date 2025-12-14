@@ -1,11 +1,5 @@
 package com.domainservice.domain.post.kafka.handler;
 
-import static com.common.exception.vo.ProductPostExceptionCode.*;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
-
 import com.common.event.productPost.EventType;
 import com.common.event.productPost.ProductPostDeletedEvent;
 import com.common.event.productPost.ProductPostUpsertedEvent;
@@ -15,9 +9,14 @@ import com.domainservice.domain.post.kafka.mapper.KafkaEventMapper;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import static com.common.exception.vo.ProductPostExceptionCode.CATEGORY_NOT_FOUND;
+import static com.common.exception.vo.ProductPostExceptionCode.PRODUCT_POST_NOT_FOUND;
 
 @Slf4j
 @Service
