@@ -22,8 +22,6 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    listener:
-      auto-startup: false
     consumer:
       group-id: ai-service-group
       auto-offset-reset: latest
@@ -31,6 +29,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+        spring.json.type.mapping: com.common.event.productPost.ProductPostUpsertedEvent:com.aiservice.domain.event.ProductPostUpsertedEvent,com.common.event.productPost.ProductPostDeletedEvent:com.aiservice.domain.event.ProductPostDeletedEvent,com.common.event.productPost.ProductPostSearchedEvent:com.aiservice.domain.event.ProductPostSearchedEvent
         allow.auto.create.topics: false
         observation:
           enabled: true

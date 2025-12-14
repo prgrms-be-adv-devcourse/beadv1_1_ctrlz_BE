@@ -50,7 +50,7 @@ public class QdrantVectorRepository implements VectorRepository {
 	public Optional<Document> findDocumentByProductId(String productId) {
 		FilterExpressionBuilder filter = new FilterExpressionBuilder();
 		SearchRequest request = SearchRequest.builder()
-				.query("")
+				.query("product") // OpenAI 에러 방지용 dummy query
 				.topK(3)
 				.filterExpression(filter.eq("productId", productId).build())
 				.build();
@@ -91,7 +91,7 @@ public class QdrantVectorRepository implements VectorRepository {
 		FilterExpressionBuilder filter = new FilterExpressionBuilder();
 		List<Document> documents = qdrantVectorStore.similaritySearch(
 				SearchRequest.builder()
-						.query("")
+						.query("product") // OpenAI 에러 방지용 dummy query
 						.topK(5) // 혹시 중복된게 있을 수 있으니 여유있게
 						.filterExpression(filter.eq("productId", productId).build())
 						.build());
