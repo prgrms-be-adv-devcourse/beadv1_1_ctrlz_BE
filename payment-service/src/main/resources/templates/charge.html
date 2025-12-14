@@ -1,120 +1,123 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>결제 확인</title>
-    <link rel="stylesheet" th:href="@{/modal-page.css}" />
+    <link rel="stylesheet" th:href="@{/api/payments/css/modal-page.css}" />
     <script src="https://js.tosspayments.com/v2/standard"></script>
 </head>
 
 <body>
-<div class="wrapper">
+    <div class="wrapper">
 
-    <div class="product-section">
+        <div class="product-section">
 
-        <div class="product-info">
-            <div class="product-details">
-                <h2>예치금 충전하기</h2>
+            <div class="product-info">
+                <div class="product-details">
+                    <h2>예치금 충전하기</h2>
+                </div>
+            </div>
+
+            <div class="product-summary">
+
+                <div class="summary-row">
+                    <span class="summary-label">충전 금액</span>
+                    <span id="paid-deposit" class="summary-value">₩ [[ ${#numbers.formatInteger(amount, 3, 'COMMA')}
+                        ]]</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">할인</span>
+                    <span class="summary-value">₩ 0</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">총 결제금액</span>
+                    <span id="final-price" class="summary-value">₩ [[ ${#numbers.formatInteger(amount, 3, 'COMMA')}
+                        ]]</span>
+                </div>
+
             </div>
         </div>
 
-        <div class="product-summary">
+        <div class="box_section">
+            <div id="payment-method"></div>
+            <div id="agreement"></div>
 
-            <div class="summary-row">
-                <span class="summary-label">충전 금액</span>
-                <span id="paid-deposit" class="summary-value">₩ [[ ${#numbers.formatInteger(amount, 3, 'COMMA')} ]]</span>
+            <div class="result wrapper">
+                <button class="button" id="payment-button" style="margin-top: 30px">
+                    충전하기
+                </button>
             </div>
-            <div class="summary-row">
-                <span class="summary-label">할인</span>
-                <span class="summary-value">₩ 0</span>
-            </div>
-
-            <div class="summary-row">
-                <span class="summary-label">총 결제금액</span>
-                <span id="final-price"
-                      class="summary-value">₩ [[ ${#numbers.formatInteger(amount, 3, 'COMMA')} ]]</span>
-            </div>
-
         </div>
+
     </div>
 
-    <div class="box_section">
-        <div id="payment-method"></div>
-        <div id="agreement"></div>
+    <script>
 
-        <div class="result wrapper">
-            <button class="button" id="payment-button" style="margin-top: 30px">
-                충전하기
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<script>
-
-    const createOrderId = () => {
-        return "deposit-" + crypto.randomUUID();
-    };
+        const createOrderId = () => {
+            return "deposit-" + crypto.randomUUID();
+        };
 
 
-    const setFinalPrice = async (widgets) => {
-        const finalPriceText = document.getElementById('final-price').innerText;
-        const finalPrice = parseInt(finalPriceText.replace(/[^0-9]/g, ""), 10);
+        const setFinalPrice = async (widgets) => {
+            const finalPriceText = document.getElementById('final-price').innerText;
+            const finalPrice = parseInt(finalPriceText.replace(/[^0-9]/g, ""), 10);
 
 
-        await widgets.setAmount({
-            currency: "KRW",
-            value: finalPrice,
-        });
+            await widgets.setAmount({
+                currency: "KRW",
+                value: finalPrice,
+            });
 
-        return widgets;
-    };
+            return widgets;
+        };
 
-    // 토스페이먼츠 위젯 초기화
-    main();
+        // 토스페이먼츠 위젯 초기화
+        main();
 
-    async function main() {
-        console.log(`window.location.origin = ${window.location.origin}`)
-        const button = document.getElementById("payment-button");
+        async function main() {
+            console.log(`window.location.origin = ${window.location.origin}`)
+            const button = document.getElementById("payment-button");
 
-        const clientKey = '[[ ${@environment.getProperty("custom.payment.toss.test_client_api_key")} ]]';
-        const tossPayments = TossPayments(clientKey);
-        const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+            const clientKey = '[[ ${@environment.getProperty("custom.payment.toss.test_client_api_key")} ]]';
+            const tossPayments = TossPayments(clientKey);
+            const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
 
-        // 최초 렌더링 시 초기 금액 설정
-        await setFinalPrice(widgets);
-
-        await widgets.renderPaymentMethods({
-            selector: "#payment-method",
-            variantKey: "DEFAULT",
-        });
-
-        await widgets.renderAgreement({selector: "#agreement", variantKey: "AGREEMENT"});
-
-        // 결제 버튼 클릭 시 최신 금액 반영
-        button.addEventListener("click", async function () {
-
+            // 최초 렌더링 시 초기 금액 설정
             await setFinalPrice(widgets);
 
-            const finalPriceEl = document.getElementById('final-price');
-            const finalPrice = parseInt(finalPriceEl.innerText.replace(/[^0-9]/g, ""), 10);
-
-            const orderId = createOrderId();
-            const queryParams = new URLSearchParams({
-                amount: finalPrice
-            }).toString();
-
-            await widgets.requestPayment({
-                orderId: orderId,
-                orderName: "예치금 충전",
-                successUrl: window.location.origin + `/api/deposits/success`,
-                failUrl: window.location.origin + `/api/deposits/fail`,
+            await widgets.renderPaymentMethods({
+                selector: "#payment-method",
+                variantKey: "DEFAULT",
             });
-        });
-    }
-</script>
+
+            await widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" });
+
+            // 결제 버튼 클릭 시 최신 금액 반영
+            button.addEventListener("click", async function () {
+
+                await setFinalPrice(widgets);
+
+                const finalPriceEl = document.getElementById('final-price');
+                const finalPrice = parseInt(finalPriceEl.innerText.replace(/[^0-9]/g, ""), 10);
+
+                const orderId = createOrderId();
+                const queryParams = new URLSearchParams({
+                    amount: finalPrice
+                }).toString();
+
+                await widgets.requestPayment({
+                    orderId: orderId,
+                    orderName: "예치금 충전",
+                    successUrl: window.location.origin + `/api/deposits/success`,
+                    failUrl: window.location.origin + `/api/deposits/fail`,
+                });
+            });
+        }
+    </script>
 </body>
+
 </html>

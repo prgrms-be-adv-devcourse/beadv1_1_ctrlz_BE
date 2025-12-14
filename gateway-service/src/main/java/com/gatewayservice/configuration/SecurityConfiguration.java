@@ -1,7 +1,8 @@
 package com.gatewayservice.configuration;
 
-import java.util.List;
-
+import com.gatewayservice.handler.OAuth2LoginSuccessHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -15,10 +16,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import com.gatewayservice.handler.OAuth2LoginSuccessHandler;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -54,7 +52,7 @@ public class SecurityConfiguration {
 		CorsConfiguration config = new CorsConfiguration();
 
 		// 프론트 실제 origin
-		config.setAllowedOrigins(List.of(""));
+		config.setAllowedOrigins(List.of("*"));
 
 		// 허용 HTTP 메서드
 		config.setAllowedMethods(List.of(
