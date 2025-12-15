@@ -75,9 +75,10 @@
 
     </div>
 
-    <script>
-        const orderId = '[[ ${orderId} ]]';
-
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const orderId = /*[[${orderId}]]*/ '';
+        let displayOrderId = orderId;
 
         if (orderId) {
             const parts = orderId.split('-');
@@ -91,10 +92,11 @@
         // 화면에 값 표시
         document.getElementById("orderId").innerText = displayOrderId;
 
-        const orderName = '[[ ${orderName} ]]';
-        const currentDeposit = [[${ depositBalance }]];
-        const totalAmount = [[${ amount }]];
+        const orderName = /*[[${orderName}]]*/ '';
+        const currentDeposit = /*[[${depositBalance}]]*/ 0;
+        const totalAmount = /*[[${amount}]]*/ 0;
         const usedDepositAmount = parseInt(document.getElementById('paid-deposit').innerText.replace(/[^0-9]/g, ""), 10);
+        /*]]>*/
 
 
         const setFinalPrice = async (widgets) => {
@@ -133,10 +135,12 @@
         main();
 
         async function main() {
+            /*<![CDATA[*/
             console.log(`window.location.origin = ${window.location.origin}`)
             const button = document.getElementById("payment-button");
 
-            const clientKey = '[[ ${@environment.getProperty("custom.payment.toss.test_client_api_key")} ]]';
+            const clientKey = /*[[${@environment.getProperty('custom.payment.toss.test_client_api_key')}]]*/ '';
+            /*]]>*/
             const tossPayments = TossPayments(clientKey);
             const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
 
@@ -164,13 +168,15 @@
 
                 // 결제금액이 0원일 경우
                 if (finalPrice === 0) {
+                    /*<![CDATA[*/
                     const requestBody = {
                         orderId: orderId,
                         orderName: orderName,
-                        amount: [[${ amount }]],
+                        amount: /*[[${amount}]]*/ 0,
                         usedDepositAmount: usedDepositAmount,
                         totalAmount: 0
                     };
+                    /*]]>*/
 
                     const confirmDeposit = confirm("예치금으로 결제를 합니다. 진행하시겠습니까?");
                     if (!confirmDeposit) return;
