@@ -1,13 +1,16 @@
 package com.domainservice.common.init.data;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.domainservice.common.init.dummy.DummyDataLoader;
-import com.domainservice.domain.post.tag.service.TagService;
+import com.domainservice.common.init.dummy.service.DummyDataLoader;
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,27 +21,54 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TagInitializer {
 
-	private final TagService tagService;
+	private final JdbcTemplate jdbcTemplate;
 	private final DummyDataLoader dataLoader;
 
 	@Transactional
 	public void init() {
 		log.info("--- 태그 초기화 시작 ---");
 
-		List<String> tags = dataLoader.loadLines("init/tags.txt");
+		List<String> tagNames = dataLoader.loadLines("init/tags.txt");
 
-		int createdCount = 0;
+		// 기존 태그 조회 (중복 체크)
+		List<String> existingTags = jdbcTemplate.queryForList(
+			"SELECT name FROM tag WHERE delete_status = 'N'",
+			String.class
+		);
 
-		for (String tagName : tags) {
-			try {
-				tagService.createIfNotExists(tagName);
-				createdCount++;
-			} catch (Exception e) {
-				log.error("❌ 태그 생성 실패: {}", tagName, e);
+		List<Object[]> batchData = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		int skippedCount = 0;
+
+		for (String tagName : tagNames) {
+
+			if (tagName.trim().isEmpty() || tagName.trim().startsWith("#")) {
+				continue;
 			}
+
+			if (existingTags.contains(tagName)) {
+				skippedCount++;
+				continue;
+			}
+
+			// UUIDv7로 ID 생성
+			String tagId = UuidCreator.getTimeOrderedEpoch().toString();
+			batchData.add(new Object[] {tagId, tagName, "N", now, now});
 		}
 
-		log.info("--- 태그 초기화 완료 ---");
-		log.info("생성: {}개", createdCount);
+		if (!batchData.isEmpty()) {
+			jdbcTemplate.batchUpdate(
+				"""
+					INSERT INTO tag (id, name, delete_status, created_at, updated_at)
+					VALUES (?, ?, ?, ?, ?)
+					""",
+				batchData
+			);
+			log.info("--- 태그 초기화 완료: {}개 생성, {}개 건너뜀 ---",
+				batchData.size(), skippedCount);
+		} else {
+			log.info("--- 태그 초기화 완료: 모든 태그가 이미 존재함 ({}/{}개) ---",
+				skippedCount, tagNames.size());
+		}
 	}
 }
