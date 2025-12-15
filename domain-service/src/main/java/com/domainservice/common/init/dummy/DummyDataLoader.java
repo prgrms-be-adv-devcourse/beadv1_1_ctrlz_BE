@@ -36,7 +36,6 @@ public class DummyDataLoader {
 					lines.add(line);
 				}
 			}
-			log.info("{} 로드 완료: {}개", resourcePath, lines.size());
 		} catch (IOException e) {
 			log.error("파일 로드 실패: {}", resourcePath, e);
 		}
@@ -70,7 +69,6 @@ public class DummyDataLoader {
 						.add(productName);
 				}
 			}
-			log.info("{} 로드 완료: {}개 카테고리", resourcePath, productMap.size());
 		} catch (IOException e) {
 			log.error("CSV 파일 로드 실패: {}", resourcePath, e);
 		}
