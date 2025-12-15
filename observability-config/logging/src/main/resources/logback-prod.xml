@@ -52,8 +52,10 @@
     <logger name="com" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
 <!--        <appender-ref ref="LOGSTASH"/>-->
+        <!--
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
+        -->
     </logger>
 </configuration>

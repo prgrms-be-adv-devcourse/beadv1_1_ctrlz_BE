@@ -18,19 +18,21 @@
     <property name="SEARCH_VIEW_LOG_FILE" value="${LOG_PATH}/search-view.log"/>
 
     <!-- appender 첨부 -->
-    <!-- local 환경에서는 appender 필요 없음 
+    <include resource="appender-api-info.xml"/>
+    <include resource="appender-api-warn.xml"/>
+    <include resource="appender-api-error.xml"/>
+
     <include resource="appender-item-view.xml"/>
     <include resource="appender-search-view.xml"/>
-
-
-    <-!- local -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <!-- <appender-ref ref="SYSTEM_FILE"/> -->
     </root>
     <logger name="API" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
-        <!-- <appender-ref ref="API_FILE"/> -->
+        <appender-ref ref="API_INFO_FILE"/>
+        <appender-ref ref="API_WARN_FILE"/>
+        <appender-ref ref="API_ERROR_FILE"/>
     </logger>
     <logger name="ITEM_VIEW" level="INFO" additivity="false">
         <appender-ref ref="ITEM_VIEW_FILE"/>
