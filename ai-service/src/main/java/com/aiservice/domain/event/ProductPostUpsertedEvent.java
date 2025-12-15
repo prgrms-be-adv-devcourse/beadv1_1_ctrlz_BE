@@ -1,15 +1,16 @@
 package com.aiservice.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import lombok.Builder;
 
 @Builder
 public record ProductPostUpsertedEvent(
 		String id,
+		String userId,
+		String name,
 		String title,
 		String description,
 		List<String> tags,
@@ -20,8 +21,14 @@ public record ProductPostUpsertedEvent(
 		String status,
 		String tradeStatus,
 		String deleteStatus,
+		String primaryImageUrl,
 
-		@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS") LocalDateTime createdAt,
+		@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+		LocalDateTime createdAt,
 
-		EventType eventType) {
+		@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+		LocalDateTime updatedAt,
+
+		EventType eventType
+) {
 }

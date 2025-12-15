@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,13 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/batch/settlement")
-@RequiredArgsConstructor
 public class SettlementBatchController {
 
     private final JobLauncher jobLauncher;
-
-    @Qualifier("settlementJob")
     private final Job settlementJob;
+
+    public SettlementBatchController(
+            JobLauncher jobLauncher,
+            @Qualifier("settlementJob") Job settlementJob) {
+        this.jobLauncher = jobLauncher;
+        this.settlementJob = settlementJob;
+    }
 
     /**
      * 정산 배치 수동 실행

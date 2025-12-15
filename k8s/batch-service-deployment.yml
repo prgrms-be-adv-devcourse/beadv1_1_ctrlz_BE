@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai-deploy
+  name: batch-deploy
   labels:
-    app: ai
+    app: batch
 spec:
   selector:
     matchLabels:
-      app: ai
+      app: batch
   replicas: 1
 
   strategy:
@@ -18,40 +18,25 @@ spec:
   template:
     metadata:
       labels:
-        app: ai
+        app: batch
     spec:
       containers:
-        - name: ai-service-app
-          image: docker.io/beatchoi156/ai-service:latest
+        - name: batch-service-app
+          image: docker.io/beatchoi156/batch-service-app:latest
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: redis-password
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: openai-api-key
+            - name: LOG_PATH
+              value: "/app/logs"
+          envFrom:
+            - secretRef:
+                name: spring-prod-secret
           ports:
-            - containerPort: 8084
+            - containerPort: 8085
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8084
+              port: 8085
             initialDelaySeconds: 85
             periodSeconds: 5
             timeoutSeconds: 3
@@ -59,25 +44,40 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8084
+              port: 8085
             initialDelaySeconds: 85
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+            - name: domain-logs
+              mountPath: /domain-logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/batch-service
+            type: DirectoryOrCreate
+        - name: domain-logs
+          hostPath:
+            path: /var/log/spring-apps/domain-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1
 kind: Service
 
 metadata:
-  name: ai-svc
+  name: batch-svc
 spec:
   selector:
-    app: ai
+    app: batch
 
   sessionAffinity: None
+  type: LoadBalancer
   ports:
     - name: http
       protocol: TCP
-      port: 8084
-      targetPort: 8084
+      port: 8085
+      targetPort: 8085

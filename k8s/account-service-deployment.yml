@@ -22,25 +22,15 @@ spec:
     spec:
       containers:
         - name: account-service-app
-          image: docker.io/beatchoi156/account-service:latest
+          image: docker.io/beatchoi156/account-service-app:latest
           env: # 헬스 체크 및 로드 밸런싱 확인용
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
-            - name: DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: db-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: redis-password
+            - name: LOG_PATH
+              value: "/app/logs"
+          envFrom:
+            - secretRef:
+                name: spring-prod-secret
           #            - name: DB_USERNAME
           #              valueFrom:
           #                secretKeyRef:
@@ -80,6 +70,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/logs
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /var/log/spring-apps/account-service
+            type: DirectoryOrCreate
 
 ---
 apiVersion: v1
@@ -91,7 +89,7 @@ spec:
   selector:
     app: account # 이 라벨을 가진 Pod들에게 트래픽 분산
 
-  sessionAffinity: None        # 기본값: 매 요청마다 무작위 Pod 선택
+  sessionAffinity: None # 기본값: 매 요청마다 무작위 Pod 선택
   # 로드밸런싱 설정
   #    sessionAffinity: ClientIP        # 같은 클라이언트 IP는 같은 Pod로 (세션 유지)
   #  sessionAffinityConfig:

@@ -5,8 +5,6 @@ spring:
   application:
     name: gateway-service
 
-
-
   data:
     redis:
       port: 6379
@@ -26,7 +24,7 @@ spring:
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
-            
+
             # 태그 조회
             - id: tag-search-public
               uri: lb://DOMAIN-SERVICE
@@ -66,7 +64,7 @@ spring:
 
             # 결제 API (공개)
             - id: payment-api-open
-              uri: lb://DOMAIN-SERVICE
+              uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
@@ -74,7 +72,7 @@ spring:
             # ============================================
             # ACCOUNT SERVICE (회원 관련)
             # ============================================
-            
+
             # 회원가입 (IP/Token 캡처)
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
@@ -110,7 +108,7 @@ spring:
             # ============================================
             # DOMAIN SERVICE (상품/주문/장바구니)
             # ============================================
-            
+
             # 상품 등록/수정/삭제 (SELLER 권한 필요)
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
@@ -158,7 +156,7 @@ spring:
             # ============================================
             # AI SERVICE (추천 시스템)
             # ============================================
-            
+
             # SSE 스트리밍 (USER 권한 필요)
             - id: ai-service-sse
               uri: lb://AI-SERVICE
@@ -181,7 +179,6 @@ spring:
                   args:
                     requiredRole: USER
 
-
 logging:
   config: classpath:logback-local.xml
 
@@ -189,10 +186,8 @@ services:
   account:
     url: lb://ACCOUNT-SERVICE
 
-
 custom:
   redirect-url: http://localhost:8082
-
 # k8s 설정
 #eureka:
 #  client:

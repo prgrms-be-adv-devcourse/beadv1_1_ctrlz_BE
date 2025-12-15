@@ -1,20 +1,14 @@
 package com.paymentservice.payment.api;
 
-import java.math.BigDecimal;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.paymentservice.payment.model.dto.PaymentReadyResponse;
 import com.paymentservice.payment.service.PaymentService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @Slf4j
 @Controller // View 렌더링을 위한 @Controller
@@ -24,12 +18,14 @@ public class PaymentViewController {
 
     private final PaymentService paymentService;
 
-    /** 결제 페이지 렌더링 */
+    /**
+     * 결제 페이지 렌더링
+     */
     @GetMapping("/checkout/{orderId}")
     public String showCheckout(
-        @PathVariable("orderId") String orderId,
-        @RequestHeader(value = "X-REQUEST-ID") String userId,
-        Model model
+            @PathVariable("orderId") String orderId,
+            @RequestHeader(value = "X-REQUEST-ID") String userId,
+            Model model
     ) {
         PaymentReadyResponse paymentReady = paymentService.getPaymentReadyInfo(orderId, userId);
 
@@ -43,11 +39,11 @@ public class PaymentViewController {
 
     @GetMapping("/success")
     public String showSuccess(
-        @RequestParam String orderId,
-        @RequestParam String orderName,
-        @RequestParam String usedDepositAmount, //사용한 예치금
-        @RequestParam String totalAmount,       //실제로 결제한 돈
-        Model model) {
+            @RequestParam String orderId,
+            @RequestParam String orderName,
+            @RequestParam String usedDepositAmount, //사용한 예치금
+            @RequestParam String totalAmount,       //실제로 결제한 돈
+            Model model) {
 
         model.addAttribute("orderId", orderId);
         model.addAttribute("orderName", orderName);
@@ -59,11 +55,11 @@ public class PaymentViewController {
 
     @GetMapping("/fail")
     public String showFail(
-        @RequestParam String orderId,
-        @RequestParam String orderName,
-        @RequestParam String usedDepositAmount,
-        @RequestParam String totalAmount,
-        Model model) {
+            @RequestParam String orderId,
+            @RequestParam String orderName,
+            @RequestParam String usedDepositAmount,
+            @RequestParam String totalAmount,
+            Model model) {
         model.addAttribute("orderId", orderId);
         model.addAttribute("orderName", orderName);
         model.addAttribute("usedDepositAmount", new BigDecimal(usedDepositAmount));

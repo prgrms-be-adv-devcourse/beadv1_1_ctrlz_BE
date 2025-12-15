@@ -15,3 +15,5 @@ eureka:
     fetch-registry: false
     register-with-eureka: false
 
+logging:
+  config: classpath:logback-prod.xml

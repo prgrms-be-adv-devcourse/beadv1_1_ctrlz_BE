@@ -24,7 +24,7 @@ jobs:
       service-name: discovery-service-app
       service-dir: .
       secret-dir: discovery-service
-      file-name: discovery-service.dockerfile
+      file-name: docker/discovery-service.dockerfile
 
 
   deploying:

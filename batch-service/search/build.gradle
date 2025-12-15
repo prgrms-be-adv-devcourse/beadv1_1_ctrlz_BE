@@ -12,6 +12,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.batch:spring-batch-test'
     testRuntimeOnly 'com.h2database:h2'
-    
-    // Lombok is provided by parent configuration
+
 }
+
+jar {
+    enabled = true
+}
+

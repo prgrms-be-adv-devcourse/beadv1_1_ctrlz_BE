@@ -1,24 +1,24 @@
 package com.aiservice.infrastructure.kafka;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
-
 import com.aiservice.application.ProductRecommendationService;
 import com.aiservice.domain.event.ProductPostSearchedEvent;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 
-@Profile("prod")
+
+/**
+ * @Deprecated 현재 사용중이지 않은 로직입니다. 프론트 엔드 진행 방향에 따라 달라집니다.
+ */
+@Profile("exp")
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class ProductSearchEventListener {
 
     private final ProductRecommendationService productRecommendationService;
 
-    @KafkaListener(topics = "${custom.product-search.topic.event}", groupId = "${spring.kafka.consumer.group-id}")
+//    @KafkaListener(topics = "${custom.product-search.topic.event}", groupId = "${spring.kafka.consumer.group-id}")
     public void handler(ProductPostSearchedEvent event) {
         log.info("ProductSearchEvent 수신 - 사용자: {}, 쿼리: {}", event.userId(), event.query());
         try {
