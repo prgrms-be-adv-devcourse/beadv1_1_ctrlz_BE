@@ -3,19 +3,19 @@ application:
   version: 1.0
 
 server:
-  port: 8083
+  port: 8081
 
 spring:
   application:
-    name: payment-service
+    name: domain-service
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
-    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
 
   jpa:
     open-in-view: false
@@ -25,56 +25,69 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
         default_batch_fetch_size: 100
-        jdbc:
-          batch_size: 1000
-        order_updates: true
-        order_inserts: true
+      order_inserts: true
+      order_updates: true
 
-  data:
-    redis:
-      port: 6379
-      host: redis-server
-      password: ${REDIS_PASSWORD}
   kafka:
-    bootstrap-servers: kafka-svc:9090
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
     consumer:
-      group-id: payment-group
+      group-id: domain-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.common.event"
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
     listener:
-      immediate-stop: false # default 값 명시
+      immediate-stop: false
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
 
 custom:
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
   config:
     topic-partitions: 1
     topic-replications: 1
 
+  cart:
+    topic:
+      command: cart-command
+
   deposit:
     topic:
       command: deposit-command
 
-  feign:
-    url:
-      user-service: http://account-svc:8080
-      order-service: http://domain-svc:8081
-# k8s 설정
-eureka:
-  instance:
-    prefer-ip-address: true
-    hostname: payment-service
-  client:
-    serviceUrl:
-      defaultZone: http://discovery-svc:8761/eureka/
-    enabled: true
+  product-post:
+    topic:
+      event: product-post-events
+
+  order:
+    topic:
+      command: order-command
+
+  search:
+    topic:
+      event: search-word-events
 
 springdoc:
   default-produces-media-type: application/json
@@ -83,7 +96,3 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
-
-openapi:
-  service:
-    url: https://api.yeongeun.chlab.org

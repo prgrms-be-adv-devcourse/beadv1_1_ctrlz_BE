@@ -106,3 +106,15 @@ custom:
 
   product:
     base-url: http://localhost:8080/api/products
+
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: http://localhost:8082
