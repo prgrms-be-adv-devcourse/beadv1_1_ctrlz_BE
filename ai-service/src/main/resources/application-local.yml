@@ -36,12 +36,12 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        properties:
-          spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
-          allow.auto.create.topics: false
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+        spring.json.type.mapping: com.common.event.productPost.ProductPostUpsertedEvent:com.aiservice.domain.event.ProductPostUpsertedEvent,com.common.event.productPost.ProductPostDeletedEvent:com.aiservice.domain.event.ProductPostDeletedEvent,com.common.event.productPost.ProductPostSearchedEvent:com.aiservice.domain.event.ProductPostSearchedEvent
+        allow.auto.create.topics: false
 
-          observation:
-            enabled: true
+        observation:
+          enabled: true
 
   batch:
     jdbc:
@@ -67,7 +67,6 @@ spring:
           batch_size: 1000
         order_updates: true
         order_inserts: true
-
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

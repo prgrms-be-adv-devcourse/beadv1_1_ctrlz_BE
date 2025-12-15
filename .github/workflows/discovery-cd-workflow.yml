@@ -1,12 +1,15 @@
 name: discovery-service ci/cd
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+      - deploytest
     paths:
       - 'discovery-service/**'
-      - '.github/workflows/**'
+      - 'observability-config/**'
+      - '.github/workflows/discovery-cd-workflow.yml'
 
 jobs:
   releasing:
@@ -20,8 +23,8 @@ jobs:
     with:
       service-name: discovery-service-app
       service-dir: .
-      secret-dir: .
-      file-name: discovery-service.dockerfile
+      secret-dir: discovery-service
+      file-name: docker/discovery-service.dockerfile
 
 
   deploying:
@@ -30,7 +33,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: discovery-service-app # pod랑 같은 이름
-      deploy-name: discovery-service-deploy # deployment랑 같은 이름
+      deploy-name: discovery-deploy # deployment랑 같은 이름
       label-name: discovery # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 

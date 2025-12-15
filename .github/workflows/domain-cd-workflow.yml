@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
+      - deploytest
     paths:
       - 'domain-service/**'
       - 'common/**'
-      - '.github/workflows/**'
+      - '**/*.dockerfile'
+      - 'observability-config/**'
+      - '.github/workflows/domain-cd-workflow.yml'
+
   workflow_dispatch:
     inputs:
       service-name:
@@ -36,8 +40,8 @@ jobs:
     with:
       service-name: domain-service-app
       service-dir: .
-      secret-dir: .
-      file-name: domain-service.dockerfile
+      secret-dir: domain-service
+      file-name: docker/domain-service.dockerfile
 
   deploying:
     needs: releasing
@@ -45,7 +49,7 @@ jobs:
     secrets: inherit
     with:
       pod-name: domain-service-app # pod랑 같은 이름
-      deploy-name: domain-service-deploy # deployment랑 같은 이름
+      deploy-name: domain-deploy # deployment랑 같은 이름
       label-name: domain # pod 라벨 이름
       image-tag: ${{ needs.releasing.outputs.tag_name }}
 
