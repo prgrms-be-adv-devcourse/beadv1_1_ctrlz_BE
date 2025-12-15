@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - deploytest
+      - pushtest
     paths:
       - 'domain-service/**'
       - 'common/**'
