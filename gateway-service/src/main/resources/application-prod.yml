@@ -1,19 +1,222 @@
+server:
+  port: 8082
+
 spring:
-  logging:
-    config: classpath:logback-prod.xml
+  application:
+    name: gateway-service
 
   data:
     redis:
-      host: redis-svc
+      port: 6379
+      host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
 
+  cloud:
+    gateway:
+      observations:
+        http:
+          server:
+            enabled: true
+          client:
+            enabled: true
+      server:
+        webflux:
+          routes:
+            # ============================================
+            # PUBLIC APIs (인증 불필요)
+            # ============================================
+
+            # 태그 조회
+            - id: tag-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/tags
+                - Method=GET
+
+            # 카테고리 조회
+            - id: category-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/categories
+                - Method=GET
+
+            # 상품 검색 (공개)
+            - id: post-search-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
+            # 검색어 API
+            - id: search-word-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/**
+                - Method=GET,POST
+
+            # 검색어 Redis 테스트
+            - id: search-word-redis-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/redis-test
+                - Method=GET,DELETE
+
+            # 결제 API
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/success
+                - Method=GET
+
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/fail
+                - Method=GET
+
+            - id: payment-api-protected
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # ============================================
+            # ACCOUNT SERVICE (회원 관련)
+            # ============================================
+
+            # 회원가입 (IP/Token 캡처)
+            - id: user-sign-up
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/users
+                - Method=POST
+              filters:
+                - name: AccessTokenCaptureFilter
+                - name: IpCaptureFilter
+
+            # 회원 정보 조회/수정/삭제 (USER 권한 필요)
+            - id: user-api-protected
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/users/**
+                - Method=GET,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # 토큰 재발급 (IP/Token 캡처)
+            - id: auth-api-protected
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/auth/reissue
+                - Method=POST
+              filters:
+                - name: AccessTokenCaptureFilter
+                - name: IpCaptureFilter
+                - name: ReissueTokenFilter
+
+            # ============================================
+            # DOMAIN SERVICE (상품/주문/장바구니)
+            # ============================================
+
+            # 상품 등록/수정/삭제 (SELLER 권한 필요)
+            - id: post-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/product-posts/**
+                - Method=POST,PUT,DELETE,PATCH
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: SELLER
+
+            # 장바구니 (USER 권한 필요)
+            - id: cart-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/carts/**
+                - Method=GET,PATCH,DELETE,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # 예치금 (USER 권한 필요)
+            - id: deposit-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/deposits/charge,/api/deposits/success,/api/deposits/fail
+                - Method=GET
+
+            - id: deposit-api-protected
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/deposits/**
+                - Method=GET,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # 주문 (USER 권한 필요)
+            - id: order-api-protected
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/orders/**
+                - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # ============================================
+            # AI SERVICE (추천 시스템)
+            # ============================================
+
+            # SSE 스트리밍 (USER 권한 필요)
+            - id: ai-service-sse
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/sse/**
+                - Method=GET
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+
+            # 추천 API (USER 권한 필요)
+            - id: ai-service-polling
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/api/recommendations/**
+                - Method=GET,POST
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
+services:
+  account:
+    url: lb://ACCOUNT-SERVICE
+
+  # k8s 설정
 eureka:
-  instance:
-    prefer-ip-address: true
-    hostname: gateway-service
   client:
     serviceUrl:
       defaultZone: http://discovery-svc:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: gateway-service
 
 custom:
-  redirect-url: https://api.yeongeun.chlab.org/
+  # 수정 필요
+  redirect-url: https://yeongeun.vercel.app
+
+logging:
+  config: classpath:logback-prod.xml

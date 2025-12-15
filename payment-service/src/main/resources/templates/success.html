@@ -1,128 +1,131 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/success-page.css">
+    <link rel="stylesheet" th:href="@{/api/payments/css/success-page.css}">
     <title>결제 완료</title>
 </head>
+
 <body>
-<div class="success-container">
+    <div class="success-container">
 
-    <div class="loading" id="loading">
-        결제 정보를 확인 중입니다...
-    </div>
+        <div class="loading" id="loading">
+            결제 정보를 확인 중입니다...
+        </div>
 
-    <div id="success-content" style="display: none;">
-        <div class="success-icon">✓</div>
+        <div id="success-content" style="display: none;">
+            <div class="success-icon">✓</div>
 
-        <h1 class="success-title">결제가 완료되었습니다</h1>
-        <p class="success-subtitle">주문이 정상적으로 처리되었습니다.</p>
+            <h1 class="success-title">결제가 완료되었습니다</h1>
+            <p class="success-subtitle">주문이 정상적으로 처리되었습니다.</p>
 
-        <div class="order-info">
+            <div class="order-info">
 
-            <h3>주문 정보</h3>
+                <h3>주문 정보</h3>
 
-            <div class="info-row">
-                <span class="info-label">주문번호</span>
-                <span class="info-value" id="orderId"></span>
+                <div class="info-row">
+                    <span class="info-label">주문번호</span>
+                    <span class="info-value" id="orderId"></span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">상품명</span>
+                    <span class="info-value" id="orderName"></span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">사용한 예치금 금액</span>
+                    <span class="info-value" id="usedDepositAmount"></span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">결제금액</span>
+                    <span class="info-value" id="amount"></span>
+                </div>
+
             </div>
 
-            <div class="info-row">
-                <span class="info-label">상품명</span>
-                <span class="info-value" id="orderName"></span>
-            </div>
-
-            <div class="info-row">
-                <span class="info-label">사용한 예치금 금액</span>
-                <span class="info-value" id="usedDepositAmount"></span>
-            </div>
-
-            <div class="info-row">
-                <span class="info-label">결제금액</span>
-                <span class="info-value" id="amount"></span>
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">확인</a>
             </div>
 
         </div>
 
-        <div class="action-buttons">
-            <a href="/" class="btn btn-primary">확인</a>
-        </div>
-
     </div>
 
-</div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get("orderId");
+            const orderName = urlParams.get("orderName");
+            const usedDepositAmount = parseInt(urlParams.get("usedDepositAmount")) || 0;
+            const totalAmount = parseInt(urlParams.get("totalAmount")) || 0;
 
-        const orderId = urlParams.get("orderId");
-        const orderName = urlParams.get("orderName");
-        const usedDepositAmount = parseInt(urlParams.get("usedDepositAmount")) || 0;
-        const totalAmount = parseInt(urlParams.get("totalAmount")) || 0;
+            let displayOrderId = orderId;
 
-        let displayOrderId = orderId;
-
-        if (orderId) {
-            const parts = orderId.split('-');
-            // 앞 3개의 파트만 가져와서 다시 합침
-            if (parts.length >= 3) {
-                displayOrderId = `${parts[0]}-${parts[1]}-${parts[2]}`;
+            if (orderId) {
+                const parts = orderId.split('-');
+                // 앞 3개의 파트만 가져와서 다시 합침
+                if (parts.length >= 3) {
+                    displayOrderId = `${parts[0]}-${parts[1]}-${parts[2]}`;
+                }
             }
-        }
 
-        // 화면에 값 표시
-        document.getElementById("orderId").innerText = displayOrderId;
-        document.getElementById("orderName").innerText = orderName;
-        document.getElementById("usedDepositAmount").innerText = `₩ ${usedDepositAmount.toLocaleString()}`;
-        document.getElementById("amount").innerText = `₩ ${totalAmount.toLocaleString()}`;
+            // 화면에 값 표시
+            document.getElementById("orderId").innerText = displayOrderId;
+            document.getElementById("orderName").innerText = orderName;
+            document.getElementById("usedDepositAmount").innerText = `₩ ${usedDepositAmount.toLocaleString()}`;
+            document.getElementById("amount").innerText = `₩ ${totalAmount.toLocaleString()}`;
 
-        if (totalAmount === 0) {
-            // 예치금만 결제 -> 바로 성공 화면 표시
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('success-content').style.display = 'block';
-        } else {
-            // 일반 결제 -> 서버 confirm 호출
-            const requestData = {
-                paymentKey: urlParams.get("paymentKey"),
-                orderId: orderId,
-                amount: totalAmount + usedDepositAmount,
-                usedDepositAmount: usedDepositAmount,
-                totalAmount: totalAmount
-            };
+            if (totalAmount === 0) {
+                // 예치금만 결제 -> 바로 성공 화면 표시
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('success-content').style.display = 'block';
+            } else {
+                // 일반 결제 -> 서버 confirm 호출
+                const requestData = {
+                    paymentKey: urlParams.get("paymentKey"),
+                    orderId: orderId,
+                    amount: totalAmount + usedDepositAmount,
+                    usedDepositAmount: usedDepositAmount,
+                    totalAmount: totalAmount
+                };
 
-            fetch('/api/payments/confirm', {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(requestData)
-            })
-                .then(response => response.json())
-                .then(result => {
-                    console.log("confirm result:", result);
+                fetch('/api/payments/confirm', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestData)
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log("confirm result:", result);
 
-                    if (result.message === "결제 처리 완료") {
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('success-content').style.display = 'block';
+                        if (result.message === "결제 처리 완료") {
+                            document.getElementById('loading').style.display = 'none';
+                            document.getElementById('success-content').style.display = 'block';
 
-                    } else if (result.message === "이미 처리된 결제입니다.") {
-                        alert("이미 정상적으로 처리된 주문입니다.");
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('success-content').style.display = 'block';
+                        } else if (result.message === "이미 처리된 결제입니다.") {
+                            alert("이미 정상적으로 처리된 주문입니다.");
+                            document.getElementById('loading').style.display = 'none';
+                            document.getElementById('success-content').style.display = 'block';
 
-                    } else {
+                        } else {
+                            const failParams = `orderId=${orderId}&orderName=${orderName}&usedDepositAmount=${usedDepositAmount}&totalAmount=${totalAmount}`;
+                            location.href = "/api/payments/fail?" + failParams;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("결제 확인 중 오류:", error);
+                        // 에러 발생 시
                         const failParams = `orderId=${orderId}&orderName=${orderName}&usedDepositAmount=${usedDepositAmount}&totalAmount=${totalAmount}`;
                         location.href = "/api/payments/fail?" + failParams;
-                    }
-                })
-                .catch(error => {
-                    console.error("결제 확인 중 오류:", error);
-                    // 에러 발생 시
-                    const failParams = `orderId=${orderId}&orderName=${orderName}&usedDepositAmount=${usedDepositAmount}&totalAmount=${totalAmount}`;
-                    location.href = "/api/payments/fail?" + failParams;
-                });
-        }
-    });
-</script>
+                    });
+            }
+        });
+    </script>
 </body>
+
 </html>

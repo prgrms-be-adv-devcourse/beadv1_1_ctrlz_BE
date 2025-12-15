@@ -1,6 +1,3 @@
-application:
-  title: yeongeunMarket
-  version: 1.0
 
 server:
   port: 8084
@@ -8,6 +5,14 @@ server:
 spring:
   application:
     name: payment-service
+
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
+  mvc:
+    static-path-pattern: /api/payments/**
 
   servlet:
     multipart:
@@ -32,11 +37,11 @@ spring:
         highlight_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
-    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
+    defer-datasource-initialization: true # Hibernate 초기화 후 data.sql 실행
 
   sql:
     init:
-      mode: always  # data.sql을 항상 실행
+      mode: always # data.sql을 항상 실행
 
   data:
     redis:
@@ -97,9 +102,9 @@ custom:
     topic:
       command: deposit-command
 
-#  order:
-#    topic:
-#      command: order-command
+  #  order:
+  #    topic:
+  #      command: order-command
 
   feign:
     url:

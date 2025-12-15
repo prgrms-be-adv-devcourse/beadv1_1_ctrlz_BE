@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,13 +21,17 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class SettlementBatchJob extends QuartzJobBean {
 
     private final JobLauncher jobLauncher;
-
-    @Qualifier("settlementJob")
     private final Job settlementJob;
+
+    public SettlementBatchJob(
+            JobLauncher jobLauncher,
+            @Qualifier("settlementJob") Job settlementJob) {
+        this.jobLauncher = jobLauncher;
+        this.settlementJob = settlementJob;
+    }
 
     @Override
     protected void executeInternal(JobExecutionContext context) {

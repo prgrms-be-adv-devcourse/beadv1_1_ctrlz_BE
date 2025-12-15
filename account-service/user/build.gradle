@@ -12,6 +12,7 @@ dependencies {
 
     // cache  redis
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
     // batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'

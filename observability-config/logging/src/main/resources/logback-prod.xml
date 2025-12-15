@@ -11,43 +11,51 @@
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <property name="SYSTEM_LOG_FILE" value="${LOG_PATH}/system.log"/>
     <property name="API_LOG_FILE" value="${LOG_PATH}/api.log"/>
-    <property name="INFO_LOG_FILE" value="${LOG_PATH}/application-info.log"/>
-    <property name="WARN_LOG_FILE" value="${LOG_PATH}/application-warn.log"/>
-    <property name="ERROR_LOG_FILE" value="${LOG_PATH}/application-error.log"/>
+    <property name="API_INFO_LOG_FILE" value="${LOG_PATH}/api-info.log"/>
+    <property name="API_WARN_LOG_FILE" value="${LOG_PATH}/api-warn.log"/>
+    <property name="API_ERROR_LOG_FILE" value="${LOG_PATH}/api-error.log"/>
     <property name="ITEM_VIEW_LOG_FILE" value="${LOG_PATH}/item-view.log"/>
     <property name="SEARCH_VIEW_LOG_FILE" value="${LOG_PATH}/search-view.log"/>
 
     <!-- appender 첨부 -->
     <include resource="appender-system.xml"/>
     <include resource="appender-api.xml"/>
-    <include resource="appender-info.xml"/>
-    <include resource="appender-warn.xml"/>
-    <include resource="appender-error.xml"/>
-    <include resource="appender-logstash.xml"/>
+    <include resource="appender-api-info.xml"/>
+    <include resource="appender-api-warn.xml"/>
+    <include resource="appender-api-error.xml"/>
+<!--    <include resource="appender-logstash.xml"/>-->
     <include resource="appender-item-view.xml"/>
     <include resource="appender-search-view.xml"/>
 
     <!-- prod -->
     <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
         <!-- logstash 지정해줘야 전파함 -->
-        <appender-ref ref="LOGSTASH"/>
+<!--        <appender-ref ref="LOGSTASH"/>-->
         <appender-ref ref="SYSTEM_FILE"/>
     </root>
     <logger name="API" level="INFO" additivity="false">
-        <appender-ref ref="LOGSTASH"/>
-        <appender-ref ref="API_FILE"/>
+<!--        <appender-ref ref="LOGSTASH"/>-->
+        <appender-ref ref="API_INFO_FILE"/>
+        <appender-ref ref="API_WARN_FILE"/>
+        <appender-ref ref="API_ERROR_FILE"/>
+    </logger>
+    <logger name="ITEM_VIEW" level="INFO" additivity="false">
         <appender-ref ref="ITEM_VIEW_FILE"/>
+    </logger>
+    <logger name="SEARCH_VIEW" level="INFO" additivity="false">
         <appender-ref ref="SEARCH_VIEW_FILE"/>
     </logger>
     
     <!-- name="com" : com 패키지 아래에 생기는 로그만 저장 -->
     <!-- additivity="false" : 로그 중복 방지 -->
     <logger name="com" level="INFO" additivity="false">
-        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="CONSOLE"/>
+<!--        <appender-ref ref="LOGSTASH"/>-->
+        <!--
         <appender-ref ref="INFO_FILE"/>
         <appender-ref ref="WARN_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
-        <appender-ref ref="ITEM_VIEW_FILE"/>
-        <appender-ref ref="SEARCH_VIEW_FILE"/>
+        -->
     </logger>
 </configuration>

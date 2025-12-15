@@ -26,7 +26,11 @@ dependencies {
     runtimeOnly project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
 
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //ai
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    //vectordb
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-qdrant'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -57,7 +61,10 @@ dependencies {
     //h2
     runtimeOnly 'com.h2database:h2'
 
-    implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+
+//    if (project.hasProperty('profile') && project.property('profile') == 'local') {
+//        implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+//    }
 
     implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation 'org.springframework.boot:spring-boot-starter-cache'

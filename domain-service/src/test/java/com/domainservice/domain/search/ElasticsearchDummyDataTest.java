@@ -102,21 +102,26 @@ public class ElasticsearchDummyDataTest {
 					productTitle = randomMobileName + " (더미) " + i;
 				}
 
-				ProductPostDocumentEntity entity = new ProductPostDocumentEntity(
-					UUID.randomUUID().toString(),
-					productTitle, // <-- 변경된 상품명 사용
-					"테스트 제목 " + i,
-					"테스트 설명입니다. HTML 태그 없이 텍스트만 들어갑니다. " + i,
-					Arrays.asList("테스트", "더미", "데이터" + i),
-					selectedCategory, // <-- 선택된 카테고리 사용
-					10000L * i,
-					(long) i,
-					(long) (i * 10),
-					ProductStatus.NEW.name(),
-					TradeStatus.SELLING.name(),
-					BaseEntity.DeleteStatus.N.name(),
-					LocalDateTime.now()
-				);
+				ProductPostDocumentEntity entity = ProductPostDocumentEntity.builder()
+					.id(UUID.randomUUID().toString())
+					.userId("testUser" + i)
+					.name(productTitle)
+					.title("테스트 제목 " + i)
+					.description("테스트 설명입니다. HTML 태그 없이 텍스트만 들어갑니다. " + i)
+					.tags(Arrays.asList("테스트", "더미", "데이터" + i))
+					.categoryName(selectedCategory)
+					.price(10000L * i)
+					.likedCount((long) i)
+					.viewCount((long) (i * 10))
+					.status(ProductStatus.NEW.name())
+					.tradeStatus(TradeStatus.SELLING.name())
+					.deleteStatus(BaseEntity.DeleteStatus.N.name())
+					.createdAt(LocalDateTime.now())
+					.updatedAt(LocalDateTime.now())
+					.primaryImageUrl("https://example.com/image.jpg")
+					.build();
+
+
 
 				insertedData.add(entity);
 			});

@@ -14,13 +14,12 @@ import com.aiservice.domain.event.ProductPostUpsertedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Profile("prod")
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Profile("prod")
+@Component
 @KafkaListener(topics = "${custom.product-post.topic.event}", groupId = "${spring.kafka.consumer.group-id}")
 public class ProductCommandEventListener {
-
 	private final RagService<CreateProductVectorCommand> ragService;
 
 	@KafkaHandler

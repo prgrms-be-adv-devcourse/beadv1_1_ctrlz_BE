@@ -31,7 +31,7 @@ public class CartService {
 	private final ProductPostService productPostService;
 
 	/**
-	 * 1. userid로 장바구니 조회 - 없으면 생성 <p></p>
+	 * 1. userid로 장바구니 조회 - 없으면 생성 
 	 * 2. 장바구니id로 장바구니 아이템 리스트 조회
 	 */
 	@Transactional(readOnly = true)
@@ -42,11 +42,17 @@ public class CartService {
 		List<CartItem> cartItemList = cartItemJpaRepository.findByCart(cart);
 
 		for (CartItem cartItem : cartItemList) {
-			ProductPostResponse productPostById = productPostService.getProductPostById(
+			ProductPostResponse productPost = productPostService.getProductPostById(
 				cartItem.getProductPostId());
-			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
-				productPostById.price(),
-				cartItem.isSelected());
+
+			CartItemResponse cartItemResponse = new CartItemResponse(
+				cartItem.getId(),
+				productPost.title(),
+				productPost.name(),
+				productPost.price(),
+				cartItem.isSelected(),
+				productPost.primaryImageUrl()
+			);
 			response.add(cartItemResponse);
 		}
 
@@ -68,10 +74,10 @@ public class CartService {
 	}
 
 	/**
-	 * 장바구니 아이템 추가 <p>
-	 * 사용자 정보로 장바구니 조회 <p>
-	 * 장바구니 아이템을 순회하며 이미 추가된 아이템인지 조회 <p>
-	 * 추가된 아이템이면 수량만 업데이트 <p>
+	 * 장바구니 아이템 추가 
+	 * 사용자 정보로 장바구니 조회 
+	 * 장바구니 아이템을 순회하며 이미 추가된 아이템인지 조회 
+	 * 추가된 아이템이면 수량만 업데이트 
 	 */
 	public CartItemResponse addItem(String userId, String productPostId, int quantity) {
 		Cart cart = getCartByUserId(userId);
@@ -96,21 +102,27 @@ public class CartService {
 				.build();
 
 			cart.addCartItem(newItem);
-			targetItem = newItem;
+			targetItem = cartItemJpaRepository.save(newItem);
 		}
 		cartJpaRepository.save(cart);
 
-		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(), productPostById.price(),
-			targetItem.isSelected());
+		ProductPostResponse productPost = productPostService.getProductPostById(targetItem.getProductPostId());
+		return new CartItemResponse(
+			targetItem.getId(),
+			productPost.title(),
+			productPost.name(),
+			productPost.price(),
+			targetItem.isSelected(),
+			productPost.primaryImageUrl()
+		);
 
 	}
 
 	// /**
-	//  * 장바구니 아이템 수량 변경 <p>
-	//  * 아이템 ID로 장바구니 아이템 조회 <p>
-	//  * 수량 업데이트 <p>
-	//  * 변경사항 저장 <p>
+	//  * 장바구니 아이템 수량 변경 
+	//  * 아이템 ID로 장바구니 아이템 조회 
+	//  * 수량 업데이트 
+	//  * 변경사항 저장 
 	//  */
 	// public CartItemResponse updateQuantity(String itemId, int quantity) {
 	// 	CartItem cartItem = cartItemJpaRepository.findById(itemId)
@@ -126,7 +138,7 @@ public class CartService {
 	// }
 
 	/**
-	 * 아이템 ID로 장바구니 아이템 조회 <p>
+	 * 아이템 ID로 장바구니 아이템 조회 
 	 * 선택 상태 업데이트
 	 * 변경사항 저장
 	 */
@@ -138,18 +150,22 @@ public class CartService {
 
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
-		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
-		return new CartItemResponse(cartItem.getId(), productPostById.title(),
-			productPostById.name(),
-			productPostById.price(),
-			savedItem.isSelected());
+		ProductPostResponse productPost = productPostService.getProductPostById(savedItem.getProductPostId());
+		return new CartItemResponse(
+			cartItem.getId(),
+			productPost.title(),
+			productPost.name(),
+			productPost.price(),
+			savedItem.isSelected(),
+			productPost.primaryImageUrl()
+		);
 	}
 
 	/**
-	 * 장바구니에서 아이템 삭제 <p>
-	 * 1. 아이템 ID로 장바구니 아이템 조회 <p>
-	 * 2. 장바구니와 아이템 간의 연결 해제 <p>
-	 * 3. 아이템 삭제 <p>
+	 * 장바구니에서 아이템 삭제 
+	 * 1. 아이템 ID로 장바구니 아이템 조회 
+	 * 2. 장바구니와 아이템 간의 연결 해제 
+	 * 3. 아이템 삭제 
 	 * 4. 장바구니 상태 업데이트
 	 */
 	public void removeItem(String cartItemId) {
@@ -175,13 +191,15 @@ public class CartService {
 
 		return recentItems.stream()
 			.map(cartItem -> {
-				ProductPostResponse product = productPostService.getProductPostById(cartItem.getProductPostId());
+				ProductPostResponse productPost = productPostService.getProductPostById(cartItem.getProductPostId());
 				return new CartItemResponse(
 					cartItem.getId(),
-					product.title(),
-					product.name(),
-					product.price(),
-					cartItem.isSelected());
+					productPost.title(),
+					productPost.name(),
+					productPost.price(),
+					cartItem.isSelected(),
+					productPost.primaryImageUrl()
+				);
 			})
 			.toList();
 	}

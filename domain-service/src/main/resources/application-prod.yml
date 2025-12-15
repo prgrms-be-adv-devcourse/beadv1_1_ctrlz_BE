@@ -1,49 +1,110 @@
+server:
+  port: 8081
+
 spring:
-  logging:
-    config: classpath:logback-prod.xml
+  application:
+    name: domain-service
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 
   datasource:
-    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
   jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto:
+    show-sql: false
     properties:
       hibernate:
-        # 운영에서는 SQL 포맷팅 제거
-        format_sql: false
-        highlight_sql: false
-        use_sql_comments: false
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
         jdbc:
           batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+  elasticsearch:
+    uris: ${ELASTIC_SEARCH_URL} 
 
   data:
     redis:
       port: 6379
-      host: redis-svc
+      host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
-
   kafka:
-    bootstrap-servers: kafka-svc:9090
-    consumer:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.trusted.packages: "com.common.event.**"
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
-  elasticsearch:
-    uris: http://elasticsearch-svc:9200
+    consumer:
+      group-id: domain-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
+    listener:
+      immediate-stop: false # default 값 명시
+
+custom:
+  image:
+    allowed-extension: jpg,jpeg,png,webp
+    max-size: 10485760 # 10mb
+    default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  cart:
+    topic:
+      command: cart-command
+
+  deposit:
+    topic:
+      command: deposit-command
+
+  product-post:
+    topic:
+      event: product-post-events
+
+  search:
+    topic:
+      event: search-word-events
+
+  feign:
+    url:
+      user-service: http://account-svc:8080
+# k8s 설정
 eureka:
   instance:
+    prefer-ip-address: true
     hostname: domain-service
   client:
     serviceUrl:
       defaultZone: http://discovery-svc:8761/eureka/
+    enabled: true
 
-custom:
-  feign:
-    url:
-      user-service: http://account-svc:8080
 
 openapi:
   service:
     url: https://api.yeongeun.chlab.org
+    
+logging:
+  config: classpath:logback-prod.xml
