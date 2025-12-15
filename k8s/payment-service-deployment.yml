@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: payment-service-app
-          image: docker.io/beatchoi156/payment-service:latest
+          image: docker.io/beatchoi156/payment-service-app:latest
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"

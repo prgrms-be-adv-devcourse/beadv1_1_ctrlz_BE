@@ -16,7 +16,7 @@ COPY observability-config/zipkin/build.gradle ./observability-config/zipkin/
 #의존성 다운로드
 WORKDIR /app/payment-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon
 
 # 나머지 소스 코드 복사
 WORKDIR /app

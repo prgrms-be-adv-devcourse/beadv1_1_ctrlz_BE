@@ -138,7 +138,7 @@ data:
       `toss_charged_amount` DECIMAL(19, 2) NOT NULL,
       `currency` VARCHAR(10) NOT NULL,
       `pay_type` ENUM('DEPOSIT', 'TOSS', 'DEPOSIT_TOSS') NOT NULL,
-      `status` ENUM('READY', 'IN_PROGRESS', 'WAITING_FOR_DEPOSIT', 'DONE', 'CANCELED', 'PARTIAL_CANCELED', 'ABORTED', 'EXPIRED', 'FAILED', 'REFUNDED') NOT NULL,
+      `status` varchar(50) NOT NULL,
       `approved_at` DATETIME,
       PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -168,7 +168,7 @@ data:
         amount           DECIMAL      NOT NULL,
         before_balance   DECIMAL      NOT NULL,
         after_balance    DECIMAL      NOT NULL,
-        reference_id     VARCHAR(255) NULL,
+     
         CONSTRAINT pk_deposit_logs PRIMARY KEY (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
@@ -194,22 +194,7 @@ data:
       FOREIGN KEY (`payment_id`) REFERENCES payments(`id`) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
-    -- payment_logs 테이블
-    CREATE TABLE IF NOT EXISTS payment_logs (
-      `id` VARCHAR(36) NOT NULL,
-      `delete_status` ENUM('N', 'D') NOT NULL DEFAULT 'N',
-      `created_at` DATETIME NOT NULL,
-      `updated_at` DATETIME NOT NULL,
-      `orders_id` VARCHAR(36),
-      `users_id` VARCHAR(36),
-      `payment_key` VARCHAR(255),
-      `status` VARCHAR(50) NOT NULL,
-      `request_body` LONGTEXT,
-      `response_body` LONGTEXT,
-      `fail_reason` VARCHAR(1000),
-      `logged_at` DATETIME NOT NULL,
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+   
 
     -- ==============================================
     -- Domain Service 테이블 - Category

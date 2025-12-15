@@ -22,13 +22,14 @@ jobs:
       id-token: write
     uses: ./.github/workflows/release-workflow.yml
     secrets:
-      APPLICATION_SECRET: ${{ secrets.APPLICATION_ACCOUNT_SECRET }} # DOMAIN에 해당하는 SECRET 가져오기
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_PAYMENT_SECRET }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+
     with:
       service-name: payment-service-app
       service-dir: .
-      secret-dir: payment-service/payment-application # payment-service 에는 /payment-application로 secret.yml 들어가게 설정
+      secret-dir: payment-service
       file-name: docker/payment-service.dockerfile
 
   deploying:

@@ -72,6 +72,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
     implementation 'io.github.openfeign:feign-micrometer'    // Feign tracing
+    implementation 'io.github.openfeign:feign-okhttp'
 
     // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"

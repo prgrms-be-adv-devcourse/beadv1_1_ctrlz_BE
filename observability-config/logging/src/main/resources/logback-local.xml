@@ -11,25 +11,19 @@
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <property name="SYSTEM_LOG_FILE" value="${LOG_PATH}/system.log"/>
     <property name="API_LOG_FILE" value="${LOG_PATH}/api.log"/>
-    <property name="INFO_LOG_FILE" value="${LOG_PATH}/application-info.log"/>
-    <property name="WARN_LOG_FILE" value="${LOG_PATH}/application-warn.log"/>
-    <property name="ERROR_LOG_FILE" value="${LOG_PATH}/application-error.log"/>
+    <property name="API_INFO_LOG_FILE" value="${LOG_PATH}/api-info.log"/>
+    <property name="API_WARN_LOG_FILE" value="${LOG_PATH}/api-warn.log"/>
+    <property name="API_ERROR_LOG_FILE" value="${LOG_PATH}/api-error.log"/>
     <property name="ITEM_VIEW_LOG_FILE" value="${LOG_PATH}/item-view.log"/>
     <property name="SEARCH_VIEW_LOG_FILE" value="${LOG_PATH}/search-view.log"/>
 
     <!-- appender 첨부 -->
     <!-- local 환경에서는 appender 필요 없음 
-    <include resource="appender-system.xml"/>
-    <include resource="appender-api.xml"/>
-    <include resource="appender-info.xml"/>
-    <include resource="appender-warn.xml"/>
-    <include resource="appender-error.xml"/>
-    -->
     <include resource="appender-item-view.xml"/>
     <include resource="appender-search-view.xml"/>
 
 
-    <!-- local -->
+    <-!- local -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <!-- <appender-ref ref="SYSTEM_FILE"/> -->

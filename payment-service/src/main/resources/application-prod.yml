@@ -9,6 +9,13 @@ spring:
   application:
     name: payment-service
 
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
+  mvc:
+    static-path-pattern: /api/payments/**
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -52,7 +59,6 @@ spring:
       immediate-stop: false # default 값 명시
 
 custom:
-
   config:
     topic-partitions: 1
     topic-replications: 1
