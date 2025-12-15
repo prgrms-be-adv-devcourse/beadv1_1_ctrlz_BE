@@ -132,7 +132,10 @@
         };
 
         // 토스페이먼츠 위젯 초기화
-        main();
+        main().catch((error) => {
+            console.error("Toss Payments SDK Initialization failed:", error);
+            alert("결제 위젯 로딩에 실패했습니다. 관리자에게 문의하세요.")
+        });
 
         async function main() {
             console.log(`window.location.origin = ${window.location.origin}`)
