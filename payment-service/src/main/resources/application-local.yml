@@ -9,6 +9,11 @@ spring:
   application:
     name: payment-service
 
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
   mvc:
     static-path-pattern: /api/payments/**
 
