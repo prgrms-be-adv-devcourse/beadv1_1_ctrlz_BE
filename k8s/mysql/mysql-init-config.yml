@@ -138,7 +138,7 @@ data:
       `toss_charged_amount` DECIMAL(19, 2) NOT NULL,
       `currency` VARCHAR(10) NOT NULL,
       `pay_type` ENUM('DEPOSIT', 'TOSS', 'DEPOSIT_TOSS') NOT NULL,
-      `status` ENUM('READY', 'IN_PROGRESS', 'WAITING_FOR_DEPOSIT', 'DONE', 'CANCELED', 'PARTIAL_CANCELED', 'ABORTED', 'EXPIRED', 'FAILED', 'REFUNDED') NOT NULL,
+      `status` varchar(50) NOT NULL,
       `approved_at` DATETIME,
       PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
