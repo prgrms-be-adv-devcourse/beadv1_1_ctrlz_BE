@@ -1,4 +1,4 @@
-package com.domainservice.common.init.dummy;
+package com.domainservice.common.init.dummy.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
+import com.domainservice.common.init.dummy.service.DummyDataService;
 import com.domainservice.common.init.dummy.dto.DummyResultResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DummyDataController {
 
-	private final DummyDataGenerator generator;
+	private final DummyDataService generator;
 
 	@PostMapping("/generate")
 	@ResponseStatus(HttpStatus.CREATED)
