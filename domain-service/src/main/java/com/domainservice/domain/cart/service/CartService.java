@@ -42,11 +42,17 @@ public class CartService {
 		List<CartItem> cartItemList = cartItemJpaRepository.findByCart(cart);
 
 		for (CartItem cartItem : cartItemList) {
-			ProductPostResponse productPostById = productPostService.getProductPostById(
+			ProductPostResponse productPost = productPostService.getProductPostById(
 				cartItem.getProductPostId());
-			CartItemResponse cartItemResponse = new CartItemResponse(cartItem.getId(), productPostById.title(), productPostById.name(),
-				productPostById.price(),
-				cartItem.isSelected());
+
+			CartItemResponse cartItemResponse = new CartItemResponse(
+				cartItem.getId(),
+				productPost.title(),
+				productPost.name(),
+				productPost.price(),
+				cartItem.isSelected(),
+				productPost.primaryImageUrl()
+			);
 			response.add(cartItemResponse);
 		}
 
@@ -100,9 +106,15 @@ public class CartService {
 		}
 		cartJpaRepository.save(cart);
 
-		ProductPostResponse productPostById = productPostService.getProductPostById(targetItem.getProductPostId());
-		return new CartItemResponse(targetItem.getId(), productPostById.title(), productPostById.name(), productPostById.price(),
-			targetItem.isSelected());
+		ProductPostResponse productPost = productPostService.getProductPostById(targetItem.getProductPostId());
+		return new CartItemResponse(
+			targetItem.getId(),
+			productPost.title(),
+			productPost.name(),
+			productPost.price(),
+			targetItem.isSelected(),
+			productPost.primaryImageUrl()
+		);
 
 	}
 
@@ -138,11 +150,15 @@ public class CartService {
 
 		CartItem savedItem = cartItemJpaRepository.save(cartItem);
 
-		ProductPostResponse productPostById = productPostService.getProductPostById(savedItem.getProductPostId());
-		return new CartItemResponse(cartItem.getId(), productPostById.title(),
-			productPostById.name(),
-			productPostById.price(),
-			savedItem.isSelected());
+		ProductPostResponse productPost = productPostService.getProductPostById(savedItem.getProductPostId());
+		return new CartItemResponse(
+			cartItem.getId(),
+			productPost.title(),
+			productPost.name(),
+			productPost.price(),
+			savedItem.isSelected(),
+			productPost.primaryImageUrl()
+		);
 	}
 
 	/**
@@ -175,13 +191,15 @@ public class CartService {
 
 		return recentItems.stream()
 			.map(cartItem -> {
-				ProductPostResponse product = productPostService.getProductPostById(cartItem.getProductPostId());
+				ProductPostResponse productPost = productPostService.getProductPostById(cartItem.getProductPostId());
 				return new CartItemResponse(
 					cartItem.getId(),
-					product.title(),
-					product.name(),
-					product.price(),
-					cartItem.isSelected());
+					productPost.title(),
+					productPost.name(),
+					productPost.price(),
+					cartItem.isSelected(),
+					productPost.primaryImageUrl()
+				);
 			})
 			.toList();
 	}
