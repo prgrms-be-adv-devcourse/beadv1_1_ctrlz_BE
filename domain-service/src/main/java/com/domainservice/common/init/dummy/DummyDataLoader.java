@@ -12,8 +12,6 @@ import java.util.Map;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class DummyDataLoader {
-
-	private final ObjectMapper objectMapper;
 
 	/**
 	 * 텍스트 파일을 라인별로 읽어 리스트로 반환
@@ -36,7 +32,7 @@ public class DummyDataLoader {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
-				if (!line.isEmpty() && !line.startsWith("#")) { // 주석 제외
+				if (!line.isEmpty() && !line.startsWith("#")) {
 					lines.add(line);
 				}
 			}
@@ -81,36 +77,4 @@ public class DummyDataLoader {
 		return productMap;
 	}
 
-	/**
-	 * CSV 파일을 읽어 카테고리 맵으로 반환 (id -> name)
-	 */
-	public Map<String, String> loadCategories(String resourcePath) {
-		Map<String, String> categoryMap = new HashMap<>();
-		try (BufferedReader reader = new BufferedReader(
-			new InputStreamReader(
-				new ClassPathResource(resourcePath).getInputStream(),
-				StandardCharsets.UTF_8))) {
-			String line;
-			boolean isFirstLine = true;
-			while ((line = reader.readLine()) != null) {
-				if (isFirstLine) { // 헤더 스킵
-					isFirstLine = false;
-					continue;
-				}
-				line = line.trim();
-				if (line.isEmpty() || line.startsWith("#")) continue;
-
-				String[] parts = line.split(",", 2);
-				if (parts.length == 2) {
-					String id = parts[0].trim();
-					String name = parts[1].trim();
-					categoryMap.put(id, name);
-				}
-			}
-			log.info("{} 로드 완료: {}개 카테고리", resourcePath, categoryMap.size());
-		} catch (IOException e) {
-			log.error("CSV 파일 로드 실패: {}", resourcePath, e);
-		}
-		return categoryMap;
-	}
 }
