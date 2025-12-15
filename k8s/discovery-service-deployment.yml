@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: discovery-service-app
-          image: docker.io/beatchoi156/discovery-service:latest
+          image: docker.io/beatchoi156/discovery-service-app:latest
           env:
             - name: LOG_PATH
               value: "/app/logs"

@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: ai-service-app
-          image: docker.io/beatchoi156/ai-service:latest
+          image: docker.io/beatchoi156/ai-service-app:latest
           env:
             - name: discovery_default_zone
               value: "http://discovery-svc:8761/eureka/"
