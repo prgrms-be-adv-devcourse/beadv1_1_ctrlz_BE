@@ -1,9 +1,16 @@
 package com.domainservice.common.init.data;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.domainservice.domain.post.category.service.CategoryService;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.domainservice.common.init.dummy.service.DummyDataLoader;
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,22 +21,53 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CategoryInitializer {
 
-    private final CategoryService categoryService;
+	private final JdbcTemplate jdbcTemplate;
+	private final DummyDataLoader dataLoader;
 
-    public void init() {
-        log.info("--- 카테고리 초기화 시작 ---");
+	@Transactional
+	public void init() {
+		log.info("--- 카테고리 초기화 시작 ---");
 
-        String[] categories = {
-                "가구/인테리어", "가방/지갑", "가전제품"
-                , "기타", "도서",
-                "생활용품", "스포츠/레저", "뷰티/미용", "신발", "식품",
-                "유아동", "의류", "전자기기", "취미/게임", "반려동물용품"
-        };
+		List<String> categoryNames = dataLoader.loadLines("init/categories.txt");
 
-        for (String categoryName : categories) {
-            categoryService.createIfNotExists(categoryName);
-        }
+		// 기존 카테고리 조회 (중복 체크)
+		List<String> existingCategories = jdbcTemplate.queryForList(
+			"SELECT name FROM category WHERE delete_status = 'N'",
+			String.class
+		);
 
-        log.info("카테고리 {}개 초기화 완료", categories.length);
-    }
+		List<Object[]> batchData = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		int skippedCount = 0;
+
+		for (String categoryName : categoryNames) {
+			if (categoryName.trim().isEmpty() || categoryName.trim().startsWith("#")) {
+				continue;
+			}
+
+			if (existingCategories.contains(categoryName)) {
+				skippedCount++;
+				continue;
+			}
+
+			// UUIDv7로 ID 자동 생성
+			String categoryId = UuidCreator.getTimeOrderedEpoch().toString();
+			batchData.add(new Object[] {categoryId, categoryName, "N", now, now});
+		}
+
+		if (!batchData.isEmpty()) {
+			jdbcTemplate.batchUpdate(
+				"""
+					INSERT INTO category (id, name, delete_status, created_at, updated_at)
+					VALUES (?, ?, ?, ?, ?)
+					""",
+				batchData
+			);
+			log.info("--- 카테고리 초기화 완료: {}개 생성, {}개 건너뜀 ---",
+				batchData.size(), skippedCount);
+		} else {
+			log.info("--- 카테고리 초기화 완료: 모든 카테고리가 이미 존재함 ({}/{}개) ---",
+				skippedCount, categoryNames.size());
+		}
+	}
 }

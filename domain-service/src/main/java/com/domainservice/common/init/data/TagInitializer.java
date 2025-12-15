@@ -1,9 +1,16 @@
 package com.domainservice.common.init.data;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.domainservice.domain.post.tag.service.TagService;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.domainservice.common.init.dummy.service.DummyDataLoader;
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,61 +21,54 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TagInitializer {
 
-    private final TagService tagService;
+	private final JdbcTemplate jdbcTemplate;
+	private final DummyDataLoader dataLoader;
 
-    public void init() {
-        log.info("--- 태그 초기화 시작 ---");
+	@Transactional
+	public void init() {
+		log.info("--- 태그 초기화 시작 ---");
 
-        String[] tags = {
-                // 상품 상태
-                "새상품", "거의새것", "사용감있음", "중고", "리퍼",
+		List<String> tagNames = dataLoader.loadLines("init/tags.txt");
 
-                // 거래 방식
-                "직거래", "택배거래", "반값택배", "끼택", "안전거래",
-                "선입금", "착불", "반반택배", "편의점택배",
+		// 기존 태그 조회 (중복 체크)
+		List<String> existingTags = jdbcTemplate.queryForList(
+			"SELECT name FROM tag WHERE delete_status = 'N'",
+			String.class
+		);
 
-                // 가격 관련
-                "가격제안가능", "네고가능", "가격흥정가능", "교환가능", "나눔",
-                "급처", "급매", "반값", "최저가", "파격가",
+		List<Object[]> batchData = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		int skippedCount = 0;
 
-                // 배송 관련
-                "무료배송", "오늘출발", "당일발송", "빠른배송", "등기발송",
+		for (String tagName : tagNames) {
 
-                // 제품 특징 - 전자기기
-                "미개봉", "정품", "애플케어", "언락", "공기계",
-                "128GB", "256GB", "512GB", "1TB",
-                "블랙", "화이트", "블루", "퍼플", "골드",
-                "아이폰", "갤럭시", "맥북", "아이패드", "에어팟",
+			if (tagName.trim().isEmpty() || tagName.trim().startsWith("#")) {
+				continue;
+			}
 
-                // 제품 특징 - 의류/잡화
-                "프리사이즈", "XS", "S", "M", "L", "XL", "XXL",
-                "새옷", "한번착용", "미착용", "택포함", "정품박스",
-                "한정판", "콜라보", "빈티지", "리미티드",
+			if (existingTags.contains(tagName)) {
+				skippedCount++;
+				continue;
+			}
 
-                // 인기 브랜드 관련
-                "나이키", "아디다스", "뉴발란스", "컨버스", "반스",
-                "노스페이스", "파타고니아", "무신사", "구찌", "프라다",
+			// UUIDv7로 ID 생성
+			String tagId = UuidCreator.getTimeOrderedEpoch().toString();
+			batchData.add(new Object[] {tagId, tagName, "N", now, now});
+		}
 
-                // 계절/시즌
-                "겨울용", "여름용", "봄가을용", "사계절용", "방한",
-
-                // 용도
-                "출근룩", "데일리룩", "운동용", "학교용", "여행용",
-                "홈트레이닝", "등산용", "캠핑용",
-
-                // 기타 인기 키워드
-                "인기상품", "베스트", "추천", "덤포함", "세트",
-                "2개묶음", "3개세트", "대량구매", "벌크",
-                "수입", "정식수입", "병행수입", "면세점",
-
-                // 인증/검증
-                "정품인증", "영수증포함", "보증서", "AS가능", "리셀가능"
-        };
-
-        for (String tagName : tags) {
-            tagService.createIfNotExists(tagName);
-        }
-
-        log.info("태그 {}개 초기화 완료", tags.length);
-    }
+		if (!batchData.isEmpty()) {
+			jdbcTemplate.batchUpdate(
+				"""
+					INSERT INTO tag (id, name, delete_status, created_at, updated_at)
+					VALUES (?, ?, ?, ?, ?)
+					""",
+				batchData
+			);
+			log.info("--- 태그 초기화 완료: {}개 생성, {}개 건너뜀 ---",
+				batchData.size(), skippedCount);
+		} else {
+			log.info("--- 태그 초기화 완료: 모든 태그가 이미 존재함 ({}/{}개) ---",
+				skippedCount, tagNames.size());
+		}
+	}
 }
