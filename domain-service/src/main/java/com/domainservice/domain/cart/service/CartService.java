@@ -102,7 +102,7 @@ public class CartService {
 				.build();
 
 			cart.addCartItem(newItem);
-			targetItem = newItem;
+			targetItem = cartItemJpaRepository.save(newItem);
 		}
 		cartJpaRepository.save(cart);
 
