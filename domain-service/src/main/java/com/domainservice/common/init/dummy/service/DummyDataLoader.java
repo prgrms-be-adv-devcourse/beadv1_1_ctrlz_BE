@@ -1,4 +1,4 @@
-package com.domainservice.common.init.dummy;
+package com.domainservice.common.init.dummy.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
