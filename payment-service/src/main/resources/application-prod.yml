@@ -1,7 +1,3 @@
-application:
-  title: yeongeunMarket
-  version: 1.0
-
 server:
   port: 8083
 
@@ -83,3 +79,15 @@ eureka:
 
 logging:
   config: classpath:logback-prod.xml
+
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
