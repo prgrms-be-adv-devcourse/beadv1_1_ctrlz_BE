@@ -1,3 +1,7 @@
+application:
+  title: yeongeunMarket
+  version: 1.0
+
 server:
   port: 8081
 
@@ -10,37 +14,25 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto:
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
         default_batch_fetch_size: 100
-        jdbc:
-          batch_size: 1000
-        order_updates: true
-        order_inserts: true
+      order_inserts: true
+      order_updates: true
 
-  elasticsearch:
-    uris: ${ELASTIC_SEARCH_URL} 
-
-  data:
-    redis:
-      port: 6379
-      host: ${REDIS_HOST}
-      password: ${REDIS_PASSWORD}
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -54,13 +46,18 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: com.common.event, com.common.event.productPost
         allow.auto.create.topics: false
         observation:
           enabled: true
 
     listener:
-      immediate-stop: false # default 값 명시
+      immediate-stop: false
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
 
 custom:
   image:
@@ -84,27 +81,18 @@ custom:
     topic:
       event: product-post-events
 
+  order:
+    topic:
+      command: order-command
+
   search:
     topic:
       event: search-word-events
 
-  feign:
-    url:
-      user-service: http://account-svc:8080
-# k8s 설정
-eureka:
-  instance:
-    prefer-ip-address: true
-    hostname: domain-service
-  client:
-    serviceUrl:
-      defaultZone: http://discovery-svc:8761/eureka/
-    enabled: true
-
-
-openapi:
-  service:
-    url: https://api.yeongeun.chlab.org
-    
-logging:
-  config: classpath:logback-prod.xml
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

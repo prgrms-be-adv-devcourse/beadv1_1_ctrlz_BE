@@ -90,5 +90,16 @@ custom:
   product:
     base-url: http://domain-svc:8081/api/products
 
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
 logging:
   config: classpath:logback-prod.xml
