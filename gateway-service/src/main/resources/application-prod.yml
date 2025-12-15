@@ -149,8 +149,14 @@ spring:
                     requiredRole: USER
 
             # 예치금 (USER 권한 필요)
+            - id: deposit-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/deposits/charge,/api/deposits/success,/api/deposits/fail
+                - Method=GET
+
             - id: deposit-api-protected
-              uri: lb://DOMAIN-SERVICE
+              uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/deposits/**
                 - Method=GET,POST
