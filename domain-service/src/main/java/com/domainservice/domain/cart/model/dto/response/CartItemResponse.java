@@ -6,6 +6,7 @@ public record CartItemResponse(
 	String title,
 	String name,
 	int price,
-	boolean isSelected
+	boolean isSelected,
+	String primaryImageUrl
 ) {
 }
