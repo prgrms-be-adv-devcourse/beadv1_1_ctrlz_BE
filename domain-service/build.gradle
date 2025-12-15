@@ -99,6 +99,10 @@ dependencies {
 
     // JSON 직렬화/역직렬화용
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator
+    // UUID creator (UUIDv7 등 생성 가능)
+    implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 }
 
 dependencyManagement {
