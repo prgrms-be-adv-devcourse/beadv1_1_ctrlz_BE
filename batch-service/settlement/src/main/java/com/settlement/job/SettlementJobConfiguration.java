@@ -16,6 +16,8 @@ public class SettlementJobConfiguration {
 
     private final JobRepository jobRepository;
 
+
+    @Qualifier("settlementJob")
     @Bean
     public Job settlementJob(@Qualifier("settlementCreateStep") Step settlementCreateStep,
             @Qualifier("settlementFeeStep") Step settlementFeeStep) {

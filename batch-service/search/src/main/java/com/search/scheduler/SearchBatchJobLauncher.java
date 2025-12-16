@@ -12,16 +12,23 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class SearchBatchJobLauncher extends QuartzJobBean {
 
 	private final JobLauncher jobLauncher;
 	private final Job searchHistoryJob;
+
+	public SearchBatchJobLauncher(
+			JobLauncher jobLauncher,
+			@Qualifier("searchHistoryJob") Job searchHistoryJob) {
+		this.jobLauncher = jobLauncher;
+		this.searchHistoryJob = searchHistoryJob;
+	}
 
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -30,9 +37,9 @@ public class SearchBatchJobLauncher extends QuartzJobBean {
 		log.info("Quartz 스케줄러에 의해 배치 작업 시작: {}", now);
 		try {
 			JobParameters jobParameters = new JobParametersBuilder()
-				.addString("executedAt",
-					LocalDateTime.parse(now.toString(), DateTimeFormatter.ISO_DATE_TIME).toString())
-				.toJobParameters();
+					.addString("executedAt",
+							LocalDateTime.parse(now.toString(), DateTimeFormatter.ISO_DATE_TIME).toString())
+					.toJobParameters();
 
 			jobLauncher.run(searchHistoryJob, jobParameters);
 		} catch (Exception e) {

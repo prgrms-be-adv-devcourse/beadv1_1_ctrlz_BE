@@ -7,6 +7,7 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,7 +41,7 @@ public class SettlementScheduleConfiguration {
      * Cron: 0 0 3 15 * ? (매달 15일 새벽 3시)
      */
     @Bean
-    public Trigger settlementTrigger(JobDetail settlementJobDetail) {
+    public Trigger settlementTrigger(@Qualifier("settlementJobDetail") JobDetail settlementJobDetail) {
         log.info("정산 배치 Trigger 생성 - Cron: 0 0 3 15 * ? (매달 15일 새벽 3시)");
 
         CronScheduleBuilder scheduleBuilder = CronScheduleBuilder
