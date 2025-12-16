@@ -1,19 +1,5 @@
 package com.auth.controller;
 
-import java.time.Duration;
-import java.util.Arrays;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.auth.dto.LoginRequest;
 import com.auth.dto.LoginResponse;
 import com.auth.handler.CookieProvider;
@@ -21,13 +7,14 @@ import com.auth.jwt.JwtTokenProvider;
 import com.auth.jwt.TokenType;
 import com.auth.service.AuthService;
 import com.auth.service.JwtAuthService;
-
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -67,12 +54,8 @@ public class AuthController {
 	}
 
 	@GetMapping("/logout")
-	public void logout(HttpServletRequest request, HttpServletResponse response) {
-		String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-		String token = bearerToken.replace("Bearer ", "");
-		String userId = jwtTokenProvider.getUserIdFromToken(token);
+	public void logout(@RequestHeader("X-REQUEST-ID") String userId, HttpServletResponse response) {
 		jwtAuthService.logout(userId);
-
 		ResponseCookie expire = CookieProvider.expireAccessToken();
 		response.addHeader("Set-Cookie", expire.toString());
 	}
