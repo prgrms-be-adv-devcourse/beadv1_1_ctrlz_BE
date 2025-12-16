@@ -47,7 +47,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
                                 "name": "가구"
                             }
                         ],
-                        "message": "태그 목록을 조회합니다."
+                        "message": "태그 목록 조회에 성공했습니다."
                     }
                     """
 			)
