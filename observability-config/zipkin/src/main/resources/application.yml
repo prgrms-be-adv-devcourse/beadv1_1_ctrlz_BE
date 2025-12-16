@@ -2,6 +2,10 @@ spring:
   application:
     name: zipkin
 
+  config:
+    activate:
+      on-profile: local
+
 management:
   tracing:
     sampling:
@@ -65,9 +69,5 @@ management:
     brave:
       span-joining-supported: true
   zipkin:
-    sender:
-      type: kafka
-    kafka:
-      topic: zipkin
     tracing:
       endpoint: http://zipkin-svc:9411/api/v2/spans
