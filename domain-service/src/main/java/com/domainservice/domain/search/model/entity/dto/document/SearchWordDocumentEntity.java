@@ -1,12 +1,9 @@
 package com.domainservice.domain.search.model.entity.dto.document;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -44,19 +41,27 @@ public class SearchWordDocumentEntity {
 	)
 	private String qwertyInput;
 
-	@Field(name = "created_at", type = FieldType.Date, format = DateFormat.date_time)
-	private Instant createdAt;
+	@Field(
+		name = "created_at",
+		type = FieldType.Date,
+		pattern = "yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+	)
+	private LocalDateTime createdAt;
 
-	@Field(name = "recent_searched_at", type = FieldType.Date, format = DateFormat.date_time)
-	private Instant recentSearchedAt;
+	@Field(
+		name = "recent_searched_at",
+		type = FieldType.Date,
+		pattern = "yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+	)
+	private LocalDateTime recentSearchedAt;
 
 	@Builder
 	private SearchWordDocumentEntity(String originValue, String qwertyInput, LocalDateTime recentSearchedAt,
 		LocalDateTime createdAt) {
 		this.originValue = originValue;
 		this.qwertyInput = qwertyInput;
-		this.recentSearchedAt = recentSearchedAt.atZone(ZoneId.systemDefault()).toInstant();
-		this.createdAt = createdAt.atZone(ZoneId.systemDefault()).toInstant();
+		this.recentSearchedAt = recentSearchedAt;
+		this.createdAt = createdAt;
 	}
 
 	public static SearchWordDocumentEntity createDocumentEntity(
