@@ -10,6 +10,7 @@ spring:
   batch:
     jdbc:
       platform: mysql
+      initialize-schema: never
 
   jpa:
     open-in-view: false
