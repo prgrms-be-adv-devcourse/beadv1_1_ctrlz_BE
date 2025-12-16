@@ -15,6 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
+import com.gatewayservice.common.ServletConst;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -80,7 +82,7 @@ public class ProductSearchFilter extends AbstractGatewayFilterFactory<ProductSea
 			return of(bearerToken.replace("Bearer ", ""));
 		}
 
-		HttpCookie tokenCookie = request.getCookies().getFirst("accessToken");
+		HttpCookie tokenCookie = request.getCookies().getFirst(ServletConst.ACCESS_TOKEN);
 		if (tokenCookie != null) {
 			log.info("Optional.of(tokenCookie.getValue()) = {}", of(tokenCookie.getValue()));
 			return of(tokenCookie.getValue());
