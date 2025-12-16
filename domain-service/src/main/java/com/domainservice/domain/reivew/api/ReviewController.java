@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.reivew.constant.ReviewConstant;
 import com.domainservice.domain.reivew.docs.CreateReviewApiDocs;
+import com.domainservice.domain.reivew.docs.UpdateReviewApiDocs;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
 import com.domainservice.domain.reivew.service.ReviewService;
@@ -61,6 +62,7 @@ public class ReviewController {
 	 * @param reviewId
 	 * @return 특정 id의 수정된 리뷰 데이터 & 상태 메시지
 	 */
+	@UpdateReviewApiDocs
 	@PatchMapping("/{reviewId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ReviewResponse> getReview(
