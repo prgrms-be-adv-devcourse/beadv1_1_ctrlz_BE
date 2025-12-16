@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.domainservice.domain.search.model.entity.persistence.SearchWordLog;
+import com.domainservice.domain.search.service.converter.PrefixConverter;
 import com.domainservice.domain.search.service.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.model.entity.dto.document.SearchWordDocumentEntity;
@@ -49,55 +50,62 @@ public class SearchWordElasticService {
 	public List<SearchWordResponse> getAutoCompletionWordList(Prefix prefix, String userId) {
 		List<SearchWordResponse> responseList = new ArrayList<>();
 
-		log.info("originValue = {}", prefix.value());
-		log.info("qwertyValue = {}", prefix.getQwertyInput());
+		String originValue = prefix.value() != null ? prefix.value().trim() : "";
+		String qwertyValue = prefix.getQwertyInput() != null ? prefix.getQwertyInput().trim() : "";
 
-		//검색어가 없는 경우
-		String originValue = prefix.value();
+		// qwerty → korean 변환 (dkssud → 안녕)
+		String convertedKorean = StringUtils.hasText(qwertyValue)
+			? PrefixConverter.convertToKoreanWord(qwertyValue)
+			: "";
+
+		log.info("originValue = {}", originValue);
+		log.info("qwertyValue = {}", qwertyValue);
+
+		// 1. 검색어가 없는 경우 → 최근 검색어 or 트렌드
 		if (!StringUtils.hasText(originValue)) {
-			// Redis에서 내가 검색한 키워드 리스트 조회.
-			return !userId.isEmpty() ?
-				getRecentSearchKeywords(userId) :
-				searchWordRedisService.getTrendWordList();
+			return StringUtils.hasText(userId)
+				? getRecentSearchKeywords(userId)
+				: searchWordRedisService.getTrendWordList();
 		}
 
-		String convertedValue = prefix.getQwertyInput();
+		List<SearchWordDocumentEntity> candidates = new ArrayList<>();
 
-		List<SearchWordDocumentEntity> findWordList;
-		if (!prefixAnalyzer.existsInDictionary(convertedValue)) {
-			//사전에 없는 영어입력값이면 -> convertedValue와 일치하는 검색후 -> 유사 검색
-			findWordList = findWordListForUnknownEnglish(prefix);
-		} else {
-			//사전에 있거나 한글이면.
-			findWordList = findWordListForOrigin(prefix);
+		// 2. originValue / 변환된 한글 / qwerty 입력을 모두 기준으로 검색
+		if (StringUtils.hasText(originValue)) {
+			candidates.addAll(searchWordRepository.findAllByOriginValue(originValue));
 		}
 
-		log.info("findWordList = {}", findWordList);
-		//koreanWord값이 같으면 중복처리
-		findWordList.stream()
+		if (StringUtils.hasText(convertedKorean) && !convertedKorean.equals(originValue)) {
+			candidates.addAll(searchWordRepository.findAllByOriginValue(convertedKorean));
+		}
+
+		// 3. qwerty 변환값이 존재하면 qwerty 기반 검색도 병행
+		if (StringUtils.hasText(qwertyValue)) {
+			candidates.addAll(searchWordRepository.findAllByQwertyInput(qwertyValue));
+		}
+
+		// 4. 그래도 비어있으면 → qwerty 단건 매칭 후 originValue 재시도 (영문 오타 케이스)
+		if (candidates.isEmpty() && StringUtils.hasText(qwertyValue)) {
+			searchWordRepository.findByQwertyInput(qwertyValue)
+				.map(SearchWordDocumentEntity::getOriginValue)
+				.ifPresent(origin ->
+					candidates.addAll(searchWordRepository.findAllByOriginValue(origin))
+				);
+		}
+
+		// 5. 중복 제거 + 응답 변환
+		candidates.stream()
 			.distinct()
+			.limit(20)
 			.map(SearchWordResponse::from)
 			.forEach(responseList::add);
 
+		log.info("auto-complete result size = {}", responseList.size());
 		return responseList;
 	}
 
 	private List<SearchWordResponse> getRecentSearchKeywords(String userId) {
 		return searchWordRedisService.getRecentSearchWordList(userId);
-	}
-
-	/**
-	 * 사전에 없는 영어일 경우에 조회 -> 실제 의미는 한글
-	 * @param prefix
-	 * @return
-	 */
-	private List<SearchWordDocumentEntity> findWordListForUnknownEnglish(Prefix prefix) {
-		SearchWordDocumentEntity findEntity = searchWordRepository.findByQwertyInput(prefix.value())
-			.orElseGet(() -> SearchWordDocumentEntity.createDocumentEntity(
-				SearchWordLog.create(prefix.value(), LocalDateTime.now())
-			));
-
-		return findWordListForOrigin(new Prefix(findEntity.getOriginValue()));
 	}
 
 	/**
