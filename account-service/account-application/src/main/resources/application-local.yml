@@ -35,7 +35,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true
     username: app
     password: 1234
 
@@ -124,8 +124,15 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     enabled: true
 
-# Management 설정
-management:
-  health:
-    redis:
-      enabled: false
+openapi:
+  service:
+    url: http://localhost:8080
+---
+spring:
+  config:
+    activate:
+      on-profile: kafka-on
+
+  kafka:
+    listener:
+      auto-startup: true

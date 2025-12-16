@@ -20,6 +20,9 @@ public class SpringDocConfiguration {
 	@Value("${openapi.service.url}")
 	private String gatewayUrl;
 
+	@Value("${server.port}")
+	private String localPort;
+
 	@Bean
 	public OpenAPI customOpenAPI() throws IOException {
 
@@ -28,7 +31,10 @@ public class SpringDocConfiguration {
 
 		return new OpenAPI()
 			.servers(
-				List.of(new Server().url(gatewayUrl).description("Gateway Server"))
+				List.of(
+					new Server().url(gatewayUrl).description("Gateway Server"),
+					new Server().url("http://localhost:" + localPort).description("local Server")
+				)
 			)
 			.info(new Info()
 				.title("연근마켓 - Domain Service API")
