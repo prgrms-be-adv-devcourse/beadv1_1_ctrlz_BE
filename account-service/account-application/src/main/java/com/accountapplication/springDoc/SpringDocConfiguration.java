@@ -1,4 +1,4 @@
-package com.paymentservice.common.configuration.springDoc;
+package com.accountapplication.springDoc;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +22,7 @@ public class SpringDocConfiguration {
 	@Value("${openapi.service.url}")
 	private String gatewayUrl;
 
-	@Value("${server.port}")
+	@Value("${server.port:8080}")
 	private String localPort;
 
 	@Bean

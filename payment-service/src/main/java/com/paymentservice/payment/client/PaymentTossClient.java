@@ -46,12 +46,6 @@ public class PaymentTossClient {
     )
     public TossApprovalResponse approve(PaymentConfirmRequest request) {
 
-        // Toss로 보내야하는 필수 필드
-        // Map<String, Object> requestBody = Map.of(
-        //         "paymentKey", request.paymentKey(),
-        //         "orderId", request.orderId(),
-        //         "amount", request.totalAmount());
-
         TossApproveRequest requestBody = new TossApproveRequest(request.paymentKey(), request.orderId(),
             request.totalAmount());
 
@@ -96,11 +90,6 @@ public class PaymentTossClient {
         backoff = @Backoff(delay = 1000)
     )
     public RefundResponse refund(PaymentEntity payment) {
-
-        // Toss로 보내야하는 필수 필드
-        // Map<String, Object> cancelBody = Map.of(
-        //         "cancelAmount", payment.getTossChargedAmount(),
-        //         "cancelReason", "사용자 요청 환불");
 
         TossCancelRequest cancelBody = new TossCancelRequest(payment.getTossChargedAmount(), "사용자 요청 환불");
         RefundResponse response = paymentFeignClient.refundPayment(

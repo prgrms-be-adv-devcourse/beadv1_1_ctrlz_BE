@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.common.model.web.BaseResponse;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.payment.client.PaymentTossClient;
+import com.paymentservice.payment.docs.ConfirmPaymentApiDocs;
+import com.paymentservice.payment.docs.DepositPaymentApiDocs;
+import com.paymentservice.payment.docs.GetPaymentReadyInfoApiDocs;
+import com.paymentservice.payment.docs.GetPaymentsForSettlementApiDocs;
+import com.paymentservice.payment.docs.RefundPaymentApiDocs;
 import com.paymentservice.payment.exception.PaymentNotFoundException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
 import com.paymentservice.payment.model.dto.PaymentReadyResponse;
@@ -26,9 +31,11 @@ import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.repository.PaymentRepository;
 import com.paymentservice.payment.service.PaymentService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Tag(name = "Payment", description = "결제 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/payments")
@@ -39,7 +46,7 @@ public class PaymentApiController {
     private final PaymentRepository paymentRepository;
     private final PaymentTossClient paymentTossClient;
 
-    /** 결제 승인 요청 처리 */
+    @ConfirmPaymentApiDocs
     @PostMapping("/confirm")
     public BaseResponse<PaymentResponse> confirmPayment(
         @RequestBody PaymentConfirmRequest request,
@@ -67,7 +74,7 @@ public class PaymentApiController {
         }
     }
 
-    /** 예치금으로 결제 요청 */
+    @DepositPaymentApiDocs
     @PostMapping("/deposit")
     public BaseResponse<PaymentResponse> depositPayment(
         @RequestBody PaymentConfirmRequest request,
@@ -88,7 +95,7 @@ public class PaymentApiController {
         }
     }
 
-    /** 결제 준비 정보 조회 */
+    @GetPaymentReadyInfoApiDocs
     @GetMapping("/ready/{orderId}")
     public BaseResponse<PaymentReadyResponse> getPaymentReadyInfo(
         @PathVariable String orderId,
@@ -97,7 +104,7 @@ public class PaymentApiController {
         return new BaseResponse<>(paymentService.getPaymentReadyInfo(orderId, userId), "결제 요청이 정상적으로 처리되었습니다.");
     }
 
-    /** 환불 처리 */
+    @RefundPaymentApiDocs
     @PostMapping("/refund/{orderId}")
     public BaseResponse<RefundResponse> refundPayment(
         @PathVariable String orderId,
@@ -135,7 +142,7 @@ public class PaymentApiController {
         }
     }
 
-    /** 정산용 결제 내역 조회 (Batch) */
+    @GetPaymentsForSettlementApiDocs
     @GetMapping("/settlement")
     public BaseResponse<java.util.List<PaymentResponse>> getPaymentsForSettlement(
         @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
