@@ -3,7 +3,6 @@ package com.domainservice.domain.post.tag.docs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import com.common.model.web.BaseResponse;
 import com.common.model.web.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,35 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @ApiResponses({
 	@ApiResponse(
 		responseCode = "200",
-		description = "태그 목록 조회 성공",
-		content = @Content(
-			schema = @Schema(implementation = BaseResponse.class),
-			examples = @ExampleObject(
-				value = """
-                    {
-                        "data": [
-                            {
-                                "id": "tag-uuid-1",
-                                "name": "전자기기"
-                            },
-                            {
-                                "id": "tag-uuid-2",
-                                "name": "의류"
-                            },
-                            {
-                                "id": "tag-uuid-3",
-                                "name": "도서"
-                            },
-                            {
-                                "id": "tag-uuid-4",
-                                "name": "가구"
-                            }
-                        ],
-                        "message": "태그 목록 조회에 성공했습니다."
-                    }
-                    """
-			)
-		)
+		description = "태그 목록 조회 성공"
 	),
 	@ApiResponse(
 		responseCode = "500",
