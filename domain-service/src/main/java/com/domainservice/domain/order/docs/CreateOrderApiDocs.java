@@ -30,10 +30,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 )
 @Parameter(
     name = "X-REQUEST-ID",
-    description = "사용자 ID",
-    required = true,
+    required = false,
     in = ParameterIn.HEADER,
-    schema = @Schema(type = "string")
+    schema = @Schema(
+        type = "string",
+        example = "gateway에서 전달되는 custom header값"
+    )
 )
 @RequestBody(
     description = "주문 생성 요청 (장바구니 아이템 ID 목록)",
