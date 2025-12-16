@@ -75,7 +75,6 @@ public class OAuth2LoginSuccessHandler implements ServerAuthenticationSuccessHan
 							response.refreshToken(),
 							TokenType.REFRESH_TOKEN.getDuration());
 
-					// 쿠키 설정 주석 처리 (Cross-Domain 문제로 URL 파라미터 방식 사용)
 					 exchange.getResponse().addCookie(accessTokenCookie);
 					 exchange.getResponse().addCookie(refreshTokenCookie);
 
