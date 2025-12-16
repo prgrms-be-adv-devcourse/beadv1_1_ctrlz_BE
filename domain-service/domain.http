@@ -2,8 +2,9 @@
 
 @host = https://api.yeongeun.chlab.org
 @userId = user-uuid-1234
-@postId = product-post-id-placeholder
-@keyword = iphone
+@postId = 019b28d5-4101-756b-ae59-c443394290ca
+@keyword = 아이폰
+@token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTliMjkwNS0wNDVlLTc1ZGYtOGM2OC1kMzFlM2UzNDczNzMiLCJ1c2VySWQiOiIwMTliMjkwNS0wNDVlLTc1ZGYtOGM2OC1kMzFlM2UzNDczNzMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTkxOTc1MywiZXhwIjoxNzY2ODE5NzUzfQ.-rZCqoXhW2Mi2q2Ym8MGNTW-RJO5ciQoWUJjQKiZrg2TajLsfQkEAbgee25Q8dg5
 
 ### 1. 더미 데이터 생성 (Generate Dummy Data)
 POST http://api.yeongeun.chlab.org:30002/api/admin/dummy/generate
@@ -27,13 +28,15 @@ Content-Type: application/json
 # postId: 조회할 상품 게시글 ID
 GET {{host}}/api/product-posts/{{postId}}
 Content-Type: application/json
-X-REQUEST-ID: {{userId}}
+Cookie: ACCESS_TOKEN={{token}}
+
 
 ### 5. 최근 본 상품 목록 조회 (Get Recent Viewed Posts)
 # X-REQUEST-ID: 사용자 식별을 위한 헤더
 GET {{host}}/api/product-posts/recent-views
 Content-Type: application/json
-X-REQUEST-ID: {{userId}}
+Cookie: ACCESS_TOKEN={{token}}
+
 
 ### 6. 통합 상품 검색 (Search Product Posts)
 # q: 검색어
