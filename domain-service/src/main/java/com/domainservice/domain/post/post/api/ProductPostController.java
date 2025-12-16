@@ -27,6 +27,7 @@ import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.DeleteProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
@@ -108,6 +109,7 @@ public class ProductPostController {
 	 * @param postId 삭제할 게시글 ID
 	 * @return 삭제된 게시글 ID (200 OK)
 	 */
+	@DeleteProductPostApiDocs
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<String> deleteProductPost(
