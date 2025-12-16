@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.reivew.constant.ReviewConstant;
 import com.domainservice.domain.reivew.docs.CreateReviewApiDocs;
+import com.domainservice.domain.reivew.docs.GetReviewListApiDocs;
 import com.domainservice.domain.reivew.docs.UpdateReviewApiDocs;
 import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
 import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
@@ -79,8 +80,9 @@ public class ReviewController {
 
 	/**
 	 * 특정 사용자의 리뷰 조회
- 	 * @return
+	 * @return
 	 */
+	@GetReviewListApiDocs
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ReviewResponse>> getReviewListById(
@@ -111,7 +113,5 @@ public class ReviewController {
 			ReviewConstant.REVIEW_FETCHED.getMessage()
 		);
 	}
-
-
 
 }
