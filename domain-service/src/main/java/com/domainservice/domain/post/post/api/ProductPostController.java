@@ -27,6 +27,7 @@ import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
@@ -83,12 +84,17 @@ public class ProductPostController {
 	 * @param request    게시글 수정 요청 정보
 	 * @return 수정된 게시글 정보 (200 OK)
 	 */
+	@UpdateProductPostApiDocs
 	@ResponseStatus(HttpStatus.OK)
 	@PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public BaseResponse<ProductPostResponse> updateProductPost(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId,
+
+		@Parameter(description = "이미지 파일들 (최소 1개 최대 10개)", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+
+		@Parameter(description = "상품 수정 요청 정보", schema = @Schema(implementation = ProductPostRequest.class))
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
 		validateAuthentication(userId);
