@@ -1,0 +1,50 @@
+package com.domainservice.common.configuration.springDoc;
+
+import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
+
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+
+@Configuration
+public class SwaggerPageableConfiguration {
+
+	@Bean
+	public OperationCustomizer customizePageable() {
+		return (operation, handlerMethod) -> {
+
+			boolean hasPageable = java.util.Arrays.stream(handlerMethod.getMethodParameters())
+				.anyMatch(param -> Pageable.class.equals(param.getParameterType()));
+
+			if (hasPageable && operation.getParameters() != null) {
+				for (Parameter param : operation.getParameters()) {
+					if ("page".equals(param.getName())) {
+						param.setDescription("페이지 번호 (0부터 시작)");
+						param.setSchema(new IntegerSchema()._default(0));
+					}
+					if ("size".equals(param.getName())) {
+						param.setDescription("페이지 당 조회 개수");
+						param.setSchema(new IntegerSchema()._default(12));
+					}
+					if ("sort".equals(param.getName())) {
+						param.setDescription("""
+							정렬 기준
+							
+							**형식**: `필드명,정렬방향`
+							
+							**정렬 방향**:
+							- `desc`: 내림차순
+							- `asc`: 오름차순
+							""");
+						param.setSchema(new StringSchema().example("createdAt,desc"));
+					}
+				}
+			}
+			return operation;
+		};
+	}
+}
+
