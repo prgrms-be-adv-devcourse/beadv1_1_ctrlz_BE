@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
+@Hidden
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/searches/redis-test")
