@@ -276,12 +276,8 @@ public class DummyDataGenerator {
 							.viewCount(((Number) row[9]).longValue())
 							.likedCount(((Number) row[10]).longValue())
 							.deleteStatus((String) row[11])
-							.createdAt(LocalDateTime.parse(
-									((LocalDateTime) row[12]).truncatedTo(ChronoUnit.SECONDS).toString()
-							))
-							.updatedAt(LocalDateTime.parse(
-									((LocalDateTime) row[13]).truncatedTo(ChronoUnit.SECONDS).toString()
-							))
+							.createdAt(((LocalDateTime) row[12]).withNano(0))
+							.updatedAt(((LocalDateTime) row[13]).withNano(0))
 							.tags(new ArrayList<>()) // 초기 생성시 태그 없음
 							.build())
 					.toList();
