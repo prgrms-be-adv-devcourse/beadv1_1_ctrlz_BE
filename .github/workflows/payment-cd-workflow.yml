@@ -32,15 +32,15 @@ jobs:
       secret-dir: payment-service
       file-name: docker/payment-service.dockerfile
 
-  deploying:
-    needs: releasing
-    uses: ./.github/workflows/deploy-workflow.yml
-    secrets: inherit
-
-    with:
-      pod-name: payment-service-app # pod랑 같은 이름
-      deploy-name: payment-deploy # deployment랑 같은 이름
-      label-name: payment # pod 라벨 이름
-      image-tag: ${{ needs.releasing.outputs.tag_name }}
+#  deploying:
+#    needs: releasing
+#    uses: ./.github/workflows/deploy-workflow.yml
+#    secrets: inherit
+#
+#    with:
+#      pod-name: payment-service-app # pod랑 같은 이름
+#      deploy-name: payment-deploy # deployment랑 같은 이름
+#      label-name: payment # pod 라벨 이름
+#      image-tag: ${{ needs.releasing.outputs.tag_name }}
 
 
