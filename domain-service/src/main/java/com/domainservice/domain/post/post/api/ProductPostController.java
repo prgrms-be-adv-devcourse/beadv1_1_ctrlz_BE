@@ -11,27 +11,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.model.vo.ProductStatus;
-import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.DeleteProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.GetProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.GetProductPostListApiDocs;
 import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
@@ -140,31 +140,26 @@ public class ProductPostController {
 	}
 
 	/**
-	 * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링을 지원합니다.
+	 * 상품 게시글 목록을 페이징하여 조회합니다.
 	 *
-	 * @param pageable    페이징 정보 (기본값: size=20, sort=createdAt, DESC)
-	 * @param categoryId  카테고리 ID (선택)
-	 * @param status      상품 상태 (선택)
-	 * @param tradeStatus 거래 상태 (선택)
-	 * @param minPrice    최소 가격 (선택)
-	 * @param maxPrice    최대 가격 (선택)
-	 * @return 페이징된 게시글 목록 (200 OK)
+	 * 카테고리, 상태, 가격 범위 등 동적으로 필터링하여 상품 게시글을 검색합니다.
+	 * 결과는 페이징되어 반환됩니다.
+	 *
+	 * @param pageable 페이징 정보 (page, size, sort)
+	 * @param request  상품 검색 필터 (카테고리, 상태, 가격 등)
+	 * @return 검색된 상품 게시글 목록 (200 OK)
 	 */
+	@GetProductPostListApiDocs
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PageResponse<List<ProductPostResponse>> getProductPostList(
-		@PageableDefault(size = 20, sort = "createdAt",
-			direction = Sort.Direction.DESC) Pageable pageable,
-		@RequestParam(required = false) String categoryId,
-		@RequestParam(required = false) ProductStatus status,
-		@RequestParam(required = false) TradeStatus tradeStatus,
-		@RequestParam(required = false) Integer minPrice,
-		@RequestParam(required = false) Integer maxPrice
+		@Valid @ModelAttribute
+		ProductPostSearchRequest request,
+		@PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+		Pageable pageable
 	) {
-		PageResponse<List<ProductPostResponse>> response = productPostService.getProductPostList(
-			pageable, categoryId, status, tradeStatus, minPrice, maxPrice
-		);
-		return response;
+		return productPostService.getProductPostList(pageable, request.getCategoryId(), request.getStatus(),
+			request.getTradeStatus(), request.getMinPrice(), request.getMaxPrice());
 	}
 
 	/**
