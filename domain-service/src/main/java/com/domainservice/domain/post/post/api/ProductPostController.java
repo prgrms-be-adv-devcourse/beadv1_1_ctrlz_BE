@@ -28,6 +28,7 @@ import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.DeleteProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.GetProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.GetProductPostListApiDocs;
+import com.domainservice.domain.post.post.docs.GetRecentlyViewedPostsApiDocs;
 import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
@@ -168,7 +169,9 @@ public class ProductPostController {
 	 * @param userId 사용자 식별자 (X-REQUEST-ID 헤더에서 추출)
 	 * @return 최근 본 상품 목록 (200 OK)
 	 */
+	@GetRecentlyViewedPostsApiDocs
 	@GetMapping("/recent-views")
+	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ProductPostResponse>> getRecentlyViewPosts(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId
 	) {
