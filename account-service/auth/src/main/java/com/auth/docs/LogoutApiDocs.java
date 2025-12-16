@@ -7,6 +7,7 @@ import org.springframework.web.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,13 +28,24 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
         """,
     security = @SecurityRequirement(name = "bearerAuth")
 )
-@Parameter(
-    name = "Authorization",
-    description = "Bearer Access Token",
-    required = true,
-    in = ParameterIn.HEADER,
-    schema = @Schema(type = "string")
-)
+@Parameters ({
+    @Parameter(
+        name = "X-REQUEST-ID",
+        required = false,
+        in = ParameterIn.HEADER,
+        schema = @Schema(
+            type = "string",
+            example = "gateway에서 전달되는 custom header값"
+        )
+    ),
+    @Parameter(
+        name = "Authorization",
+        description = "Bearer Access Token",
+        required = true,
+        in = ParameterIn.COOKIE,
+        schema = @Schema(type = "string")
+    )
+})
 @ApiResponses({
     @ApiResponse(
         responseCode = "200",

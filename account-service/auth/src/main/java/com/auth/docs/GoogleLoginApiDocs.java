@@ -18,9 +18,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-    summary = "소셜 로그인 (구글)",
+    summary = "토큰 발급 [내부 API]",
     description = """
-        OAuth 제공자(Google)로부터 받은 정보를 이용해 로그인을 시도합니다.
+        OAuth 제공자(Google)로부터 받은 정보를 이용해 인증을 합니다.
         
         ### 응답 분기 (`isNewUser` 필드 확인)
         1. **`isNewUser: false` (기존 회원)**:
