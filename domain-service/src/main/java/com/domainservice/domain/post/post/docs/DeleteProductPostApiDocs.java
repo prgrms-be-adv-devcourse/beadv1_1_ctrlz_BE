@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		상품 게시글을 삭제합니다. (Soft Delete)
 		
 		### 인증 (Header)
-		- **`X-REQUEST-ID`**: API Gateway에서 검증된 사용자 UUID (필수)
+		- **`X-REQUEST-ID`**: 로그인을 통해 API Gateway에서 header에 발급된 사용자 UUID (필수)
 		
 		### 권한
 		- 본인이 작성한 게시글만 삭제 가능

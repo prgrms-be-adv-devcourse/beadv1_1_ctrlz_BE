@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		새로운 상품 게시글을 생성합니다.
 		
 		### 인증 (Header)
-		- **`X-REQUEST-ID`**: API Gateway에서 검증된 사용자 UUID (필수)
+		- **`X-REQUEST-ID`**: 로그인을 통해 API Gateway에서 header에 발급된 사용자 UUID (필수)
 		
 		### 권한
 		- 해당 userId 회원은 SELLER 또는 ADMIN 권한 필요

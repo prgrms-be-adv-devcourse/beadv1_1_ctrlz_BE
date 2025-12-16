@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		기존 상품 게시글을 수정합니다. 기존 이미지는 삭제되고 새 이미지로 교체됩니다.
 		
 		### 인증 (Header)
-		- **`X-REQUEST-ID`**: API Gateway에서 검증된 사용자 UUID (필수)
-		
+		- **`X-REQUEST-ID`**: 로그인을 통해 API Gateway에서 header에 발급된 사용자 UUID (필수)
+
 		### 권한
 		- 본인이 작성한 게시글만 수정 가능
 		- 해당 userId 회원은 SELLER 또는 ADMIN 권한 필요

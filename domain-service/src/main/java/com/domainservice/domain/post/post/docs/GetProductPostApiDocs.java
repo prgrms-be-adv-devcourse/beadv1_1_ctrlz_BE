@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		특정 상품 게시글의 상세 정보를 조회합니다.
 		
 		### 인증 (Header)
-		- **`X-REQUEST-ID`**: API Gateway에서 검증된 사용자 UUID
+		- **`X-REQUEST-ID`**: 로그인을 통해 API Gateway에서 header에 발급된 사용자 UUID (필수)
 		
 		### 권한
 		- 비회원 조회 가능

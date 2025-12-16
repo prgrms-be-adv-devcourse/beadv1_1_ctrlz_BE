@@ -25,8 +25,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
         - **최대 개수**: Redis 설정에 따라 최근 본 상품 N개(최대 10개)를 반환합니다.
         - **정렬**: 최근에 본 순서대로 정렬되어 반환됩니다.
         
-        ### 인증
-        - **로그인 필수**: `X-REQUEST-ID` 헤더가 유효한 사용자 UUID여야 합니다.
+		### 인증 (Header)
+		- **`X-REQUEST-ID`**: 로그인을 통해 API Gateway에서 header에 발급된 사용자 UUID (필수)
         """
 )
 @Parameters({
