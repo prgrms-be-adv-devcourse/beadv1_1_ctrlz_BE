@@ -31,14 +31,14 @@ jobs:
       secret-dir: gateway-service
       file-name: docker/gateway-service.dockerfile
 
-#  deploying:
-#    needs: releasing
-#    uses: ./.github/workflows/deploy-workflow.yml
-#    secrets: inherit
-#    with:
-#      pod-name: gateway-service-app # pod랑 같은 이름
-#      deploy-name: gateway-deploy # deployment랑 같은 이름
-#      label-name: gateway # pod 라벨 이름
-#      image-tag: ${{ needs.releasing.outputs.tag_name }}
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: gateway-service-app # pod랑 같은 이름
+      deploy-name: gateway-deploy # deployment랑 같은 이름
+      label-name: gateway # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
 
 
