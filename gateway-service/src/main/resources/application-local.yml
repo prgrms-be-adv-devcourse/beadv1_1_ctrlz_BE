@@ -1,10 +1,15 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: gateway-service
 
   data:
     redis:
+      port: 6379
       host: localhost
+
 
   cloud:
     gateway:
@@ -17,6 +22,31 @@ spring:
       server:
         webflux:
           routes:
+            # ============================================
+            # SWAGGER UI 관련
+            # ============================================
+
+            - id: domain-service
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/domain-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/payment-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            - id: ai-service
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/ai-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
@@ -184,6 +214,16 @@ services:
 
 custom:
   redirect-url: http://localhost:8082
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: domain-service
+        url: /domain-service/v3/api-docs
+      - name: payment-service
+        url: /payment-service/v3/api-docs
+    path: /swagger-ui.html
+
 # k8s 설정
 #eureka:
 #  client:
