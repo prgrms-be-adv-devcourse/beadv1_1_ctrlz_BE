@@ -101,8 +101,8 @@ public class UserController {
     }
 
     @GetUserApiDocs
-    @GetMapping("/{id}")
-    public UserDescription getUser(@PathVariable("id") String id) {
+    @GetMapping("/{userId}")
+    public UserDescription getUser(@PathVariable("userId") String id) {
         log.info("회원 정보 조회");
         return userReaderPort.getUserDescription(id);
     }

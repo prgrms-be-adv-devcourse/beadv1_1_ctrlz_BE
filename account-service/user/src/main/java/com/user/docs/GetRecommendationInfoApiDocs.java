@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-    summary = "추천용 회원 정보 조회",
+    summary = "추천용 회원 정보 조회 [내부 API]",
     description = """
         추천 시스템 등에서 필요한 회원의 인구통계학적 정보(나이, 성별 등)를 조회합니다.
         

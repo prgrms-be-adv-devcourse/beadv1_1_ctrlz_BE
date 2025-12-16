@@ -47,6 +47,13 @@ spring:
               filters:
                 - StripPrefix=1
 
+            - id: account-service
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/account-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
             # ============================================
             # PUBLIC APIs (인증 불필요)
             # ============================================
@@ -222,6 +229,8 @@ springdoc:
         url: /domain-service/v3/api-docs
       - name: payment-service
         url: /payment-service/v3/api-docs
+      - name: account-service
+        url: /account-service/v3/api-docs
     path: /swagger-ui.html
 
 # k8s 설정

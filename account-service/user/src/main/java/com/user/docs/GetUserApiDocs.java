@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-    summary = "회원 정보 조회 (특정 ID)",
+    summary = "회원 정보 조회 (특정 ID) [내부 API]",
     description = """
         특정 회원(ID)의 상세 정보를 조회합니다.
         다른 사용자의 프로필을 조회하거나 관리자가 회원을 조회할 때 사용됩니다.
@@ -28,8 +28,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 )
 @Parameters({
     @Parameter(
-        name = "id",
-        description = "조회할 회원 ID",
+        name = "userId",
+        description = "조회할 회원 userId",
         required = true,
         in = ParameterIn.PATH
     )

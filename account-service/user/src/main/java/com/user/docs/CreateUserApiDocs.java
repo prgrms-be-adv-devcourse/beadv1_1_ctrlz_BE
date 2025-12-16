@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
     summary = "회원가입",
     description = """
         신규 회원을 등록합니다.
-        
+                
         ### 토큰 발급
         - 가입 성공 시 **Response Header(Set-Cookie)**를 통해 Access Token과 Refresh Token이 발급됩니다.
         """
@@ -34,18 +34,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
         examples = @ExampleObject(
             value = """
                 {
-                    "email": "test@example.com",
-                    "password": "password123!",
-                    "name": "홍길동",
-                    "nickname": "dev_hong",
-                    "phoneNumber": "010-1234-5678",
-                    "age": 25,
-                    "gender": "MALE",
-                    "state": "경기도",
-                    "city": "성남시",
-                    "street": "분당구 판교역로",
-                    "zipCode": "13529",
-                    "details": "101동 1202호"
+                  "oauthId" : "google",
+                  "email": "choizz156@gmail.com",
+                  "phoneNumber": "01096395588",
+                  "street": "street_f42fa85a43a1",
+                  "zipCode": "zipCode_3f828ede8a5d",
+                  "state": "state_b33630e89d76",
+                  "city": "city_6232d43546ca",
+                  "details": "details_2de90f41ec58",
+                  "name": "name_435c00db2258",
+                  "nickname": "nickname_9ca5bcb1ad24",
+                  "gender" : "male",
+                  "age" : 45
                 }
                 """
         )
