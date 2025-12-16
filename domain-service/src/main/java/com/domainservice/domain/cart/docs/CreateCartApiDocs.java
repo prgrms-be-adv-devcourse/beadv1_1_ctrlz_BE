@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-    summary = "장바구니 생성",
+    summary = "장바구니 생성 [내부 API]",
     description = """
         사용자의 장바구니를 최초 생성합니다.
         회원가입 직후나 장바구니가 없는 유저가 접근할 때 호출됩니다.
