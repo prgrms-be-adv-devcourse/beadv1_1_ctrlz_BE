@@ -16,7 +16,7 @@ spring:
     bootstrap-servers: localhost:9090
     consumer:
       properties:
-        spring.json.trusted.packages: "com.common.event.*, com.common.event.productPost.*"
+        spring.json.trusted.packages: com.common.event.**
         delivery.timeout.ms: 120000
         linger.ms: 300
         request.timeout.ms: 30000
