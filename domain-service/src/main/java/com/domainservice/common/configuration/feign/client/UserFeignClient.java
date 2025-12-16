@@ -14,6 +14,6 @@ import com.domainservice.common.model.user.UserResponse;
 )
 public interface UserFeignClient {
 
-	@GetMapping("/api/users/{id}")
-	UserResponse getUser(@PathVariable(name = "id") String id);
+	@GetMapping("/api/users/{userId}")
+	UserResponse getUser(@PathVariable(name = "userId") String id);
 }
