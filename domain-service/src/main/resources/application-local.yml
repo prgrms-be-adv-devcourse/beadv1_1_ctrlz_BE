@@ -39,7 +39,7 @@ custom:
 
 openapi:
   service:
-    url: http://localhost:8082
+    url: http://localhost:${server.port}
 
 logging:
   config: classpath:logback-local.xml
