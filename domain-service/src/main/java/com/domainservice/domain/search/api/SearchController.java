@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +59,7 @@ public class SearchController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
-		@RequestParam String searchWord,
+		@RequestBody String searchWord,
 		@RequestHeader(value = "X-REQUEST-ID", required = false) String userId
 	) {
 

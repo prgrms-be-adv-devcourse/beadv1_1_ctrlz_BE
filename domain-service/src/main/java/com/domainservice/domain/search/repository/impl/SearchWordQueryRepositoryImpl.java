@@ -28,7 +28,7 @@ public class SearchWordQueryRepositoryImpl implements SearchWordQueryRepository 
 	@Override
 	public List<SearchWordDocumentEntity> findAllByQwertyInput(String prefix) {
 
-		Query fuzzyPrefixQuery = BoolQuery.of(b -> b
+		Query query = BoolQuery.of(b -> b
 			.should(
 				PrefixQuery.of(p -> p
 					.field("qwertyInput")
@@ -37,30 +37,30 @@ public class SearchWordQueryRepositoryImpl implements SearchWordQueryRepository 
 			)
 			.should(
 				FuzzyQuery.of(f -> f
-					.field("qwertyInput")
+					.field("qwertyInput.raw")
 					.value(prefix)
 					.fuzziness("AUTO")
-					.prefixLength(Math.min(prefix.length(), 2))  // 🔧 오타 허용 범위 개선
+					.prefixLength(Math.min(prefix.length(), 2))
 				)._toQuery()
 			)
 		)._toQuery();
 
-		return executeSearch(fuzzyPrefixQuery);
+		return executeSearch(query);
 	}
 
 	@Override
 	public List<SearchWordDocumentEntity> findAllByOriginValue(String koreanWord) {
 
-		Query fuzzyPrefixQuery = BoolQuery.of(b -> b
+		Query query = BoolQuery.of(b -> b
 			.should(
 				PrefixQuery.of(p -> p
-					.field("originValue")
+					.field("originValue.nori")
 					.value(koreanWord)
 				)._toQuery()
 			)
 			.should(
 				FuzzyQuery.of(f -> f
-					.field("originValue")
+					.field("originValue.raw")
 					.value(koreanWord)
 					.fuzziness("AUTO")
 					.prefixLength(Math.min(koreanWord.length(), 2))
@@ -68,7 +68,7 @@ public class SearchWordQueryRepositoryImpl implements SearchWordQueryRepository 
 			)
 		)._toQuery();
 
-		return executeSearch(fuzzyPrefixQuery);
+		return executeSearch(query);
 	}
 
 	/**
