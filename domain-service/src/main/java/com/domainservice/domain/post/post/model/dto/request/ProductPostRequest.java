@@ -26,7 +26,7 @@ public record ProductPostRequest(
 	@Size(max = 255, message = "상품명은 255자를 초과할 수 없습니다.")
 	String name,
 
-	@Schema(description = "가격 (0원 이상)", example = "1200000")
+	@Schema(description = "가격", example = "1200000")
 	@NotNull(message = "가격은 필수입니다.")
 	@Min(value = 0, message = "가격은 0원 이상이어야 합니다.")
 	Integer price,
@@ -35,11 +35,11 @@ public record ProductPostRequest(
 	@NotNull(message = "상품 설명은 필수입니다.")
 	String description,
 
-	@Schema(description = "카테고리 UUID", example = "category-uuid-1234")
+	@Schema(description = "카테고리 ID", example = "category-uuid-1234")
 	@NotNull(message = "카테고리는 필수입니다.")
 	String categoryId,
 
-	@Schema(description = "상품 상태 (NEW: 새상품, GOOD: 중고, FAIR: 사용감 많음)", example = "NEW")
+	@Schema(description = "상품 상태", example = "NEW")
 	@NotNull(message = "상품 상태는 필수입니다.")
 	ProductStatus status,
 
