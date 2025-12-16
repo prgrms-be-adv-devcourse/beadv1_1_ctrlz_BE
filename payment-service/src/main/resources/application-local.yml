@@ -1,3 +1,6 @@
+application:
+  title: yeongeunMarket
+  version: 1.0
 
 server:
   port: 8084
