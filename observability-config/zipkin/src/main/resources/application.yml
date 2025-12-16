@@ -2,6 +2,10 @@ spring:
   application:
     name: zipkin
 
+  config:
+    activate:
+      on-profile: local
+
 management:
   tracing:
     sampling:

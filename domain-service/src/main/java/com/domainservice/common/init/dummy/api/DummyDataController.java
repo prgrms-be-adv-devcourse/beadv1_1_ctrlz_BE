@@ -1,6 +1,5 @@
 package com.domainservice.common.init.dummy.api;
 
-import com.domainservice.common.init.dummy.service.DummyDataGenerator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,8 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.common.init.dummy.service.DummyDataService;
 import com.domainservice.common.init.dummy.dto.DummyResultResponse;
+import com.domainservice.common.init.dummy.service.DummyDataGenerator;
+import com.domainservice.common.init.dummy.service.DummyDataService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class DummyDataController {
 		log.info(" es 더미 데이터 생성 요청: {}개", count);
 		long startTime = System.currentTimeMillis();
 
-		esGenerator.syncProductsToElasticsearch(1000);
+		esGenerator.syncProductsToElasticsearch(10000);
 
 		long duration = System.currentTimeMillis() - startTime;
 
