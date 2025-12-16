@@ -103,9 +103,9 @@ public class UserController {
 		@RequestBody UpdateSellerRequest request
 	) {
 
+		log.info("userId = {}", userId);
 		SellerVerificationContext sellerVerificationContext =
 			SellerVerificationContext.toVerify(userId, request.verificationCode());
-
 		sellerVerificationUseCase.checkVerificationCode(sellerVerificationContext);
 		userCommandUseCase.updateForSeller(userId);
 
@@ -120,7 +120,7 @@ public class UserController {
 		User user = userCommandUseCase.getUser(userId);
 
 		SellerVerificationContext sellerVerificationContext =
-			SellerVerificationContext.forSending(request.phoneNumber(), userId, user);
+			SellerVerificationContext.forSending(request.phoneNumber(), user.getId(), user);
 
 		sellerVerificationUseCase.requestVerificationCode(sellerVerificationContext);
 	}
