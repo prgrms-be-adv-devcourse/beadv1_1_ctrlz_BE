@@ -26,18 +26,24 @@ import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
  * 상품 게시글 관련 REST API를 제공하는 컨트롤러입니다.
  */
+@Tag(name = "ProductPost", description = "상품 게시글 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/product-posts")
@@ -52,11 +58,16 @@ public class ProductPostController {
 	 * @param request    게시글 생성 요청 정보
 	 * @return 생성된 게시글 정보 (201 Created)
 	 */
+	@CreateProductPostApiDocs
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<ProductPostResponse> createProductPost(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
+
+		@Parameter(description = "이미지 파일들 (최소 1개 최대 10개)", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+
+		@Parameter(description = "상품 생성 요청 정보", schema = @Schema(implementation = ProductPostRequest.class))
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
 		validateAuthentication(userId);
