@@ -28,6 +28,7 @@ import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.DeleteProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.GetProductPostApiDocs;
 import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
@@ -127,6 +128,7 @@ public class ProductPostController {
 	 * @param postId 조회할 게시글 ID
 	 * @return 게시글 상세 정보 (200 OK)
 	 */
+	@GetProductPostApiDocs
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ProductPostDescription> getProductPostById(
