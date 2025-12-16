@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Operation(
 	summary = "태그 목록 조회",
 	description = """
-        게시글 작성 시 사용 가능한 모든 태그 목록을 조회합니다.
+        등록되어있는 모든 태그 목록을 조회합니다.
         """
 )
 @ApiResponses({
