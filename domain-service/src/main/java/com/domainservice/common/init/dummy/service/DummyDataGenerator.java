@@ -1,21 +1,16 @@
 package com.domainservice.common.init.dummy.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
+import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
+import com.github.f4b6a3.uuid.UuidCreator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
-import com.github.f4b6a3.uuid.UuidCreator;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * 더미 데이터 생성 공통 서비스
@@ -265,7 +260,7 @@ public class DummyDataGenerator {
 						categoryIds.toArray());
 			}
 
-			// ES Document 변환
+			// es Document 변환
 			List<ProductPostDocumentEntity> documents = batchData.stream()
 					.map(row -> ProductPostDocumentEntity.builder()
 							.id((String) row[0])
@@ -281,13 +276,17 @@ public class DummyDataGenerator {
 							.viewCount(((Number) row[9]).longValue())
 							.likedCount(((Number) row[10]).longValue())
 							.deleteStatus((String) row[11])
-							.createdAt((LocalDateTime) row[12])
-							.updatedAt((LocalDateTime) row[13])
+							.createdAt(LocalDateTime.parse(
+									((LocalDateTime) row[12]).truncatedTo(ChronoUnit.SECONDS).toString()
+							))
+							.updatedAt(LocalDateTime.parse(
+									((LocalDateTime) row[13]).truncatedTo(ChronoUnit.SECONDS).toString()
+							))
 							.tags(new ArrayList<>()) // 초기 생성시 태그 없음
 							.build())
 					.toList();
 
-			// ES Bulk Save
+			// bulk Save
 			elasticsearchOperations.save(documents);
 
 		} catch (Exception e) {
