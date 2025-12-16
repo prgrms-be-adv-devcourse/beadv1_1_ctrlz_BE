@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -275,12 +276,8 @@ public class DummyDataGenerator {
 							.viewCount(((Number) row[9]).longValue())
 							.likedCount(((Number) row[10]).longValue())
 							.deleteStatus((String) row[11])
-							.createdAt(((LocalDateTime) row[12])
-									.withNano(((LocalDateTime) row[12]).getNano() / 1_000_000 * 1_000_000)
-							)
-							.updatedAt(((LocalDateTime) row[13])
-									.withNano(((LocalDateTime) row[13]).getNano() / 1_000_000 * 1_000_000)
-							)
+							.createdAt(((LocalDateTime) row[12]).truncatedTo(ChronoUnit.MILLIS))
+							.updatedAt(((LocalDateTime) row[13]).truncatedTo(ChronoUnit.MILLIS))
 							.tags(new ArrayList<>()) // 초기 생성시 태그 없음
 							.build())
 					.toList();
