@@ -94,5 +94,6 @@ springdoc:
   default-flat-param-object: true
   api-docs:
     path: /v3/api-docs
+#    resolve-schema-properties: true
   swagger-ui:
     path: /swagger-ui.html

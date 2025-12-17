@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.common.event.productPost.EventType;
 import com.common.exception.CustomException;
 import com.common.model.persistence.BaseEntity;
-import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
@@ -30,6 +29,7 @@ import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.mapper.ProductPostMapper;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
@@ -219,22 +219,14 @@ public class ProductPostService {
 	/**
 	 * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링(Specification)을 지원합니다.
 	 *
-	 * @param pageable    페이징 정보
-	 * @param categoryId  카테고리 ID (선택)
-	 * @param status      상품 상태 (선택)
-	 * @param tradeStatus 거래 상태 (선택)
-	 * @param minPrice    최소 가격 (선택)
-	 * @param maxPrice    최대 가격 (선택)
+	 * @param pageable	페이징 정보
+	 * @param request 	상품 필터 정보
 	 * @return 페이징된 게시글 목록
 	 */
 	public PageResponse<List<ProductPostResponse>> getProductPostList(
-		Pageable pageable, String categoryId, ProductStatus status,
-		TradeStatus tradeStatus, Integer minPrice, Integer maxPrice
-	) {
+		Pageable pageable, ProductPostSearchRequest request) {
 		// Specification 생성
-		Specification<ProductPost> spec = ProductPostSpecification.searchWith(
-			categoryId, status, tradeStatus, minPrice, maxPrice
-		);
+		Specification<ProductPost> spec = ProductPostSpecification.searchWith(request);
 
 		Page<ProductPost> page = productPostRepository.findAll(spec, pageable);
 

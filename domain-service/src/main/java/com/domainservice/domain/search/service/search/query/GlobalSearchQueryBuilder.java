@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.stereotype.Component;
 
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
+import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
@@ -24,13 +24,13 @@ public class GlobalSearchQueryBuilder {
 	/**
 	 * request로 들어온 검색어 및 필더를 기반으로 통합 검색 쿼리 생성
 	 */
-	public NativeQuery build(ProductPostSearchRequest request, Pageable pageable) {
+	public NativeQuery build(postSearchParams params, Pageable pageable) {
 
 		// Bool Query 생성
-		Query boolQuery = buildBoolQuery(request);
+		Query boolQuery = buildBoolQuery(params);
 
 		// request로 들어온 정렬 적용
-		Sort sort = createSort(request.sort());
+		Sort sort = createSort(params.sort());
 
 		Pageable pageableWithSort = PageRequest.of(
 			pageable.getPageNumber(),
@@ -47,15 +47,15 @@ public class GlobalSearchQueryBuilder {
 	}
 
 	// Bool Query 생성
-	private Query buildBoolQuery(ProductPostSearchRequest request) {
+	private Query buildBoolQuery(postSearchParams params) {
 
 		// must 쿼리 생성
 		// 검색 점수에 반영되는 필수 조건 영역, 내부 필드가 반드시 만족해야 문서가 검색됨
 		List<Query> mustQueries = new ArrayList<>();
 
 		// multi_match 쿼리 생성
-		if (request.hasQuery()) {
-			mustQueries.add(buildMultiMatchQuery(request.q())); // 검색어가 있을 때 Multi-Match 수행
+		if (params.hasQuery()) {
+			mustQueries.add(buildMultiMatchQuery(params.q())); // 검색어가 있을 때 Multi-Match 수행
 		} else {
 			mustQueries.add(Query.of(q -> q.matchAll(m -> m))); // 검색어가 없을 때는 전체 조회 (Match All)
 		}
@@ -65,21 +65,16 @@ public class GlobalSearchQueryBuilder {
 
 		// 삭제되지 않은 상품만 필터
 		filterQueries.add(
-			Query.of(queryBuilder -> queryBuilder.term(
-				TermQuery.of(termQueryBuilder -> termQueryBuilder
-					.field("delete_status")
-					.value("N")
-				)
-			))
+			Query.of(filter -> filter.term(term -> term.field("delete_status").value("N")))
 		);
 
 		// 카테고리 필터가 존재하면 적용
-		if (request.hasCategory()) {
+		if (params.hasCategory()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.match(
 					MatchQuery.of(matchQueryBuilder -> matchQueryBuilder
 						.field("category_name")
-						.query(request.category())
+						.query(params.category())
 					)
 				))
 			);
@@ -95,15 +90,15 @@ public class GlobalSearchQueryBuilder {
 				rangeQueryBuilder -> rangeQueryBuilder.number(
 					numberRangeBuilder -> numberRangeBuilder
 						.field("price")
-						.gte(Double.valueOf(request.minPrice()))
-						.lte(Double.valueOf(request.maxPrice()))
+						.gte(Double.valueOf(params.minPrice()))
+						.lte(Double.valueOf(params.maxPrice()))
 				)
 			))
 		);
 
 		// 태그 필터가 존재하면 적용
-		if (request.hasTags()) {
-			for (String tag : request.tags()) {
+		if (params.hasTags()) {
+			for (String tag : params.getParsedTagList()) {
 				filterQueries.add(
 					Query.of(queryBuilder -> queryBuilder.match(
 						MatchQuery.of(matchQueryBuilder -> matchQueryBuilder
@@ -116,24 +111,24 @@ public class GlobalSearchQueryBuilder {
 		}
 
 		// 상품 상태 필터가 존재하면 적용 ( "ALL"(default), "NEW", "GOOD" )
-		if (request.hasStatus()) {
+		if (params.hasStatus()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.term(
 					TermQuery.of(termQueryBuilder -> termQueryBuilder
 						.field("status")
-						.value(request.status())
+						.value(params.status())
 					)
 				))
 			);
 		}
 
 		// 상품 판매 상태 필터가 존재하면 적용 ( "ALL" (default), "SELLING" )
-		if (request.hasTradeStatus()) {
+		if (params.hasTradeStatus()) {
 			filterQueries.add(
 				Query.of(queryBuilder -> queryBuilder.term(
 					TermQuery.of(termQueryBuilder -> termQueryBuilder
 						.field("trade_status")
-						.value(request.tradeStatus())
+						.value(params.tradeStatus())
 					)
 				))
 			);
