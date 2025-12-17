@@ -3,11 +3,131 @@
 프로그래머스 백엔드 심화과정 1기 **Ctrl+Z 팀**의 백엔드 프로젝트입니다.
 
 ### 👥 Member
-|                **김상아**                 |                   **옥정현**                   |                 **이준호**                  |                 **최민석**                  |
-| :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: |
-| <img src="https://github.com/shark-coding.png" width="200"> | <img src="https://github.com/okjunghyeon.png" width="200"> | <img src="https://github.com/iamian815.png" width="200"> | <img src="https://github.com/choizz156.png" width="200"> |
-|                 **PO**                 |                     **BE**                     |                   **BE**                    |                   **BE**                    |
-|   [GitHub](https://github.com/shark-coding)    |   [GitHub](https://github.com/okjunghyeon)    |   [GitHub](https://github.com/iamian815)    |   [GitHub](https://github.com/choizz156)    |
+
+|                           **김상아**                           |                   **옥정현**                   |                   **이건민**                   |                         **이준호**                          |                         **최민석**                          |
+|:-----------------------------------------------------------:| :-----------------------------------------: | :-----------------------------------------: |:--------------------------------------------------------:|:--------------------------------------------------------:|
+| <img src="https://github.com/shark-coding.png" width="200"> | <img src="https://github.com/okjunghyeon.png" width="200"> | <img src="https://github.com/Leegeonmin.png" width="200"> | <img src="https://github.com/iamian815.png" width="200"> | <img src="https://github.com/choizz156.png" width="200"> |
+|                          **BE/PO**                          |                     **BE**                     |                     **BE**                     |                        **BE/FE**                         |                         **BE/DevOps**                          |
+|          [GitHub](https://github.com/shark-coding)          |   [GitHub](https://github.com/okjunghyeon)    |   [GitHub](https://github.com/Leegeonmin)    |          [GitHub](https://github.com/iamian815)          |          [GitHub](https://github.com/choizz156)          |
+
+<details>
+<summary><strong>👥 팀원별 주요 기여 (클릭)</strong></summary>
+
+### 김상아 (PO / Backend)
+> **핵심 역할: 결제/예치금 시스템 구축 및 프로젝트 프로세스 리딩**
+
+**결제 시스템 모듈화 (Payment Service)**
+- Toss Payments API 연동을 통한 결제 승인/취소/환불 프로세스 구현
+- 결제 서비스를 독립적인 마이크로서비스로 분리하여 유연성 확보
+- 멱등성 보장을 통한 중복 결제 방지 시스템 구현
+
+**예치금(Deposit) 시스템**
+- 사용자 예치금 충전 로직 및 트랜잭션 기록 시스템 구축
+- 결제와 예치금을 연동한 복합 결제 흐름 설계
+- 예치금 우선 차감 후 부족분 PG 결제 로직 구현
+
+**보안 및 운영**
+- **AES 암호화**를 적용하여 DB 내 민감한 결제 정보 보호
+- Kafka 기반의 정산 이벤트 처리 및 체크아웃 UI 구현
+- GitHub Issue/PR 템플릿 표준화로 팀 협업 생산성 향상
+
+---
+### 옥정현 (Backend)
+> **핵심 역할: 상품 도메인 및 Elasticsearch 기반 검색/추천 엔진 개발**
+
+**상품 게시글 관리 (Product Domain)**
+- **상품 CRUD API**: 게시글 생성, 수정, 삭제, 상세 조회, 목록 조회 (필터링/페이징)
+- **최근 본 상품(Recently-view)**: Redis Sorted Set(zSet) 활용 시간 기반 조회 이력 관리
+- **관심 상품(Favorite)**: 상품 찜하기 등록/취소, 회원 별 관심 상품 관리
+- **태그, 카테고리(Tag, Category)**: 상품 조회 고도화를 위해 태그, 카테고리 관리
+
+**검색 및 추천 시스템 (Elasticsearch)**
+- **통합 검색**: 복합 필터(카테고리, 가격, 상태)를 지원하는 고성능 검색 API 구현
+- **추천 알고리즘**:
+    - **유사 상품** (`/similar`): More Like This Query 활용 현재 상품과 유사한 상품 추천
+    - **오늘의 추천** (`/daily`): Function Score 기반 72시간 내 인기 상품 추천 (카테고리별 추천상품 지원)
+    - **판매자 다른 상품** (`/by-seller`): 해당 판매자의 다른 판매 상품 노출
+
+**Swagger 기반 API 문서화**
+- MSA 환경에서 Swagger 기반 API 문서 자동화 진행
+- 비즈니스 로직별 성공/실패 예외 코드(ErrorCode)와 상세한 파라미터 제약 조건을 명시
+- 실제 협업 시 프론트엔드 팀과의 커뮤니케이션 비용을 줄이고 개발 생산성을 크게 향상
+
+---
+
+### 이준호 (Backend)
+> **핵심 역할: 검색 기능 고도화(자동완성), 데이터 정합성 및 리뷰 시스템**
+
+**검색 경험 개선**
+- 실시간 **검색어 자동완성(Autocomplete)** 기능 구현
+- 검색 로직 최적화를 통한 응답 속도 개선
+- 사용자 검색 패턴 분석을 위한 이벤트 발행 시스템 구축
+
+**데이터 일관성 (DB-ES Sync)**
+- RDB(MySQL)와 Elasticsearch 간의 데이터 동기화 로직 고도화
+- Logstash 파이프라인 설정으로 실시간 데이터 정합성 확보
+- 데이터 유실 방지를 위한 안정성 확보
+
+**커뮤니티/리뷰 시스템**
+- 게시글 댓글 CRUD 및 리뷰 작성 기능 구현
+- 리뷰 응답 내 프로필 이미지 통합 등 API 응답 구조 개선
+- 2종 평점 시스템 (판매자 평점 + 상품 평점) 구현
+
+**성능 최적화**
+- **Redis Lua Script** 도입으로 인기 검색어 업데이트 성능 최적화 (N회 쿼리 → 1회)
+- Feign Client 로깅 및 예외 처리 표준화로 운영 편의성 증대
+
+---
+
+### 최민석 (Backend / DevOps)
+> **핵심 역할: 인프라(K8s/CI/CD) 구축, 인증/인가 및 MSA 아키텍처 설계**
+
+**DevOps 인프라**
+- **Kubernetes(K8s)** 클러스터 구축 및 서비스별 Manifest 관리
+- **ArgoCD & GitHub Actions** 연동 자동화 CI/CD 파이프라인 구축
+- Docker Compose 기반 로컬 개발 환경 표준화
+
+**인증/인가 (Auth & Security)**
+- **Spring Cloud Gateway** 기반 중앙 집중식 인증 분리 및 라우팅 설정
+- OAuth2 소셜 로그인 (Google) 및 JWT 토큰 발급/검증 시스템 구현
+- Refresh Token 기반 토큰 재발급 메커니즘 구현
+
+**관측성(Observability)**
+- **ELK Stack** 활용 중앙 로그 수집 시스템 구축
+- **Zipkin** 적용으로 마이크로서비스 간 분산 트랜잭션 추적 환경 마련
+- Kafka를 활용한 비동기 메시징 처리 시스템 구현
+
+**아키텍처 확장**
+- Eureka 서비스 디스커버리 구성
+- Spring Batch 기반 정산(Settlement) 배치 시스템 구현
+- AI 서비스 모듈 초기 구성 및 통합
+
+---
+
+### 이건민 (Backend)
+> **핵심 역할: 주문/장바구니 도메인 및 Spring Batch 정산 시스템 개발**
+
+**주문 관리 시스템**
+- 장바구니 기반 주문 생성 로직 구현
+- 주문 상태 관리 (PAYMENT_PENDING → PAYMENT_COMPLETED → PURCHASE_CONFIRMED)
+- 구매자/판매자별 주문 목록 조회 API 개발
+
+**장바구니 시스템**
+- 장바구니 CRUD 및 상품 선택/해제 기능 구현
+- 결제 대상 상품 관리 로직 개발
+
+**Spring Batch 정산 시스템**
+- Kafka 이벤트 기반 정산 데이터 생성 (PENDING → WAITING → COMPLETED/FAILED)
+- Chunk 방식 배치 처리 (100건씩 읽기-처리-쓰기)
+- 실패 정산 자동 재시도 배치 스케줄러 구현
+- Payment Service 연동 정산 금액 계산 로직
+
+**데이터 처리**
+- 대용량 더미 데이터 생성 전략 구현 (Strategy Pattern)
+- 메모리 기반 (<100k) / 임시 테이블 (100k-500k) / SQL (500k+) 분기 처리
+- S3 이미지 업로드 통합 더미 데이터 시스템 구축
+
+</details>
 
 ---
 
