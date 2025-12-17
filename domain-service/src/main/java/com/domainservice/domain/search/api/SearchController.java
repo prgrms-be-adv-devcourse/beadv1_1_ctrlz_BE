@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.domain.search.service.SearchWordRedisService;
-import com.domainservice.domain.search.service.dto.request.Prefix;
+import com.domainservice.domain.search.docs.GetAutoCompletionApiDocs;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
+import com.domainservice.domain.search.service.SearchWordRedisService;
+import com.domainservice.domain.search.service.dto.request.Prefix;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class SearchController {
  	 * @param userId 사용자 id
 	 * @return
 	 */
+	@GetAutoCompletionApiDocs
 	@GetMapping("/suggestion")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getAutoCompletionList(
