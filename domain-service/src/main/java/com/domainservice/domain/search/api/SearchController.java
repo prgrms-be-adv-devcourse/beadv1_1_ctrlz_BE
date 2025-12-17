@@ -18,6 +18,7 @@ import com.domainservice.domain.search.service.dto.request.Prefix;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -99,6 +100,7 @@ public class SearchController {
 	 * @param userId
 	 * @return
 	 */
+	@Hidden
 	@PostMapping("test")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
