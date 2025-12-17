@@ -19,7 +19,9 @@ import com.settlement.service.SettlementService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+/**
+ * 특정 ip만 허용합니다.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
