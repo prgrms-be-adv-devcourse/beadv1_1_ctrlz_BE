@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.search.docs.GetAutoCompletionApiDocs;
+import com.domainservice.domain.search.docs.word.SaveSearchWordApiDocs;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
 import com.domainservice.domain.search.service.SearchWordRedisService;
@@ -59,6 +60,7 @@ public class SearchController {
 	 * @param userId
 	 * @return
 	 */
+	@SaveSearchWordApiDocs
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
