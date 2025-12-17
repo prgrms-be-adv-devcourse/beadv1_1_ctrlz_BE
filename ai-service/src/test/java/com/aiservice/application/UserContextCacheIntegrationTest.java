@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.aiservice.domain.model.UserContext;
 import com.aiservice.domain.repository.UserBehaviorRepository;
-import com.aiservice.infrastructure.config.UserContextCacheConfiguration;
+import com.aiservice.infrastructure.configuration.UserContextCacheConfiguration;
 import com.aiservice.infrastructure.feign.DomainServiceClient;
 import com.aiservice.infrastructure.feign.UserInfoClient;
 import com.aiservice.infrastructure.feign.dto.UserDemographicDescription;
