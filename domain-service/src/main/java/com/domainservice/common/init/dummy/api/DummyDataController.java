@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.common.init.dummy.service.DummyDataService;
 import com.domainservice.common.init.dummy.dto.DummyResultResponse;
+import com.domainservice.common.init.dummy.service.DummyDataGenerator;
+import com.domainservice.common.init.dummy.service.DummyDataService;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DummyDataController {
 
 	private final DummyDataService generator;
+	private final DummyDataGenerator esGenerator;
 
 	@PostMapping("/generate")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -42,6 +44,26 @@ public class DummyDataController {
 			result,
 			"%d개의 상품 데이터를 %d초 만에 생성했습니다."
 				.formatted(result.productCount(), result.durationSeconds()));
+	}
+
+	@PostMapping("/generate/es")
+	@ResponseStatus(HttpStatus.CREATED)
+	public BaseResponse<DummyResultResponse> generateDummyDataEs(
+			@RequestParam(defaultValue = "100000") int count) {
+
+		log.info(" es 더미 데이터 생성 요청: {}개", count);
+		long startTime = System.currentTimeMillis();
+
+		esGenerator.syncProductsToElasticsearch(100000);
+
+		long duration = System.currentTimeMillis() - startTime;
+
+		DummyResultResponse result = DummyResultResponse.success(count, duration);
+
+		return new BaseResponse<>(
+				result,
+				"ES %d개의 상품 데이터를 %d초 만에 생성했습니다."
+						.formatted(result.productCount(), result.durationSeconds()));
 	}
 
 }

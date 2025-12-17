@@ -1,11 +1,17 @@
 package com.accountapplication.user.web.api;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.user.application.adapter.command.SellerVerificationContext;
+import com.user.application.port.in.SellerVerificationUseCase;
+import com.user.domain.vo.UserRole;
+import com.user.infrastructure.api.dto.UpdateSellerRequest;
+import com.user.infrastructure.api.dto.UserCreateRequest;
+import com.user.infrastructure.api.dto.UserUpdateRequest;
+import com.user.infrastructure.api.dto.VerificationReqeust;
+import com.user.infrastructure.feign.ProfileImageClient;
+import com.user.infrastructure.jpa.entity.UserEntity;
+import com.user.infrastructure.jpa.repository.UserJpaRepository;
+import com.user.infrastructure.jpa.vo.EmbeddedAddress;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,20 +25,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.user.application.adapter.command.SellerVerificationContext;
-import com.user.application.port.in.SellerVerificationUseCase;
-import com.user.domain.vo.UserRole;
-import com.user.infrastructure.api.dto.UpdateSellerRequest;
-import com.user.infrastructure.api.dto.UserCreateRequest;
-import com.user.infrastructure.api.dto.UserUpdateRequest;
-import com.user.infrastructure.api.dto.VerificationReqeust;
-import com.user.infrastructure.feign.CartClient;
-import com.user.infrastructure.feign.ProfileImageClient;
-import com.user.infrastructure.feign.dto.CartCreateRequest;
-import com.user.infrastructure.jpa.entity.UserEntity;
-import com.user.infrastructure.jpa.repository.UserJpaRepository;
-import com.user.infrastructure.jpa.vo.EmbeddedAddress;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @Transactional
@@ -54,8 +53,6 @@ class UserControllerTest {
 	@MockitoBean
 	private ProfileImageClient profileImageClient;
 
-	@MockitoBean
-	private CartClient cartClient;
 
 	@MockitoBean
 	private SellerVerificationUseCase sellerVerificationUseCase;
@@ -72,7 +69,6 @@ class UserControllerTest {
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
 			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl", 25, "MALE");
 
-		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")
@@ -339,7 +335,6 @@ class UserControllerTest {
 			"FEMALE"
 		);
 
-		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when
 		mockMvc.perform(post("/api/users")
