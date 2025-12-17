@@ -1,6 +1,6 @@
 # Git
 .git
-../.gitignore
+.gitignore
 .gitattributes
 
 # IDE
@@ -37,14 +37,12 @@ k8s/
 !**/src/**/*.yaml
 !**/resources/**/*.yaml
 
-# Documentation and misc - BUT keep source code docs
-*.md
+# Documentation - 프로젝트 루트의 문서만 제외, src/main/resources는 포함
+/*.md
+/*.png
+/*.webp
 !**/src/**/*.md
-!**/resources/**/*.md
-!**/docs/**/*.md
-!**/docs/**/*.txt
-*.png
-*.webp
+!**/src/**/*.txt
 
 # GitHub
 .github/

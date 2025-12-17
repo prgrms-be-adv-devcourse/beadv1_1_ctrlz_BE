@@ -15,7 +15,7 @@ COPY observability-config/zipkin/build.gradle ./observability-config/zipkin/
 #의존성 다운로드
 WORKDIR /app/ai-service
 RUN sed -i 's/\r$//' ./gradlew
-RUN ./gradlew dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon
 
 # 나머지 소스 코드 복사
 WORKDIR /app
@@ -24,7 +24,7 @@ COPY ai-service/src ./ai-service/src
 
 #빌드
 WORKDIR /app/ai-service
-RUN ./gradlew build -x test --parallel --no-daemon --build-cache
+RUN ./gradlew clean build -x test --parallel --no-daemon --build-cache
 
 #jar 생성
 # 이미지 압축 라이브러리 호환성을 위해 jammy 유지

@@ -22,6 +22,7 @@ spring:
       server:
         webflux:
           routes:
+
             # ============================================
             # SWAGGER UI 관련
             # ============================================
@@ -44,13 +45,6 @@ spring:
               uri: lb://AI-SERVICE
               predicates:
                 - Path=/ai-service/v3/api-docs/**
-              filters:
-                - StripPrefix=1
-
-            - id: account-service
-              uri: lb://ACCOUNT-SERVICE
-              predicates:
-                - Path=/account-service/v3/api-docs/**
               filters:
                 - StripPrefix=1
 
@@ -95,12 +89,28 @@ spring:
                 - Path=/api/searches/redis-test
                 - Method=GET,DELETE
 
-            # 결제 API (공개)
+            # 결제 API
             - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/success
+                - Method=GET
+
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/fail
+                - Method=GET
+
+            - id: payment-api-protected
               uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/payments/**
                 - Method=GET,POST,PATCH,DELETE
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
             # ============================================
             # ACCOUNT SERVICE (회원 관련)
@@ -121,7 +131,7 @@ spring:
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users/**
-                - Method=GET,PATCH,DELETE
+                - Method=GET,PATCH,DELETE,POST
               filters:
                 - name: AuthenticationFilter
                   args:
@@ -165,8 +175,14 @@ spring:
                     requiredRole: USER
 
             # 예치금 (USER 권한 필요)
+            - id: deposit-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/deposits/charge,/api/deposits/success,/api/deposits/fail
+                - Method=GET
+
             - id: deposit-api-protected
-              uri: lb://DOMAIN-SERVICE
+              uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/deposits/**
                 - Method=GET,POST
