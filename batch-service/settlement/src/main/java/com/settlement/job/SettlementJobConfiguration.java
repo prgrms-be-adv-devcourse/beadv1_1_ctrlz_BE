@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.settlement.job.listener.SettlementJobCompletionListener;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class SettlementJobConfiguration {
 
     private final JobRepository jobRepository;
+    private final SettlementJobCompletionListener settlementJobCompletionListener;
 
 
     @Qualifier("settlementJob")
@@ -22,6 +25,7 @@ public class SettlementJobConfiguration {
     public Job settlementJob(@Qualifier("settlementCreateStep") Step settlementCreateStep,
             @Qualifier("settlementFeeStep") Step settlementFeeStep) {
         return new JobBuilder("settlementJob", jobRepository)
+                .listener(settlementJobCompletionListener)
                 .start(settlementCreateStep)
                 .next(settlementFeeStep)
                 .build();
