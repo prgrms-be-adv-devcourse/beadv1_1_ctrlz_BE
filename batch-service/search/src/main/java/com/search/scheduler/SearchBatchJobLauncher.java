@@ -23,6 +23,9 @@ public class SearchBatchJobLauncher extends QuartzJobBean {
 	private final JobLauncher jobLauncher;
 	private final Job searchHistoryJob;
 
+	// Settlement 배치가 실행되는 날짜 (매월 15일)
+	private static final int SETTLEMENT_DAY = 15;
+
 	public SearchBatchJobLauncher(
 			JobLauncher jobLauncher,
 			@Qualifier("searchHistoryJob") Job searchHistoryJob) {
@@ -34,6 +37,14 @@ public class SearchBatchJobLauncher extends QuartzJobBean {
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
 		LocalDateTime now = LocalDateTime.now();
+		int dayOfMonth = now.getDayOfMonth();
+
+		// Settlement 배치가 실행되는 날(매월 15일)에는 Search 배치를 실행하지 않음
+		if (dayOfMonth == SETTLEMENT_DAY) {
+			log.info("오늘은 Settlement 배치 실행일({}일)입니다. Search 배치를 건너뜁니다.", SETTLEMENT_DAY);
+			return;
+		}
+
 		log.info("Quartz 스케줄러에 의해 배치 작업 시작: {}", now);
 		try {
 			JobParameters jobParameters = new JobParametersBuilder()

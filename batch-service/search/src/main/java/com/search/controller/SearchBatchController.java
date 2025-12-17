@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import lombok.extern.slf4j.Slf4j;
-
+/**
+ * 특정 ip만 허용합니다.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/batch/search")
