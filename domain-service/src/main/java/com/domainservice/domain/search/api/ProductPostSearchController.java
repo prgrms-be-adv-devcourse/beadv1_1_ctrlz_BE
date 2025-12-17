@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.springDoc.HidePageableSort;
-import com.domainservice.domain.search.docs.GetDailyRecommendationApiDocs;
-import com.domainservice.domain.search.docs.GetSellerProductsApiDocs;
-import com.domainservice.domain.search.docs.GetSimilarProductsApiDocs;
-import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
+import com.domainservice.domain.search.docs.post.GetDailyRecommendationApiDocs;
+import com.domainservice.domain.search.docs.post.GetSellerProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GetSimilarProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GlobalSearchApiDocs;
 import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 import com.domainservice.domain.search.service.search.GlobalSearchService;

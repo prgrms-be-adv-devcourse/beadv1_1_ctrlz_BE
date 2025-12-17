@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 
-import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
+import com.domainservice.domain.search.docs.post.GlobalSearchApiDocs;
 
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.StringSchema;

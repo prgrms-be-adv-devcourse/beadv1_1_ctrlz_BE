@@ -1,4 +1,4 @@
-package com.domainservice.domain.search.docs;
+package com.domainservice.domain.search.docs.post;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,28 +15,37 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-	summary = "비슷한 상품 추천",
+	summary = "오늘의 추천 상품",
 	description = """
-        Elasticsearch의 More Like This 쿼리를 활용한 유사 상품 추천 API입니다.
+        최근 3일(72시간) 내 등록된 상품 중 인기 상품을 추천하는 API입니다.
         
         ### 주요 기능
-        - **유사도 기반 추천**: 제목, 상품명, 설명, 태그를 기반으로 유사한 상품을 찾아냅니다.
+        - **시간 기반 필터**: 최근 72시간 내 등록된 신규 상품만 조회
         
-        - **자동 필터링**: 현재 판매중인 상품(SELLING)만 자동으로 필터링됩니다.
+        - **인기도 기반 정렬**: Function Score를 사용한 가중치 기반 인기도 계산
+        
+        - **카테고리 필터**: 특정 카테고리의 인기 상품 조회 가능 (선택)
         
         - **페이징**: `page`, `size` 파라미터 지원 (기본 12개)
         
-        - 유사도 점수가 높은 순서로 정렬됩니다.
+        ### 인기도 계산 방식
+        - **좋아요 점수**: `sqrt(liked_count) × 5.0`
+        
+        - **조회수 점수**: `log(view_count + 1) × 3.0`
+        
+        - **최종 점수**: 좋아요 점수 + 조회수 점수
+        
+        - 좋아요에 더 높은 가중치를 부여하여 사용자 관심도를 우선 반영
         
         ### 사용 예시
-        - 상품 상세 페이지에서 "비슷한 상품" 섹션
+        - 메인 페이지 "오늘의 인기 상품" 섹션
+        
+        - 메인 페이지 "OO 카테고리 인기 상품" 섹션
         """,
 	parameters = {
 		@Parameter(
-			name = "productPostId",
-			description = "기준이 되는 상품 게시글 ID",
-			required = true,
-			example = "post-uuid-1234"
+			name = "category",
+			description = "카테고리명"
 		)
 	}
 )
@@ -47,8 +56,52 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		content = @Content(
 			examples = {
 				@ExampleObject(
-					name = "유사 상품 목록",
-					description = "아이폰 15 Pro와 유사한 상품 추천 결과",
+					name = "전체 카테고리 인기 상품",
+					description = "최근 3일간 등록된 모든 카테고리의 인기 상품",
+					value = """
+						{
+						  "pageNum": 0,
+						  "totalPages": 3,
+						  "pageSize": 12,
+						  "hasNext": true,
+						  "contents": [
+						    {
+						      "id": "post-uuid-1234",
+						      "title": "아이폰 15 Pro 새상품",
+						      "price": 1350000,
+						      "likedCount": 89,
+						      "viewCount": 1250,
+						      "tradeStatus": "SELLING",
+						      "primaryImageUrl": "https://s3.bucket/iphone15.jpg",
+						      "updatedAt": "2024-01-17T10:30:00"
+						    },
+						    {
+						      "id": "post-uuid-5678",
+						      "title": "맥북 에어 M3 미개봉",
+						      "price": 1580000,
+						      "likedCount": 76,
+						      "viewCount": 980,
+						      "tradeStatus": "SELLING",
+						      "primaryImageUrl": "https://s3.bucket/macbook.jpg",
+						      "updatedAt": "2024-01-16T14:20:00"
+						    },
+						    {
+						      "id": "post-uuid-9012",
+						      "title": "다이슨 청소기 V15 새상품",
+						      "price": 680000,
+						      "likedCount": 62,
+						      "viewCount": 850,
+						      "tradeStatus": "SELLING",
+						      "primaryImageUrl": "https://s3.bucket/dyson.jpg",
+						      "updatedAt": "2024-01-16T09:15:00"
+						    }
+						  ]
+						}
+						"""
+				),
+				@ExampleObject(
+					name = "특정 카테고리 인기 상품",
+					description = "모바일/태블릿 카테고리의 인기 상품",
 					value = """
 						{
 						  "pageNum": 0,
@@ -91,8 +144,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 						"""
 				),
 				@ExampleObject(
-					name = "추천 결과 없음",
-					description = "유사한 상품이 없는 경우",
+					name = "입력한 카테고리가 존재하지 않음",
+					description = "입력된 카테고리가 존재하지 않는 경우",
 					value = """
 						{
 						  "pageNum": 0,
@@ -104,21 +157,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 						"""
 				)
 			}
-		)
-	),
-	@ApiResponse(
-		responseCode = "404",
-		description = "상품을 찾을 수 없음",
-		content = @Content(
-			schema = @Schema(implementation = ErrorResponse.class),
-			examples = @ExampleObject(
-				value = """
-					{
-					    "code": 404,
-					    "message": "해당 글은 존재하지 않습니다."
-					}
-					"""
-			)
 		)
 	),
 	@ApiResponse(
@@ -137,5 +175,5 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		)
 	)
 })
-public @interface GetSimilarProductsApiDocs {
+public @interface GetDailyRecommendationApiDocs {
 }

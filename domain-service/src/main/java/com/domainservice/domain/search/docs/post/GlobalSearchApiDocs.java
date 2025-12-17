@@ -1,4 +1,4 @@
-package com.domainservice.domain.search.docs;
+package com.domainservice.domain.search.docs.post;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
