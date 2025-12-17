@@ -18,7 +18,7 @@ public record postSearchParams(
 	@Schema(description = "검색어", example = "아이폰")
 	String q,
 
-	@Schema(description = "카테고리", example = "전자기기")
+	@Schema(description = "카테고리", example = "모바일/태블릿")
 	String category,
 
 	@Schema(description = "최소 가격", defaultValue = "0")
@@ -29,7 +29,7 @@ public record postSearchParams(
 	@Min(value = 0, message = "최대 가격은 0원 이상이어야 합니다.")
 	Long maxPrice,
 
-	@Schema(description = "태그 (콤마로 구분)", example = "친환경,중고")
+	@Schema(description = "태그 (콤마로 구분)", example = "미개봉,무료배송")
 	String tags,
 
 	@Schema(
