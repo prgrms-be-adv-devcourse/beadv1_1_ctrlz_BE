@@ -124,15 +124,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 						    ]
 						}
 						"""
-				),
-				@ExampleObject(
-					name = "잘못된 정렬 옵션",
-					value = """
-						{
-						    "code": 400,
-						    "message": "잘못된 정렬 옵션입니다. 허용된 값: score, popular, price_asc, price_desc, newest"
-						}
-						"""
 				)
 			}
 		)
@@ -144,11 +135,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 			schema = @Schema(implementation = ErrorResponse.class),
 			examples = @ExampleObject(
 				value = """
-                    {
-                        "code": 500,
-                        "message": "Elasticsearch 연결 오류가 발생했습니다."
-                    }
-                    """
+					{
+					    "code": 500,
+					    "message": "서버 내부 오류가 발생했습니다."
+					}
+					"""
 			)
 		)
 	)
