@@ -36,10 +36,12 @@ custom:
   feign:
     url:
       user-service: localhost:8080
+  port:
+    gateway: 8082
 
 openapi:
   service:
-    url: http://localhost:${server.port}
+    url: http://localhost:${custom.port.gateway}
 
 logging:
   config: classpath:logback-local.xml
