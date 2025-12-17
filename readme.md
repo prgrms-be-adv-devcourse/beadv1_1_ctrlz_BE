@@ -3,12 +3,11 @@
 프로그래머스 백엔드 심화과정 1기 **Ctrl+Z 팀**의 백엔드 프로젝트입니다.
 
 ### 👥 Member
-
-|                **김상아**                 |                   **옥정현**                   |                   **이건민**                   |                 **이준호**                  |                 **최민석**                  |
-| :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: |
-| <img src="https://github.com/shark-coding.png" width="200"> | <img src="https://github.com/okjunghyeon.png" width="200"> | <img src="https://github.com/Leegeonmin.png" width="200"> | <img src="https://github.com/iamian815.png" width="200"> | <img src="https://github.com/choizz156.png" width="200"> |
-|                 **PO**                 |                     **BE**                     |                     **BE**                     |                   **BE**                    |                   **BE**                    |
-|   [GitHub](https://github.com/shark-coding)    |   [GitHub](https://github.com/okjunghyeon)    |   [GitHub](https://github.com/Leegeonmin)    |   [GitHub](https://github.com/iamian815)    |   [GitHub](https://github.com/choizz156)    |
+|                **김상아**                 |                   **옥정현**                   |                 **이준호**                  |                 **최민석**                  |
+| :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: |
+| <img src="https://github.com/shark-coding.png" width="200"> | <img src="https://github.com/okjunghyeon.png" width="200"> | <img src="https://github.com/iamian815.png" width="200"> | <img src="https://github.com/choizz156.png" width="200"> |
+|                 **PO**                 |                     **BE**                     |                   **BE**                    |                   **BE**                    |
+|   [GitHub](https://github.com/shark-coding)    |   [GitHub](https://github.com/okjunghyeon)    |   [GitHub](https://github.com/iamian815)    |   [GitHub](https://github.com/choizz156)    |
 
 ---
 
