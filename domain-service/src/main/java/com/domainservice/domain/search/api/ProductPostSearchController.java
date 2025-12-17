@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
+import com.domainservice.common.configuration.springDoc.HidePageableSort;
 import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
 import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
@@ -43,6 +44,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
+	@HidePageableSort
 	@GlobalSearchApiDocs
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
