@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.springDoc.HidePageableSort;
+import com.domainservice.domain.search.docs.GetDailyRecommendationApiDocs;
 import com.domainservice.domain.search.docs.GetSellerProductsApiDocs;
 import com.domainservice.domain.search.docs.GetSimilarProductsApiDocs;
 import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
@@ -99,6 +100,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 오늘의 추천 상품 목록
 	 */
+	@GetDailyRecommendationApiDocs
 	@GetMapping("/daily")
 	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
 		@RequestParam(defaultValue = "all") String category,
