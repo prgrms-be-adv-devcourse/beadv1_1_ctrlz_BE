@@ -33,7 +33,67 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @ApiResponses({
 	@ApiResponse(
 		responseCode = "200",
-		description = "게시글 목록 조회 성공"
+		description = "게시글 목록 조회 성공",
+		content = @Content(
+			examples = @ExampleObject(
+				name = "게시글 목록 (2개)",
+				value = """
+					{
+					  "pageNum": 0,
+					  "totalPages": 5,
+					  "pageSize": 20,
+					  "hasNext": true,
+					  "contents": [
+					    {
+					      "id": "post-uuid-1234",
+					      "userId": "user-uuid-5678",
+					      "categoryId": "category-uuid-9012",
+					      "title": "아이폰 15 Pro 팝니다",
+					      "name": "아이폰 15 Pro 256GB 딥퍼플",
+					      "price": 1200000,
+					      "description": "작년 12월에 구매한 아이폰입니다. 상태 깨끗합니다.",
+					      "status": "NEW",
+					      "tradeStatus": "SELLING",
+					      "imageUrls": [
+					        "https://s3.bucket/image1.jpg",
+					        "https://s3.bucket/image2.jpg"
+					      ],
+					      "primaryImageUrl": "https://s3.bucket/image1.jpg",
+					      "tags": [
+					        "전자기기",
+					        "애플"
+					      ],
+					      "createdAt": "2024-01-15T10:30:00",
+					      "updatedAt": "2024-01-15T10:30:00"
+					    },
+					    {
+					      "id": "post-uuid-5678",
+					      "userId": "user-uuid-9012",
+					      "categoryId": "category-uuid-3456",
+					      "title": "맥북 에어 M2 미개봉",
+					      "name": "MacBook Air M2 13인치 스타라이트",
+					      "price": 1450000,
+					      "description": "선물 받았는데 필요 없어서 팝니다. 씰도 안 뜯은 새상품입니다.",
+					      "status": "NEW",
+					      "tradeStatus": "RESERVED",
+					      "imageUrls": [
+					        "https://s3.bucket/macbook1.jpg"
+					      ],
+					      "primaryImageUrl": "https://s3.bucket/macbook1.jpg",
+					      "tags": [
+					        "노트북",
+					        "애플",
+					        "맥북"
+					      ],
+					      "createdAt": "2024-01-16T14:20:00",
+					      "updatedAt": "2024-01-16T14:20:00"
+					    }
+					  ]
+					}
+					
+					"""
+			)
+		)
 	),
 	@ApiResponse(
 		responseCode = "400",

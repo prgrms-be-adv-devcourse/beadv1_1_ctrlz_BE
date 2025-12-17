@@ -22,7 +22,32 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @ApiResponses({
 	@ApiResponse(
 		responseCode = "200",
-		description = "카테고리 목록 조회 성공"
+		description = "카테고리 목록 조회 성공",
+		content = @Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(
+				name = "카테고리 목록",
+				value = """
+                {
+                  "data": [
+                    {
+                      "id": "category-uuid-1",
+                      "name": "가전제품"
+                    },
+                    {
+                      "id": "category-uuid-2",
+                      "name": "의류/패션"
+                    },
+                    {
+                      "id": "category-uuid-3",
+                      "name": "도서"
+                    }
+                  ],
+                  "message": "카테고리 목록 조회에 성공했습니다."
+                }
+                """
+			)
+		)
 	),
 	@ApiResponse(
 		responseCode = "500",

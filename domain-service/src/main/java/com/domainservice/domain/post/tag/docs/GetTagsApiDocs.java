@@ -22,7 +22,27 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @ApiResponses({
 	@ApiResponse(
 		responseCode = "200",
-		description = "태그 목록 조회 성공"
+		description = "태그 목록 조회 성공",
+		content = @Content(
+			examples = @ExampleObject(
+				name = "태그 목록 (여러 개)",
+				value = """
+                {
+                  "data": [
+                    {
+                      "id": "tag-uuid-1",
+                      "name": "전자기기"
+                    },
+                    {
+                      "id": "tag-uuid-2",
+                      "name": "가전제품"
+                    }
+                  ],
+                  "message": "태그 목록 조회에 성공했습니다."
+                }
+                """
+			)
+		)
 	),
 	@ApiResponse(
 		responseCode = "500",
