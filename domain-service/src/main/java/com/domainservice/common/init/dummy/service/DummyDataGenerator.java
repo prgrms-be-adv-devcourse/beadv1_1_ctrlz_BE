@@ -1,18 +1,24 @@
 package com.domainservice.common.init.dummy.service;
 
-import com.common.event.productPost.ProductPostUpsertedEvent;
-import com.domainservice.domain.search.mapper.SearchMapper;
-import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
-import com.github.f4b6a3.uuid.UuidCreator;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import com.common.event.productPost.ProductPostUpsertedEvent;
+import com.domainservice.domain.search.mapper.SearchMapper;
+import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 더미 데이터 생성 공통 서비스
@@ -35,8 +41,8 @@ public class DummyDataGenerator {
 	public void generateCategories() {
 		List<String> categoryNames = dataLoader.loadLines("dummy/categories.txt");
 		List<String> existingCategories = jdbcTemplate.queryForList(
-				"SELECT name FROM category WHERE delete_status = 'N'",
-				String.class);
+			"SELECT name FROM category WHERE delete_status = 'N'",
+			String.class);
 
 		List<Object[]> batchData = new ArrayList<>();
 		LocalDateTime now = LocalDateTime.now();
@@ -49,15 +55,15 @@ public class DummyDataGenerator {
 				continue;
 			}
 			batchData.add(new Object[] {
-					UuidCreator.getTimeOrderedEpoch().toString(),
-					categoryName, "N", now, now
+				UuidCreator.getTimeOrderedEpoch().toString(),
+				categoryName, "N", now, now
 			});
 		}
 
 		if (!batchData.isEmpty()) {
 			jdbcTemplate.batchUpdate(
-					"INSERT INTO category (id, name, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-					batchData);
+				"INSERT INTO category (id, name, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+				batchData);
 			log.info("카테고리 생성: {}개", batchData.size());
 		}
 	}
@@ -68,8 +74,8 @@ public class DummyDataGenerator {
 	public void generateTags() {
 		List<String> tagNames = dataLoader.loadLines("dummy/tags.txt");
 		List<String> existingTags = jdbcTemplate.queryForList(
-				"SELECT name FROM tag WHERE delete_status = 'N'",
-				String.class);
+			"SELECT name FROM tag WHERE delete_status = 'N'",
+			String.class);
 
 		List<Object[]> batchData = new ArrayList<>();
 		LocalDateTime now = LocalDateTime.now();
@@ -82,25 +88,25 @@ public class DummyDataGenerator {
 				continue;
 			}
 			batchData.add(new Object[] {
-					UuidCreator.getTimeOrderedEpoch().toString(),
-					tagName, "N", now, now
+				UuidCreator.getTimeOrderedEpoch().toString(),
+				tagName, "N", now, now
 			});
 		}
 
 		if (!batchData.isEmpty()) {
 			jdbcTemplate.batchUpdate(
-					"INSERT INTO tag (id, name, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-					batchData);
+				"INSERT INTO tag (id, name, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+				batchData);
 			log.info("태그 생성: {}개", batchData.size());
 		}
 	}
 
 	public record TemplateData(
-			List<String> titlePrefixes,
-			Map<String, List<String>> productNames,
-			List<String> conditionWords,
-			List<String> descriptionPrefixes,
-			List<String> descriptions) {
+		List<String> titlePrefixes,
+		Map<String, List<String>> productNames,
+		List<String> conditionWords,
+		List<String> descriptionPrefixes,
+		List<String> descriptions) {
 	}
 
 	public TemplateData loadTemplateData() {
@@ -119,7 +125,7 @@ public class DummyDataGenerator {
 	public Map<String, String> loadCategoryMapping() {
 		Map<String, String> categoryNameToIdMap = new HashMap<>();
 		List<Map<String, Object>> categories = jdbcTemplate.queryForList(
-				"SELECT id, name FROM category WHERE delete_status = 'N'");
+			"SELECT id, name FROM category WHERE delete_status = 'N'");
 		for (Map<String, Object> row : categories) {
 			categoryNameToIdMap.put((String) row.get("name"), (String) row.get("id"));
 		}
@@ -153,20 +159,20 @@ public class DummyDataGenerator {
 			String filePrefix = productId.substring(0, 8);
 
 			imageBatchData.add(new Object[] {
-					imageId,
-					"product_" + filePrefix + ".jpg",
-					"product_" + filePrefix + ".webp",
-					"https://s3.amazonaws.com/products/" + filePrefix + ".webp",
-					"products/" + filePrefix + ".webp",
-					1000000 + random.nextInt(2000000),
-					"image/jpeg",
-					250000 + random.nextInt(500000),
-					"WEBP", "PRODUCT", "N", createdAt, createdAt
+				imageId,
+				"product_" + filePrefix + ".jpg",
+				"product_" + filePrefix + ".webp",
+				"https://s3.amazonaws.com/products/" + filePrefix + ".webp",
+				"products/" + filePrefix + ".webp",
+				1000000 + random.nextInt(2000000),
+				"image/jpeg",
+				250000 + random.nextInt(500000),
+				"WEBP", "PRODUCT", "N", createdAt, createdAt
 			});
 
 			relationBatchData.add(new Object[] {
-					UuidCreator.getTimeOrderedEpoch().toString(),
-					productId, imageId, 0, true, "N", createdAt, createdAt
+				UuidCreator.getTimeOrderedEpoch().toString(),
+				productId, imageId, 0, true, "N", createdAt, createdAt
 			});
 
 			if (imageBatchData.size() >= BATCH_SIZE) {
@@ -189,15 +195,15 @@ public class DummyDataGenerator {
 	 */
 	public void generateProductPostTags() {
 		List<String> tagIds = jdbcTemplate.queryForList(
-				"SELECT id FROM tag WHERE delete_status = 'N'",
-				String.class);
+			"SELECT id FROM tag WHERE delete_status = 'N'",
+			String.class);
 		if (tagIds.isEmpty()) {
 			return;
 		}
 
 		List<String> productIds = jdbcTemplate.queryForList(
-				"SELECT id FROM product_post p WHERE NOT EXISTS (SELECT 1 FROM product_post_tag ppt WHERE ppt.product_post_id = p.id)",
-				String.class);
+			"SELECT id FROM product_post p WHERE NOT EXISTS (SELECT 1 FROM product_post_tag ppt WHERE ppt.product_post_id = p.id)",
+			String.class);
 		if (productIds.isEmpty()) {
 			return;
 		}
@@ -239,14 +245,14 @@ public class DummyDataGenerator {
 	public void saveProductBatch(List<Object[]> batchData) {
 		// MySQL Only
 		jdbcTemplate.batchUpdate(
-				"INSERT INTO product_post (id, user_id, category_id, title, name, price, description, status, trade_status, view_count, liked_count, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				batchData);
+			"INSERT INTO product_post (id, user_id, category_id, title, name, price, description, status, trade_status, view_count, liked_count, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			batchData);
 		batchData.clear();
 	}
 
 	/**
 	 * DB에서 product_post를 조회하여 ES에 벌크 동기화
-	 * 
+	 *
 	 * @param limit 동기화할 최대 건수
 	 */
 	public void syncProductsToElasticsearch(int limit) {
@@ -258,7 +264,7 @@ public class DummyDataGenerator {
 					p.status, p.trade_status, p.view_count, p.liked_count,
 					p.delete_status, p.created_at, p.updated_at,
 					c.name as category_name,
-					(SELECT ppi2.image_id FROM product_post_images ppi2
+					(SELECT img.s3_url FROM product_post_images ppi2
 					 JOIN images img ON ppi2.image_id = img.id
 					 WHERE ppi2.product_post_id = p.id AND ppi2.is_primary = true LIMIT 1) as primary_image_url
 				FROM product_post p
@@ -276,21 +282,21 @@ public class DummyDataGenerator {
 
 		// 상품별 태그 조회
 		List<String> productIds = products.stream()
-				.map(p -> (String) p.get("id"))
-				.toList();
+			.map(p -> (String) p.get("id"))
+			.toList();
 
 		Map<String, List<String>> productTagsMap = new HashMap<>();
 		if (!productIds.isEmpty()) {
 			String inSql = String.join(",", Collections.nCopies(productIds.size(), "?"));
 			jdbcTemplate.query(
-					"SELECT ppt.product_post_id, t.name FROM product_post_tag ppt " +
-							"JOIN tag t ON ppt.tag_id = t.id WHERE ppt.product_post_id IN (" + inSql + ")",
-					rs -> {
-						String productId = rs.getString("product_post_id");
-						String tagName = rs.getString("name");
-						productTagsMap.computeIfAbsent(productId, k -> new ArrayList<>()).add(tagName);
-					},
-					productIds.toArray());
+				"SELECT ppt.product_post_id, t.name FROM product_post_tag ppt " +
+					"JOIN tag t ON ppt.tag_id = t.id WHERE ppt.product_post_id IN (" + inSql + ")",
+				rs -> {
+					String productId = rs.getString("product_post_id");
+					String tagName = rs.getString("name");
+					productTagsMap.computeIfAbsent(productId, k -> new ArrayList<>()).add(tagName);
+				},
+				productIds.toArray());
 		}
 
 		// ES Document 변환 및 벌크 저장
@@ -302,23 +308,23 @@ public class DummyDataGenerator {
 
 			// Map을 ProductPostUpsertedEvent로 변환
 			ProductPostUpsertedEvent event = ProductPostUpsertedEvent.builder()
-					.id(productId)
-					.userId((String) product.get("user_id"))
-					.categoryName((String) product.get("category_name"))
-					.title((String) product.get("title"))
-					.name((String) product.get("name"))
-					.price(((Number) product.get("price")).longValue())
-					.description((String) product.get("description"))
-					.status((String) product.get("status"))
-					.tradeStatus((String) product.get("trade_status"))
-					.viewCount(((Number) product.get("view_count")).longValue())
-					.likedCount(((Number) product.get("liked_count")).longValue())
-					.deleteStatus((String) product.get("delete_status"))
-					.createdAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
-					.updatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
-					.tags(productTagsMap.getOrDefault(productId, new ArrayList<>()))
-					.primaryImageUrl((String) product.get("primary_image_url"))
-					.build();
+				.id(productId)
+				.userId((String) product.get("user_id"))
+				.categoryName((String) product.get("category_name"))
+				.title((String) product.get("title"))
+				.name((String) product.get("name"))
+				.price(((Number) product.get("price")).longValue())
+				.description((String) product.get("description"))
+				.status((String) product.get("status"))
+				.tradeStatus((String) product.get("trade_status"))
+				.viewCount(((Number) product.get("view_count")).longValue())
+				.likedCount(((Number) product.get("liked_count")).longValue())
+				.deleteStatus((String) product.get("delete_status"))
+				.createdAt((LocalDateTime) product.get("created_at"))
+				.updatedAt((LocalDateTime) product.get("updated_at"))
+				.tags(productTagsMap.getOrDefault(productId, new ArrayList<>()))
+				.primaryImageUrl((String) product.get("primary_image_url"))
+				.build();
 
 			// SearchMapper를 사용하여 Document 변환
 			ProductPostDocumentEntity doc = SearchMapper.toDocumentEntity(event);
@@ -345,22 +351,22 @@ public class DummyDataGenerator {
 
 	private void saveImageBatch(List<Object[]> batchData) {
 		jdbcTemplate.batchUpdate(
-				"INSERT INTO images (id, original_file_name, stored_file_name, s3_url, s3_key, original_file_size, original_content_type, compressed_file_size, converted_content_type, image_target, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				batchData);
+			"INSERT INTO images (id, original_file_name, stored_file_name, s3_url, s3_key, original_file_size, original_content_type, compressed_file_size, converted_content_type, image_target, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			batchData);
 		batchData.clear();
 	}
 
 	private void saveProductImageBatch(List<Object[]> batchData) {
 		jdbcTemplate.batchUpdate(
-				"INSERT INTO product_post_images (id, product_post_id, image_id, display_order, is_primary, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-				batchData);
+			"INSERT INTO product_post_images (id, product_post_id, image_id, display_order, is_primary, delete_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+			batchData);
 		batchData.clear();
 	}
 
 	private void saveProductTagBatch(List<Object[]> batchData) {
 		jdbcTemplate.batchUpdate(
-				"INSERT INTO product_post_tag (product_post_id, tag_id) VALUES (?, ?)",
-				batchData);
+			"INSERT INTO product_post_tag (product_post_id, tag_id) VALUES (?, ?)",
+			batchData);
 		batchData.clear();
 	}
 
