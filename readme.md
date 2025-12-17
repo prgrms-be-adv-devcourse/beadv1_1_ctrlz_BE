@@ -55,7 +55,8 @@
 | **Search Service** | 1개 | - | 검색 배치 |
 | **AI Service** | 1개 | - | AI 추천 |
 
-### 🔐 Account Service - 회원 및 인증
+<details>
+<summary><h3>🔐 Account Service - 회원 및 인증</h3></summary>
 
 #### 인증 (Auth)
 - [x] OAuth 2.0 Google 로그인 (isNewUser 분기 처리)
@@ -73,7 +74,10 @@
 - [x] SMS 인증 코드 발송 (6자리)
 - [x] 인증 코드 검증 후 SELLER 권한 부여
 
-### 🛍️ Domain Service - 핵심 비즈니스
+</details>
+
+<details>
+<summary><h3>🛍️ Domain Service - 핵심 비즈니스</h3></summary>
 
 #### 상품 게시글 (ProductPost)
 - [x] 상품 게시글 CRUD (이미지 포함)
@@ -111,7 +115,10 @@
 - [x] 상품별/사용자별 리뷰 조회
 - [x] 2종 평점 시스템 (판매자 평점 + 상품 평점)
 
-### 🔍 Search Service - Elasticsearch 검색
+</details>
+
+<details>
+<summary><h3>🔍 Search Service - Elasticsearch 검색</h3></summary>
 
 #### 상품 검색 (ProductPost Search)
 - [x] 통합 검색 (키워드 기반)
@@ -132,7 +139,10 @@
 - [x] Spring Batch 기반 검색 이력 처리
 - [x] 수동 트리거 방식 지원
 
-### 💳 Payment Service - 결제 및 예치금
+</details>
+
+<details>
+<summary><h3>💳 Payment Service - 결제 및 예치금</h3></summary>
 
 #### 결제 (Payment)
 - [x] 결제 준비 정보 조회 (주문 금액 + 예치금 잔액)
@@ -155,7 +165,10 @@
 - [x] 결제 시 예치금 우선 차감
 - [x] 환불 시 예치금 자동 복구
 
-### 💰 Settlement Service - 정산
+</details>
+
+<details>
+<summary><h3>💰 Settlement Service - 정산</h3></summary>
 
 #### 정산 관리
 - [x] 정산 내역 조회 (개별/목록/사용자별)
@@ -175,12 +188,17 @@
 → 예치금 처리 → SettlementResultEvent → COMPLETED/FAILED
 ```
 
-### 🤖 AI Service - 상품 추천
+</details>
+
+<details>
+<summary><h3>🤖 AI Service - 상품 추천</h3></summary>
 
 - [x] Spring AI 기반 개인화 추천
 - [x] 쿼리 기반 상품 추천 생성
 - [x] 사용자 검색 패턴 분석
 - [x] Elasticsearch 연동 유사 상품 검색
+
+</details>
 
 ---
 
@@ -274,200 +292,6 @@
 
 ---
 
-## 📄 추가 문서
-
-### 🔗 ERD
-<img width="3280" height="2042" alt="image" src="https://github.com/user-attachments/assets/327e8d03-57f8-489a-a853-273bf79f8ac1" />
-
-### 🏛️ 백엔드 아키텍처
-<img width="1920" height="1080" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/321c6951-3425-43b3-be92-f67be8143d76" />
-
-### 📜 프로젝트 기획서
-- [프로젝트 기획서 바로가기](https://www.notion.so/29f9d0051b9981e6a1a7d5421fd58f1e?source=copy_link)
-
-### 📌 API 명세서
-- [API 명세서 바로가기](https://www.notion.so/API-Mock-Server-29f9d0051b99813299b8e88a68ac724c?source=copy_link)
-
-### 기능 정의서
-- [기능 정의서 바로가기](https://www.notion.so/29f9d0051b9981438f59c43ef83877d6?source=copy_link)
-
----
-
-## 📊 주요 비즈니스 플로우
-
-### 1. 회원가입 및 로그인
-<details>
-<summary>상세 플로우 보기</summary>
-
-```mermaid
-flowchart LR
-    A[소셜 로그인 시도] --> B{소셜 로그인 성공?}
-    B -- 아니오 --> E[로그인 페이지 이동]
-    B -- 예 --> C[추가 정보 기입]
-    C --> D{추가 정보 기입 성공?}
-    D -- 예 --> F[토큰 발행]
-    D -- 아니오 --> E[로그인 페이지 이동]
-```
-
-**처리 과정**
-```
-OAuth 인증 → isNewUser 확인 
-→ 신규: 추가 정보 입력 후 회원가입 API 
-→ 기존: 토큰 발급 (Access + Refresh)
-```
-</details>
-
-### 2. 상품 구매 플로우
-<details>
-<summary>상세 플로우 보기</summary>
-
-```mermaid
-flowchart TD
-    A[상품 검색/조회] --> B[장바구니 추가]
-    B --> C[주문 생성]
-    C --> D{결제 방법 선택}
-    D -->|예치금 전액| E[예치금 결제]
-    D -->|복합 결제| F[예치금 + Toss]
-    D -->|PG 전액| G[Toss 결제]
-    E --> H[주문 완료]
-    F --> H
-    G --> H
-    H --> I[구매 확정]
-    I --> J[리뷰 작성]
-    I --> K[정산 처리]
-```
-
-**처리 과정**
-```
-장바구니 추가 → 주문 생성 (PAYMENT_PENDING) 
-→ 결제 준비 정보 조회 (금액 + 예치금 잔액)
-→ 결제 승인 (예치금 우선 차감 → 부족분 PG)
-→ 주문 상태 업데이트 (PAYMENT_COMPLETED)
-→ 구매 확정 (PURCHASE_CONFIRMED)
-→ 정산 이벤트 발행 → 리뷰 작성 가능
-```
-</details>
-
-### 3. 복합 결제 플로우
-<details>
-<summary>상세 플로우 보기</summary>
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant O as Order Service
-    participant P as Payment Service
-    participant D as Deposit Service
-    participant T as Toss Payments
-
-    C->>O: 주문 생성
-    O-->>C: orderId
-    
-    C->>P: 결제 준비 정보 조회
-    P->>O: 주문 금액 조회
-    P->>D: 예치금 잔액 조회
-    P-->>C: amount, depositBalance
-    
-    C->>P: 결제 승인 요청<br/>(usedDepositAmount 포함)
-    
-    alt 예치금 사용
-        P->>D: 예치금 차감
-        D-->>P: 차감 완료
-    end
-    
-    alt 부족분 있음
-        P->>T: Toss 결제 승인
-        T-->>P: 승인 완료
-    end
-    
-    P->>O: 주문 상태 업데이트<br/>(PAYMENT_COMPLETED)
-    P-->>C: 결제 완료
-```
-
-**멱등성 보장**
-- 동일 `orderId`로 중복 요청 시 기존 결제 정보 반환
-- 예치금 차감 실패 시 전체 롤백
-</details>
-
-### 4. 정산 플로우
-<details>
-<summary>상세 플로우 보기</summary>
-
-```mermaid
-flowchart TD
-    A[구매 확정] --> B[SettlementCreatedEvent]
-    B --> C[정산 생성: PENDING]
-    
-    C --> D[배치 스케줄러 실행]
-    D --> E{PENDING 정산 100건 조회}
-    E -->|없음| Z[배치 종료]
-    E -->|있음| F[DepositSettlementReadyEvent]
-    
-    F --> G[정산 상태: WAITING]
-    G --> H{예치금 처리}
-    
-    H -->|성공| I[SettlementResultEvent: SUCCESS]
-    H -->|실패| J[SettlementResultEvent: FAILED]
-    
-    I --> K[정산 상태: COMPLETED]
-    J --> L[정산 상태: FAILED]
-    
-    L --> M[재시도 배치 스케줄러]
-    M --> N[FAILED → PENDING 변경]
-    N --> D
-```
-
-**처리 과정**
-```
-구매 확정 → Kafka 이벤트 발행
-→ Settlement Service에서 PENDING 생성
-→ Spring Batch 스케줄러 (100건씩 처리)
-→ 예치금 서비스로 정산 요청 이벤트 발행
-→ 예치금 반영 후 결과 이벤트 수신
-→ COMPLETED/FAILED 처리
-→ 실패 시 재시도 배치로 복구
-```
-</details>
-
-### 5. 검색 및 추천 플로우
-<details>
-<summary>상세 플로우 보기</summary>
-
-```mermaid
-flowchart TD
-    A[검색어 입력] --> B{입력값 검증}
-    B -->|비어있음| C[최근 검색어 조회]
-    B -->|입력값 있음| D[Elasticsearch 검색]
-    
-    D --> E[상품 목록 반환]
-    E --> F[Redis에 검색어 저장]
-    F --> G{사용자 로그인?}
-    
-    G -->|예| H[개인 최근 검색어 저장]
-    G -->|아니오| I[인기 검색어 집계만]
-    
-    H --> J[AI 추천 이벤트 발행]
-    J --> K[검색 패턴 분석]
-    
-    C --> L[자동완성 제공]
-    D --> M{유사 상품 추천?}
-    M -->|예| N[More Like This Query]
-    M -->|아니오| O[일반 검색 결과]
-```
-
-**처리 과정**
-```
-검색어 입력 → Elasticsearch 통합 검색
-→ Redis 저장 (최근 검색어 + 인기 검색어)
-→ 로그인 사용자: AI 이벤트 발행
-→ 자동완성 제공 (접두사 매칭)
-→ 유사 상품: More Like This 쿼리
-→ 오늘의 추천: Function Score 계산
-```
-</details>
-
----
-
 ## 🔑 주요 기술 구현 특징
 
 ### 1. 멱등성 보장 시스템
@@ -503,6 +327,7 @@ settlement-result → settlement-completed/failed
 ### 6. Redis 활용
 - **토큰 관리**: Refresh Token 저장 (TTL 설정)
 - **검색어**: 최근 검색어 (Sorted Set) + 인기 검색어 (Hash)
+- **최근 본 상품**: Sorted Set (zSet)으로 조회 시간 기반 정렬 관리
 - **세션**: 인증 코드 임시 저장 (5분 TTL)
 
 ---
@@ -737,6 +562,25 @@ flowchart TD
     Q --> R[구매자에게 알림]
 ```
 </details>
+
+---
+
+## 📄 추가 문서
+
+### 🔗 ERD
+<img width="3280" height="2042" alt="image" src="https://github.com/user-attachments/assets/327e8d03-57f8-489a-a853-273bf79f8ac1" />
+
+### 🏛️ 백엔드 아키텍처
+<img width="1920" height="1080" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/321c6951-3425-43b3-be92-f67be8143d76" />
+
+### 📜 프로젝트 기획서
+- [프로젝트 기획서 바로가기](https://www.notion.so/29f9d0051b9981e6a1a7d5421fd58f1e?source=copy_link)
+
+### 📌 API 명세서
+- [API 명세서 바로가기](https://www.notion.so/API-Mock-Server-29f9d0051b99813299b8e88a68ac724c?source=copy_link)
+
+### 기능 정의서
+- [기능 정의서 바로가기](https://www.notion.so/29f9d0051b9981438f59c43ef83877d6?source=copy_link)
 
 ---
 
