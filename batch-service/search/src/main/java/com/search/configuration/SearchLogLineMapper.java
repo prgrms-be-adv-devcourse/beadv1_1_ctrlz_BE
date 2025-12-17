@@ -38,7 +38,7 @@ public class SearchLogLineMapper implements LineMapper<UserBehaviorDto> {
 
             // userId는 JSON 루트 레벨에서 먼저 확인 (item-view.log)
             // 없으면 data 내부에서 파싱 (search-view.log)
-            String userIdFromRoot = jsonNode.path("userId").asText(null);
+            String userIdFromRoot = jsonNode.path("userId").asText("");
 
             ParsedData parsedData = parseDataNode(dataNode, userIdFromRoot);
             validateParsedValue(parsedData.value(), lineNumber, dataNode);

@@ -1,59 +1,42 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: CronJob
 metadata:
-  name: batch-deploy
+  name: batch-cronJob
   labels:
     app: batch
-spec:
-  selector:
-    matchLabels:
-      app: batch
-  replicas: 1
 
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
-  template:
-    metadata:
-      labels:
-        app: batch
+spec:
+  schedule: "30 1 * * *"
+  # 성공한 작업 기록 유지 개수
+  successfulJobsHistoryLimit: 3
+  # 실패한 작업 기록 유지 개수
+  failedJobsHistoryLimit: 1
+  jobTemplate:
     spec:
-      containers:
-        - name: batch-service-app
-          image: docker.io/beatchoi156/batch-service-app:latest
-          env:
-            - name: discovery_default_zone
-              value: "http://discovery-svc:8761/eureka/"
-            - name: LOG_PATH
-              value: "/app/logs"
-          envFrom:
-            - secretRef:
-                name: spring-prod-secret
-          ports:
-            - containerPort: 8085
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: 8085
-            initialDelaySeconds: 120
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: 8085
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
-          volumeMounts:
-            - name: log-volume
-              mountPath: /app/logs
-            - name: domain-logs
-              mountPath: /domain-logs
+      template:
+        metadata:
+          labels:
+            app: batch
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: batch-service-app
+              image: docker.io/beatchoi156/batch-service-app:latest
+              env:
+                - name: LOG_PATH
+                  value: "/app/logs"
+
+              envFrom:
+                - secretRef:
+                    name: spring-prod-secret
+
+              ports:
+                - containerPort: 8085
+              volumeMounts:
+                - name: log-volume
+                  mountPath: /app/logs
+                - name: domain-logs
+                  mountPath: /domain-logs
       volumes:
         - name: log-volume
           hostPath:
@@ -63,7 +46,6 @@ spec:
           hostPath:
             path: /var/log/spring-apps/domain-service
             type: DirectoryOrCreate
-
 ---
 apiVersion: v1
 kind: Service
