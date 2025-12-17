@@ -65,12 +65,7 @@ public class GlobalSearchQueryBuilder {
 
 		// 삭제되지 않은 상품만 필터
 		filterQueries.add(
-			Query.of(queryBuilder -> queryBuilder.term(
-				TermQuery.of(termQueryBuilder -> termQueryBuilder
-					.field("delete_status")
-					.value("N")
-				)
-			))
+			Query.of(filter -> filter.term(term -> term.field("delete_status").value("N")))
 		);
 
 		// 카테고리 필터가 존재하면 적용

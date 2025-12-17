@@ -47,7 +47,7 @@ public record postSearchParams(
 ) {
 	public postSearchParams {
 		if (minPrice == null) minPrice = 0L;
-		if (maxPrice == null) maxPrice = Long.MAX_VALUE;
+		if (maxPrice == null) maxPrice = 100_000_000L;
 		if (status == null) status = "ALL";
 		if (tradeStatus == null) tradeStatus = "ALL";
 		if (sort == null) sort = "score";
