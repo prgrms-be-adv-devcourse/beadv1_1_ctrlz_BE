@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * elasticSearch를 사용하여 상품 게시글 검색 및 추천 기능을 제공하는 REST API 컨트롤러입니다.
  */
-@Tag(name = "ProductPost Search", description = "다양한 상품 게시글 목록 조회 API")
+@Tag(name = "ProductPost Search", description = "elasticSearch를 통한 다양한 상품 게시글 목록 조회 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -105,7 +105,7 @@ public class ProductPostSearchController {
 	@GetDailyRecommendationApiDocs
 	@GetMapping("/daily")
 	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
-		@RequestParam(defaultValue = "all") String category,
+		@RequestParam(defaultValue = "ALL") String category,
 		@PageableDefault(size = 12) Pageable pageable
 	) {
 		return recommendationService.getDailyBestProductList(category, pageable);

@@ -45,9 +45,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 	parameters = {
 		@Parameter(
 			name = "category",
-			description = "카테고리명 (기본값: all)",
-			example = "전자기기",
-			schema = @Schema(defaultValue = "all")
+			description = "카테고리명"
 		)
 	}
 )

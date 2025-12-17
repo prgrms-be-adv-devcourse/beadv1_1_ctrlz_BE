@@ -40,7 +40,7 @@ public class SwaggerPageableConfiguration {
 
 				if ("size".equals(paramName)) {
 					param.setDescription("페이지 당 조회 개수");
-					int defaultSize = hidePageableSort ? 24 : 12;
+					int defaultSize = isGlobalSearch ? 24 : 12;
 					param.setSchema(new IntegerSchema()._default(defaultSize));
 				}
 
