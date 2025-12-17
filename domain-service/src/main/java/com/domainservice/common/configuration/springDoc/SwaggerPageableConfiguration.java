@@ -22,7 +22,7 @@ public class SwaggerPageableConfiguration {
 			if (hasPageable && operation.getParameters() != null) {
 				for (Parameter param : operation.getParameters()) {
 					if ("page".equals(param.getName())) {
-						param.setDescription("페이지 번호 (0부터 시작)");
+						param.setDescription("페이지 번호");
 						param.setSchema(new IntegerSchema()._default(0));
 					}
 					if ("size".equals(param.getName())) {

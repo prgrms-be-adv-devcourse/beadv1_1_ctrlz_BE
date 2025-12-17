@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -154,13 +153,11 @@ public class ProductPostController {
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PageResponse<List<ProductPostResponse>> getProductPostList(
-		@Valid @ModelAttribute
-		ProductPostSearchRequest request,
+		@Valid ProductPostSearchRequest request,
 		@PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
 		Pageable pageable
 	) {
-		return productPostService.getProductPostList(pageable, request.getCategoryId(), request.getStatus(),
-			request.getTradeStatus(), request.getMinPrice(), request.getMaxPrice());
+		return productPostService.getProductPostList(pageable, request);
 	}
 
 	/**
