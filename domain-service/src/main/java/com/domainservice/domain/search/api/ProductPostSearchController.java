@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
 import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 import com.domainservice.domain.search.service.search.GlobalSearchService;
 import com.domainservice.domain.search.service.search.RecommendationService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * elasticSearch를 사용하여 상품 게시글 검색 및 추천 기능을 제공하는 REST API 컨트롤러입니다.
  */
+@Tag(name = "ProductPost Search", description = "다양한 상품 게시글 목록 조회 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
+	@GlobalSearchApiDocs
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
 		@Valid postSearchParams searchParams,
