@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 
+import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
+
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -25,6 +27,7 @@ public class SwaggerPageableConfiguration {
 
 			// @HidePageableSort 어노테이션이 있는지 확인
 			boolean hidePageableSort = handlerMethod.getMethod().isAnnotationPresent(HidePageableSort.class);
+			boolean isGlobalSearch = handlerMethod.getMethod().isAnnotationPresent(GlobalSearchApiDocs.class);
 
 			for (int i = operation.getParameters().size() - 1; i >= 0; i--) {
 				Parameter param = operation.getParameters().get(i);
@@ -42,7 +45,9 @@ public class SwaggerPageableConfiguration {
 				}
 
 				if ("sort".equals(paramName)) {
-					if (!hidePageableSort) {
+					if (hidePageableSort) { operation.getParameters().remove(i); }
+					else if (isGlobalSearch) { return operation; }
+					else {
 						param.setDescription("""
                       정렬 기준
                       

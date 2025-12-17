@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
         
         - **자동 필터링**: 기준 상품 자체와 판매 완료된 상품(SOLDOUT)은 자동으로 제외됩니다.
         
-        - **페이징**: `sort`, `page`, `size` 파라미터 지원 (기본 12개)
+        - **페이징**: `page`, `size` 파라미터 지원 (기본 12개)
         
         - 최신 등록순으로 정렬됩니다.
         

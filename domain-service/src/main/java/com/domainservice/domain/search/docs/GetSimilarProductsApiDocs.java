@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
         
         - **자동 필터링**: 현재 판매중인 상품(SELLING)만 자동으로 필터링됩니다.
         
-        - **페이징**: `sort`, `page`, `size` 파라미터 지원 (기본 12개)
+        - **페이징**: `page`, `size` 파라미터 지원 (기본 12개)
         
         - 유사도 점수가 높은 순서로 정렬됩니다.
         

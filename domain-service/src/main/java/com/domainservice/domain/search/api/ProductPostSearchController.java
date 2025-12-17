@@ -47,7 +47,6 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
-	@HidePageableSort
 	@GlobalSearchApiDocs
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
@@ -65,6 +64,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 유사 상품 목록
 	 */
+	@HidePageableSort
 	@GetSimilarProductsApiDocs
 	@GetMapping("/{productPostId}/similar")
 	public PageResponse<List<ProductPostSearchResponse>> getSimilarProducts(
@@ -82,6 +82,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 판매자의 다른 상품 목록
 	 */
+	@HidePageableSort
 	@GetSellerProductsApiDocs
 	@GetMapping("/{productPostId}/by-seller")
 	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
@@ -100,6 +101,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 오늘의 추천 상품 목록
 	 */
+	@HidePageableSort
 	@GetDailyRecommendationApiDocs
 	@GetMapping("/daily")
 	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
