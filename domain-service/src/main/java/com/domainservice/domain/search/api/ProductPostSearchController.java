@@ -2,8 +2,6 @@ package com.domainservice.domain.search.api;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +11,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
-import com.domainservice.domain.search.mapper.SearchMapper;
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
+import com.domainservice.common.configuration.springDoc.HidePageableSort;
+import com.domainservice.domain.search.docs.post.GetDailyRecommendationApiDocs;
+import com.domainservice.domain.search.docs.post.GetSellerProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GetSimilarProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GlobalSearchApiDocs;
+import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 import com.domainservice.domain.search.service.search.GlobalSearchService;
 import com.domainservice.domain.search.service.search.RecommendationService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * elasticSearch를 사용하여 상품 게시글 검색 및 추천 기능을 제공하는 REST API 컨트롤러입니다.
  */
+@Tag(name = "ProductPost Search", description = "elasticSearch를 통한 다양한 상품 게시글 목록 조회 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -38,36 +43,17 @@ public class ProductPostSearchController {
 	 * 통합 검색 API
 	 * - 모든 필터 조건을 단일 엔드포인트에서 처리
 	 *
-	 * @param q 검색어 (optional)
-	 * @param category 카테고리 (optional)
-	 * @param minPrice 최소 가격 (optional, default: 0)
-	 * @param maxPrice 최대 가격 (optional, default: 999999999)
-	 * @param tags 태그 (optional)
-	 * @param sort 정렬 기준 (optional, default: score)
-	 * @param status 상품 상태 (optional, default: ALL)
-	 * @param tradeStatus 상품 판매 상태 (optional, default: SELLING)
+	 * @param searchParams 검색 파라미터
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
+	@GlobalSearchApiDocs
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
-		@RequestParam(required = false) String q,                    // ex) "아이폰"
-		@RequestParam(required = false) String category,             // ex) "전자기기"
-		@RequestParam(defaultValue = "0") Long minPrice,             // ex) "100000"
-		@RequestParam(defaultValue = "999999999") Long maxPrice,     // ex) "2000000"
-		@RequestParam(required = false) String tags,                 // ex) "친환경,중고"
-		@RequestParam(defaultValue = "ALL") String status,           // ex) "NEW", "GOOD", "ALL"
-		@RequestParam(defaultValue = "ALL") String tradeStatus,      // ex) "SELLING", "ALL"
-
-		// ex) "score", "popular", "price_asc", "price_desc", "newest"
-		@RequestParam(defaultValue = "score") String sort,
-
+		@Valid postSearchParams searchParams,
 		@PageableDefault(size = 24) Pageable pageable
 	) {
-		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
-			q, category, minPrice, maxPrice, tags, status, tradeStatus, sort);
-
-		return globalSearchService.search(request, pageable);
+		return globalSearchService.search(searchParams, pageable);
 	}
 
 	/**
@@ -78,6 +64,8 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 유사 상품 목록
 	 */
+	@HidePageableSort
+	@GetSimilarProductsApiDocs
 	@GetMapping("/{productPostId}/similar")
 	public PageResponse<List<ProductPostSearchResponse>> getSimilarProducts(
 		@PathVariable String productPostId,
@@ -94,6 +82,8 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 판매자의 다른 상품 목록
 	 */
+	@HidePageableSort
+	@GetSellerProductsApiDocs
 	@GetMapping("/{productPostId}/by-seller")
 	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
 		@PathVariable String productPostId,
@@ -111,9 +101,11 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 오늘의 추천 상품 목록
 	 */
+	@HidePageableSort
+	@GetDailyRecommendationApiDocs
 	@GetMapping("/daily")
 	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
-		@RequestParam(defaultValue = "all") String category,
+		@RequestParam(defaultValue = "ALL") String category,
 		@PageableDefault(size = 12) Pageable pageable
 	) {
 		return recommendationService.getDailyBestProductList(category, pageable);

@@ -43,7 +43,7 @@ public class DailyProductQueryBuilder {
 		));
 
 		// 카테고리 필터 (선택)
-		if (!category.equals("all")) {
+		if (!category.equals("ALL")) {
 			filterQueries.add(Query.of(f -> f.term(t -> t.field("category_name.keyword").value(category))));
 		}
 

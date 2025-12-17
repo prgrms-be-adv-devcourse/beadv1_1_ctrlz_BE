@@ -23,6 +23,7 @@ spring:
         collection-name: products
         initialize-schema: true
 
+
   data:
     redis:
       host: localhost

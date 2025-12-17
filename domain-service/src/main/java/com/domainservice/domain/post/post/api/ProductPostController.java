@@ -16,28 +16,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.common.model.vo.ProductStatus;
-import com.common.model.vo.TradeStatus;
 import com.common.model.web.BaseResponse;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.post.docs.CreateProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.DeleteProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.GetProductPostApiDocs;
+import com.domainservice.domain.post.post.docs.GetProductPostListApiDocs;
+import com.domainservice.domain.post.post.docs.GetRecentlyViewedPostsApiDocs;
+import com.domainservice.domain.post.post.docs.UpdateProductPostApiDocs;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostDescription;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.service.ProductPostService;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
  * 상품 게시글 관련 REST API를 제공하는 컨트롤러입니다.
  */
+@Tag(name = "ProductPost", description = "상품 게시글 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/product-posts")
@@ -52,11 +61,16 @@ public class ProductPostController {
 	 * @param request    게시글 생성 요청 정보
 	 * @return 생성된 게시글 정보 (201 Created)
 	 */
+	@CreateProductPostApiDocs
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public BaseResponse<ProductPostResponse> createProductPost(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
+
+		@Parameter(description = "이미지 파일들 (최소 1개 최대 10개)", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+
+		@Parameter(description = "상품 생성 요청 정보", schema = @Schema(implementation = ProductPostRequest.class))
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
 		validateAuthentication(userId);
@@ -72,12 +86,17 @@ public class ProductPostController {
 	 * @param request    게시글 수정 요청 정보
 	 * @return 수정된 게시글 정보 (200 OK)
 	 */
+	@UpdateProductPostApiDocs
 	@ResponseStatus(HttpStatus.OK)
 	@PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public BaseResponse<ProductPostResponse> updateProductPost(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId,
 		@PathVariable String postId,
+
+		@Parameter(description = "이미지 파일들 (최소 1개 최대 10개)", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
 		@RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+
+		@Parameter(description = "상품 수정 요청 정보", schema = @Schema(implementation = ProductPostRequest.class))
 		@Valid @RequestPart("request") ProductPostRequest request
 	) {
 		validateAuthentication(userId);
@@ -91,6 +110,7 @@ public class ProductPostController {
 	 * @param postId 삭제할 게시글 ID
 	 * @return 삭제된 게시글 ID (200 OK)
 	 */
+	@DeleteProductPostApiDocs
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<String> deleteProductPost(
@@ -108,6 +128,7 @@ public class ProductPostController {
 	 * @param postId 조회할 게시글 ID
 	 * @return 게시글 상세 정보 (200 OK)
 	 */
+	@GetProductPostApiDocs
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<ProductPostDescription> getProductPostById(
@@ -119,31 +140,24 @@ public class ProductPostController {
 	}
 
 	/**
-	 * 상품 게시글 목록을 페이징하여 조회합니다. 동적 필터링을 지원합니다.
+	 * 상품 게시글 목록을 페이징하여 조회합니다.
 	 *
-	 * @param pageable    페이징 정보 (기본값: size=20, sort=createdAt, DESC)
-	 * @param categoryId  카테고리 ID (선택)
-	 * @param status      상품 상태 (선택)
-	 * @param tradeStatus 거래 상태 (선택)
-	 * @param minPrice    최소 가격 (선택)
-	 * @param maxPrice    최대 가격 (선택)
-	 * @return 페이징된 게시글 목록 (200 OK)
+	 * 카테고리, 상태, 가격 범위 등 동적으로 필터링하여 상품 게시글을 검색합니다.
+	 * 결과는 페이징되어 반환됩니다.
+	 *
+	 * @param pageable 페이징 정보 (page, size, sort)
+	 * @param request  상품 검색 필터 (카테고리, 상태, 가격 등)
+	 * @return 검색된 상품 게시글 목록 (200 OK)
 	 */
+	@GetProductPostListApiDocs
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PageResponse<List<ProductPostResponse>> getProductPostList(
-		@PageableDefault(size = 20, sort = "createdAt",
-			direction = Sort.Direction.DESC) Pageable pageable,
-		@RequestParam(required = false) String categoryId,
-		@RequestParam(required = false) ProductStatus status,
-		@RequestParam(required = false) TradeStatus tradeStatus,
-		@RequestParam(required = false) Integer minPrice,
-		@RequestParam(required = false) Integer maxPrice
+		@Valid ProductPostSearchRequest request,
+		@PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+		Pageable pageable
 	) {
-		PageResponse<List<ProductPostResponse>> response = productPostService.getProductPostList(
-			pageable, categoryId, status, tradeStatus, minPrice, maxPrice
-		);
-		return response;
+		return productPostService.getProductPostList(pageable, request);
 	}
 
 	/**
@@ -152,7 +166,9 @@ public class ProductPostController {
 	 * @param userId 사용자 식별자 (X-REQUEST-ID 헤더에서 추출)
 	 * @return 최근 본 상품 목록 (200 OK)
 	 */
+	@GetRecentlyViewedPostsApiDocs
 	@GetMapping("/recent-views")
+	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<ProductPostResponse>> getRecentlyViewPosts(
 		@RequestHeader(value = "X-REQUEST-ID", defaultValue = "anonymous") String userId
 	) {
