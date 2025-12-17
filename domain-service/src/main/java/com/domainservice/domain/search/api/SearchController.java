@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.search.docs.GetAutoCompletionApiDocs;
+import com.domainservice.domain.search.docs.word.GetTrendSearchWordsApiDocs;
 import com.domainservice.domain.search.docs.word.SaveSearchWordApiDocs;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
@@ -75,6 +76,7 @@ public class SearchController {
 		);
 	}
 
+	@GetTrendSearchWordsApiDocs
 	@GetMapping("/trend")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getTrendWordList() {
