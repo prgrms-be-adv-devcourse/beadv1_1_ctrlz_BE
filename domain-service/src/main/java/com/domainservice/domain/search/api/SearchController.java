@@ -23,8 +23,10 @@ import com.domainservice.domain.search.service.SearchWordRedisService;
 import com.domainservice.domain.search.service.dto.request.Prefix;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Search Word", description = "elasticSearch를 통한 검색어 추천 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/searches")
