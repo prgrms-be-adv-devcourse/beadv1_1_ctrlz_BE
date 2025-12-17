@@ -11,26 +11,9 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
-import com.domainservice.domain.search.model.entity.dto.request.ProductSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 
 public class SearchMapper {
-
-	// 검색 파라미터들을 검색 요청 DTO로 변환
-	public static ProductPostSearchRequest toSearchRequest(ProductSearchParams searchParams) {
-
-		return ProductPostSearchRequest.builder()
-			.q(searchParams.q())
-			.category(searchParams.category())
-			.minPrice(searchParams.minPrice())
-			.maxPrice(searchParams.maxPrice())
-			.tags(parseTagList(searchParams.tags()))
-			.status(searchParams.status())
-			.tradeStatus(searchParams.tradeStatus())
-			.sort(searchParams.sort())
-			.build();
-	}
 
 	// Elasticsearch Document를 검색 응답 DTO로 변환
 	public static ProductPostSearchResponse toSearchResponse(ProductPostDocumentEntity document) {

@@ -1,9 +1,13 @@
 package com.domainservice.domain.search.model.entity.dto.request;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "상품 검색 요청 파라미터")
-public record ProductSearchParams(
+public record postSearchParams(
 
 	@Schema(description = "검색어", example = "아이폰")
 	String q,
@@ -41,11 +45,27 @@ public record ProductSearchParams(
 	)
 	String sort
 ) {
-	public ProductSearchParams {
-		minPrice = minPrice != null ? minPrice : 0L;
-		maxPrice = maxPrice != null ? maxPrice : 999999999L;
-		status = status != null && !status.isBlank() ? status : "ALL";
-		tradeStatus = tradeStatus != null && !tradeStatus.isBlank() ? tradeStatus : "ALL";
-		sort = sort != null && !sort.isBlank() ? sort : "score";
+	public postSearchParams {
+		if (minPrice == null) minPrice = 0L;
+		if (maxPrice == null) maxPrice = Long.MAX_VALUE;
+		if (status == null) status = "ALL";
+		if (tradeStatus == null) tradeStatus = "ALL";
+		if (sort == null) sort = "score";
 	}
+
+	public List<String> getParsedTagList() {
+		if (!this.hasTags()) return new ArrayList<>();
+
+		return Arrays.stream(tags.split(","))
+			.map(String::trim)
+			.filter(s -> !s.isEmpty())
+			.toList();
+	}
+
+	public boolean hasQuery() {return q != null && !q.isBlank();}
+	public boolean hasCategory() {return category != null && !category.isBlank();}
+	public boolean hasTags() {return tags != null && !tags.isEmpty();}
+	public boolean hasStatus() {return !status.equals("ALL");}
+	public boolean hasTradeStatus() {return !tradeStatus.equals("ALL");}
+
 }

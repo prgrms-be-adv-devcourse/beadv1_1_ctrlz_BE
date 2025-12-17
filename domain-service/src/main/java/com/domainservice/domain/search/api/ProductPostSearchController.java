@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
-import com.domainservice.domain.search.mapper.SearchMapper;
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
-import com.domainservice.domain.search.model.entity.dto.request.ProductSearchParams;
+import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 import com.domainservice.domain.search.service.search.GlobalSearchService;
 import com.domainservice.domain.search.service.search.RecommendationService;
@@ -44,11 +42,10 @@ public class ProductPostSearchController {
 	 */
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
-		@Valid ProductSearchParams searchParams,
+		@Valid postSearchParams searchParams,
 		@PageableDefault(size = 24) Pageable pageable
 	) {
-		ProductPostSearchRequest request = SearchMapper.toSearchRequest(searchParams);
-		return globalSearchService.search(request, pageable);
+		return globalSearchService.search(searchParams, pageable);
 	}
 
 	/**
