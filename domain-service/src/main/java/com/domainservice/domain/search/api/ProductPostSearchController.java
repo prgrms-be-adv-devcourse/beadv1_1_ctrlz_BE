@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
 import com.domainservice.common.configuration.springDoc.HidePageableSort;
+import com.domainservice.domain.search.docs.GetSellerProductsApiDocs;
 import com.domainservice.domain.search.docs.GetSimilarProductsApiDocs;
 import com.domainservice.domain.search.docs.GlobalSearchApiDocs;
 import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
@@ -80,6 +81,7 @@ public class ProductPostSearchController {
 	 * @param pageable 페이징 정보, size: 12(default)
 	 * @return 판매자의 다른 상품 목록
 	 */
+	@GetSellerProductsApiDocs
 	@GetMapping("/{productPostId}/by-seller")
 	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
 		@PathVariable String productPostId,
