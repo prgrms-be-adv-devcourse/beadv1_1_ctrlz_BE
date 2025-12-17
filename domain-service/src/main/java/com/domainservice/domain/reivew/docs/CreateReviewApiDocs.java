@@ -33,7 +33,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 		name = "X-REQUEST-ID",
 		description = "사용자 ID (구매자)",
 		in = ParameterIn.HEADER,
-		required = true,
 		schema = @Schema(type = "string", example = "user-uuid-1234")
 	)
 })
