@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
 import com.domainservice.domain.search.docs.GetAutoCompletionApiDocs;
+import com.domainservice.domain.search.docs.word.GetDailyPopularSearchWordsApiDocs;
 import com.domainservice.domain.search.docs.word.GetTrendSearchWordsApiDocs;
 import com.domainservice.domain.search.docs.word.SaveSearchWordApiDocs;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
@@ -91,6 +92,7 @@ public class SearchController {
 	 * 일간 인기 검색어 조회.
 	 * @return
 	 */
+	@GetDailyPopularSearchWordsApiDocs
 	@GetMapping("/popular-daily")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getDailyPopularWord() {
@@ -106,7 +108,7 @@ public class SearchController {
 	 * @param userId
 	 * @return
 	 */
-	@Hidden
+	@Hidden // swagger에서 숨김
 	@PostMapping("test")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
