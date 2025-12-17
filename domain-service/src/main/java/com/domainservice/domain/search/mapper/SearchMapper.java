@@ -12,23 +12,23 @@ import com.common.event.productPost.ProductPostUpsertedEvent;
 import com.common.model.web.PageResponse;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
+import com.domainservice.domain.search.model.entity.dto.request.ProductSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 
 public class SearchMapper {
 
 	// 검색 파라미터들을 검색 요청 DTO로 변환
-	public static ProductPostSearchRequest toSearchRequest(String q, String category,
-		Long minPrice, Long maxPrice, String tags, String status, String tradeStatus, String sort) {
+	public static ProductPostSearchRequest toSearchRequest(ProductSearchParams searchParams) {
 
 		return ProductPostSearchRequest.builder()
-			.q(q)
-			.category(category)
-			.minPrice(minPrice)
-			.maxPrice(maxPrice)
-			.tags(parseTagList(tags))
-			.status(status)
-			.tradeStatus(tradeStatus)
-			.sort(sort)
+			.q(searchParams.q())
+			.category(searchParams.category())
+			.minPrice(searchParams.minPrice())
+			.maxPrice(searchParams.maxPrice())
+			.tags(parseTagList(searchParams.tags()))
+			.status(searchParams.status())
+			.tradeStatus(searchParams.tradeStatus())
+			.sort(searchParams.sort())
 			.build();
 	}
 
