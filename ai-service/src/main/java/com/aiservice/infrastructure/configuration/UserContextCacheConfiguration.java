@@ -1,4 +1,4 @@
-package com.aiservice.infrastructure.config;
+package com.aiservice.infrastructure.configuration;
 
 import java.util.concurrent.TimeUnit;
 
