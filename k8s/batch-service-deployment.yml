@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: CronJob
 metadata:
-  name: batch-deploy
+  name: batch-cronJob
   labels:
     app: batch
 
@@ -32,11 +32,11 @@ spec:
 
               ports:
                 - containerPort: 8085
-          volumeMounts:
-            - name: log-volume
-              mountPath: /app/logs
-            - name: domain-logs
-              mountPath: /domain-logs
+              volumeMounts:
+                - name: log-volume
+                  mountPath: /app/logs
+                - name: domain-logs
+                  mountPath: /domain-logs
       volumes:
         - name: log-volume
           hostPath:
