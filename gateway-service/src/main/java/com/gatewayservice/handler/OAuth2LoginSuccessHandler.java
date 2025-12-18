@@ -1,11 +1,9 @@
 package com.gatewayservice.handler;
 
-import com.gatewayservice.client.AccountServiceClient;
-import com.gatewayservice.dto.LoginRequest;
-import com.gatewayservice.utils.CookieProvider;
-import com.gatewayservice.utils.ServletRequestUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -17,11 +15,15 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
+import com.gatewayservice.client.AccountServiceClient;
+import com.gatewayservice.dto.LoginRequest;
+import com.gatewayservice.utils.CookieProvider;
+import com.gatewayservice.utils.ServletRequestUtils;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
