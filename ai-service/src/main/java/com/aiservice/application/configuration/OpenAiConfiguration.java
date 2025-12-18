@@ -33,35 +33,35 @@ public class OpenAiConfiguration {
 	@Bean
 	public OpenAiApi openAiApi() {
 		return OpenAiApi.builder()
-				.apiKey(apiKey)
-				.build();
+			.apiKey(apiKey)
+			.build();
 	}
 
 	@Bean
 	public EmbeddingModel embeddingModel(OpenAiApi openAiApi) {
 		log.info("운영 환경 openai embedding model 사용 - dimensions: {}", embeddingDimensions);
 		return new OpenAiEmbeddingModel(
-				openAiApi,
-				MetadataMode.EMBED,
-				OpenAiEmbeddingOptions.builder()
-						.model("text-embedding-3-small")
-						.dimensions(embeddingDimensions)
-						.build(),
-				RetryUtils.DEFAULT_RETRY_TEMPLATE);
+			openAiApi,
+			MetadataMode.EMBED,
+			OpenAiEmbeddingOptions.builder()
+				.model("text-embedding-3-small")
+				.dimensions(embeddingDimensions)
+				.build(),
+			RetryUtils.DEFAULT_RETRY_TEMPLATE);
 	}
 
 	@Bean
 	public ChatModel chatModel(OpenAiApi openAiApi) {
 		return OpenAiChatModel.builder()
-				.openAiApi(openAiApi)
-				.build();
+			.openAiApi(openAiApi)
+			.build();
 	}
 
 	@Bean
 	public OpenAiChatOptions recommendationChatOptions() {
 		return OpenAiChatOptions.builder()
-				.model("gpt-4o-mini")
-				.temperature(0.7)
-				.build();
+			.model("gpt-4o-mini")
+			.temperature(0.7)
+			.build();
 	}
 }
