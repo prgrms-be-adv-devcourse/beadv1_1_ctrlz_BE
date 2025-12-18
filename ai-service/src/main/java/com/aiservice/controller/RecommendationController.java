@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aiservice.application.RecommendService;
 import com.aiservice.controller.dto.BaseResponse;
+import com.aiservice.docs.TriggerRecommendationApiDocs;
 import com.aiservice.domain.model.RecommendationResult;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
+@Tag(name = "Ai-Service", description = "AI 추천 API")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -22,6 +24,7 @@ public class RecommendationController {
 
 	private final RecommendService recommendService;
 
+	@TriggerRecommendationApiDocs
 	@GetMapping
 	public BaseResponse<RecommendationResult> triggerRecommendation(
 			@RequestParam("query") String query,
