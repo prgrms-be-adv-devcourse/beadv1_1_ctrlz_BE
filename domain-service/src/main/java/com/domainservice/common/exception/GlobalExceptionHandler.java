@@ -16,7 +16,7 @@ import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.common.configuration.feign.exception.UserClientException;
 import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.reivew.exception.ReviewException;
+import com.domainservice.domain.review.exception.ReviewException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import lombok.RequiredArgsConstructor;

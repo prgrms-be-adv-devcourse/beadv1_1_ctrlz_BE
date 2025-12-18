@@ -9,12 +9,14 @@ import com.aiservice.application.SessionService;
 import com.aiservice.controller.dto.BaseResponse;
 import com.aiservice.domain.model.RecommendationResult;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Deprecated 프론트엔드 진행 작업에 따라 사용 여부가 달라집니다.
  */
+@Hidden
 @Slf4j
 @RestController
 @RequestMapping("/api/recommendations")
