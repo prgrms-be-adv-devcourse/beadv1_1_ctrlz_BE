@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.api;
+package com.domainservice.domain.review.api;
 
 import java.util.List;
 
@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.domain.reivew.constant.ReviewConstant;
-import com.domainservice.domain.reivew.docs.CreateReviewApiDocs;
-import com.domainservice.domain.reivew.docs.GetReviewByProductPostApiDocs;
-import com.domainservice.domain.reivew.docs.GetReviewListApiDocs;
-import com.domainservice.domain.reivew.docs.UpdateReviewApiDocs;
-import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
-import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
-import com.domainservice.domain.reivew.service.ReviewService;
+import com.domainservice.domain.review.constant.ReviewConstant;
+import com.domainservice.domain.review.docs.CreateReviewApiDocs;
+import com.domainservice.domain.review.docs.GetReviewByProductPostApiDocs;
+import com.domainservice.domain.review.docs.GetReviewListApiDocs;
+import com.domainservice.domain.review.docs.UpdateReviewApiDocs;
+import com.domainservice.domain.review.model.dto.request.ReviewRequest;
+import com.domainservice.domain.review.model.dto.response.ReviewResponse;
+import com.domainservice.domain.review.service.ReviewService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

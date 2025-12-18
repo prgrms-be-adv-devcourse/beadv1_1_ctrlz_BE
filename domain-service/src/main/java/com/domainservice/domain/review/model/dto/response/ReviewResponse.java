@@ -1,9 +1,9 @@
-package com.domainservice.domain.reivew.model.dto.response;
+package com.domainservice.domain.review.model.dto.response;
 
 import java.time.LocalDateTime;
 import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.order.model.dto.OrderedAt;
-import com.domainservice.domain.reivew.model.entity.Review;
+import com.domainservice.domain.review.model.entity.Review;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record ReviewResponse(

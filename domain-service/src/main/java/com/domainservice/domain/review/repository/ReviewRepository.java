@@ -1,7 +1,7 @@
-package com.domainservice.domain.reivew.repository;
+package com.domainservice.domain.review.repository;
 
 
-import com.domainservice.domain.reivew.model.entity.Review;
+import com.domainservice.domain.review.model.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
