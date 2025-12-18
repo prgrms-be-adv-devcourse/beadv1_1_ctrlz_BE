@@ -35,7 +35,7 @@ WORKDIR /app
 
 COPY --from=build /app/domain-service/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", "-Xms700m", "-Xmx700m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
+ENTRYPOINT ["java", "-Xms512m", "-Xmx512m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
 
 
 
