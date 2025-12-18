@@ -53,7 +53,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
                     "paymentKey": "5zJ4xY7m0Kq...",
                     "orderId": "order-uuid-1234",
                     "amount": 50000,
-                    "usedDepositAmount": 10000
+                    "usedDepositAmount": 10000,
+                    "totalAmount": 40000
                 }
                 """
         )
