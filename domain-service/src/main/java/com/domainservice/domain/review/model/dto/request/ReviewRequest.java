@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.model.dto.request;
+package com.domainservice.domain.review.model.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
