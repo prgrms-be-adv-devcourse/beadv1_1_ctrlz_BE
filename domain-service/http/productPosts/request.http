@@ -1,6 +1,32 @@
 ### ========================================
 ### 상품 게시글 API 테스트 (단일 이미지)
 ### ========================================
+### 상품 등록
+POST http://127.0.0.1:30000/api/product-posts
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTliMTg3Zi0xZWE0LTdmM2YtYWUyZi1jMDE5MTljMmQ5OGQiLCJ1c2VySWQiOiIwMTliMTg3Zi0xZWE0LTdmM2YtYWUyZi1jMDE5MTljMmQ5OGQiLCJyb2xlcyI6WyJVU0VSIiwiU0VMTEVSIiwiQURNSU4iXSwiaWF0IjoxNzY1Njc2NzYxLCJleHAiOjE3NjY1NzY3NjF9.Zf1idMbTfSPElkAZhfVv0mQi0R2hEA3wpb5XWchFhJGARWhkdW7zUhWUQIiSf7se
+
+--WebAppBoundary
+Content-Disposition: form-data; name="images"; filename="test.png"
+Content-Type: image/png
+
+< ./images/product1.png
+
+--WebAppBoundary
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+"title": "깨끗한 아이폰 15 프로 판매합니다",
+"name": "아이폰 15 프로 256GB 블랙 티타늄",
+"price": 1250000,
+"description": "구매한지 3개월 되 상태 매우 좋습니다. 풀박스입니다.",
+ "categoryId": "01939a8c-1234-7000-8000-000000000006-category",
+ "status": "NEW",
+ "tagIds": []
+}
+
+--WebAppBoundary--
 
 ### 환경 변수 설정
 @baseUrl = http://localhost:8081

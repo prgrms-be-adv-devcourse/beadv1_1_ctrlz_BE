@@ -1,11 +1,5 @@
 package com.user.application.adapter;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.stereotype.Service;
-
 import com.common.exception.CustomException;
 import com.common.exception.vo.UserExceptionCode;
 import com.user.application.adapter.command.SellerVerificationContext;
@@ -13,10 +7,14 @@ import com.user.application.port.in.SellerVerificationUseCase;
 import com.user.application.port.out.SellerVerificationClient;
 import com.user.infrastructure.redis.vo.CacheType;
 import com.user.infrastructure.sms.utils.VerificationCodeSupplier;
-
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * - 인증번호 캐시 유효 시간: 1분
@@ -61,10 +59,12 @@ public class SmsApplication implements SellerVerificationUseCase {
 	public void checkVerificationCode(SellerVerificationContext context) {
 		String cachedCode = getFromCacheSafely(verificationCodeCache, context.getUserId(), String.class);
 
+		log.info("cache code 1 : {}", cachedCode);
 		if (cachedCode == null || cachedCode.isBlank()) {
 			throw new CustomException(UserExceptionCode.CODE_MISMATCH.getMessage());
 		}
 
+		log.info("cache code 2 : {}", context.getVerificationCode());
 		if (!cachedCode.equals(context.getVerificationCode())) {
 			handleIncorrectCode(context.getUserId());
 			throw new CustomException(UserExceptionCode.CODE_MISMATCH.getMessage());

@@ -11,8 +11,10 @@ import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.service.AssetService;
 import com.domainservice.domain.asset.image.infrastructure.api.dto.ImageResponse;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
+@Hidden
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/images")

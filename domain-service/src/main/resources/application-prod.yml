@@ -13,44 +13,54 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
-    url: jdbc:mysql://mysql-service:3306/test_db
-    username: admin
-    password: 1234
-  #    username: "${custom.db.username}"
-  #    password: "${custom.db.password}"
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto:
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
 
   elasticsearch:
-    uris: http://elastic-search-service:9200 # default 지만 명시적으로 작성
+    uris: ${ELASTIC_SEARCH_URL} 
 
   data:
     redis:
       port: 6379
-      host: redis-server
-      password: 1234
-  #      password: "${REDIS_PASSWORD}"
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
   kafka:
-    bootstrap-servers: kafka-mq:9090
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
 
     consumer:
       group-id: domain-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.common.event"
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
+
+    listener:
+      immediate-stop: false # default 값 명시
 
 custom:
   image:
@@ -70,20 +80,31 @@ custom:
     topic:
       command: deposit-command
 
-  payment:
-    toss:
-      test_client_api_key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-      test_secrete_api_key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
-      targetUrl: https://api.tosspayments.com/v1/payments
+  product-post:
+    topic:
+      event: product-post-events
+
+  search:
+    topic:
+      event: search-word-events
 
   feign:
     url:
-      user-service: http://account-service:8080
+      user-service: http://account-svc:8080
 # k8s 설정
 eureka:
   instance:
     prefer-ip-address: true
+    hostname: domain-service
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
+      defaultZone: http://discovery-svc:8761/eureka/
+    enabled: true
 
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
+    
+logging:
+  config: classpath:logback-prod.xml

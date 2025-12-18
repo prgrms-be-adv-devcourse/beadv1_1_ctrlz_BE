@@ -12,7 +12,7 @@ public interface UserPersistencePort {
 
 	void update(User user);
 
-	void withdraw(String id);
+	void withdraw(User user);
 
 	void delete(String id);
 	
@@ -20,9 +20,9 @@ public interface UserPersistencePort {
 
 	boolean existsNickname(String nickname);
 
-	void updateRolesForSeller(String id);
+	void updateRolesForSeller(User user);
 
-	void updateImage(String userId, String imageId, String profileImageUrl);
+	void updateImage(User user);
 
 	Optional<User> findByEmailAndOAuthId(String email, String oAuthId);
 

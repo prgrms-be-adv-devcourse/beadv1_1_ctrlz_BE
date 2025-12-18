@@ -1,0 +1,47 @@
+// GET /product-posts/_search
+{
+  "query": {
+    // function_score: 기본 검색 결과에 사용자 정의 점수(가중치)를 매겨 재정렬하는 쿼리
+    "function_score": {
+      "query": {
+        "bool": {
+          "filter": [
+            { "term": { "delete_status": "N" } },
+            { "term": { "trade_status": "SELLING" } },
+            { "range": { "created_at": { "gte": "now-72h" } } },
+            { "term": { "category_name.keyword": "전자기기" } }
+          ]
+        }
+      },
+      // functions: 위 filter를 통과한 문서들에 대해 추가 점수를 부여하는 규칙들
+      "functions": [
+        // [가중치 1] 좋아요 수
+        {
+          "field_value_factor": {
+            "field": "liked_count",
+            "factor": 5.0,          // 좋아요 1개당 5점 부여 (좋아요는 의도적인 행동이므로 높은 가중치)
+            "modifier": "sqrt",     // 좋아요 100개 -> sqrt(100) * 5 = 50점
+            "missing": 0            // 좋아요가 없는 경우 0으로 처리
+          }
+        },
+        // [가중치 2] 조회수
+        {
+          "field_value_factor": {
+            "field": "view_count",
+            "factor": 3.0,          // 조회수 1회당 3점 부여
+            "modifier": "log1p",    // 조회수 1000회 -> log(1001) * 3 = 20점, 매우 커질 수 있기에 log 처리
+            "missing": 0            // 조회수가 없는 경우 0으로 처리
+          }
+        }
+      ],
+      "score_mode": "sum", // 계산된 좋아요 점수와 조회수 점수를 더함
+      "boost_mode": "replace"  // filter 점수와는 상관없이 functions의 계산 결과만으로 점수 매김
+    }
+  },
+  // 계산된 점수를 기준으로 내림차순 정렬
+  "sort": [
+    { "_score": "desc" }
+  ],
+  "from": 0,
+  "size": 12
+}

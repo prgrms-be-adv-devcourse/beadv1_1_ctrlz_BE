@@ -7,10 +7,7 @@ metadata:
 
 #임시
 data:
-  MYSQL_USER: "admin"
-  MYSQL_PASSWORD: "1234"
-  MYSQL_DATABASE: "test_db"
-  MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+  MYSQL_ROOT_PASSWORD: "1234"
   TZ: "Asia/Seoul"
 
 

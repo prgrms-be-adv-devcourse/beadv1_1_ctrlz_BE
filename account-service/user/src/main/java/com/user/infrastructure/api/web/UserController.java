@@ -1,12 +1,17 @@
 package com.user.infrastructure.api.web;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +23,15 @@ import com.user.application.adapter.dto.UserContext;
 import com.user.application.adapter.dto.UserUpdateContext;
 import com.user.application.port.in.SellerVerificationUseCase;
 import com.user.application.port.in.UserCommandUseCase;
+import com.user.docs.CreateUserApiDocs;
+import com.user.docs.DeleteUserApiDocs;
+import com.user.docs.GetMyInformationApiDocs;
+import com.user.docs.GetRecommendationInfoApiDocs;
+import com.user.docs.GetUserApiDocs;
+import com.user.docs.SendVerificationCodeApiDocs;
+import com.user.docs.UpdateProfileImageApiDocs;
+import com.user.docs.UpdateRoleForSellerApiDocs;
+import com.user.docs.UpdateUserApiDocs;
 import com.user.domain.model.User;
 import com.user.infrastructure.api.dto.UpdateSellerRequest;
 import com.user.infrastructure.api.dto.UserCreateRequest;
@@ -27,12 +41,19 @@ import com.user.infrastructure.api.dto.VerificationReqeust;
 import com.user.infrastructure.api.mapper.UserContextMapper;
 import com.user.infrastructure.feign.ProfileImageClient;
 import com.user.infrastructure.feign.dto.ImageResponse;
+import com.user.infrastructure.reader.port.TokenWriterPort;
 import com.user.infrastructure.reader.port.UserReaderPort;
+import com.user.infrastructure.reader.port.dto.TokenResponse;
+import com.user.infrastructure.reader.port.dto.UserDemographicDescription;
 import com.user.infrastructure.reader.port.dto.UserDescription;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Tag(name = "User", description = "User API")
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -44,81 +65,121 @@ public class UserController {
 	private final UserReaderPort userReaderPort;
 	private final UserCommandUseCase userCommandUseCase;
 	private final SellerVerificationUseCase sellerVerificationUseCase;
+	private final TokenWriterPort tokenWriterPort;
 	private final ProfileImageClient profileImageClient;
 
+	@CreateUserApiDocs
 	@PostMapping
-	public BaseResponse<UserCreateResponse> createUser(
+	public ResponseEntity<BaseResponse<UserCreateResponse>> createUser(
 		@Valid @RequestBody UserCreateRequest request
 	) {
-
+		log.info("회원가입 요청 받음: email={}", request.email());
 		UserContext context = UserContextMapper.toContext(request, defaultImageUrl);
 		UserContext savedUserContext = userCommandUseCase.create(context);
+		log.info("회원가입 완료: userId={}, email={}", savedUserContext.userId(), savedUserContext.email());
 
-		return new BaseResponse<>(new UserCreateResponse(
-			savedUserContext.userId(),
-			savedUserContext.profileImageUrl(),
-			savedUserContext.nickname()
-		),
-			"가입 완료");
+		TokenResponse tokenResponse = tokenWriterPort.issueUserRoleToken(savedUserContext.userId());
+		MultiValueMap<String, String> headers = addTokenInHeader(tokenResponse);
+		BaseResponse<UserCreateResponse> body = addUserInBody(savedUserContext);
+
+		return new ResponseEntity<>(body, headers, HttpStatus.OK);
 	}
 
-	@PatchMapping("/{id}")
+	@UpdateUserApiDocs
+	@PatchMapping("/my-info")
 	public void updateUser(
-		@PathVariable("id") String id,
+		@RequestHeader("X-REQUEST-ID") String userId,
 		@Valid @RequestBody UserUpdateRequest request
 	) {
 		UserUpdateContext context = UserContextMapper.toContext(request);
-		userCommandUseCase.updateUser(id, context);
+		userCommandUseCase.updateUser(userId, context);
 	}
 
-	@GetMapping("/{id}")
-	public UserDescription getUser(@PathVariable("id") String id) {
-		return userReaderPort.getUserDescription(id);
+	@GetMyInformationApiDocs
+	@GetMapping("/my-info")
+	public UserDescription getMyInformation(@RequestHeader("X-REQUEST-ID") String userId) {
+		return userReaderPort.getUserDescription(userId);
 	}
 
-	@PostMapping("/sellers/{id}")
-	public BaseResponse<Void> updateRoleForSeller(
-		@PathVariable("id") String id,
-		@RequestBody UpdateSellerRequest request
-	) {
+	@GetUserApiDocs
+	@GetMapping("/{userId}")
+	public UserDescription getUser(@PathVariable("userId") String userId) {
+		log.info("회원 정보 조회 user={}", userId);
+		return userReaderPort.getUserDescription(userId);
+	}
 
-		SellerVerificationContext sellerVerificationContext =
-			SellerVerificationContext.toVerify(id, request.verificationCode());
+	@GetRecommendationInfoApiDocs
+	@GetMapping("/recommendation-info/{userId}")
+	public UserDemographicDescription getRecommendationInfo(@PathVariable("userId") String userId) {
+		return userReaderPort.getUserDemographicDescription(userId);
+	}
 
+	@UpdateRoleForSellerApiDocs
+	@PostMapping("/sellers")
+	public ResponseEntity<BaseResponse<Void>> updateRoleForSeller(
+		@RequestHeader("X-REQUEST-ID") String userId,
+		@RequestBody UpdateSellerRequest request) {
+
+		SellerVerificationContext sellerVerificationContext = SellerVerificationContext.toVerify(userId,
+			request.verificationCode());
 		sellerVerificationUseCase.checkVerificationCode(sellerVerificationContext);
-		userCommandUseCase.updateForSeller(id);
+		userCommandUseCase.updateForSeller(userId);
 
-		return new BaseResponse<>(null, "판매자 등록이 완료됐습니다.");
+		TokenResponse tokenResponse = tokenWriterPort.issueSellerRoleToken(userId);
+		MultiValueMap<String, String> headers = addTokenInHeader(tokenResponse);
+
+		return new ResponseEntity<>(
+			new BaseResponse<>(null, "판매자 등록이 완료됐습니다."),
+			headers,
+			HttpStatus.OK);
 	}
 
-	@PostMapping("/sellers/verification/{id}")
+	@SendVerificationCodeApiDocs
+	@PostMapping("/sellers/verification")
 	public void sendVerificationCode(
-		@PathVariable("id") String id,
+		@RequestHeader("X-REQUEST-ID") String userId,
 		@RequestBody VerificationReqeust request
 	) {
-		User user = userCommandUseCase.getUser(id);
+		User user = userCommandUseCase.getUser(userId);
 
 		SellerVerificationContext sellerVerificationContext =
-			SellerVerificationContext.forSending(request.phoneNumber(), id, user);
+			SellerVerificationContext.forSending(request.phoneNumber(), user.getId(), user);
 
 		sellerVerificationUseCase.requestVerificationCode(sellerVerificationContext);
 	}
 
-	@PatchMapping("/{id}/images/{imageId}")
+	@UpdateProfileImageApiDocs
+	@PatchMapping("/images/{imageId}")
 	public BaseResponse<String> updateProfileImage(
-		@PathVariable("id") String id,
+		@RequestHeader("X-REQUEST-ID") String userId,
 		@PathVariable("imageId") String imageId,
 		@RequestParam("profileImage") MultipartFile profileImage
 	) {
 		ImageResponse imageResponse = profileImageClient.updateProfileImage(profileImage, imageId);
-		userCommandUseCase.updateImage(id, imageResponse.imageId(), imageResponse.imageUrl());
+		userCommandUseCase.updateImage(userId, imageResponse.imageId(), imageResponse.imageUrl());
 		return new BaseResponse<>(imageResponse.imageUrl(), "프로필 이미지 교체 완료");
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteUserApiDocs
+	@DeleteMapping("/my-info")
 	public void deleteUser(
-		@PathVariable("id") String id
+		@RequestHeader("X-REQUEST-ID") String userId
 	) {
-		userCommandUseCase.delete(id);
+		userCommandUseCase.delete(userId);
+	}
+
+	private BaseResponse<UserCreateResponse> addUserInBody(UserContext savedUserContext) {
+		return new BaseResponse<>(new UserCreateResponse(
+			savedUserContext.userId(),
+			savedUserContext.profileImageUrl(),
+			savedUserContext.nickname()),
+			"가입 완료");
+	}
+
+	private MultiValueMap<String, String> addTokenInHeader(TokenResponse tokenResponse) {
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		headers.add("Set-Cookie", tokenResponse.accessToken().toString());
+		headers.add("Set-Cookie", tokenResponse.refreshToken().toString());
+		return headers;
 	}
 }

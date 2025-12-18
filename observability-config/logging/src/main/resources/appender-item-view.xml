@@ -1,0 +1,33 @@
+<included>
+    <appender name="ITEM_VIEW_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ITEM_VIEW_LOG_FILE}</file>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${ITEM_VIEW_LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+
+        <!--    원하는 데이터(Provider)만 골라서 JSON을 만드는 설정-->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <!--            json에 message를 data로 이름 변경-->
+                <message>
+                    <fieldName>data</fieldName>
+                </message>
+
+                <mdc/>
+            </providers>
+        </encoder>
+    </appender>
+</included>

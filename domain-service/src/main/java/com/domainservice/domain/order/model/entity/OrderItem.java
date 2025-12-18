@@ -1,24 +1,16 @@
 package com.domainservice.domain.order.model.entity;
 
-import java.math.BigDecimal;
-
 import com.common.model.persistence.BaseEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "Ordered_items")
+@Table(name = "ordered_items")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -55,8 +47,4 @@ public class OrderItem extends BaseEntity {
 		this.orderItemStatus = orderItemStatus;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "OrderItems";
-	}
 }

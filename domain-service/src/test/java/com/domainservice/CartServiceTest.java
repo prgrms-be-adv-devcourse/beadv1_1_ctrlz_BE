@@ -118,6 +118,7 @@ class CartServiceTest {
 			.build();
 
 		when(cartJpaRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+		when(cartItemJpaRepository.save(any(CartItem.class))).thenReturn(newItem);
 		when(cartJpaRepository.save(any(Cart.class))).thenReturn(cart);
 		when(productPostService.getProductPostById("p1")).thenReturn(productPostResponse);
 

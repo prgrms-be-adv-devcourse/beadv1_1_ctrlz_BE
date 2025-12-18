@@ -24,7 +24,7 @@ public class UserExceptionHandler {
 	 * feign 클라이언트 사용 시 에러 핸들러
 	 *
 	 * @param e the FeignClientException
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(FeignClientException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -38,7 +38,7 @@ public class UserExceptionHandler {
 	 * 비즈니스 로직 상 예외 발생 시
 	 *
 	 * @param e the CustomException
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(CustomException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -51,7 +51,7 @@ public class UserExceptionHandler {
 	 * 메서드 파라미터 유효성 검사(Validation) 실패 시
 	 *
 	 * @param e the e
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(ConstraintViolationException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -65,7 +65,7 @@ public class UserExceptionHandler {
 	 * requestbody 유효성 검증 예외 시
 	 *
 	 * @param e the MethodArgumentNotValidException
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -79,13 +79,12 @@ public class UserExceptionHandler {
 	 * 요청 파라미터 타입 불일치 시
 	 *
 	 * @param e the MethodArgumentTypeMismatchException
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiErrorResponse methodArgumentTypeMismatchExceptionHandler(
-		MethodArgumentTypeMismatchException e
-	) {
+			MethodArgumentTypeMismatchException e) {
 		log.info("methodArgumentTypeMismatchExceptionHandler => {}", e.getMessage());
 		return ApiErrorResponse.of(HttpStatus.BAD_REQUEST, "잘못된 파라미터 타입입니다.");
 	}
@@ -94,13 +93,12 @@ public class UserExceptionHandler {
 	 * 요청 파라미터 누락 시
 	 *
 	 * @param e the e
-	 * @return  the api error response
+	 * @return the api error response
 	 */
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiErrorResponse missingServletRequestParameterExceptionHandler(
-		MissingServletRequestParameterException e
-	) {
+			MissingServletRequestParameterException e) {
 
 		log.info("MissingServletRequestParameterException => {}", e.getMessage());
 		return ApiErrorResponse.of(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -110,7 +108,7 @@ public class UserExceptionHandler {
 	 * 처리되지 않은 모든 예외
 	 *
 	 * @param e the RuntimeException
-	 * @return  the base response
+	 * @return the base response
 	 */
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
@@ -121,22 +119,20 @@ public class UserExceptionHandler {
 			rootCause = rootCause.getCause();
 		}
 
-		log.error("{}", e.getStackTrace());
+		log.error("Unhandled RuntimeException", e);
 		log.error("Caused by: {}: {}",
-			rootCause.getClass().getSimpleName(),
-			rootCause.getMessage()
-		);
+				rootCause.getClass().getSimpleName(),
+				rootCause.getMessage());
 
 		StackTraceElement top = e.getStackTrace()[0];
 		log.error("Exception at {}.{}({}:{}): {}",
-			top.getClassName(),
-			top.getMethodName(),
-			top.getFileName(),
-			top.getLineNumber(),
-			e.getMessage()
-		);
+				top.getClassName(),
+				top.getMethodName(),
+				top.getFileName(),
+				top.getLineNumber(),
+				e.getMessage());
 
 		return new BaseResponse<>(
-			ApiErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 에러가 발생했습니다."), "internal server error");
+				ApiErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 에러가 발생했습니다."), "internal server error");
 	}
 }

@@ -25,7 +25,7 @@ public class CartItem extends BaseEntity {
 	@JoinColumn(name = "cart_id", nullable = false)
 	private Cart cart;
 
-	@Column(name = "productPost_id", nullable = false)
+	@Column(name = "product_post_id", nullable = false)
 	private String productPostId;
 
 	@Column(name = "selected", nullable = false)
@@ -33,15 +33,11 @@ public class CartItem extends BaseEntity {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-		this.updateTime();
+		this.update();
 	}
 
 	public void setCart(Cart cart) {
 		this.cart = cart;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "cartItem";
-	}
 }

@@ -1,0 +1,816 @@
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+
+
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+### 유저가 여러번 검색
+# @name RandomSearchTest
+
+// 1. Pre-request Script (요청이 실행되기 직전에 실행됨)
+// JavaScript 코드를 사용합니다.
+< {%
+    // q 파라미터에 사용할 값 목록
+    const queryValues = ["아이폰", "아이폰 15", "갤럭시", "갤럭시 20", "갤럭시22", "모바일/태블릿", "가전제품", "갤럭시 Z"];
+
+    // 목록에서 랜덤으로 하나의 값을 선택
+    const randomQuery = queryValues[Math.floor(Math.random() * queryValues.length)];
+
+    // 선택된 값을 'random_q' 변수에 설정.
+    // 이 변수는 아래 GET 요청 URL에서 {{random_q}} 형태로 사용됩니다.
+    request.variables.set('random_q', randomQuery);
+%}
+GET http://127.0.0.1:8082/api/product-posts/search?q={{random_q}}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJ1c2VySWQiOiIwMTlhZjNjZS0zZjU0LTc5ZDItYTgwOS1mMDljZDRhMWYzNWItdXNlcnMiLCJyb2xlcyI6WyJVU0VSIl0sImlhdCI6MTc2NTAyNjk3MSwiZXhwIjoxNzY1OTI2OTcxfQ.lvCE-7yzmoNZ01VRfcplOk6xgsAWnXdm6AwxDunAJP7xpdc_xsKgaYyyx6XqDrdM
+
+
+

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([%X{userId:-ANONYMOUS}]){yellow} %clr([%X{api:-NO_API}]){blue} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : [%X{traceId:-},%X{spanId:-}] [%X{userId:-ANONYMOUS}] [%X{api:-NO_API}] %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- log 저장 paths -->
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
+    <property name="SYSTEM_LOG_FILE" value="${LOG_PATH}/system.log"/>
+    <property name="API_LOG_FILE" value="${LOG_PATH}/api.log"/>
+    <property name="API_INFO_LOG_FILE" value="${LOG_PATH}/api-info.log"/>
+    <property name="API_WARN_LOG_FILE" value="${LOG_PATH}/api-warn.log"/>
+    <property name="API_ERROR_LOG_FILE" value="${LOG_PATH}/api-error.log"/>
+    <property name="ITEM_VIEW_LOG_FILE" value="${LOG_PATH}/item-view.log"/>
+    <property name="SEARCH_VIEW_LOG_FILE" value="${LOG_PATH}/search-view.log"/>
+
+    <!-- appender 첨부 -->
+    <include resource="appender-api-info.xml"/>
+    <include resource="appender-api-warn.xml"/>
+    <include resource="appender-api-error.xml"/>
+
+    <include resource="appender-item-view.xml"/>
+    <include resource="appender-search-view.xml"/>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <!-- <appender-ref ref="SYSTEM_FILE"/> -->
+    </root>
+    <logger name="API" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="API_INFO_FILE"/>
+        <appender-ref ref="API_WARN_FILE"/>
+        <appender-ref ref="API_ERROR_FILE"/>
+    </logger>
+    <logger name="ITEM_VIEW" level="INFO" additivity="false">
+        <appender-ref ref="ITEM_VIEW_FILE"/>
+    </logger>
+    <logger name="SEARCH_VIEW" level="INFO" additivity="false">
+        <appender-ref ref="SEARCH_VIEW_FILE"/>
+    </logger>
+    <logger name="com" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <!--
+        <appender-ref ref="INFO_FILE"/>
+        <appender-ref ref="WARN_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+        -->
+    </logger>
+</configuration>

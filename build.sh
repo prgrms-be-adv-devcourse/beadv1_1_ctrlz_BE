@@ -6,10 +6,11 @@ DOCKERHUB_USERNAME="beatchoi156"
 # 서비스 목록
 SERVICES=(
   "account-service"
-#   "discovery-service"
-#   "domain-service"
-#   "gateway-service"
-#   "settlement-service"
+  "discovery-service"
+  "domain-service"
+  "gateway-service"
+  "settlement-service"
+  "payment-service"
 )
 z
 # buildx builder 설정 (멀티 플랫폼 지원)
@@ -19,7 +20,7 @@ z
 # 각 서비스에 대해 Docker 이미지 빌드 및 푸시
 for SERVICE in "${SERVICES[@]}"; do
   IMAGE_NAME="$DOCKERHUB_USERNAME/$SERVICE:latest"
-  DOCKERFILE="$SERVICE.dockerfile"
+  DOCKERFILE="docker/$SERVICE.dockerfile"
 
   echo "=================================================="
   echo "Building and pushing $IMAGE_NAME"

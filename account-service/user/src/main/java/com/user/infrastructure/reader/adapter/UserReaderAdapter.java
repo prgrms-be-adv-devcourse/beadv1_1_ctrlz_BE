@@ -6,23 +6,25 @@ import org.springframework.transaction.annotation.Transactional;
 import com.user.application.port.out.UserPersistencePort;
 import com.user.domain.model.User;
 import com.user.infrastructure.reader.port.UserReaderPort;
+import com.user.infrastructure.reader.port.dto.UserDemographicDescription;
 import com.user.infrastructure.reader.port.dto.UserDescription;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Component
 public class UserReaderAdapter implements UserReaderPort {
 
 	private final UserPersistencePort userPersistencePort;
 
-	@Transactional(readOnly = true)
 	@Override
 	public UserDescription getUserDescription(String id) {
 
 		User user = userPersistencePort.findById(id);
 
 		return UserDescription.builder()
+			.userId(user.getId())
 			.city(user.getAddress().getCity())
 			.roles(user.getRolesToString())
 			.email(user.getEmail())
@@ -36,6 +38,16 @@ public class UserReaderAdapter implements UserReaderPort {
 			.nickname(user.getNickname())
 			.imageId(user.getImageId())
 			.profileImageUrl(user.getProfileImageUrl())
+			.build();
+	}
+
+	@Override
+	public UserDemographicDescription getUserDemographicDescription(String id) {
+		User user = userPersistencePort.findById(id);
+
+		return UserDemographicDescription.builder()
+			.age(user.getAge())
+			.gender(user.getGender())
 			.build();
 	}
 }

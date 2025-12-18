@@ -16,11 +16,6 @@ public class Tag extends BaseEntity {
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
 
-    @Override
-    protected String getEntitySuffix() {
-        return "tag";
-    }
-
     @Builder
     public Tag(String name) {
         this.name = name;

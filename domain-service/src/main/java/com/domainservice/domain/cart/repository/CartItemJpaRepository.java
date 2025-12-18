@@ -1,5 +1,6 @@
 package com.domainservice.domain.cart.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,10 @@ public interface CartItemJpaRepository extends JpaRepository<CartItem, String> {
 	@Query("SELECT ci.id FROM Cart c JOIN c.cartItems ci WHERE c.userId = :userId")
 	List<String> findCartItemIdsByUserId(@Param("userId") String userId);
 
+	@Query("SELECT ci FROM CartItem ci WHERE ci.cart.userId = :userId " +
+		"AND (ci.createdAt >= :oneMonthAgo OR (ci.deleteStatus = 'D' AND ci.updatedAt >= :oneMonthAgo))")
+	List<CartItem> findRecentCartItemsByUserId(
+		@Param("userId") String userId,
+		@Param("oneMonthAgo") LocalDateTime oneMonthAgo
+	);
 }

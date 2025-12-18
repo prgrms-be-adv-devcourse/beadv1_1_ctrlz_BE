@@ -1,11 +1,17 @@
 package com.accountapplication.user.web.api;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.user.application.adapter.command.SellerVerificationContext;
+import com.user.application.port.in.SellerVerificationUseCase;
+import com.user.domain.vo.UserRole;
+import com.user.infrastructure.api.dto.UpdateSellerRequest;
+import com.user.infrastructure.api.dto.UserCreateRequest;
+import com.user.infrastructure.api.dto.UserUpdateRequest;
+import com.user.infrastructure.api.dto.VerificationReqeust;
+import com.user.infrastructure.feign.ProfileImageClient;
+import com.user.infrastructure.jpa.entity.UserEntity;
+import com.user.infrastructure.jpa.repository.UserJpaRepository;
+import com.user.infrastructure.jpa.vo.EmbeddedAddress;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,20 +25,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.user.application.adapter.command.SellerVerificationContext;
-import com.user.application.port.in.SellerVerificationUseCase;
-import com.user.domain.vo.UserRole;
-import com.user.infrastructure.api.dto.UpdateSellerRequest;
-import com.user.infrastructure.api.dto.UserCreateRequest;
-import com.user.infrastructure.api.dto.UserUpdateRequest;
-import com.user.infrastructure.api.dto.VerificationReqeust;
-import com.user.infrastructure.feign.CartClient;
-import com.user.infrastructure.feign.ProfileImageClient;
-import com.user.infrastructure.feign.dto.CartCreateRequest;
-import com.user.infrastructure.jpa.entity.UserEntity;
-import com.user.infrastructure.jpa.repository.UserJpaRepository;
-import com.user.infrastructure.jpa.vo.EmbeddedAddress;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @Transactional
@@ -54,8 +53,6 @@ class UserControllerTest {
 	@MockitoBean
 	private ProfileImageClient profileImageClient;
 
-	@MockitoBean
-	private CartClient cartClient;
 
 	@MockitoBean
 	private SellerVerificationUseCase sellerVerificationUseCase;
@@ -70,9 +67,8 @@ class UserControllerTest {
 	void test1() throws Exception {
 		// given
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "010-1111-0111", "street",
-			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
+			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl", 25, "MALE");
 
-		doNothing().when(cartClient).createCart(any(CartCreateRequest.class));
 
 		// when then
 		mockMvc.perform(post("/api/users")
@@ -92,7 +88,7 @@ class UserControllerTest {
 	void test2() throws Exception {
 		// given
 		UserCreateRequest request = new UserCreateRequest("test@test.com", "", "street",
-			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl");
+			"123423", "state", "city", "details", "name", "nickname", "profileImageUrl", 25, "MALE");
 
 		mockMvc.perform(post("/api/users")
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -124,12 +120,15 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		UserEntity user = userJpaRepository.save(userEntity);
 
 		// when then
-		mockMvc.perform(post("/api/users/sellers/verification/{id}", user.getId())
+		mockMvc.perform(post("/api/users/sellers/verification")
+				.header("X-REQUEST-ID", user.getId())
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(objectMapper.writeValueAsString(new VerificationReqeust("010-1234-5678"))))
 			.andDo(print())
@@ -157,13 +156,16 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(28)
+			.gender("MALE")
 			.build();
 
 		UserEntity user = userJpaRepository.save(userEntity);
 
 		doNothing().when(sellerVerificationUseCase).checkVerificationCode(any(SellerVerificationContext.class));
 
-		mockMvc.perform(post("/api/users/sellers/{id}", user.getId())
+		mockMvc.perform(post("/api/users/sellers")
+				.header("X-REQUEST-ID", user.getId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(new UpdateSellerRequest("010-1234-5678"))))
 			.andDo(print())
@@ -193,6 +195,8 @@ class UserControllerTest {
 			.password("default")
 			.profileImageUrl("https://example-bucket.s3.amazonaws.com/profile/default.png")
 			.phoneNumber("010-1234-5678")
+			.age(30)
+			.gender("FEMALE")
 			.build();
 
 		UserEntity savedUser = userJpaRepository.save(userEntity);
@@ -208,7 +212,8 @@ class UserControllerTest {
 		);
 
 		// when
-		mockMvc.perform(patch("/api/users/{id}", savedUser.getId())
+		mockMvc.perform(patch("/api/users/my-info")
+				.header("X-REQUEST-ID", savedUser.getId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updateRequest)))
 			.andDo(print())
@@ -222,5 +227,128 @@ class UserControllerTest {
 		assertThat(updatedUser.getAddress().getZipCode()).isEqualTo("new_zipCode");
 		assertThat(updatedUser.getAddress().getState()).isEqualTo("new_state");
 		assertThat(updatedUser.getAddress().getDetails()).isEqualTo("new_details");
+	}
+
+	@DisplayName("나이가 1보다 작으면 예외가 발생한다.")
+	@Test
+	void test8() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			0,
+			"MALE"
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'age')].reason").value("나이는 1 이상이어야 합니다."));
+	}
+
+	@DisplayName("나이가 150보다 크면 예외가 발생한다.")
+	@Test
+	void test9() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			151,
+			"MALE"
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'age')].reason").value("나이는 150 이하여야 합니다."));
+	}
+
+	@DisplayName("성별이 빈 값이면 예외가 발생한다.")
+	@Test
+	void test10() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			25,
+			""
+		);
+
+		// when then
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.customFieldErrors[?(@.field == 'gender')].reason").value("성별을 입력해주세요."));
+	}
+
+	@DisplayName("회원가입 시 나이와 성별이 정상적으로 저장된다.")
+	@Test
+	void test11() throws Exception {
+		// given
+		UserCreateRequest request = new UserCreateRequest(
+			"test@test.com",
+			"010-1111-0111",
+			"street",
+			"123423",
+			"state",
+			"city",
+			"details",
+			"name",
+			"nickname",
+			"profileImageUrl",
+			35,
+			"FEMALE"
+		);
+
+
+		// when
+		mockMvc.perform(post("/api/users")
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(objectMapper.writeValueAsString(request))
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("가입 완료"));
+
+		// then
+		UserEntity savedUser = userJpaRepository.findAll().get(0);
+		assertThat(savedUser.getAge()).isEqualTo(35);
+		assertThat(savedUser.getGender()).isEqualTo("FEMALE");
+		assertThat(savedUser.getNickname()).isEqualTo("nickname");
 	}
 }

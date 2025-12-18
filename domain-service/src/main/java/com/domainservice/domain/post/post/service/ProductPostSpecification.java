@@ -1,59 +1,63 @@
 package com.domainservice.domain.post.post.service;
 
-import com.common.model.persistence.BaseEntity;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.jpa.domain.Specification;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.common.model.persistence.BaseEntity;
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostSearchRequest;
+import com.domainservice.domain.post.post.model.entity.ProductPost;
+
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * 사용자가 입력한 필터링을 받아서 동적으로 검색 조건을 생성해주는 클래스
  */
 public class ProductPostSpecification {
 
-    public static Specification<ProductPost> searchWith(
-            String categoryId,
-            ProductStatus status,
-            TradeStatus tradeStatus,
-            Integer minPrice,
-            Integer maxPrice
-    ) {
-        return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
+	public static Specification<ProductPost> searchWith(ProductPostSearchRequest request) {
 
-            // 삭제되지 않은 게시글만 조회
-            predicates.add(criteriaBuilder.equal(root.get("deleteStatus"), BaseEntity.DeleteStatus.N));
+		String categoryId = request.categoryId();
+		ProductStatus status = request.status();
+		TradeStatus tradeStatus = request.tradeStatus();
+		Integer minPrice = request.minPrice();
+		Integer maxPrice = request.maxPrice();
 
-            // 카테고리 필터
-            if (categoryId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("categoryId"), categoryId));
-            }
+		return (root, query, criteriaBuilder) -> {
+			List<Predicate> predicates = new ArrayList<>();
 
-            // 상품 상태 필터
-            if (status != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), status));
-            }
+			// 삭제되지 않은 게시글만 조회
+			predicates.add(criteriaBuilder.equal(root.get("deleteStatus"), BaseEntity.DeleteStatus.N));
 
-            // 거래 상태 필터
-            if (tradeStatus != null) {
-                predicates.add(criteriaBuilder.equal(root.get("tradeStatus"), tradeStatus));
-            }
+			// 카테고리 필터
+			if (categoryId != null) {
+				predicates.add(criteriaBuilder.equal(root.get("categoryId"), categoryId));
+			}
 
-            // 최소 가격 필터
-            if (minPrice != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice));
-            }
+			// 상품 상태 필터
+			if (status != null) {
+				predicates.add(criteriaBuilder.equal(root.get("status"), status));
+			}
 
-            // 최대 가격 필터
-            if (maxPrice != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
-            }
+			// 거래 상태 필터
+			if (tradeStatus != null) {
+				predicates.add(criteriaBuilder.equal(root.get("tradeStatus"), tradeStatus));
+			}
 
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
-    }
+			// 최소 가격 필터
+			if (minPrice != null) {
+				predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice));
+			}
+
+			// 최대 가격 필터
+			if (maxPrice != null) {
+				predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
+			}
+
+			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		};
+	}
 }

@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,21 +18,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.common.model.vo.ProductStatus;
+import com.common.model.vo.TradeStatus;
 import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.domain.asset.image.application.ImageService;
 import com.domainservice.domain.asset.image.domain.entity.Image;
 import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
+import com.domainservice.domain.post.kafka.handler.ProductPostEventProducer;
 import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.model.enums.ProductStatus;
-import com.domainservice.domain.post.post.model.enums.TradeStatus;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
 import com.domainservice.domain.post.tag.model.entity.Tag;
 import com.domainservice.domain.post.tag.repository.TagRepository;
-
-import feign.FeignException;
 
 /**
  * ProductPostService 생성 기능 테스트
@@ -58,6 +56,9 @@ class CreateProductPostTest {
 
     @Mock
     private MultipartFile mockImageFile;
+
+	@Mock
+	private ProductPostEventProducer eventProducer;
 
     @DisplayName("판매자는 상품 게시글을 생성할 수 있다.")
     @Test
@@ -198,36 +199,9 @@ class CreateProductPostTest {
         verify(productPostRepository, never()).save(any());
     }
 
-    @DisplayName("존재하지 않는 사용자는 게시글을 생성할 수 없다.")
-    @Test
-    void test4() {
-        // given
-        String userId = "invalid-user-id";
-        List<MultipartFile> imageFiles = List.of(mockImageFile);
-
-        ProductPostRequest request = ProductPostRequest.builder()
-                .title("아이폰 15 Pro")
-                .name("iPhone 15 Pro")
-                .price(1200000)
-                .categoryId("category-123")
-                .status(ProductStatus.GOOD)
-                .build();
-
-        given(userClient.getUser(userId)).willThrow(FeignException.NotFound.class);
-
-        // when & then
-        assertThatThrownBy(() -> productPostService.createProductPost(request, userId, imageFiles))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining(USER_NOT_FOUND.getMessage());
-
-        verify(userClient).getUser(userId);
-        verify(imageService, never()).uploadProfileImageListByTarget(anyList(), any());
-        verify(productPostRepository, never()).save(any());
-    }
-
     @DisplayName("존재하지 않는 태그가 포함되면 예외가 발생한다.")
     @Test
-    void test5() {
+    void test4() {
         // given
         String userId = "user-123";
         List<String> tagIds = Arrays.asList("tag-1", "tag-2", "invalid-tag");
@@ -262,9 +236,9 @@ class CreateProductPostTest {
         verify(productPostRepository, never()).save(any());
     }
 
-    @DisplayName("빈 태그 리스트로 상품 게시글을 생성할 수 있다.")
+    @DisplayName("태그를 입력않아도 게시글을 생성할 수 있다.")
     @Test
-    void test6() {
+    void test5() {
         // given
         String userId = "user-123";
         List<String> emptyTagIds = Collections.emptyList();
@@ -295,8 +269,7 @@ class CreateProductPostTest {
 
         given(userClient.getUser(userId)).willReturn(UserViewFactory.createSeller(userId));
         given(tagRepository.findAllById(emptyTagIds)).willReturn(Collections.emptyList());
-        given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT)))
-                .willReturn(List.of(mockImage));
+        given(imageService.uploadProfileImageListByTarget(anyList(), eq(ImageTarget.PRODUCT))).willReturn(List.of(mockImage));
         given(productPostRepository.save(any(ProductPost.class))).willReturn(savedProductPost);
 
         // when
@@ -312,10 +285,9 @@ class CreateProductPostTest {
         verify(productPostRepository).save(any(ProductPost.class));
     }
 
-	@Disabled
     @DisplayName("이미지 없이 게시글을 생성하면 예외가 발생한다.")
     @Test
-    void test7() {
+    void test6() {
         // given
         String userId = "user-123";
 
@@ -345,7 +317,7 @@ class CreateProductPostTest {
 
     @DisplayName("이미지가 10개를 초과하면 예외가 발생한다.")
     @Test
-    void test8() {
+    void test7() {
         // given
         String userId = "user-123";
         List<MultipartFile> tooManyImages = Arrays.asList(

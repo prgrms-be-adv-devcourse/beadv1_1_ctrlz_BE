@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
-import com.domainservice.domain.reivew.service.ReviewService;
+import com.domainservice.domain.review.model.dto.request.ReviewRequest;
+import com.domainservice.domain.review.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

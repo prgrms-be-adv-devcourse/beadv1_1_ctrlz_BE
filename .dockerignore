@@ -19,6 +19,7 @@
 
 # Logs
 *.log
+logs/
 
 # OS
 .DS_Store
@@ -28,3 +29,20 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+
+# K8s and deployment files (빌드에 불필요)
+k8s/
+*-deployment.yml
+*.yaml
+!**/src/**/*.yaml
+!**/resources/**/*.yaml
+
+# Documentation - 프로젝트 루트의 문서만 제외, src/main/resources는 포함
+/*.md
+/*.png
+/*.webp
+!**/src/**/*.md
+!**/src/**/*.txt
+
+# GitHub
+.github/

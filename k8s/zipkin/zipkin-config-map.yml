@@ -1,0 +1,17 @@
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+  name: zipkin-config-map
+#임시
+data:
+  STORAGE_TYPE: "mysql"
+  MYSQL_HOST: "mysql-svc"
+  MYSQL_TCP_PORT: "3306"
+  MYSQL_USER: "app"
+  MYSQL_PASS: "app123"
+  MYSQL_DB: "zipkin"
+
+
+

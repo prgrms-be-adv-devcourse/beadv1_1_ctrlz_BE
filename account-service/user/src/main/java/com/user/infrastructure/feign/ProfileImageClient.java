@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.user.infrastructure.feign.dto.ImageResponse;
 
-@FeignClient(name = "profile-image-service", url = "localhost:8081")
+@FeignClient(name = "profile-image-service", url = "${custom.feign.domain-service}")
 public interface ProfileImageClient {
 
 	@PostMapping(value = "/api/images/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

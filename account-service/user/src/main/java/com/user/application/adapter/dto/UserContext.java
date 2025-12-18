@@ -17,7 +17,9 @@ public record UserContext(
 	String phoneNumber,
 	String oauthId,
 	String profileImageUrl,
-	String imageId
+	String imageId,
+	int age,
+	String gender
 ) {
 
 }

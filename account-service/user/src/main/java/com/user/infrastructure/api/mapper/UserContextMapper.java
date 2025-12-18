@@ -21,6 +21,8 @@ public class UserContextMapper {
 			.oauthId(request.oauthId())
 			.profileImageUrl(imageUrl)
 			.imageId("default_Image")
+			.age(request.age())
+			.gender(request.gender())
 			.build();
 	}
 

@@ -1,0 +1,46 @@
+
+dependencies {
+    implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
+    // implementation project(':common') // REMOVED
+
+    // uuid creator
+    implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
+
+    // Swagger/OpenAPI (for BaseResponse)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // h2
+    runtimeOnly 'com.h2database:h2'
+
+    // Spring Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    // JSON 직렬화/역직렬화용
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Quartz 스케줄러
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+}
+
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+
+jar {
+    enabled = true
+}
+

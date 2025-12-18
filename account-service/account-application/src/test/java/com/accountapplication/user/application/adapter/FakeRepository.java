@@ -23,7 +23,7 @@ public class FakeRepository implements UserPersistencePort {
 	}
 
 	@Override
-	public void withdraw(String id) {
+	public void withdraw(User user) {
 
 	}
 
@@ -43,13 +43,12 @@ public class FakeRepository implements UserPersistencePort {
 	}
 
 	@Override
-	public void updateRolesForSeller(String id) {
+	public void updateRolesForSeller(User user) {
 
 	}
 
-
 	@Override
-	public void updateImage(String userId, String imageId, String profileImageUrl) {
+	public void updateImage(User user) {
 
 	}
 

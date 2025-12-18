@@ -21,7 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.user.infrastructure.redis.vo.CacheType;
 
-@Profile("prod")
+@Profile("prod || dev")
 @EnableCaching
 @Configuration
 public class RedisConfiguration {
