@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.constant;
+package com.domainservice.domain.review.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.service;
+package com.domainservice.domain.review.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +9,11 @@ import com.domainservice.common.configuration.feign.client.UserFeignClient;
 import com.domainservice.common.model.user.UserResponse;
 import com.domainservice.domain.order.model.dto.OrderedAt;
 import com.domainservice.domain.order.repository.OrderRepository;
-import com.domainservice.domain.reivew.exception.ReviewNotFoundException;
-import com.domainservice.domain.reivew.model.dto.request.ReviewRequest;
-import com.domainservice.domain.reivew.model.dto.response.ReviewResponse;
-import com.domainservice.domain.reivew.model.entity.Review;
-import com.domainservice.domain.reivew.repository.ReviewRepository;
+import com.domainservice.domain.review.exception.ReviewNotFoundException;
+import com.domainservice.domain.review.model.dto.request.ReviewRequest;
+import com.domainservice.domain.review.model.dto.response.ReviewResponse;
+import com.domainservice.domain.review.model.entity.Review;
+import com.domainservice.domain.review.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 

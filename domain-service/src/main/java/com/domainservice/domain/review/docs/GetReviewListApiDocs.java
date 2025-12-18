@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.docs;
+package com.domainservice.domain.review.docs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
