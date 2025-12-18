@@ -1,4 +1,4 @@
-package com.domainservice.domain.reivew.exception;
+package com.domainservice.domain.review.exception;
 
 import org.springframework.http.HttpStatus;
 

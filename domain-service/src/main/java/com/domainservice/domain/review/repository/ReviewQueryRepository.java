@@ -1,10 +1,10 @@
-package com.domainservice.domain.reivew.repository;
+package com.domainservice.domain.review.repository;
 
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
-import com.domainservice.domain.reivew.model.entity.Review;
+import com.domainservice.domain.review.model.entity.Review;
 
 public interface ReviewQueryRepository {
 

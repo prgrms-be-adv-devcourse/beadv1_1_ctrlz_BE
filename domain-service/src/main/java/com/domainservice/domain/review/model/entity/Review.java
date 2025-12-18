@@ -1,8 +1,8 @@
-package com.domainservice.domain.reivew.model.entity;
+package com.domainservice.domain.review.model.entity;
 
 import com.common.model.persistence.BaseEntity;
-import com.domainservice.domain.reivew.exception.DuplicatedReviewException;
-import com.domainservice.domain.reivew.exception.NotReviewAuthorException;
+import com.domainservice.domain.review.exception.DuplicatedReviewException;
+import com.domainservice.domain.review.exception.NotReviewAuthorException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
