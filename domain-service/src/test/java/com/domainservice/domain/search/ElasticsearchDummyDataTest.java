@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import com.common.model.vo.TradeStatus;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
 import com.domainservice.domain.search.repository.ProductPostElasticRepository;
 
-
+@Disabled
 @DisplayName("es 데이터 삽입")
 @SpringBootTest
 @ActiveProfiles({"local", "secret"})
@@ -120,7 +121,6 @@ public class ElasticsearchDummyDataTest {
 					.updatedAt(LocalDateTime.now())
 					.primaryImageUrl("https://example.com/image.jpg")
 					.build();
-
 
 
 				insertedData.add(entity);

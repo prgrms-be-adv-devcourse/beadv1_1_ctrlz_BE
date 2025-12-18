@@ -1,21 +1,21 @@
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+#spring:
+#  datasource:
+#    url: jdbc:h2:mem:testdb;MODE=MySQL
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
 
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    open-in-view: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        default_batch_fetch_size: 100
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
+#    show-sql: false
+#    open-in-view: false
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.H2Dialect
+#        default_batch_fetch_size: 100
 
-custom:
-  feign:
-    url:
-      user-service: http://localhost:8080
+#custom:
+#  feign:
+#    url:
+#      user-service: http://localhost:8080

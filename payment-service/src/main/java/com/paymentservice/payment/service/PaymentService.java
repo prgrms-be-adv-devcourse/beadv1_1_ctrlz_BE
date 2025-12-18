@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,6 +319,6 @@ public class PaymentService {
 
         return payments.stream()
             .map(PaymentResponse::from)
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 }

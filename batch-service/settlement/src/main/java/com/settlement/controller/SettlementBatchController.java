@@ -1,13 +1,15 @@
 package com.settlement.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,15 +46,16 @@ public class SettlementBatchController {
      */
     @PostMapping("/manual")
     public ResponseEntity<String> runSettlementBatch(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
 
         try {
-            LocalDateTime startDateTime;
-            LocalDateTime endDateTime;
 
-            startDateTime = LocalDateTime.parse(startDate);
-            endDateTime = LocalDateTime.parse(endDate);
+            LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+            LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+            LocalDateTime startDateTime = start.atStartOfDay();
+            LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
 
             log.info("정산 배치 수동 실행 요청 - 정산 기간: {} ~ {}", startDateTime, endDateTime);
 

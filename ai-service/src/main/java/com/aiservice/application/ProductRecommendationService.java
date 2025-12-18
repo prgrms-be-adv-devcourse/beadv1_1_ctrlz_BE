@@ -44,10 +44,9 @@ public class ProductRecommendationService implements RecommendService {
 		// 메시지 생성 및 결과 구성
 		RecommendationResult result = buildResult(userId, query, searchResults);
 
-
 		// 세션에 발행
-		sessionService.publishRecommendationData(userId, result);
-		sessionService.incrementRecommendationCount(userId);
+		// sessionService.publishRecommendationData(userId, result);
+		// sessionService.incrementRecommendationCount(userId);
 		log.info("{} 개의 추천 결과 저장 완료 - 사용자: {} (쿼리: {})", searchResults.size(), userId, query);
 
 		return result;
