@@ -8,8 +8,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
 import com.settlement.dto.PaymentResponse;
-import com.settlement.domain.entity.SettlementStatus;
-import com.settlement.job.dto.SettlementVO;
+import com.settlement.domain.entity.Settlement;
 import com.settlement.job.dto.SettlementSourceDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,26 +16,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @StepScope
-public class SettlementCreateProcessor implements ItemProcessor<SettlementSourceDto, SettlementVO> {
+public class SettlementCreateProcessor implements ItemProcessor<SettlementSourceDto, Settlement> {
 
     @Override
-    public SettlementVO process(SettlementSourceDto item) throws Exception {
+    public Settlement process(SettlementSourceDto item) throws Exception {
         PaymentResponse payment = item.getPayment();
 
-        // 결제 완료 상태가 아니면 필터링 (이미 Payment Service에서 걸러줄 수도 있지만 안전장치)
-        if (!"PAID".equals(payment.status())) {
+        // 결제 완료 상태가 아니면 필터링
+        if (!"SUCCESS".equals(payment.status())) {
             return null;
         }
 
-        return SettlementVO.builder()
-                .id(UUID.randomUUID().toString())
-                .orderItemId(payment.orderItemId())
-                .userId(item.getUserId())
-                .amount(payment.amount())
-                .payType(payment.payType())
-                .status(SettlementStatus.PENDING.name())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        return Settlement.create(
+                payment.orderId(),
+                item.getUserId(),
+                payment.amount(),
+                payment.payType());
     }
 }

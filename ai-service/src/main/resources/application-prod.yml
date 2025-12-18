@@ -89,6 +89,7 @@ custom:
 
   product:
     base-url: http://domain-svc:8081/api/products
+    front-url: https://yeongeun.vercel.app/
 
 springdoc:
   default-produces-media-type: application/json

@@ -9,7 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.settlement.dto.PaymentResponse;
-import com.settlement.job.dto.SettlementModel;
+import com.settlement.dto.PaymentResponse;
+import com.settlement.domain.entity.Settlement;
+import com.settlement.domain.entity.SettlementStatus;
 import com.settlement.job.dto.SettlementSourceDto;
 
 @DisplayName("SettlementCreateProcessor 테스트")
@@ -18,7 +20,7 @@ class SettlementCreateProcessorTest {
         private final SettlementCreateProcessor processor = new SettlementCreateProcessor();
 
         @Test
-        @DisplayName("test1: PAID 상태 결제는 SettlementModel 로 변환한다")
+        @DisplayName("test1: SUCCESS 상태 결제는 Settlement 엔티티로 변환한다")
         void test1() throws Exception {
                 // given
                 PaymentResponse payment = new PaymentResponse(
@@ -26,7 +28,7 @@ class SettlementCreateProcessorTest {
                                 "orderItem-1",
                                 "user-1",
                                 new BigDecimal("10000"),
-                                "PAID",
+                                "SUCCESS",
                                 LocalDateTime.now(),
                                 "TOSS");
                 SettlementSourceDto source = SettlementSourceDto.builder()
@@ -35,19 +37,19 @@ class SettlementCreateProcessorTest {
                                 .build();
 
                 // when
-                SettlementModel model = processor.process(source);
+                Settlement settlement = processor.process(source);
 
                 // then
-                assertThat(model).isNotNull();
-                assertThat(model.getUserId()).isEqualTo("user-1");
-                assertThat(model.getOrderItemId()).isEqualTo("orderItem-1");
-                assertThat(model.getAmount()).isEqualByComparingTo(new BigDecimal("10000"));
-                assertThat(model.getStatus()).isEqualTo("PENDING");
-                assertThat(model.getPayType()).isEqualTo("TOSS");
+                assertThat(settlement).isNotNull();
+                assertThat(settlement.getUserId()).isEqualTo("user-1");
+                assertThat(settlement.getOrderId()).isEqualTo("orderItem-1");
+                assertThat(settlement.getAmount()).isEqualByComparingTo(new BigDecimal("10000"));
+                assertThat(settlement.getSettlementStatus()).isEqualTo(SettlementStatus.PENDING);
+                assertThat(settlement.getPayType().name()).isEqualTo("TOSS");
         }
 
         @Test
-        @DisplayName("test2: PAID가 아닌 상태는 null 반환한다")
+        @DisplayName("test2: SUCCESS가 아닌 상태는 null 반환한다")
         void test2() throws Exception {
                 // given
                 PaymentResponse payment = new PaymentResponse(
@@ -64,7 +66,7 @@ class SettlementCreateProcessorTest {
                                 .build();
 
                 // when
-                SettlementModel result = processor.process(source);
+                Settlement result = processor.process(source);
 
                 // then
                 assertThat(result).isNull();

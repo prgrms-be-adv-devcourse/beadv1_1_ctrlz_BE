@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RecommendationMessageGenerator {
 
-	@Value("${custom.product.base-url:http://localhost:8080/product}")
+	@Value("${custom.product.front-url:http://localhost:8080/product}")
 	private String productBaseUrl;
 
 	private final ChatClient chatClient;

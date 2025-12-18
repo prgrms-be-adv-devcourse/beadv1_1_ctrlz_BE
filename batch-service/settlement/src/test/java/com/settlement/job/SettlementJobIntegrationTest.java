@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.common.model.web.BaseResponse;
+import com.settlement.common.dto.BaseResponse;
 import com.settlement.common.feign.PaymentFeignClient;
 import com.settlement.dto.PaymentResponse;
 import com.settlement.domain.entity.Settlement;
@@ -58,7 +58,7 @@ public class SettlementJobIntegrationTest {
                 BigDecimal amount = new BigDecimal("10000");
 
                 // TOSS 결제 -> 수수료 3%
-                PaymentResponse paymentResponse = new PaymentResponse(paymentId, orderItemId, userId, amount, "PAID",
+                PaymentResponse paymentResponse = new PaymentResponse(paymentId, orderItemId, userId, amount, "SUCCESS",
                                 now, "TOSS");
 
                 when(paymentFeignClient.getPaymentsForSettlement(any(), any()))
@@ -81,7 +81,7 @@ public class SettlementJobIntegrationTest {
                 assertThat(settlements).hasSize(1);
 
                 Settlement settlement = settlements.get(0);
-                assertThat(settlement.getOrderItemId()).isEqualTo(orderItemId);
+                assertThat(settlement.getOrderId()).isEqualTo(orderItemId);
                 assertThat(settlement.getUserId()).isEqualTo(userId);
                 assertThat(settlement.getAmount()).isEqualByComparingTo(amount);
 

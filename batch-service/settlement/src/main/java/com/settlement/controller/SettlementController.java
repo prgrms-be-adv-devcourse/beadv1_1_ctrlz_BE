@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.common.model.web.BaseResponse;
+import com.settlement.common.dto.BaseResponse;
 import com.settlement.dto.SettlementResponse;
 import com.settlement.service.SettlementService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 /**
  * 특정 ip만 허용합니다.
  */
