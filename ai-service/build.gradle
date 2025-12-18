@@ -62,9 +62,11 @@ dependencies {
     //h2
     runtimeOnly 'com.h2database:h2'
 
-//    if (project.hasProperty('profile') && project.property('profile') == 'local,secret') {
-    implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
-//    }
+    if (project.hasProperty('profile') &&
+            project.property('profile').contains('local') &&
+            project.property('profile').contains('secret')) {
+        implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+    }
 
     implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
