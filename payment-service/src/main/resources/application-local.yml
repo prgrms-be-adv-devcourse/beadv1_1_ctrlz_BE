@@ -4,6 +4,8 @@ application:
 
 server:
   port: 8084
+  tomcat:
+    relaxed-query-chars: [ "[", "]" ]
 
 spring:
   application:

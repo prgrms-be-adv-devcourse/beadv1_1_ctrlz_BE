@@ -107,7 +107,8 @@ public class PaymentService {
 
         // 2차 검증: 토스에서 승인된 금액이 요청 금액과 일치하는지 확인
         // 프론트에서 금액을 다른 금액을 보냈다면 여기서 걸러지고 Exception 발생 -> Controller에서 catch -> cancelPayment 호출됨
-        if (approve.amount().compareTo(request.totalAmount()) != 0) {
+        BigDecimal sumAmount = request.totalAmount().add(request.usedDepositAmount());
+        if (approve.amount().compareTo(sumAmount) != 0) {
             throw new PaymentFailedException();
         }
 
