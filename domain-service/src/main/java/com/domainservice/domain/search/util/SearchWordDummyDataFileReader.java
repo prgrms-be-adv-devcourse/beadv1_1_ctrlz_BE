@@ -14,7 +14,7 @@ import org.springframework.util.StreamUtils;
 @Component
 public class SearchWordDummyDataFileReader {
 
-	private static final String FILE_PATH = "dummy/korean_realistic_search_terms_50k.txt";
+	private static final String FILE_PATH = "dummy/used_market_search_terms_50k.txt";
 	private final List<String> cachedLines;
 
 	public SearchWordDummyDataFileReader() {

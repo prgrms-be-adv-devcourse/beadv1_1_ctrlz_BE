@@ -1,0 +1,51 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: batch-service
+
+  batch:
+    jdbc:
+      platform: mysql
+
+    job:
+      enabled: false
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto:
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+# 배치 작업 설정
+batch:
+  search:
+    log-directory: /domain-logs
+    log-pattern: item-view.log*,search-view.log*
+    chunk-size: 1000
+    skip-limit: 100
+    pool-size: 4
+
+custom:
+  feign:
+    url:
+      payment-service: http://payment-svc:8083
+
+logging:
+  config: classpath:logback-prod.xml
+

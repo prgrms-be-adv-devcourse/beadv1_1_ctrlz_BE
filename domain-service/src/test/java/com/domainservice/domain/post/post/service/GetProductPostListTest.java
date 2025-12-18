@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import com.common.model.vo.ProductStatus;
 import com.common.model.vo.TradeStatus;
 import com.common.model.web.PageResponse;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.post.post.model.dto.response.ProductPostResponse;
 import com.domainservice.domain.post.post.model.entity.ProductPost;
 import com.domainservice.domain.post.post.repository.ProductPostRepository;
@@ -33,201 +34,217 @@ import com.domainservice.domain.post.post.repository.ProductPostRepository;
 @ExtendWith(MockitoExtension.class)
 class GetProductPostListTest {
 
-    @InjectMocks
-    private ProductPostService productPostService;
+	@InjectMocks
+	private ProductPostService productPostService;
 
-    @Mock
-    private ProductPostRepository productPostRepository;
+	@Mock
+	private ProductPostRepository productPostRepository;
 
-    @DisplayName("게시글 목록을 조회할 수 있다.")
-    @Test
-    void test1() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
+	@DisplayName("게시글 목록을 조회할 수 있다.")
+	@Test
+	void test1() {
+		// given
+		Pageable pageable = PageRequest.of(0, 20);
+		ProductPostSearchRequest request = new ProductPostSearchRequest(
+			null, null, null, null, null
+		);
 
-        List<ProductPost> posts = Arrays.asList(
-                ProductPost.builder()
-                        .userId("user-123")
-                        .categoryId("category-001")
-                        .title("아이폰 15 Pro")
-                        .name("iPhone 15 Pro")
-                        .price(1200000)
-                        .status(ProductStatus.GOOD)
-                        .tradeStatus(TradeStatus.SELLING)
-                        .build(),
-                ProductPost.builder()
-                        .userId("user-456")
-                        .categoryId("category-001")
-                        .title("갤럭시 S24")
-                        .name("Galaxy S24")
-                        .price(1000000)
-                        .status(ProductStatus.NEW)
-                        .tradeStatus(TradeStatus.SELLING)
-                        .build()
-        );
+		List<ProductPost> posts = Arrays.asList(
+			ProductPost.builder()
+				.userId("user-123")
+				.categoryId("category-001")
+				.title("아이폰 15 Pro")
+				.name("iPhone 15 Pro")
+				.price(1200000)
+				.status(ProductStatus.GOOD)
+				.tradeStatus(TradeStatus.SELLING)
+				.build(),
+			ProductPost.builder()
+				.userId("user-456")
+				.categoryId("category-001")
+				.title("갤럭시 S24")
+				.name("Galaxy S24")
+				.price(1000000)
+				.status(ProductStatus.NEW)
+				.tradeStatus(TradeStatus.SELLING)
+				.build()
+		);
 
-        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+		Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
 
-        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .willReturn(page);
+		given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+			.willReturn(page);
 
-        // when
-        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
-                pageable, null, null, null, null, null
-        );
+		// when
+		PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+			pageable, request
+		);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.pageNum()).isEqualTo(0);
-        assertThat(result.pageSize()).isEqualTo(20);
-        assertThat(result.totalPages()).isEqualTo(1);
-        assertThat(result.hasNext()).isFalse();
-        assertThat(result.contents()).hasSize(2);
-        assertThat(result.contents().get(0).title()).isEqualTo("아이폰 15 Pro");
-        assertThat(result.contents().get(1).title()).isEqualTo("갤럭시 S24");
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.pageNum()).isEqualTo(0);
+		assertThat(result.pageSize()).isEqualTo(20);
+		assertThat(result.totalPages()).isEqualTo(1);
+		assertThat(result.hasNext()).isFalse();
+		assertThat(result.contents()).hasSize(2);
+		assertThat(result.contents().get(0).title()).isEqualTo("아이폰 15 Pro");
+		assertThat(result.contents().get(1).title()).isEqualTo("갤럭시 S24");
 
-        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
-    }
+		verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+	}
 
-    @DisplayName("여러 조건으로 필터링하여 조회할 수 있다.")
-    @Test
-    void test2() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
-        String categoryId = "category-001";
-        ProductStatus status = ProductStatus.GOOD;
-        TradeStatus tradeStatus = TradeStatus.SELLING;
-        Integer minPrice = 1000000;
-        Integer maxPrice = 1500000;
+	@DisplayName("여러 조건으로 필터링하여 조회할 수 있다.")
+	@Test
+	void test2() {
+		// given
+		Pageable pageable = PageRequest.of(0, 20);
+		String categoryId = "category-001";
+		ProductStatus status = ProductStatus.GOOD;
+		TradeStatus tradeStatus = TradeStatus.SELLING;
+		Integer minPrice = 1000000;
+		Integer maxPrice = 1500000;
 
-        List<ProductPost> posts = Arrays.asList(
-                ProductPost.builder()
-                        .userId("user-123")
-                        .categoryId(categoryId)
-                        .title("아이폰 15 Pro")
-                        .name("iPhone 15 Pro")
-                        .price(1200000)
-                        .status(status)
-                        .tradeStatus(tradeStatus)
-                        .build()
-        );
+		ProductPostSearchRequest request = new ProductPostSearchRequest(
+			categoryId, status, tradeStatus, minPrice, maxPrice
+		);
 
-        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+		List<ProductPost> posts = Arrays.asList(
+			ProductPost.builder()
+				.userId("user-123")
+				.categoryId(categoryId)
+				.title("아이폰 15 Pro")
+				.name("iPhone 15 Pro")
+				.price(1200000)
+				.status(status)
+				.tradeStatus(tradeStatus)
+				.build()
+		);
 
-        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .willReturn(page);
+		Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
 
-        // when
-        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
-                pageable, categoryId, status, tradeStatus, minPrice, maxPrice
-        );
+		given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+			.willReturn(page);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.contents()).hasSize(1);
-        assertThat(result.contents().get(0).categoryId()).isEqualTo(categoryId);
-        assertThat(result.contents().get(0).status()).isEqualTo(status);
-        assertThat(result.contents().get(0).tradeStatus()).isEqualTo(tradeStatus);
-        assertThat(result.contents().get(0).price()).isBetween(minPrice, maxPrice);
+		// when
+		PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+			pageable, request
+		);
 
-        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
-    }
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.contents()).hasSize(1);
+		assertThat(result.contents().get(0).categoryId()).isEqualTo(categoryId);
+		assertThat(result.contents().get(0).status()).isEqualTo(status);
+		assertThat(result.contents().get(0).tradeStatus()).isEqualTo(tradeStatus);
+		assertThat(result.contents().get(0).price()).isBetween(minPrice, maxPrice);
 
-    @DisplayName("삭제된 게시글은 목록에 표시되지 않는다.")
-    @Test
-    void test3() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
+		verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+	}
 
-        ProductPost activePost = ProductPost.builder()
-                .userId("user-123")
-                .categoryId("category-001")
-                .title("아이폰 15 Pro")
-                .name("iPhone 15 Pro")
-                .price(1200000)
-                .status(ProductStatus.GOOD)
-                .tradeStatus(TradeStatus.SELLING)
-                .build();
+	@DisplayName("삭제된 게시글은 목록에 표시되지 않는다.")
+	@Test
+	void test3() {
+		// given
+		Pageable pageable = PageRequest.of(0, 20);
+		ProductPostSearchRequest request = new ProductPostSearchRequest(
+			null, null, null, null, null
+		);
 
-        // 삭제된 게시글은 Specification에서 필터링되어야 함
-        List<ProductPost> posts = Arrays.asList(activePost);
-        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+		ProductPost activePost = ProductPost.builder()
+			.userId("user-123")
+			.categoryId("category-001")
+			.title("아이폰 15 Pro")
+			.name("iPhone 15 Pro")
+			.price(1200000)
+			.status(ProductStatus.GOOD)
+			.tradeStatus(TradeStatus.SELLING)
+			.build();
 
-        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .willReturn(page);
+		// 삭제된 게시글은 Specification에서 필터링되어야 함
+		List<ProductPost> posts = Arrays.asList(activePost);
+		Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
 
-        // when
-        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
-                pageable, null, null, null, null, null
-        );
+		given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+			.willReturn(page);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.contents()).hasSize(1);
-        assertThat(result.contents().get(0).title()).isEqualTo("아이폰 15 Pro");
+		// when
+		PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+			pageable, request
+		);
 
-        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
-    }
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.contents()).hasSize(1);
+		assertThat(result.contents().get(0).title()).isEqualTo("아이폰 15 Pro");
 
-    @DisplayName("판매 완료된 게시글도 조회할 수 있다.")
-    @Test
-    void test4() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
+		verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+	}
 
-        List<ProductPost> posts = Arrays.asList(
-                ProductPost.builder()
-                        .userId("user-123")
-                        .categoryId("category-001")
-                        .title("아이폰 15 Pro (판매완료)")
-                        .name("iPhone 15 Pro")
-                        .price(1200000)
-                        .status(ProductStatus.GOOD)
-                        .tradeStatus(TradeStatus.SOLDOUT)
-                        .build()
-        );
+	@DisplayName("판매 완료된 게시글도 조회할 수 있다.")
+	@Test
+	void test4() {
+		// given
+		Pageable pageable = PageRequest.of(0, 20);
+		ProductPostSearchRequest request = new ProductPostSearchRequest(
+			null, null, TradeStatus.SOLDOUT, null, null
+		);
 
-        Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
+		List<ProductPost> posts = Arrays.asList(
+			ProductPost.builder()
+				.userId("user-123")
+				.categoryId("category-001")
+				.title("아이폰 15 Pro (판매완료)")
+				.name("iPhone 15 Pro")
+				.price(1200000)
+				.status(ProductStatus.GOOD)
+				.tradeStatus(TradeStatus.SOLDOUT)
+				.build()
+		);
 
-        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .willReturn(page);
+		Page<ProductPost> page = new PageImpl<>(posts, pageable, posts.size());
 
-        // when
-        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
-                pageable, null, null, TradeStatus.SOLDOUT, null, null
-        );
+		given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+			.willReturn(page);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.contents()).hasSize(1);
-        assertThat(result.contents().get(0).tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
+		// when
+		PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+			pageable, request
+		);
 
-        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
-    }
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.contents()).hasSize(1);
+		assertThat(result.contents().get(0).tradeStatus()).isEqualTo(TradeStatus.SOLDOUT);
 
-    @DisplayName("존재하지 않는 페이지를 요청하면 빈 결과를 반환한다.")
-    @Test
-    void test5() {
-        // given
-        Pageable pageable = PageRequest.of(100, 20);  // 100페이지 요청 (존재하지 않음)
-        Page<ProductPost> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+		verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+	}
 
-        given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .willReturn(emptyPage);
+	@DisplayName("존재하지 않는 페이지를 요청하면 빈 결과를 반환한다.")
+	@Test
+	void test5() {
+		// given
+		Pageable pageable = PageRequest.of(100, 20);  // 100페이지 요청 (존재하지 않음)
+		ProductPostSearchRequest request = new ProductPostSearchRequest(
+			null, null, null, null, null
+		);
+		Page<ProductPost> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        // when
-        PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
-                pageable, null, null, null, null, null
-        );
+		given(productPostRepository.findAll(any(Specification.class), any(Pageable.class)))
+			.willReturn(emptyPage);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.contents()).isEmpty();
-        assertThat(result.pageNum()).isEqualTo(100);
-        assertThat(result.totalPages()).isEqualTo(0);
-        assertThat(result.hasNext()).isFalse();
+		// when
+		PageResponse<List<ProductPostResponse>> result = productPostService.getProductPostList(
+			pageable, request
+		);
 
-        verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
-    }
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.contents()).isEmpty();
+		assertThat(result.pageNum()).isEqualTo(100);
+		assertThat(result.totalPages()).isEqualTo(0);
+		assertThat(result.hasNext()).isFalse();
+
+		verify(productPostRepository).findAll(any(Specification.class), any(Pageable.class));
+	}
 
 }

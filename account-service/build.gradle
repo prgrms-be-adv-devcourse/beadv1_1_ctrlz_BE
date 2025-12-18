@@ -46,7 +46,6 @@ subprojects {
 
         // redis
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-        implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
         // lombok
         compileOnly 'org.projectlombok:lombok'
@@ -58,6 +57,10 @@ subprojects {
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         testRuntimeOnly 'com.h2database:h2'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        // SpringDoc (Swagger UI)
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+
     }
 
     tasks.named('test') {

@@ -1,8 +1,13 @@
 package com.paymentservice.payment.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.common.exception.CustomException;
 import com.common.exception.vo.OrderExceptionCode;
 import com.paymentservice.common.configuration.feign.client.OrderFeignClient;
+import com.paymentservice.common.configuration.feign.dto.OrderStatusUpdateRequest;
 import com.paymentservice.common.model.order.OrderResponse;
+import com.paymentservice.common.model.order.OrderStatus;
 import com.paymentservice.deposit.model.entity.Deposit;
 import com.paymentservice.deposit.service.DepositService;
-import com.paymentservice.payment.event.producer.OrderEventProducer;
 import com.paymentservice.payment.exception.InvalidOrderAmountException;
 import com.paymentservice.payment.exception.PaymentFailedException;
 import com.paymentservice.payment.exception.PaymentNotFoundException;
@@ -27,6 +33,7 @@ import com.paymentservice.payment.model.dto.TossApprovalResponse;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.entity.PaymentRefundEntity;
 import com.paymentservice.payment.model.enums.PayType;
+import com.paymentservice.payment.model.enums.PaymentStatus;
 import com.paymentservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -39,7 +46,6 @@ public class PaymentService {
     private final PaymentTxService paymentTxService;
     private final OrderFeignClient orderFeignClient;
     private final DepositService depositService;
-    private final OrderEventProducer orderEventProducer;
     private static final Logger log = LoggerFactory.getLogger("API." + PaymentService.class.getName());
 
     // 결제 정보
@@ -100,6 +106,13 @@ public class PaymentService {
     public PaymentResponse completeTossPayment(PaymentConfirmRequest request, String userId,
         Deposit deposit, TossApprovalResponse approve) {
 
+        // 2차 검증: 토스에서 승인된 금액이 요청 금액과 일치하는지 확인
+        // 프론트에서 금액을 다른 금액을 보냈다면 여기서 걸러지고 Exception 발생 -> Controller에서 catch -> cancelPayment 호출됨
+        BigDecimal sumAmount = request.totalAmount().add(request.usedDepositAmount());
+        if (approve.amount().compareTo(sumAmount) != 0) {
+            throw new PaymentFailedException();
+        }
+
         try {
             // DB 저장 및 예치금 차감
             BigDecimal usedDepositAmount = approve.depositUsedAmount();     // deposit 사용 금액
@@ -128,14 +141,21 @@ public class PaymentService {
             );
             PaymentEntity saved = paymentRepository.save(paymentEntity);
 
-            orderEventProducer.publishOrderCompleted(approve.orderId(), paymentEntity.getId());
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                request.orderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.PAYMENT_COMPLETED, saved
+                ),
+                userId);
 
             log.info("[토스 결제 성공] orderId={}, userId={}, paymentKey={}, request={}, approve={}",
                 request.orderId(), userId, request.paymentKey(), request, approve);
 
             return PaymentResponse.from(saved);
         } catch (Exception e) {
-            log.error("[토스 결제 실패] orderId={}, userId={}, paymentKey={}, request={}",
+            // 여기서 발생한 에러는 controller로 전파되어야 취소 로직이 수행
+            log.error("[토스 결제 후처리 실패] orderId={}, userId={}, paymentKey={}, request={}",
                 request.orderId(), userId, request.paymentKey(), request, e);
             throw new PaymentFailedException();
         }
@@ -157,8 +177,13 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
-
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
             RefundResponse.from(refundEntity);
 
             log.info("[토스 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}",
@@ -191,7 +216,13 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
 
             RefundResponse response = RefundResponse.from(refundEntity);
 
@@ -227,8 +258,14 @@ public class PaymentService {
             );
 
             refundEntity.refundSuccess(payment.getOrderId(), OffsetDateTime.now());
-            afterRefundProcess(payment);
 
+            // order 동기처리
+            orderFeignClient.updateOrderStatus(
+                payment.getOrderId(),
+                OrderStatusUpdateRequest.of(
+                    OrderStatus.REFUND_AFTER_PAYMENT, payment
+                ),
+                userId);
             RefundResponse response = RefundResponse.from(refundEntity);
 
             log.info("[혼합 환불 성공] orderId={}, userId={}, paymentKey={}, refundResponse={}, response={}",
@@ -259,13 +296,29 @@ public class PaymentService {
         return refund;
     }
 
-    private void afterRefundProcess(PaymentEntity payment) {
-        orderEventProducer.publishOrderRefunded(payment.getOrderId(), payment.getId());
-    }
-
     public PaymentResponse findByOrderId(String orderId) {
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 번호입니다: " + orderId));
         return PaymentResponse.from(paymentEntity);
+    }
+
+    // 정산용 결제 내역 조회 (Batch 호출)
+    @Transactional(readOnly = true)
+    public java.util.List<PaymentResponse> getPaymentsForSettlement(
+        LocalDateTime startDate,
+        LocalDateTime endDate) {
+        // LocalDateTime -> OffsetDateTime
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        ZoneOffset zoneOffset = zoneId.getRules().getOffset(LocalDateTime.now());
+
+        OffsetDateTime start = startDate.atOffset(zoneOffset);
+        OffsetDateTime end = endDate.atOffset(zoneOffset);
+
+        List<PaymentEntity> payments = paymentRepository.findByApprovedAtBetweenAndStatus(
+            start, end, PaymentStatus.SUCCESS);
+
+        return payments.stream()
+            .map(PaymentResponse::from)
+            .collect(Collectors.toList());
     }
 }

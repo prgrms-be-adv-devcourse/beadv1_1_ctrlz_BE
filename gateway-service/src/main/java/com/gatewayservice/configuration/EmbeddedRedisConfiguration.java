@@ -1,10 +1,10 @@
 package com.gatewayservice.configuration;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -16,27 +16,29 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import lombok.extern.slf4j.Slf4j;
 import redis.embedded.RedisServer;
-import redis.embedded.core.RedisServerBuilder;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
 
 @Slf4j
 @Profile("test || local")
 @EnableCaching
 @Configuration
 public class EmbeddedRedisConfiguration {
-	@Value("${spring.data.redis.host}")
-	private final String host = "localhost";
-	@Value("${spring.data.redis.port}")
+
+	@Value("${spring.data.redis.host:localhost}")
+	private String host;
+
+	@Value("${spring.data.redis.port:0}") // 0이면 자동 할당
 	private int port;
+
 	private RedisServer redisServer;
+
+	private static final String OS = System.getProperty("os.name").toLowerCase();
+	private static final boolean IS_WINDOWS = OS.contains("win");
 
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
@@ -57,7 +59,6 @@ public class EmbeddedRedisConfiguration {
 		template.setValueSerializer(serializer);
 		template.setHashKeySerializer(new StringRedisSerializer());
 		template.setHashValueSerializer(serializer);
-
 		template.afterPropertiesSet();
 		return template;
 	}
@@ -65,113 +66,89 @@ public class EmbeddedRedisConfiguration {
 	@PostConstruct
 	public void startRedis() {
 		try {
-			int defaultRedisPort = 6380;
-			try {
-				port = isRedisRunning() ? findAvailablePort() : defaultRedisPort;
-			} catch (Exception e) {
-				log.warn(
-					"Failed to check if Redis is running using system commands. Falling back to socket check. Error: {}",
-					e.getMessage());
-				port = isPortInUse(defaultRedisPort) ? findAvailablePortUsingSocket() : defaultRedisPort;
+			// 포트가 0이면 자동 할당, 아니면 지정된 포트 사용
+			if (port == 0) {
+				port = findAvailablePort();
+			} else if (isPortInUse(port)) {
+				log.info("Port {} is already in use. Finding another port...", port);
+				port = findAvailablePort();
 			}
 
-			try {
-				redisServer = new RedisServerBuilder()
-					.port(port)
-					.setting("daemonize no")
-					.setting("appendonly no")
-					.setting("save \"\"")
-					.setting("dbfilename \"\"")
-					.setting("stop-writes-on-bgsave-error no")
-					.build();
+			redisServer = new RedisServer(port);
 
-				redisServer.start();
-				log.info("Embedded Redis started on port {}", port);
-			} catch (Exception e) {
-				log.error(" Failed to start embedded Redis server. Tests will continue without Redis. Error: {}",
-					e.getMessage());
-			}
+			redisServer.start();
+			log.info("Embedded Redis started successfully on port {}", port);
+
 		} catch (Exception e) {
-			log.error("Error during Redis server initialization: {}", e.getMessage());
+			log.error("Failed to start embedded Redis on port {}. Tests will run without Redis cache. Error: {}", port,
+					e.getMessage());
+			// Redis 없이도 테스트 진행 가능하도록 예외 던지지 않음
 		}
 	}
 
 	@PreDestroy
 	public void stopRedis() {
-		try {
-			if (redisServer != null) {
-				redisServer.stop();
-				log.info("Embedded Redis stopped");
-			}
-		} catch (Exception e) {
-			log.error("Error stopping Redis server: {}", e.getMessage());
-		}
-	}
-
-	public int findAvailablePort() throws IOException {
-		for (int port = 10000; port <= 65535; port++) {
+		if (redisServer != null && redisServer.isActive()) {
 			try {
-				Process process = executeGrepProcessCommand(port);
-				if (!isRunning(process)) {
-					return port;
-				}
+				redisServer.stop();
+				log.info("Embedded Redis stopped on port {}", port);
 			} catch (Exception e) {
-				log.warn("Error checking port {}: {}", port, e.getMessage());
+				log.error("Error stopping embedded Redis: {}", e.getMessage());
 			}
 		}
-		return findAvailablePortUsingSocket();
 	}
 
-	private int findAvailablePortUsingSocket() {
-		for (int port = 10000; port <= 65535; port++) {
-			if (!isPortInUse(port)) {
-				return port;
+	private int findAvailablePort() {
+		for (int p = 10000; p <= 65535; p++) {
+			if (!isPortInUse(p)) {
+				return p;
 			}
 		}
-		throw new IllegalArgumentException("Not Found Available port: 10000 ~ 65535");
+		throw new IllegalStateException("No available port found in range 10000-65535");
 	}
 
 	private boolean isPortInUse(int port) {
-		try (ServerSocket serverSocket = new ServerSocket(port)) {
+		if (IS_WINDOWS) {
+			return isPortInUseOnWindows(port);
+		} else {
+			return isPortInUseOnUnix(port);
+		}
+	}
+
+	// Windows용: netstat -ano | findstr :포트
+	private boolean isPortInUseOnWindows(int port) {
+		try {
+			Process process = Runtime.getRuntime().exec("netstat -ano | findstr :" + port);
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				return reader.lines().anyMatch(line -> line.contains("LISTENING"));
+			}
+		} catch (Exception e) {
+			log.debug("Fallback to socket check due to netstat failure: {}", e.getMessage());
+			return isPortInUseBySocket(port);
+		}
+	}
+
+	// Unix/macOS용
+	private boolean isPortInUseOnUnix(int port) {
+		try {
+			String[] command = { "/bin/sh", "-c", "lsof -i :" + port + " | grep LISTEN" };
+			Process process = Runtime.getRuntime().exec(command);
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				return reader.readLine() != null;
+			}
+		} catch (Exception e) {
+			log.debug("Fallback to socket check due to lsof/netstat failure: {}", e.getMessage());
+			return isPortInUseBySocket(port);
+		}
+	}
+
+	// 가장 확실한 방법: ServerSocket으로 직접 확인
+	private boolean isPortInUseBySocket(int port) {
+		try (ServerSocket socket = new ServerSocket(port)) {
+			socket.setReuseAddress(true);
 			return false;
 		} catch (IOException e) {
 			return true;
 		}
-	}
-
-	private boolean isRedisRunning() throws IOException {
-		try {
-			return isRunning(executeGrepProcessCommand(port));
-		} catch (Exception e) {
-			log.warn("Error checking if Redis is running: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	private Process executeGrepProcessCommand(int port) throws IOException {
-		try {
-			String command = String.format("netstat -nat | grep LISTEN|grep %d", port);
-			String[] shell = {"/bin/sh", "-c", command};
-			return Runtime.getRuntime().exec(shell);
-		} catch (Exception e) {
-			log.warn("Failed to execute grep command: {}", e.getMessage());
-			throw e;
-		}
-	}
-
-	private boolean isRunning(Process process) {
-		String line;
-		StringBuilder pidInfo = new StringBuilder();
-
-		try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-			while ((line = input.readLine()) != null) {
-				pidInfo.append(line);
-			}
-		} catch (Exception e) {
-			log.warn("Error reading process output: {}", e.getMessage());
-			return false;
-		}
-
-		return StringUtils.hasLength(pidInfo.toString());
 	}
 }

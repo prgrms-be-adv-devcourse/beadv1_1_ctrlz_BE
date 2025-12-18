@@ -1,8 +1,12 @@
 package com.domainservice.common.exception;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,7 +16,8 @@ import com.common.exception.CustomException;
 import com.common.model.web.ErrorResponse;
 import com.domainservice.common.configuration.feign.exception.UserClientException;
 import com.domainservice.domain.post.post.exception.ProductPostException;
-import com.domainservice.domain.reivew.exception.ReviewException;
+import com.domainservice.domain.review.exception.ReviewException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +60,44 @@ public class GlobalExceptionHandler {
 		ErrorResponse response = ErrorResponse.of(e.getCode(), e.getMessage());
 
 		return ResponseEntity.status(status).body(response);
+	}
+
+	/**
+	 * JSON 역직렬화 실패 처리 (400)
+	 * Enum 타입 불일치, 잘못된 JSON 형식 등
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+		HttpMessageNotReadableException e) {
+
+		String message = "잘못된 요청 형식입니다.";
+
+		// Enum 역직렬화 실패인 경우 구체적인 메시지 제공
+		Throwable cause = e.getCause();
+		if (cause instanceof InvalidFormatException ife) {
+			if (ife.getTargetType().isEnum()) {
+				Object[] enumValues = ife.getTargetType().getEnumConstants();
+				String allowedValues = Arrays.stream(enumValues)
+					.map(Object::toString)
+					.collect(Collectors.joining(", "));
+
+				message = String.format(
+					"%s 필드는 [%s] 중 하나여야 합니다. (입력값: %s)",
+					ife.getPath().get(0).getFieldName(),
+					allowedValues,
+					ife.getValue()
+				);
+			}
+		}
+
+		ErrorResponse response = ErrorResponse.of(
+			HttpStatus.BAD_REQUEST.value(),
+			message
+		);
+
+		return ResponseEntity
+			.status(HttpStatus.BAD_REQUEST)
+			.body(response);
 	}
 
 	/**

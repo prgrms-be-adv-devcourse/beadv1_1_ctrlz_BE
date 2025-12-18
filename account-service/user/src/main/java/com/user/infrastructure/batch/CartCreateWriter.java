@@ -8,7 +8,6 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.user.application.adapter.dto.CartCreateCommand;
 import com.user.application.port.out.OutboundEventPublisher;
@@ -28,7 +27,6 @@ public class CartCreateWriter implements ItemWriter<CartCreateCommand> {
 	private final OutboundEventPublisher outboundEventPublisher;
 	private final ExternalEventJpaRepository externalEventJpaRepository;
 
-	@Transactional
 	@Override
 	public void write(Chunk<? extends CartCreateCommand> chunk) {
 		List<? extends CartCreateCommand> items = chunk.getItems();

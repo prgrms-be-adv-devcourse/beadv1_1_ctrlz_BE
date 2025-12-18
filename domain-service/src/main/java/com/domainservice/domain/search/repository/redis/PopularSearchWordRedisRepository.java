@@ -2,14 +2,11 @@ package com.domainservice.domain.search.repository.redis;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -222,103 +219,45 @@ public class PopularSearchWordRedisRepository {
 
 	/**
 	 * 일간 인기 검색어 리스트를 Redis에 update
-	 * @param currentLog {검색어, 검색 시간 로그들, 배치가 실행된 시각}
-	 * @param previousLog {검색어, 이전 스케줄러에서 집계된 검색 횟수(2시간 단위), 마지막으로 검색된 시간}
+	 * @param currentLogs {검색어, 검색 시간 로그들, 배치가 실행된 시각}
+	 * @param previousLogMap {검색어, 이전 스케줄러에서 집계된 검색 횟수(2시간 단위), 마지막으로 검색된 시간}
 	 */
-	public void updateDailyPopularWordList(KeywordLog currentLog, Optional<DailyPopularWordLog> previousLog) {
-
-		String keyword = currentLog.keyword();
-		long currentCount = currentLog.searchedAt().size();
-
-		if (currentCount <= 0) {
-			log.info("[DAILY POPULAR] keyword={}, currentCount=0 (skip)", keyword);
-			return;
-		}
-
-		long previousCount = previousLog.map(DailyPopularWordLog::searchedCount).orElse(0L);
-
-		// === ⭐ 변화율 기반 weight 모델 ===
-		double weight;
-		if (previousCount == 0) {
-			weight = 1.2;  // 초기부스트
-		} else {
-			double rate = (double) currentCount / previousCount;
-			weight = Math.max(0.3, Math.min(2.0, rate));  // 너무 작은/큰 변동 방지
-		}
-
-		long adjustedCount = Math.round(currentCount * weight);
-
-		double tauMillis = 6 * 60 * 60 * 1000.0;
-		double intervalMillis = 2 * 60 * 60 * 1000.0;
+	public void updateDailyPopularWordList(List<KeywordLog> currentLogs, Map<String, DailyPopularWordLog> previousLogMap) {
+		double tauMillis = 6 * 60 * 60 * 1000.0;     // 6h
+		double intervalMillis = 2 * 60 * 60 * 1000.0; // 2h batch
 		double epsilon = 0.1;
 
 		List<String> args = new java.util.ArrayList<>();
 		args.add(String.valueOf(tauMillis));
 		args.add(String.valueOf(intervalMillis));
 		args.add(String.valueOf(epsilon));
-		args.add(keyword);
-		args.add(String.valueOf(adjustedCount));
+
+		for (KeywordLog log : currentLogs) {
+			long currCount = log.searchedAt().size();
+			if (currCount <= 0) continue;
+
+			DailyPopularWordLog prev = previousLogMap.get(log.keyword());
+			long prevCount = prev == null ? 0 : prev.searchedCount();
+
+			double weight;
+			if (prevCount == 0) {
+				weight = 1.2;
+			} else {
+				double rate = (double) currCount / prevCount;
+				weight = Math.max(0.3, Math.min(2.0, rate));
+			}
+
+			long adjusted = Math.round(currCount * weight);
+
+			args.add(log.keyword());
+			args.add(String.valueOf(adjusted));
+		}
 
 		redisTemplate.execute(
 			updateZSetWithDecayScript,
 			java.util.List.of(DAILY_ZSET_KEY),
 			args.toArray()
 		);
-
-		log.info("[DAILY POPULAR][LUA] keyword={}, prev={}, curr={}, weight={}, final={}",
-			keyword, previousCount, currentCount, weight, adjustedCount);
-	}
-
-	/**
-	 * Redis에 저장된 모든 key-value 조회
-	 */
-	public Map<String, Object> findAll() {
-		Map<String, Object> result = new HashMap<>();
-
-		ScanOptions scanOptions = ScanOptions.scanOptions()
-			.match("*")
-			.count(1000)
-			.build();
-
-		try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
-			.getConnection()
-			.scan(scanOptions)) {
-
-			while (cursor.hasNext()) {
-				String key = new String(cursor.next());
-				DataType type = redisTemplate.type(key);
-
-				switch (type) {
-					case STRING -> {
-						String value = redisTemplate.opsForValue().get(key);
-						result.put(key, value);
-					}
-					case LIST -> {
-						List<String> list = redisTemplate.opsForList().range(key, 0, -1);
-						result.put(key, list);
-					}
-					case SET -> {
-						Set<String> set = redisTemplate.opsForSet().members(key);
-						result.put(key, set);
-					}
-					case ZSET -> {
-						Set<ZSetOperations.TypedTuple<String>> zset =
-							redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
-						result.put(key, zset);
-					}
-					case HASH -> {
-						Map<Object, Object> hash = redisTemplate.opsForHash().entries(key);
-						result.put(key, hash);
-					}
-					default -> {
-						// 기타(type none 등)
-						result.put(key, "UNSUPPORTED TYPE: " + type);
-					}
-				}
-			}
-		}
-
-		return result;
 	}
 
 	private void applyDecayToZSet(String zsetKey,

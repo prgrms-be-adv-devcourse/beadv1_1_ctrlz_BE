@@ -1,6 +1,6 @@
 package com.gatewayservice.filter;
 
-import static com.gatewayservice.common.ServeletConst.*;
+import static com.gatewayservice.common.ServletConst.*;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.gatewayservice.utils.ServletRequestUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class IpCaptureFilter
 	extends AbstractGatewayFilterFactory<IpCaptureFilter.Config>
@@ -34,6 +37,7 @@ public class IpCaptureFilter
 
 			// 요청 ID를 exchange에 저장하여 다음 필터에서 사용 가능하도록
 			exchange.getAttributes().put(REQUEST_IP, userIp);
+			log.info("userIp {}", userIp);
 			return chain.filter(exchange);
 		};
 	}

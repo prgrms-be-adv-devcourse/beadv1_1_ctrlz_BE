@@ -22,7 +22,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
@@ -31,24 +31,23 @@ spring:
           batch_size: 1000
         order_updates: true
         order_inserts: true
-    defer-datasource-initialization: true  # Hibernate 초기화 후 data.sql 실행
+    defer-datasource-initialization: true # Hibernate 초기화 후 data.sql 실행
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/domain_dev?rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true
     username: app
     password: 1234
 
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#    url: jdbc:h2:mem:user-db
-#  #
-#  h2:
-#    console:
-#      enabled: true
-
+  # datasource:
+  #   driver-class-name: org.h2.Driver
+  #   username: sa
+  #   password:
+  #   url: jdbc:h2:mem:user-db
+  # #
+  # h2:
+  #   console:
+  #     enabled: true
 
   data:
     redis:
@@ -103,19 +102,22 @@ custom:
     topic:
       command: deposit-command
 
+  feign:
+    domain-service: http://localhost:8081
+
   image:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-  redirectUrl: http://localhost:8000
+
+#  redirectUrl: http://localhost:8000
 
 logging:
   config: classpath:logback-local.xml
   level:
     io.awspring.cloud: DEBUG
     org.springframework.batch: DEBUG
-
 
 # k8s 설정
 eureka:
@@ -126,6 +128,9 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     enabled: true
 
+openapi:
+  service:
+    url: http://localhost:8082
 ---
 spring:
   config:

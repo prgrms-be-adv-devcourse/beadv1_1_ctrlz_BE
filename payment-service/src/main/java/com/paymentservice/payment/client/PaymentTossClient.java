@@ -9,10 +9,10 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentservice.common.configuration.feign.client.PaymentFeignClient;
 import com.paymentservice.payment.exception.PaymentGatewayFailedException;
 import com.paymentservice.payment.model.dto.PaymentConfirmRequest;
@@ -22,7 +22,6 @@ import com.paymentservice.payment.model.dto.TossApproveRequest;
 import com.paymentservice.payment.model.dto.TossCancelRequest;
 import com.paymentservice.payment.model.entity.PaymentEntity;
 import com.paymentservice.payment.model.enums.PaymentStatus;
-import com.paymentservice.payment.repository.PaymentRepository;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentTossClient {
 
     private final PaymentFeignClient paymentFeignClient;
-    private final PaymentRepository paymentRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${custom.payment.toss.test_secret_api_key}")
     private String secretApiKey;
@@ -43,39 +42,17 @@ public class PaymentTossClient {
     @Retryable(
         value = {FeignException.class, RuntimeException.class},
         maxAttempts = 3,
-        backoff = @Backoff(delay = 1000) // 3초 쉬고 다시 재시도
+        backoff = @Backoff(delay = 1000) // 1초 쉬고 다시 재시도
     )
     public TossApprovalResponse approve(PaymentConfirmRequest request) {
 
-        // 멱등성 보장(paymentKey + orderId 조합) DB 재요청 막기 -> 불필요한 외부 API막기
-        if (paymentRepository.existsByOrderId(request.orderId())) {
-            log.info("이미 처리된 결제입니다. DB 정보를 반환합니다. orderId={}", request.orderId());
-            PaymentEntity existingPayment = paymentRepository.findByOrderId(request.orderId())
-                .orElseThrow(() -> new IllegalArgumentException("결제 정보가 존재하지 않습니다."));
-
-
-            // Entity -> TossApprovalResponse 변환
-            return new TossApprovalResponse(
-                existingPayment.getOrderId(),
-                existingPayment.getAmount(),
-                existingPayment.getDepositUsedAmount(),
-                existingPayment.getTossChargedAmount(),
-                existingPayment.getCurrency(),
-                existingPayment.getPayType(),
-                existingPayment.getStatus(),
-                existingPayment.getPaymentKey(),
-                existingPayment.getApprovedAt()
-            );
-        }
-
-        // Toss로 보내야하는 필수 필드
-        TossApproveRequest requestBody = TossApproveRequest.from(request);
+        TossApproveRequest requestBody = new TossApproveRequest(request.paymentKey(), request.orderId(),
+            request.totalAmount());
 
         Map<String, Object> responseMap = paymentFeignClient.requestPayment(
-            requestBody, authHeader()
-        );
+                requestBody, authHeader());
 
-        String responseStatus = (String)responseMap.get("status");
+        String responseStatus = (String) responseMap.get("status");
         PaymentStatus paymentStatus;
         // Toss 응답 상태가 DONE이 아닌 경우는 실패
         if (Objects.equals("DONE", responseStatus)) {
@@ -95,40 +72,30 @@ public class PaymentTossClient {
             }
         }
         return new TossApprovalResponse(
-            request.orderId(),
-            request.amount(),
-            request.usedDepositAmount(),
-            request.totalAmount(),
-            (String)responseMap.get("currency"),
-            null,
-            paymentStatus,
-            (String)responseMap.get("paymentKey"),
-            approvedAt
-        );
-    }
-
-    @Recover
-    public TossApprovalResponse recoverApprove(Exception e, PaymentConfirmRequest request) {
-        log.error("Toss 승인 최종 실패 orderId={}", request.orderId());
-        throw new PaymentGatewayFailedException();
+                request.orderId(),
+                request.amount(),
+                request.usedDepositAmount(),
+                request.totalAmount(),
+                (String) responseMap.get("currency"),
+                null,
+                paymentStatus,
+                (String) responseMap.get("paymentKey"),
+                approvedAt);
     }
 
     // 환불
     @Retryable(
         value = {FeignException.class, RuntimeException.class},
         maxAttempts = 3,
-        backoff = @Backoff(delay = 3000)
+        backoff = @Backoff(delay = 1000)
     )
     public RefundResponse refund(PaymentEntity payment) {
 
-        // Toss로 보내야하는 필수 필드
-        TossCancelRequest cancelBody = TossCancelRequest.from(payment);
-
+        TossCancelRequest cancelBody = new TossCancelRequest(payment.getTossChargedAmount(), "사용자 요청 환불");
         RefundResponse response = paymentFeignClient.refundPayment(
-            payment.getPaymentKey(),
-            cancelBody,
-            authHeader()
-        );
+                payment.getPaymentKey(),
+                cancelBody,
+                authHeader());
 
         // Toss 환불 실패 시 바로 Exception
         if (!Objects.equals("CANCELED", response.status())) {
@@ -138,16 +105,22 @@ public class PaymentTossClient {
         return response;
     }
 
-    @Recover
-    public TossApprovalResponse recoverRefund(Exception e, PaymentConfirmRequest request) {
-        log.error("Toss 환불 최종 실패 orderId={}", request.orderId());
-        throw new PaymentGatewayFailedException();
+    // Entity없이 키값 만으로 취소하는 기능
+    public void cancelPayment(String paymentKey, String reason) {
+        try {
+            TossCancelRequest cancelRequest = new TossCancelRequest(null, reason); // 금액이 null이면 전액 취소
+            paymentFeignClient.refundPayment(paymentKey, cancelRequest, authHeader());
+            log.info("결제 취소(보상 트랜잭션) 성공: paymentKey={}, reason={}", paymentKey, reason);
+        } catch (Exception e) {
+            log.error("결제 취소(보상 트랜잭션) 실패 - 수동 환불 필요: paymentKey={}, reason={}", paymentKey, reason, e);
+            // 취소 실패는 Exception을 던지지 않고 로그만 남겨서 원본 에러(Exception e)가 묻히지 않게 함
+        }
     }
 
     private String authHeader() {
         String key = (secretApiKey != null) ? secretApiKey : "test_secret_key";
         return "Basic " + Base64.getEncoder()
-            .encodeToString((key + ":").getBytes(StandardCharsets.UTF_8));
+                .encodeToString((key + ":").getBytes(StandardCharsets.UTF_8));
 
     }
 }

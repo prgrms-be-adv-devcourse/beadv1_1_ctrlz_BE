@@ -67,9 +67,4 @@ public class Deposit extends BaseEntity {
 			.paymentKey("paymentKey")
 			.build();
 	}
-
-	@Override
-	protected String getEntitySuffix() {
-		return "deposit";
-	}
 }

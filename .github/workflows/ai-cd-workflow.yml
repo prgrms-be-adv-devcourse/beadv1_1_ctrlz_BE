@@ -1,0 +1,56 @@
+name: ai-service ci/cd
+
+on:
+  push:
+    branches:
+      - main
+      - deploytest
+    paths:
+      - 'ai-service/**'
+      - 'observability-config/**'
+      - '**/*.dockerfile'
+      - '.github/workflows/ai-cd-workflow.yml'
+
+  workflow_dispatch:
+    inputs:
+      service-name:
+        description: 'yeongeun-Market ai service for deployment'
+        required: false
+        default: 'sa-ai-service'
+      force-deploy:
+        description: 'Force deployment even without changes'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+
+  releasing:
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    uses: ./.github/workflows/release-workflow.yml
+    secrets:
+      APPLICATION_SECRET: ${{ secrets.APPLICATION_AI_SECRET }} # AI에 해당하는 SECRET 가져오기
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_AC_KEY: ${{ secrets.DOCKER_AC_KEY }}
+    with:
+      service-name: ai-service-app
+      service-dir: .
+      secret-dir: ai-service
+      file-name: docker/ai-service.dockerfile
+
+  deploying:
+    needs: releasing
+    uses: ./.github/workflows/deploy-workflow.yml
+    secrets: inherit
+    with:
+      pod-name: ai-service-app # pod랑 같은 이름
+      deploy-name: ai-deploy # deployment랑 같은 이름
+      label-name: ai # pod 라벨 이름
+      image-tag: ${{ needs.releasing.outputs.tag_name }}
+
+
+

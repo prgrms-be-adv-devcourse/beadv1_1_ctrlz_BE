@@ -4,23 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 
 import com.common.event.productPost.ProductPostUpsertedEvent;
+import com.common.model.web.PageResponse;
 import com.domainservice.domain.search.model.entity.dto.document.ProductPostDocumentEntity;
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
 
 public class SearchMapper {
-
-	// 검색 파라미터들을 검색 요청 DTO로 변환
-	public static ProductPostSearchRequest toSearchRequest(
-		String q, String category, Long minPrice, Long maxPrice, String tags, String sort) {
-
-		return new ProductPostSearchRequest(
-			q, category, minPrice, maxPrice, parseTagList(tags), sort);
-	}
 
 	// Elasticsearch Document를 검색 응답 DTO로 변환
 	public static ProductPostSearchResponse toSearchResponse(ProductPostDocumentEntity document) {
@@ -48,6 +41,7 @@ public class SearchMapper {
 	public static ProductPostDocumentEntity toDocumentEntity(ProductPostUpsertedEvent event) {
 		return ProductPostDocumentEntity.builder()
 			.id(event.id())
+			.userId(event.userId())
 			.name(event.name())
 			.title(event.title())
 			.price(event.price())
@@ -65,6 +59,21 @@ public class SearchMapper {
 			.build();
 	}
 
+	public static PageResponse<List<ProductPostSearchResponse>> toPageResponse(
+		SearchHits<ProductPostDocumentEntity> searchHits, Pageable pageable) {
+
+		long totalHits = searchHits.getTotalHits();
+		int totalPages = (int)Math.ceil((double)totalHits / pageable.getPageSize());
+
+		return new PageResponse<>(
+			pageable.getPageNumber(),
+			totalPages,
+			pageable.getPageSize(),
+			pageable.getPageNumber() < totalPages - 1,
+			SearchMapper.toSearchResponseList(searchHits)
+		);
+	}
+
 	// 태그 파싱 : 아이폰,중고 -> [아이폰, 중고]
 	private static List<String> parseTagList(String tags) {
 		if (tags == null || tags.isEmpty()) {
@@ -76,5 +85,4 @@ public class SearchMapper {
 			.filter(s -> !s.isEmpty())
 			.toList();
 	}
-
 }

@@ -1,0 +1,121 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: ai-service
+
+  ai:
+#    embedding:
+#      transformer:
+#        onnx:
+#          model-uri: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx
+#        tokenizer:
+#          uri: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/raw/main/tokenizer.json
+#        cache:
+#          enabled: true
+#          directory: /tmp/spring-ai-onnx-cache
+
+    vectorstore:
+      qdrant:
+        host: localhost
+        port: 6334
+        collection-name: products-post
+        initialize-schema: true
+
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9090
+    consumer:
+      group-id: ai-service-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+        spring.json.type.mapping: com.common.event.productPost.ProductPostUpsertedEvent:com.aiservice.domain.event.ProductPostUpsertedEvent,com.common.event.productPost.ProductPostDeletedEvent:com.aiservice.domain.event.ProductPostDeletedEvent,com.common.event.productPost.ProductPostSearchedEvent:com.aiservice.domain.event.ProductPostSearchedEvent
+        allow.auto.create.topics: false
+
+        observation:
+          enabled: true
+
+  batch:
+    jdbc:
+      initialize-schema: always
+      platform: mysql
+
+    job:
+      enabled: false
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true
+    username: app
+    password: 1234
+
+logging:
+  level:
+    org.springframework.batch: DEBUG
+
+# k8s 설정
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    enabled: true
+
+custom:
+  product-post:
+    topic:
+      event: product-post-events
+
+  recommendation:
+    limit: 3
+    ttl-hours: 6
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  feign:
+    url:
+      domain-service: http://localhost:8081
+      account-service: http://localhost:8080
+
+  product:
+    base-url: http://localhost:8080/api/products
+
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: http://localhost:8082

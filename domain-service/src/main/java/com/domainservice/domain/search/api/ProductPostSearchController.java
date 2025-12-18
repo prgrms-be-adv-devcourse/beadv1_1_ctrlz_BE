@@ -5,83 +5,110 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.PageResponse;
-import com.domainservice.domain.search.mapper.SearchMapper;
-import com.domainservice.domain.search.model.entity.dto.request.ProductPostSearchRequest;
+import com.domainservice.common.configuration.springDoc.HidePageableSort;
+import com.domainservice.domain.search.docs.post.GetDailyRecommendationApiDocs;
+import com.domainservice.domain.search.docs.post.GetSellerProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GetSimilarProductsApiDocs;
+import com.domainservice.domain.search.docs.post.GlobalSearchApiDocs;
+import com.domainservice.domain.search.model.entity.dto.request.postSearchParams;
 import com.domainservice.domain.search.model.entity.dto.response.ProductPostSearchResponse;
-import com.domainservice.domain.search.service.ProductPostElasticService;
+import com.domainservice.domain.search.service.search.GlobalSearchService;
+import com.domainservice.domain.search.service.search.RecommendationService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 상품 게시글 elasticSearch 기능에 대한 REST API를 제공하는 컨트롤러입니다.
+ * elasticSearch를 사용하여 상품 게시글 검색 및 추천 기능을 제공하는 REST API 컨트롤러입니다.
  */
+@Tag(name = "ProductPost Search", description = "elasticSearch를 통한 다양한 상품 게시글 목록 조회 API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/product-posts/search")
 public class ProductPostSearchController {
 
-	private final ProductPostElasticService productPostElasticService;
+	private final GlobalSearchService globalSearchService;
+	private final RecommendationService recommendationService;
 
 	/**
 	 * 통합 검색 API
 	 * - 모든 필터 조건을 단일 엔드포인트에서 처리
 	 *
-	 * @param q 검색어 (optional)
-	 * @param category 카테고리 (optional)
-	 * @param minPrice 최소 가격 (optional, default: 0)
-	 * @param maxPrice 최대 가격 (optional, default: 999999999)
-	 * @param tags 태그 (optional)
-	 * @param sort 정렬 기준 (optional, default: score)
+	 * @param searchParams 검색 파라미터
 	 * @param pageable 페이징 정보
 	 * @return 검색 결과
 	 */
+	@GlobalSearchApiDocs
 	@GetMapping
 	public PageResponse<List<ProductPostSearchResponse>> search(
-		@RequestParam(required = false) String q,                                                     // ex) "아이폰"
-		@RequestParam(required = false) String category,                            // ex) "전자기기"
-		@RequestParam(defaultValue = "0") Long minPrice,          // ex) "100000"
-		@RequestParam(defaultValue = "999999999") Long maxPrice,  // ex) "2000000"
-		@RequestParam(required = false) String tags,                                // ex) "친환경,중고"
-		// TODO: 상품 판매 상태에 따른 정렬,
-
-		// ex) "score", "popular", "price_asc", "price_desc", "newest", "listing_count_desc"
-		@RequestParam(defaultValue = "score") String sort,
-
-		@PageableDefault(size = 20) Pageable pageable
+		@Valid postSearchParams searchParams,
+		@PageableDefault(size = 24) Pageable pageable
 	) {
-
-		ProductPostSearchRequest request = SearchMapper.toSearchRequest(
-			q, category, minPrice, maxPrice, tags, sort);
-
-		return productPostElasticService.search(request, pageable);
+		return globalSearchService.search(searchParams, pageable);
 	}
 
-	// TODO: 현재 조회중인 상품과 유사한 상품 조회 API
-	//  - 엔드포인트: GET /api/product-posts/search/{postId}/similar
-    /*
-    @GetMapping("/{postId}/similar")
-    public List<ProductPostSearchResponse> getSimilarProductPosts(...) { ... }
-    */
+	/**
+	 * 비슷한 상품 추천 API
+	 * - 현재 상품과 유사한 상품 추천
+	 *
+	 * @param productPostId 기준 상품 ID
+	 * @param pageable 페이징 정보, size: 12(default)
+	 * @return 유사 상품 목록
+	 */
+	@HidePageableSort
+	@GetSimilarProductsApiDocs
+	@GetMapping("/{productPostId}/similar")
+	public PageResponse<List<ProductPostSearchResponse>> getSimilarProducts(
+		@PathVariable String productPostId,
+		@PageableDefault(size = 12) Pageable pageable
+	) {
+		return recommendationService.findSimilarProductList(productPostId, pageable);
+	}
 
-	// TODO: 다른 고객이 해당 상품과 함께 본 상품 조회 API
-	//  - 엔드포인트: GET /api/product-posts/search/{postId}/viewed-together
-    /*
-    @GetMapping("/{postId}/also-viewed")
-    public List<ProductPostSearchResponse> getAlsoViewedProductPosts(...) { ... }
-    */
+	/**
+	 * 판매자의 다른 상품 추천 API
+	 * - 같은 판매자가 판매 중인 다른 상품 추천
+	 *
+	 * @param productPostId 기준 상품 ID
+	 * @param pageable 페이징 정보, size: 12(default)
+	 * @return 판매자의 다른 상품 목록
+	 */
+	@HidePageableSort
+	@GetSellerProductsApiDocs
+	@GetMapping("/{productPostId}/by-seller")
+	public PageResponse<List<ProductPostSearchResponse>> getSellerProductList(
+		@PathVariable String productPostId,
+		@PageableDefault(size = 12) Pageable pageable
+	) {
+		return recommendationService.getSellerProductList(productPostId, pageable);
+	}
 
-	// TODO: 오늘의 추천 상품 조회 API
-	//  - 엔드포인트: GET /api/product-posts/search/recommendations/today
-    /*
-    @GetMapping("/recommendations/today")
-    public List<ProductPostSearchResponse> getTodayRecommendations(...) { ... }
-    */
+	/**
+	 * 오늘의 추천 상품 API
+	 * - 최근 3일(72시간) 내 등록된 상품 중 인기 상품 선정
+	 * - 요청 파라메터에 카테고리 입력 시 해당 카테고리의 인기상품 검색 가능
+	 *
+	 * @param category 카테고리명 (선택)
+	 * @param pageable 페이징 정보, size: 12(default)
+	 * @return 오늘의 추천 상품 목록
+	 */
+	@HidePageableSort
+	@GetDailyRecommendationApiDocs
+	@GetMapping("/daily")
+	public PageResponse<List<ProductPostSearchResponse>> getDailyProductList(
+		@RequestParam(defaultValue = "ALL") String category,
+		@PageableDefault(size = 12) Pageable pageable
+	) {
+		return recommendationService.getDailyBestProductList(category, pageable);
+	}
 
 }

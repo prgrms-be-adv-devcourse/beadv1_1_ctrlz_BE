@@ -51,7 +51,7 @@ public class ProductPostMapper {
 
 		return ProductPostDescription.builder()
 			.id(productPost.getId())
-			.nickName(sellerNickname)
+			.nickname(sellerNickname)
 			.name(productPost.getName())
 			.title(productPost.getTitle())
 			.description(productPost.getDescription())

@@ -99,6 +99,12 @@ dependencies {
 
     // JSON 직렬화/역직렬화용
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // SpringDoc (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+    // https://mvnrepository.com/artifact/com.github.f4b6a3/uuid-creator
+    // UUID creator (UUIDv7 등 생성 가능)
+    implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 }
 
 dependencyManagement {

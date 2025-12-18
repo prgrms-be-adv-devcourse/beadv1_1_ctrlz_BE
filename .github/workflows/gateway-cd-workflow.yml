@@ -29,7 +29,7 @@ jobs:
       service-name: gateway-service-app
       service-dir: .
       secret-dir: gateway-service
-      file-name: gateway-service.dockerfile
+      file-name: docker/gateway-service.dockerfile
 
   deploying:
     needs: releasing

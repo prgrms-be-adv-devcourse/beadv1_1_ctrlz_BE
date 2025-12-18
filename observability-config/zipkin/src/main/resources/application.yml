@@ -2,8 +2,9 @@ spring:
   application:
     name: zipkin
 
-  profiles:
-    active: local
+  config:
+    activate:
+      on-profile: local
 
 management:
   tracing:
@@ -26,29 +27,47 @@ management:
     web:
       exposure:
         include: "*"
-
 ---
 spring:
-  profiles:
-    active: prod
+  config:
+    activate:
+      on-profile: me
 
 management:
   tracing:
     sampling:
-      probability: 1.0
+      probability: 0.8
 
     propagation:
       consume: b3
       produce: b3
       type: b3
-
     brave:
       span-joining-supported: true
-
   zipkin:
     sender:
-      type: kafka # 이 설정은 Spring Boot 3.x+의 micrometer-tracing에서는 직접 지원하지 않을 수 있습니다.
+      type: kafka
     kafka:
       topic: zipkin
+    tracing:
+      endpoint: http://192.168.200.100:9411/api/v2/spans
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+management:
+  tracing:
+    sampling:
+      probability: 0.8
+
+    propagation:
+      consume: b3
+      produce: b3
+      type: b3
+    brave:
+      span-joining-supported: true
+  zipkin:
     tracing:
       endpoint: http://zipkin-svc:9411/api/v2/spans

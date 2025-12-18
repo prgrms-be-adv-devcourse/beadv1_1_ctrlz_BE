@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,13 +13,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.common.model.web.BaseResponse;
-import com.domainservice.domain.search.service.SearchWordRedisService;
-import com.domainservice.domain.search.service.dto.request.Prefix;
+import com.domainservice.domain.search.docs.GetAutoCompletionApiDocs;
+import com.domainservice.domain.search.docs.word.GetDailyPopularSearchWordsApiDocs;
+import com.domainservice.domain.search.docs.word.GetTrendSearchWordsApiDocs;
+import com.domainservice.domain.search.docs.word.SaveSearchWordApiDocs;
 import com.domainservice.domain.search.model.dto.response.SearchWordResponse;
 import com.domainservice.domain.search.service.SearchWordElasticService;
+import com.domainservice.domain.search.service.SearchWordRedisService;
+import com.domainservice.domain.search.service.dto.request.Prefix;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Search Word", description = "elasticSearch를 통한 검색어 추천 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/searches")
@@ -33,6 +41,7 @@ public class SearchController {
  	 * @param userId 사용자 id
 	 * @return
 	 */
+	@GetAutoCompletionApiDocs
 	@GetMapping("/suggestion")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getAutoCompletionList(
@@ -55,10 +64,11 @@ public class SearchController {
 	 * @param userId
 	 * @return
 	 */
+	@SaveSearchWordApiDocs
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(
-		@RequestParam String searchWord,
+		@RequestBody String searchWord,
 		@RequestHeader(value = "X-REQUEST-ID", required = false) String userId
 	) {
 
@@ -69,6 +79,7 @@ public class SearchController {
 		);
 	}
 
+	@GetTrendSearchWordsApiDocs
 	@GetMapping("/trend")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getTrendWordList() {
@@ -83,6 +94,7 @@ public class SearchController {
 	 * 일간 인기 검색어 조회.
 	 * @return
 	 */
+	@GetDailyPopularSearchWordsApiDocs
 	@GetMapping("/popular-daily")
 	@ResponseStatus(HttpStatus.OK)
 	public BaseResponse<List<SearchWordResponse>> getDailyPopularWord() {
@@ -98,6 +110,7 @@ public class SearchController {
 	 * @param userId
 	 * @return
 	 */
+	@Hidden // swagger에서 숨김
 	@PostMapping("test")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BaseResponse<Void> addSearchWord(

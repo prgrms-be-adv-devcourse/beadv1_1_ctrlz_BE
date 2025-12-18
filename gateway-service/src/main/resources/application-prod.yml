@@ -5,14 +5,11 @@ spring:
   application:
     name: gateway-service
 
-  logging:
-    config: classpath:logback-prod.xml
-
   data:
     redis:
       port: 6379
-      host: redis-svc
-      password: 1234
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
 
   cloud:
     gateway:
@@ -25,40 +22,108 @@ spring:
       server:
         webflux:
           routes:
+
+            # ============================================
+            # SWAGGER UI 관련
+            # ============================================
+
+            - id: domain-service
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/domain-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/payment-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            - id: account-service
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/account-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            - id: ai-service
+              uri: lb://AI-SERVICE
+              predicates:
+                - Path=/ai-service/v3/api-docs/**
+              filters:
+                - StripPrefix=1
+
+            # ============================================
+            # PUBLIC APIs (인증 불필요)
+            # ============================================
+
+            # 태그 조회
             - id: tag-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/tags
                 - Method=GET
 
+            # 카테고리 조회
             - id: category-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
                 - Path=/api/categories
                 - Method=GET
 
-            - id: tag-search-public
+            # 상품 검색 (공개)
+            - id: post-search-public
               uri: lb://DOMAIN-SERVICE
               predicates:
-                - Path=/api/tags
+                - Path=/api/product-posts/**
+                - Method=GET
+              filters:
+                - name: ProductSearchFilter
+
+            # 검색어 API
+            - id: search-word-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/**
+                - Method=GET,POST
+
+            # 검색어 Redis 테스트
+            - id: search-word-redis-public
+              uri: lb://DOMAIN-SERVICE
+              predicates:
+                - Path=/api/searches/redis-test
+                - Method=GET,DELETE
+
+            # 결제 API
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/success
                 - Method=GET
 
-            - id: category-search-public
-              uri: lb://DOMAIN-SERVICE
+            - id: payment-api-open
+              uri: lb://PAYMENT-SERVICE
               predicates:
-                - Path=/api/categories
+                - Path=/api/payments/fail
                 - Method=GET
 
-            - id: favorite-api-protected
-              uri: lb://DOMAIN-SERVICE
+            - id: payment-api-protected
+              uri: lb://PAYMENT-SERVICE
               predicates:
-                - Path=/api/users/favorites/**
-                - Method=GET,POST,DELETE
+                - Path=/api/payments/**
+                - Method=GET,POST,PATCH,DELETE
               filters:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
 
+            # ============================================
+            # ACCOUNT SERVICE (회원 관련)
+            # ============================================
+
+            # 회원가입 (IP/Token 캡처)
             - id: user-sign-up
               uri: lb://ACCOUNT-SERVICE
               predicates:
@@ -68,27 +133,33 @@ spring:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
 
+            # 회원 정보 조회/수정/삭제 (USER 권한 필요)
             - id: user-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/users/**
-                - Method=GET,PATCH,DELETE
+                - Method=GET,PATCH,DELETE,POST
               filters:
                 - name: AuthenticationFilter
                   args:
                     requiredRole: USER
 
+            # 토큰 재발급 (IP/Token 캡처)
             - id: auth-api-protected
               uri: lb://ACCOUNT-SERVICE
               predicates:
                 - Path=/api/auth/reissue
-                - Method=POST  # CSRF 방어를 위해 POST 사용
-
+                - Method=POST
               filters:
                 - name: AccessTokenCaptureFilter
                 - name: IpCaptureFilter
                 - name: ReissueTokenFilter
 
+            # ============================================
+            # DOMAIN SERVICE (상품/주문/장바구니)
+            # ============================================
+
+            # 상품 등록/수정/삭제 (SELLER 권한 필요)
             - id: post-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -99,6 +170,7 @@ spring:
                   args:
                     requiredRole: SELLER
 
+            # 장바구니 (USER 권한 필요)
             - id: cart-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -109,8 +181,15 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 예치금 (USER 권한 필요)
+            - id: deposit-api-open
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/deposits/charge,/api/deposits/success,/api/deposits/fail
+                - Method=GET
+
             - id: deposit-api-protected
-              uri: lb://DOMAIN-SERVICE
+              uri: lb://PAYMENT-SERVICE
               predicates:
                 - Path=/api/deposits/**
                 - Method=GET,POST
@@ -119,6 +198,7 @@ spring:
                   args:
                     requiredRole: USER
 
+            # 주문 (USER 권한 필요)
             - id: order-api-protected
               uri: lb://DOMAIN-SERVICE
               predicates:
@@ -129,32 +209,31 @@ spring:
                   args:
                     requiredRole: USER
 
-            - id: payment-api-open
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/payments/**
-                - Method=GET,POST,PATCH,DELETE
+            # ============================================
+            # AI SERVICE (추천 시스템)
+            # ============================================
 
-            - id: post-search-public
-              uri: lb://DOMAIN-SERVICE
+            # SSE 스트리밍 (USER 권한 필요)
+            - id: ai-service-sse
+              uri: lb://AI-SERVICE
               predicates:
-                - Path=/api/product-posts/**
+                - Path=/sse/**
                 - Method=GET
               filters:
-                - name: ProductSearchFilter
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 
-            - id: search-word-public
-              uri: lb://DOMAIN-SERVICE
+            # 추천 API (USER 권한 필요)
+            - id: ai-service-polling
+              uri: lb://AI-SERVICE
               predicates:
-                - Path=/api/searches/**
+                - Path=/api/recommendations/**
                 - Method=GET,POST
-
-            - id: search-word-redis-public
-              uri: lb://DOMAIN-SERVICE
-              predicates:
-                - Path=/api/searches/redis-test
-                - Method=GET,DELETE
-
+              filters:
+                - name: AuthenticationFilter
+                  args:
+                    requiredRole: USER
 services:
   account:
     url: lb://ACCOUNT-SERVICE
@@ -170,4 +249,20 @@ eureka:
 
 custom:
   # 수정 필요
-  redirect-url: https://api.yeongeun.chlab.org/
+  redirect-url: https://yeongeun.vercel.app
+
+logging:
+  config: classpath:logback-prod.xml
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: domain-service
+        url: /domain-service/v3/api-docs
+      - name: payment-service
+        url: /payment-service/v3/api-docs
+      - name: account-service
+        url: /account-service/v3/api-docs
+      - name: ai-service
+        url: /ai-service/v3/api-docs
+    path: /swagger-ui.html

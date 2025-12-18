@@ -1,0 +1,81 @@
+package com.settlement.controller;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 정산 배치 수동 실행 컨트롤러
+ * 특정 ip만 허용합니다.
+ */
+@Slf4j
+@RestController
+@RequestMapping("/batch/settlement")
+public class SettlementBatchController {
+
+    private final JobLauncher jobLauncher;
+    private final Job settlementJob;
+
+    public SettlementBatchController(
+            JobLauncher jobLauncher,
+            @Qualifier("settlementJob") Job settlementJob) {
+        this.jobLauncher = jobLauncher;
+        this.settlementJob = settlementJob;
+    }
+
+    /**
+     * 정산 배치 수동 실행
+     * 
+     * @param startDate 정산 시작일 (없으면 전월 1일)
+     * @param endDate   정산 종료일 (없으면 전월 마지막날)
+     * @return 실행 결과
+     */
+    @PostMapping("/manual")
+    public ResponseEntity<String> runSettlementBatch(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+
+        try {
+
+            LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+            LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+
+            LocalDateTime startDateTime = start.atStartOfDay();
+            LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
+
+            log.info("정산 배치 수동 실행 요청 - 정산 기간: {} ~ {}", startDateTime, endDateTime);
+
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("startDate", startDateTime.toString())
+                    .addString("endDate", endDateTime.toString())
+                    .addLong("timestamp", System.currentTimeMillis())
+                    .toJobParameters();
+
+            // 배치 실행
+            jobLauncher.run(settlementJob, jobParameters);
+            String message = "정산 배치 실행 완료 - 정산 기간: %s ~ %s".formatted(startDateTime, endDateTime);
+            log.info(message);
+
+            return ResponseEntity.ok(message);
+
+        } catch (Exception e) {
+            log.error("정산 배치 수동 실행 중 오류 발생", e);
+            return ResponseEntity.internalServerError()
+                    .body("정산 배치 실행 실패: " + e.getMessage());
+        }
+    }
+}

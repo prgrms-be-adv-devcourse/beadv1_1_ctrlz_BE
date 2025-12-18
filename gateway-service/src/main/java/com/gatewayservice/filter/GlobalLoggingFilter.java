@@ -26,7 +26,7 @@ public class GlobalLoggingFilter implements GlobalFilter, Ordered {
 
             log.info("[Gateway] {} {} {} {}ms",
                     exchange.getRequest().getMethod(),
-                    exchange.getRequest().getURI(),
+                    exchange.getRequest().getURI().getPath(),
                     exchange.getResponse().getStatusCode(),
                     duration);
         }));

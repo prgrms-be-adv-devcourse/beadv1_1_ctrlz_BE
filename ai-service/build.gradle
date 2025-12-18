@@ -1,0 +1,86 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+ext {
+    springCloudVersion = "2025.0.0"
+    set('springAiVersion', "1.0.3")
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+description = 'ai-service'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    runtimeOnly project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
+
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //ai
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    //vectordb
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-qdrant'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    //eureka
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    //openfeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    //lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    //h2
+    runtimeOnly 'com.h2database:h2'
+
+//    if (project.hasProperty('profile') && project.property('profile') == 'local,secret') {
+    implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+//    }
+
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // SpringDoc (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

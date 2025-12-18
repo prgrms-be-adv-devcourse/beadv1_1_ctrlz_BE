@@ -37,12 +37,12 @@ k8s/
 !**/src/**/*.yaml
 !**/resources/**/*.yaml
 
-# Documentation and misc
-readme.md
-*.md
+# Documentation - 프로젝트 루트의 문서만 제외, src/main/resources는 포함
+/*.md
+/*.png
+/*.webp
 !**/src/**/*.md
-*.png
-*.webp
+!**/src/**/*.txt
 
 # GitHub
 .github/

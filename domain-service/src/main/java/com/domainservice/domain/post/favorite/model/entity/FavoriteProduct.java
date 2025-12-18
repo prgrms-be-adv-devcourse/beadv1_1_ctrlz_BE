@@ -41,8 +41,4 @@ public class FavoriteProduct extends BaseEntity {
 		this.productPost = productPost;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return "favorite-product";
-	}
 }

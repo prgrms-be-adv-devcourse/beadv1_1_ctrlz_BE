@@ -39,6 +39,7 @@ dependencyManagement {
 dependencies {
 
     implementation project(":observability-config:zipkin")
+    implementation project(":observability-config:logging")
     implementation project(':common')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -71,6 +72,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'io.github.openfeign.form:feign-form-spring:3.8.0'
     implementation 'io.github.openfeign:feign-micrometer'    // Feign tracing
+    implementation 'io.github.openfeign:feign-okhttp'
 
     // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-core:$queryDslVersion"
@@ -86,16 +88,15 @@ dependencies {
 
     // mockWebServer
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+
+    // SpringDoc (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
     }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }
 
 tasks.named('test') {

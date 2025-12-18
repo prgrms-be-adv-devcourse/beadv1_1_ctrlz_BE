@@ -61,3 +61,14 @@ CREATE TABLE IF NOT EXISTS zipkin_dependencies (
   `error_count` BIGINT,
   PRIMARY KEY (`day`, `parent`, `child`)
 ) ENGINE=InnoDB ROW_FORMAT=COMPRESSED CHARACTER SET=utf8 COLLATE utf8_general_ci;
+
+USE domain_dev;
+
+CREATE TABLE IF NOT EXISTS user_behavior (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(255),
+    behavior_value VARCHAR(255),
+    behavior_type VARCHAR(50),
+    created_at TIMESTAMP
+);
+

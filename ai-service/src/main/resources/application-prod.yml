@@ -1,0 +1,106 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ai-service
+
+  ai:
+    vectorstore:
+      qdrant:
+        host: ${QDRANT_HOST}
+        port: 6334
+        # api-key: your-api-key  # 필요한 경우 주석 해제
+        collection-name: ${QDRANT_COLLECTION_NAME}
+        initialize-schema: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ai-service-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost, com.aiservice
+        spring.json.type.mapping: com.common.event.productPost.ProductPostUpsertedEvent:com.aiservice.domain.event.ProductPostUpsertedEvent,com.common.event.productPost.ProductPostDeletedEvent:com.aiservice.domain.event.ProductPostDeletedEvent,com.common.event.productPost.ProductPostSearchedEvent:com.aiservice.domain.event.ProductPostSearchedEvent
+        allow.auto.create.topics: false
+        observation:
+          enabled: true
+
+  batch:
+    jdbc:
+      platform: mysql
+
+    job:
+      enabled: false
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto:
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
+        jdbc:
+          batch_size: 1000
+        order_updates: true
+        order_inserts: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-svc:8761/eureka/
+    enabled: true
+
+custom:
+  product-post:
+    topic:
+      event: product-post-events
+
+  recommendation:
+    limit: 3 # 최대 추천 제한 수
+    ttl-hours: 6 # 세션 유지 시간
+
+  config:
+    topic-partitions: 1
+    topic-replications: 1
+
+  feign:
+    url:
+      domain-service: http://domain-svc:8081
+      account-service: http://account-svc:8080
+
+  product:
+    base-url: http://domain-svc:8081/api/products
+    front-url: https://yeongeun.vercel.app/
+
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
+logging:
+  config: classpath:logback-prod.xml

@@ -1,16 +1,9 @@
-application:
-  title: yeongeunMarket
-  version: 1.0
-
 server:
   port: 8081
 
 spring:
   application:
     name: domain-service
-
-  logging:
-    config: classpath:logback-prod.xml
 
   servlet:
     multipart:
@@ -20,17 +13,14 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: jdbc:mysql://mysql-service:3306/${custom.db.database}
-    url: jdbc:mysql://mysql-svc:3306/test_db?rewriteBatchedStatements=true
-    username: admin
-    password: 1234
-  #    username: "${custom.db.username}"
-  #    password: "${custom.db.password}"
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto:
     show-sql: false
     properties:
       hibernate:
@@ -42,16 +32,15 @@ spring:
         order_inserts: true
 
   elasticsearch:
-    uris: http://elasticsearch-svc:9200 # default 지만 명시적으로 작성
+    uris: ${ELASTIC_SEARCH_URL} 
 
   data:
     redis:
       port: 6379
-      host: redis-svc
-      password: 1234
-  #      password: "${REDIS_PASSWORD}"
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
   kafka:
-    bootstrap-servers: kafka-svc:9090
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -65,7 +54,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.common.event.**"
+        spring.json.trusted.packages: com.common.event, com.common.event.productPost
         allow.auto.create.topics: false
         observation:
           enabled: true
@@ -112,3 +101,10 @@ eureka:
       defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
+
+openapi:
+  service:
+    url: https://api.yeongeun.chlab.org
+    
+logging:
+  config: classpath:logback-prod.xml

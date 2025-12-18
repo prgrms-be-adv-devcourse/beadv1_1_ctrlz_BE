@@ -70,9 +70,4 @@ public class Image extends BaseEntity {
 		this.imageTarget = imageTarget;
 	}
 
-	@Override
-	protected String getEntitySuffix() {
-		return this.getClass().getAnnotation(Table.class).name();
-	}
-
 }

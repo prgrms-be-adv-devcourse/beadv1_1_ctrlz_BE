@@ -1,23 +1,21 @@
 package com.domainservice.common.init.data;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.common.model.vo.ProductStatus;
-import com.common.model.vo.TradeStatus;
-import com.domainservice.domain.asset.image.domain.entity.Image;
-import com.domainservice.domain.asset.image.domain.entity.ImageTarget;
-import com.domainservice.domain.asset.image.domain.entity.ImageType;
-import com.domainservice.domain.asset.image.domain.repository.ImageRepository;
+import com.domainservice.common.init.data.util.ResourceMultipartFile;
 import com.domainservice.domain.post.category.service.CategoryService;
-import com.domainservice.domain.post.post.model.entity.ProductPost;
-import com.domainservice.domain.post.post.repository.ProductPostRepository;
-import com.domainservice.domain.post.tag.model.entity.Tag;
-import com.domainservice.domain.post.tag.repository.TagRepository;
+import com.domainservice.domain.post.post.model.dto.request.ProductPostRequest;
+import com.domainservice.domain.post.post.model.enums.ProductStatus;
+import com.domainservice.domain.post.post.service.ProductPostService;
 import com.domainservice.domain.post.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,12 +29,7 @@ public class ProductPostInitializer {
 
     private final CategoryService categoryService;
     private final TagService tagService;
-
-	private final ProductPostRepository productPostRepository;
-	private final ImageRepository imageRepository;
-	private final TagRepository tagRepository;
-
-	private static final String DUMMY_IMAGE_URL = "https://dummy-s3-bucket.com/images/sampleLogo.png";
+    private final ProductPostService productPostService;
 
     private final Random random = new Random();
 
@@ -55,6 +48,7 @@ public class ProductPostInitializer {
             log.warn("태그가 없습니다.");
         }
 
+        // TODO: 테스트용 user 생성 가능해지면 실제 id로 연결
         String[] userIds = {"user-001", "user-002", "user-003", "user-004", "user-005"};
         ProductTemplate[] templates = createTemplates();
 
@@ -66,35 +60,21 @@ public class ProductPostInitializer {
                     ProductTemplate template = templates[random.nextInt(templates.length)];
                     String userId = userIds[random.nextInt(userIds.length)];
 
-					// 1. ProductPost 엔티티 생성
-					ProductPost productPost = ProductPost.builder()
-						.userId(userId)
-						.categoryId(categoryId)
-						.title(template.title())
-						.name(template.name())
-						.price(template.basePrice() + random.nextInt(50000))
-						.description(template.description())
-						.status(getRandomProductStatus())
-						.tradeStatus(TradeStatus.SELLING)
-						.build();
+                    ProductPostRequest request = ProductPostRequest.builder()
+                            .categoryId(categoryId)
+                            .title(template.title())
+                            .name(template.name())
+                            .price(template.basePrice() + random.nextInt(50000))
+                            .description(template.description())
+                            .status(getRandomProductStatus())
+                            .tagIds(getRandomTagIds(allTagIds))
+                            .build();
 
-					// 2. 태그 연결
-					List<String> randomTagIds = getRandomTagIds(allTagIds);
-					if (!randomTagIds.isEmpty()) {
-						List<Tag> tags = tagRepository.findAllById(randomTagIds);
-						// ProductPost 엔티티에 있는 편의 메서드 활용
-						productPost.replaceTags(tags);
-					}
+                    // 샘플 이미지 로드 및 업로드
+                    MultipartFile sampleImage = loadSampleImage();
+                    productPostService.createProductPost(request, userId, List.of(sampleImage));
 
-					// 3. 더미 이미지 생성 및 연결 (파일 업로드 X)
-					List<Image> dummyImages = createDummyImages();
-					// ProductPost 엔티티에 있는 편의 메서드 활용
-					productPost.addImages(dummyImages);
-
-					// 4. 저장
-					productPostRepository.save(productPost);
-
-					totalCount++;
+                    totalCount++;
 
                 } catch (Exception e) {
                     log.warn("상품 생성 실패: {}", e.getMessage());
@@ -105,26 +85,27 @@ public class ProductPostInitializer {
         log.info("상품 게시글 {}개 초기화 완료", totalCount);
     }
 
-	/**
-	 * S3 업로드 없이 DB에 저장될 더미 Image 엔티티를 생성합니다.
-	 */
-	private List<Image> createDummyImages() {
-		Image dummyImage = Image.builder()
-			.originalFileName("sampleLogo.png")
-			.storedFileName("dummy_sampleLogo.png")
-			.s3Url(DUMMY_IMAGE_URL)
-			.s3Key("PRODUCT/dummy_sampleLogo.png")
-			.originalFileSize(1024L)
-			.originalContentType("image/png")
-			.compressedFileSize(512L)
-			.convertedContentType(ImageType.WEBP)
-			.imageTarget(ImageTarget.PRODUCT)
-			.build();
+    /**
+     * resources/static/images/sampleLogo.png 파일을 MultipartFile로 로드합니다.
+     */
+    private MultipartFile loadSampleImage() throws IOException {
+        ClassPathResource resource = new ClassPathResource("static/images/sampleLogo.png");
 
-		// Cascade 설정 여부에 따라 필요할 수도 있고 없을 수도 있음. 안전하게 저장 후 반환
-		Image savedImage = imageRepository.save(dummyImage);
-		return List.of(savedImage);
-	}
+        if (!resource.exists()) {
+            throw new IOException("샘플 이미지 파일이 존재하지 않습니다: static/images/sampleLogo.png");
+        }
+
+        try (InputStream inputStream = resource.getInputStream()) {
+            byte[] content = inputStream.readAllBytes();
+
+            return new ResourceMultipartFile(
+                    "images",
+                    "sampleLogo.png",
+                    "image/png",
+                    content
+            );
+        }
+    }
 
     private ProductStatus getRandomProductStatus() {
         int rand = random.nextInt(10);

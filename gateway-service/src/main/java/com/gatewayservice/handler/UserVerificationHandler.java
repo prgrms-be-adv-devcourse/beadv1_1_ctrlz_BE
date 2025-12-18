@@ -24,6 +24,10 @@ public class UserVerificationHandler {
 	private final RedisTemplate<String, String> redisTemplate;
 
 	public void addTokenAndIp(String token, String ip) {
+		String oldToken = redisTemplate.opsForValue().get(IP_KEY + ip);
+		if (oldToken != null) {
+			redisTemplate.delete(IP_KEY + ip);
+		}
 		redisTemplate.opsForValue().set(IP_KEY + ip, token, expiration + EXPIRATION_LEEWAY, TimeUnit.MILLISECONDS);
 	}
 
