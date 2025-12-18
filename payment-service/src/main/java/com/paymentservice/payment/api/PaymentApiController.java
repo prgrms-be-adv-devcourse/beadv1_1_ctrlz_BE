@@ -52,6 +52,7 @@ public class PaymentApiController {
         @RequestBody PaymentConfirmRequest request,
         @RequestHeader(value = "X-REQUEST-ID") String userId
     ) {
+        TossApprovalResponse approve = null;
         try {
             // 멱등성체크
             if (paymentRepository.existsByOrderId(request.orderId())) {
@@ -62,7 +63,7 @@ public class PaymentApiController {
             // 사전 검증, 예치금 조회
             Deposit deposit = paymentService.validateBeforeApprove(request, userId);
             // 토스 외부 서버
-            TossApprovalResponse approve = paymentTossClient.approve(request);
+            approve = paymentTossClient.approve(request);
             // 승인 결과 db저장, 이벤트 발행
             PaymentResponse response =
                 paymentService.completeTossPayment(request, userId, deposit, approve);
@@ -70,6 +71,13 @@ public class PaymentApiController {
             return new BaseResponse<>(response, "결제 처리 완료");
         } catch (Exception e) {
             log.error("결제 처리 오류", e);
+
+            // 토스 승인은 땄는데(approve != null), 내부 로직에서 터진 경우 -> 결제 취소
+            if (approve != null) {
+                log.warn("내부 처리 실패로 인한 결제 취소 진행: orderId={}, paymentKey={}", request.orderId(), approve.paymentKey());
+                paymentTossClient.cancelPayment(approve.paymentKey(), "Internal Server Error: " + e.getMessage());
+            }
+
             return new BaseResponse<>(null, "결제 실패: " + e.getMessage());
         }
     }

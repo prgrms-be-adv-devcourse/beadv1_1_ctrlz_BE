@@ -105,6 +105,18 @@ public class PaymentTossClient {
         return response;
     }
 
+    // Entity없이 키값 만으로 취소하는 기능
+    public void cancelPayment(String paymentKey, String reason) {
+        try {
+            TossCancelRequest cancelRequest = new TossCancelRequest(null, reason); // 금액이 null이면 전액 취소
+            paymentFeignClient.refundPayment(paymentKey, cancelRequest, authHeader());
+            log.info("결제 취소(보상 트랜잭션) 성공: paymentKey={}, reason={}", paymentKey, reason);
+        } catch (Exception e) {
+            log.error("결제 취소(보상 트랜잭션) 실패 - 수동 환불 필요: paymentKey={}, reason={}", paymentKey, reason, e);
+            // 취소 실패는 Exception을 던지지 않고 로그만 남겨서 원본 에러(Exception e)가 묻히지 않게 함
+        }
+    }
+
     private String authHeader() {
         String key = (secretApiKey != null) ? secretApiKey : "test_secret_key";
         return "Basic " + Base64.getEncoder()
