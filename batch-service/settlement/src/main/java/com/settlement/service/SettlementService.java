@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.common.exception.CustomException;
+import com.settlement.common.exception.SettlementException;
 import com.settlement.domain.entity.Settlement;
 import com.settlement.dto.SettlementResponse;
 import com.settlement.repository.SettlementRepository;
@@ -26,7 +26,7 @@ public class SettlementService {
 	@Transactional(readOnly = true)
 	public SettlementResponse getSettlement(String id) {
 		Settlement settlement = settlementRepository.findById(id)
-				.orElseThrow(() -> new CustomException("정산 내역을 찾을 수 없습니다. id=" + id));
+				.orElseThrow(() -> new SettlementException("정산 내역을 찾을 수 없습니다. id=" + id));
 		return SettlementResponse.from(settlement);
 	}
 
@@ -47,7 +47,7 @@ public class SettlementService {
 	@Transactional
 	public void deleteSettlement(String id) {
 		Settlement settlement = settlementRepository.findById(id)
-				.orElseThrow(() -> new CustomException("정산 내역을 찾을 수 없습니다. id=" + id));
+				.orElseThrow(() -> new SettlementException("정산 내역을 찾을 수 없습니다. id=" + id));
 		settlement.delete();
 		log.info("정산 삭제 처리 완료 id={}", id);
 	}

@@ -5,7 +5,9 @@ import java.net.SocketTimeoutException;
 
 import javax.sql.DataSource;
 
+import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
@@ -16,9 +18,10 @@ import org.springframework.dao.TransientDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.settlement.job.dto.SettlementSourceDto;
-import com.settlement.job.dto.SettlementVO;
+import com.settlement.domain.entity.Settlement;
 import com.settlement.job.processor.SettlementCreateProcessor;
 import com.settlement.job.reader.PaymentSettlementItemReader;
+import com.settlement.job.listener.SettlementStepListener;
 
 import feign.FeignException;
 import feign.RetryableException;
@@ -39,15 +42,18 @@ public class SettlementCreateStepConfiguration {
 
     private final PaymentSettlementItemReader paymentSettlementItemReader;
     private final SettlementCreateProcessor settlementCreateProcessor;
+    private final SettlementStepListener settlementStepListener;
 
     @Bean
     public Step settlementCreateStep() {
         log.info("SettlementCreateStep 설정: 재시도 {}회, 스킵 {}회", RETRY_LIMIT, SKIP_LIMIT);
         return new StepBuilder("settlementCreateStep", jobRepository)
-                .<SettlementSourceDto, SettlementVO>chunk(1000, transactionManager)
+                .<SettlementSourceDto, Settlement>chunk(1000, transactionManager)
                 .reader(paymentSettlementItemReader)
                 .processor(settlementCreateProcessor)
                 .writer(settlementCreateWriter())
+                .listener((StepExecutionListener) settlementStepListener)
+                .listener((ChunkListener) settlementStepListener)
                 // 재시도 설정: 네트워크 오류 및 일시적 DB 오류 시 재시도
                 .faultTolerant()
                 .retryLimit(RETRY_LIMIT)
@@ -64,12 +70,12 @@ public class SettlementCreateStepConfiguration {
     }
 
     @Bean
-    public JdbcBatchItemWriter<SettlementVO> settlementCreateWriter() {
-        return new JdbcBatchItemWriterBuilder<SettlementVO>()
+    public JdbcBatchItemWriter<Settlement> settlementCreateWriter() {
+        return new JdbcBatchItemWriterBuilder<Settlement>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO settlements (id, order_item_id, user_id, amount, fee, net_amount, pay_type, status, settled_at, created_at, updated_at) "
+                .sql("INSERT INTO settlements (id, order_id, user_id, amount, fee, net_amount, pay_type, status, settled_at, created_at, updated_at) "
                         +
-                        "VALUES (:id, :orderItemId, :userId, :amount, :fee, :netAmount, :payType, :status, :settledAt, :createdAt, :updatedAt)")
+                        "VALUES (:id, :orderId, :userId, :amount, :fee, :netAmount, :payType, :settlementStatus, :settledAt, :createdAt, :updatedAt)")
                 .beanMapped()
                 .build();
     }

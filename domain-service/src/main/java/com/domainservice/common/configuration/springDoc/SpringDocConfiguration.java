@@ -19,7 +19,7 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class SpringDocConfiguration {
 
-	@Value("${openapi.service.url}")
+	@Value("${openapi.service.url:http:localhost:8082}")
 	private String gatewayUrl;
 
 	@Value("${server.port}")

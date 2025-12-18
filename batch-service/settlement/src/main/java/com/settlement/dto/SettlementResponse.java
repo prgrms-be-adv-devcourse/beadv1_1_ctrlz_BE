@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SettlementResponse {
     private String id;
-    private String orderItemId;
+    private String orderId;
     private String userId;
     private BigDecimal amount;
     private BigDecimal fee;
@@ -30,7 +30,7 @@ public class SettlementResponse {
     public static SettlementResponse from(Settlement settlement) {
         return SettlementResponse.builder()
                 .id(settlement.getId())
-                .orderItemId(settlement.getOrderItemId())
+                .orderId(settlement.getOrderId())
                 .userId(settlement.getUserId())
                 .amount(settlement.getAmount())
                 .fee(settlement.getFee())

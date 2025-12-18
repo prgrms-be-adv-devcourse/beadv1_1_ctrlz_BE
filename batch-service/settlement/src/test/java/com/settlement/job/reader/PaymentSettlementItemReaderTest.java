@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.settlement.common.feign.PaymentFeignClient;
-import com.common.model.web.BaseResponse;
+import com.settlement.common.dto.BaseResponse;
 import com.settlement.dto.PaymentResponse;
 import com.settlement.job.dto.SettlementSourceDto;
 
@@ -41,7 +41,7 @@ class PaymentSettlementItemReaderTest {
                 "orderItem-1",
                 "user-1",
                 new BigDecimal("10000"),
-                "PAID",
+                "SUCCESS",
                 LocalDateTime.now(),
                 "TOSS");
         given(paymentFeignClient.getPaymentsForSettlement(start, end))

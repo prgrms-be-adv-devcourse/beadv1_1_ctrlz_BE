@@ -9,15 +9,14 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.settlement.domain.entity.SettlementStatus;
-import com.settlement.job.dto.SettlementVO;
+import com.settlement.domain.entity.Settlement;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 @StepScope
-public class SettlementFeeProcessor implements ItemProcessor<SettlementVO, SettlementVO> {
+public class SettlementFeeProcessor implements ItemProcessor<Settlement, Settlement> {
 
 	@Value("${settlement.fee.rate.toss:0.03}") // 카드 수수료율 (기본 3%)
 	private BigDecimal tossRate;
@@ -29,12 +28,11 @@ public class SettlementFeeProcessor implements ItemProcessor<SettlementVO, Settl
 	private BigDecimal depositRate;
 
 	@Override
-	public SettlementVO process(SettlementVO item) {
+	public Settlement process(Settlement item) {
 		log.info("정산 수수료 계산 - ID: {}, PayType: {}", item.getId(), item.getPayType());
 
 		item.calculateFee(tossRate, depositTossRate, depositRate);
-		item.setStatus(SettlementStatus.COMPLETED.name());
-		item.setSettledAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+		item.complete(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
 
 		return item;
 	}
