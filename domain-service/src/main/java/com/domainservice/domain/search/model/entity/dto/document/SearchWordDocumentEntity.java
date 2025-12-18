@@ -1,6 +1,6 @@
 package com.domainservice.domain.search.model.entity.dto.document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
@@ -44,20 +44,20 @@ public class SearchWordDocumentEntity {
 	@Field(
 		name = "created_at",
 		type = FieldType.Date,
-		pattern = "yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+		pattern = "yyyy-MM-dd||yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
 	)
-	private LocalDateTime createdAt;
+	private LocalDate createdAt;
 
 	@Field(
 		name = "recent_searched_at",
 		type = FieldType.Date,
-		pattern = "yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+		pattern = "yyyy-MM-dd||yyyy-MM-dd'T'HH:mm:ss||yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
 	)
-	private LocalDateTime recentSearchedAt;
+	private LocalDate recentSearchedAt;
 
 	@Builder
-	private SearchWordDocumentEntity(String originValue, String qwertyInput, LocalDateTime recentSearchedAt,
-		LocalDateTime createdAt) {
+	private SearchWordDocumentEntity(String originValue, String qwertyInput, LocalDate recentSearchedAt,
+		LocalDate createdAt) {
 		this.originValue = originValue;
 		this.qwertyInput = qwertyInput;
 		this.recentSearchedAt = recentSearchedAt;
@@ -68,12 +68,14 @@ public class SearchWordDocumentEntity {
 		SearchWordLog log
 	) {
 		String originValue = log.getWord();
-		LocalDateTime createdAt = log.getCreatedAt() == null ? log.getSearchedAt() : log.getCreatedAt();
+		LocalDate createdAt = (log.getCreatedAt() != null
+			? log.getCreatedAt()
+			: log.getSearchedAt()).toLocalDate();
 		return SearchWordDocumentEntity.builder()
 			.originValue(originValue)
 			.qwertyInput(PrefixConverter.convertToQwertyInput(originValue))
 			.createdAt(createdAt)
-			.recentSearchedAt(log.getSearchedAt())
+			.recentSearchedAt(log.getSearchedAt().toLocalDate())
 			.build();
 	}
 
