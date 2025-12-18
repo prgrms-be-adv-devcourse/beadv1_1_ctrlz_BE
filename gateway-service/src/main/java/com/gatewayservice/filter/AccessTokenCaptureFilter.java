@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 import com.gatewayservice.handler.UserVerificationHandler;
 import com.gatewayservice.utils.ServletRequestUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 public class AccessTokenCaptureFilter
 	extends AbstractGatewayFilterFactory<AccessTokenCaptureFilter.Config>
@@ -41,7 +43,7 @@ public class AccessTokenCaptureFilter
 			if (accessToken == null) {
 				return;
 			}
-
+			log.info("accessToken {}", accessToken);
 			userVerificationHandler.addTokenAndIp(accessToken, requestIp);
 		}));
 	}
