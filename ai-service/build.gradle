@@ -26,6 +26,7 @@ dependencies {
     runtimeOnly project(":observability-config:zipkin")
     implementation project(":observability-config:logging")
 
+
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     //ai
@@ -61,9 +62,8 @@ dependencies {
     //h2
     runtimeOnly 'com.h2database:h2'
 
-
-//    if (project.hasProperty('profile') && project.property('profile') == 'local') {
-//        implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+//    if (project.hasProperty('profile') && project.property('profile') == 'local,secret') {
+    implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
 //    }
 
     implementation 'com.github.ben-manes.caffeine:caffeine'

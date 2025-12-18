@@ -9,12 +9,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.aiservice.application.SseCommunicationService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Deprecated 프론트엔드 진행 작업에 따라 사용 여부가 달라집니다.
  */
+@Hidden
 @Slf4j
 @RestController
 @RequestMapping("/sse")

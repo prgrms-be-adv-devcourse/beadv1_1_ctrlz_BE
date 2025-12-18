@@ -106,6 +106,13 @@ public class PaymentService {
     public PaymentResponse completeTossPayment(PaymentConfirmRequest request, String userId,
         Deposit deposit, TossApprovalResponse approve) {
 
+        // 2차 검증: 토스에서 승인된 금액이 요청 금액과 일치하는지 확인
+        // 프론트에서 금액을 다른 금액을 보냈다면 여기서 걸러지고 Exception 발생 -> Controller에서 catch -> cancelPayment 호출됨
+        BigDecimal sumAmount = request.totalAmount().add(request.usedDepositAmount());
+        if (approve.amount().compareTo(sumAmount) != 0) {
+            throw new PaymentFailedException();
+        }
+
         try {
             // DB 저장 및 예치금 차감
             BigDecimal usedDepositAmount = approve.depositUsedAmount();     // deposit 사용 금액
@@ -147,7 +154,8 @@ public class PaymentService {
 
             return PaymentResponse.from(saved);
         } catch (Exception e) {
-            log.error("[토스 결제 실패] orderId={}, userId={}, paymentKey={}, request={}",
+            // 여기서 발생한 에러는 controller로 전파되어야 취소 로직이 수행
+            log.error("[토스 결제 후처리 실패] orderId={}, userId={}, paymentKey={}, request={}",
                 request.orderId(), userId, request.paymentKey(), request, e);
             throw new PaymentFailedException();
         }

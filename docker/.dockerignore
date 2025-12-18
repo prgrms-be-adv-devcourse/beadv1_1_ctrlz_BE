@@ -37,10 +37,12 @@ k8s/
 !**/src/**/*.yaml
 !**/resources/**/*.yaml
 
-# Documentation and misc
-readme.md
+# Documentation and misc - BUT keep source code docs
 *.md
 !**/src/**/*.md
+!**/resources/**/*.md
+!**/docs/**/*.md
+!**/docs/**/*.txt
 *.png
 *.webp
 

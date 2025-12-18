@@ -49,6 +49,9 @@ custom:
     topic:
       command: deposit-command
 
+  feign:
+    domain-service: http://localhost:8081
+
   redirectUrl: http://localhost:8080
 
   image:

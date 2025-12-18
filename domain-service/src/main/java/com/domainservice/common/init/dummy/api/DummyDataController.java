@@ -12,10 +12,12 @@ import com.domainservice.common.init.dummy.dto.DummyResultResponse;
 import com.domainservice.common.init.dummy.service.DummyDataGenerator;
 import com.domainservice.common.init.dummy.service.DummyDataService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Hidden // swagger 비노출
 @RestController
 @RequestMapping("/api/admin/dummy")
 @RequiredArgsConstructor

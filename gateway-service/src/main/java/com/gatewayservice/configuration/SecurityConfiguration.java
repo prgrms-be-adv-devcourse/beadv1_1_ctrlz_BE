@@ -54,7 +54,7 @@ public class SecurityConfiguration {
 		CorsConfiguration config = new CorsConfiguration();
 
 		// 프론트 실제 origin
-		config.setAllowedOrigins(List.of("http://localhost:8080","http://localhost:3000", "https://yeongeun.vercel.app"));
+		config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:3000", "https://yeongeun.vercel.app"));
 
 		// 허용 HTTP 메서드
 		config.setAllowedMethods(List.of(

@@ -102,12 +102,16 @@ custom:
     topic:
       command: deposit-command
 
+  feign:
+    domain-service: http://localhost:8081
+
   image:
     allowed-extension: jpg,jpeg,png,webp
     max-size: 10485760 # 10mb
     default: https://team03-ctrlz-5775efc3-b7e8.s3.ap-northeast-2.amazonaws.com/images/USER/defualt-profile-image.png
 
-  redirectUrl: http://localhost:8000
+
+#  redirectUrl: http://localhost:8000
 
 logging:
   config: classpath:logback-local.xml
