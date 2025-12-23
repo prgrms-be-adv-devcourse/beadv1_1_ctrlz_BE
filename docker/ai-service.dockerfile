@@ -1,16 +1,19 @@
+# syntax=docker/dockerfile:1.4
+# BuildKit 고급 기능 활성화 (--link 등)
+
 # Build stage
 FROM gradle:jdk21 AS build
 WORKDIR /app
 
 # gradle wrapper 및 설정 파일들만 '먼저' 복사
-COPY ai-service/gradlew ai-service/gradlew.bat ./ai-service/
-COPY ai-service/gradle ./ai-service/gradle
-COPY ai-service/settings.gradle ./ai-service/
+COPY --link ai-service/gradlew ai-service/gradlew.bat ./ai-service/
+COPY --link ai-service/gradle ./ai-service/gradle
+COPY --link ai-service/settings.gradle ./ai-service/
 
 # 각 모듈의 build.gradle 파일 복사
-COPY ai-service/build.gradle ./ai-service/
-COPY observability-config/logging/build.gradle ./observability-config/logging/
-COPY observability-config/zipkin/build.gradle ./observability-config/zipkin/
+COPY --link ai-service/build.gradle ./ai-service/
+COPY --link observability-config/logging/build.gradle ./observability-config/logging/
+COPY --link observability-config/zipkin/build.gradle ./observability-config/zipkin/
 
 #의존성 다운로드
 WORKDIR /app/ai-service
@@ -19,8 +22,8 @@ RUN ./gradlew dependencies --no-daemon
 
 # 나머지 소스 코드 복사
 WORKDIR /app
-COPY observability-config ./observability-config
-COPY ai-service/src ./ai-service/src
+COPY --link observability-config ./observability-config
+COPY --link ai-service/src ./ai-service/src
 
 #빌드
 WORKDIR /app/ai-service
@@ -32,6 +35,6 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /app/ai-service/build/libs/*.jar app.jar
+COPY --link --from=build /app/ai-service/build/libs/*.jar app.jar
 
 ENTRYPOINT ["java", "-Xms512m", "-Xmx512m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]

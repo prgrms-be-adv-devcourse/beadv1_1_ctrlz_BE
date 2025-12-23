@@ -1,15 +1,18 @@
+# syntax=docker/dockerfile:1.4
+# BuildKit 고급 기능 활성화 (--link 등)
+
 # Build stage
 FROM gradle:jdk21 AS build
 WORKDIR /app
 
 # gradle wrapper 및 설정 파일들만 '먼저' 복사
-COPY discovery-service/gradlew discovery-service/gradlew.bat ./discovery-service/
-COPY discovery-service/gradle ./discovery-service/gradle
-COPY discovery-service/settings.gradle ./discovery-service/
+COPY --link discovery-service/gradlew discovery-service/gradlew.bat ./discovery-service/
+COPY --link discovery-service/gradle ./discovery-service/gradle
+COPY --link discovery-service/settings.gradle ./discovery-service/
 
 # 각 모듈의 build.gradle 파일 복사
-COPY discovery-service/build.gradle ./discovery-service/
-COPY observability-config/logging/build.gradle ./observability-config/logging/
+COPY --link discovery-service/build.gradle ./discovery-service/
+COPY --link observability-config/logging/build.gradle ./observability-config/logging/
 
 #의존성 다운로드
 WORKDIR /app/discovery-service
@@ -18,8 +21,8 @@ RUN ./gradlew dependencies --no-daemon || true
 
 # 나머지 소스 코드 복사
 WORKDIR /app
-COPY observability-config ./observability-config
-COPY discovery-service/src ./discovery-service/src
+COPY --link observability-config ./observability-config
+COPY --link discovery-service/src ./discovery-service/src
 
 #빌드
 WORKDIR /app/discovery-service
@@ -31,6 +34,6 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /app/discovery-service/build/libs/*.jar app.jar
+COPY --link --from=build /app/discovery-service/build/libs/*.jar app.jar
 
 ENTRYPOINT ["java", "-Xms512m", "-Xmx512m", "-jar", "-Dspring.profiles.active=prod,secret", "app.jar"]
