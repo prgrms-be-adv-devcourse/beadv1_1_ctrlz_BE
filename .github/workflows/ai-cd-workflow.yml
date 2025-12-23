@@ -42,6 +42,7 @@ jobs:
       secret-dir: ai-service
       file-name: docker/ai-service.dockerfile
 
+
 #  deploying:
 #    needs: releasing
 #    uses: ./.github/workflows/deploy-workflow.yml

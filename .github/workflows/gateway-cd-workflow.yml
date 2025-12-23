@@ -31,6 +31,7 @@ jobs:
       secret-dir: gateway-service
       file-name: docker/gateway-service.dockerfile
 
+
 #  deploying:
 #    needs: releasing
 #    uses: ./.github/workflows/deploy-workflow.yml

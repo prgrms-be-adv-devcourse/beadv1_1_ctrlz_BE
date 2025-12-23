@@ -43,15 +43,15 @@ jobs:
       secret-dir: domain-service
       file-name: docker/domain-service.dockerfile
 
-  deploying:
-    needs: releasing
-    uses: ./.github/workflows/deploy-workflow.yml
-    secrets: inherit
-    with:
-      pod-name: domain-service-app # pod랑 같은 이름
-      deploy-name: domain-deploy # deployment랑 같은 이름
-      label-name: domain # pod 라벨 이름
-      image-tag: ${{ needs.releasing.outputs.tag_name }}
-
+#  deploying:
+#    needs: releasing
+#    uses: ./.github/workflows/deploy-workflow.yml
+#    secrets: inherit
+#    with:
+#      pod-name: domain-service-app # pod랑 같은 이름
+#      deploy-name: domain-deploy # deployment랑 같은 이름
+#      label-name: domain # pod 라벨 이름
+#      image-tag: ${{ needs.releasing.outputs.tag_name }}
+#
 
 
