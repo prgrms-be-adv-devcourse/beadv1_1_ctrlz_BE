@@ -19,6 +19,10 @@ import com.domainservice.domain.post.post.exception.ProductPostException;
 import com.domainservice.domain.review.exception.ReviewException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
+import io.sentry.Sentry;
+import io.sentry.SentryEvent;
+import io.sentry.SentryLevel;
+import io.sentry.protocol.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,9 +37,15 @@ public class GlobalExceptionHandler {
 		e.printStackTrace();
 		log.info("error={}", e);
 
-		ErrorResponse response = ErrorResponse.of(e.getStatus().value(), e.getMessage());
-		return ResponseEntity.status(e.getStatus()).body(response);
+		// 500번대 에러인 경우 Sentry에 캡처
+		int statusCode = e.getStatus().value();
 
+		if (statusCode >= 500 && statusCode < 600) {
+			captureSentryException(e, statusCode);
+		}
+
+		ErrorResponse response = ErrorResponse.of(statusCode, e.getMessage());
+		return ResponseEntity.status(e.getStatus()).body(response);
 	}
 
 	/**
@@ -43,10 +53,17 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(ReviewException.class)
 	public ResponseEntity<ErrorResponse> handleReviewException(ReviewException e) {
-		e.printStackTrace();
-		int status = e.getStatus().value();
-		ErrorResponse response = ErrorResponse.of(status, e.getMessage());
 
+		e.printStackTrace();
+
+		int status = e.getStatus().value();
+
+		// 500번대 에러인 경우 Sentry에 캡처
+		if (status >= 500 && status < 600) {
+			captureSentryException(e, status);
+		}
+
+		ErrorResponse response = ErrorResponse.of(status, e.getMessage());
 		return ResponseEntity.status(status).body(response);
 	}
 
@@ -56,9 +73,16 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ProductPostException.class)
 	public ResponseEntity<ErrorResponse> handleProductPostException(ProductPostException e) {
 
-		HttpStatus status = HttpStatus.valueOf(e.getCode());
-		ErrorResponse response = ErrorResponse.of(e.getCode(), e.getMessage());
+		int statusCode = e.getCode();
 
+		HttpStatus status = HttpStatus.valueOf(statusCode);
+
+		// 500번대 에러인 경우 Sentry에 캡처
+		if (statusCode >= 500 && statusCode < 600) {
+			captureSentryException(e, statusCode);
+		}
+
+		ErrorResponse response = ErrorResponse.of(statusCode, e.getMessage());
 		return ResponseEntity.status(status).body(response);
 	}
 
@@ -118,15 +142,14 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(response);
-
 	}
 
 	@ExceptionHandler(NoResourceFoundException.class)
 	public ResponseEntity<ErrorResponse> handleNoApiException(NoResourceFoundException e) {
 
 		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value()
-			, "요청하신 API 엔드포인트를 찾을 수 없습니다."
+			HttpStatus.BAD_REQUEST.value(),
+			"요청하신 API 엔드포인트를 찾을 수 없습니다."
 		);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -137,11 +160,11 @@ public class GlobalExceptionHandler {
 	 * DB 유니크 제약조건 위반 (동시 요청)
 	 */
 	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<ErrorResponse> handleNoApiException(DataIntegrityViolationException e) {
+	public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
 
 		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value()
-			, "이미 좋아요한 글입니다."
+			HttpStatus.BAD_REQUEST.value(),
+			"이미 좋아요한 글입니다."
 		);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -150,7 +173,6 @@ public class GlobalExceptionHandler {
 
 	/**
 	 * CustomException를 상속받는 모든 예외 처리
-	 * ⚠️일단 모든 예외를 404 처리함
 	 */
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
@@ -167,15 +189,42 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleException(Exception e) {
-		e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
+		e.printStackTrace();
+
+		// 500 에러는 항상 Sentry에 캡처
+		captureSentryException(e, HttpStatus.INTERNAL_SERVER_ERROR.value());
+
 		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.INTERNAL_SERVER_ERROR.value()
-			, "서버 내부 오류가 발생했습니다."
+			HttpStatus.INTERNAL_SERVER_ERROR.value(),
+			"서버 내부 오류가 발생했습니다."
 		);
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.body(response);
+	}
 
+	/**
+	 * Sentry에 예외를 캡처하는 메서드
+	 */
+	private void captureSentryException(Exception exception, int statusCode) {
+		try {
+			SentryEvent event = new SentryEvent();
+			event.setLevel(SentryLevel.ERROR);
+			event.setThrowable(exception);
+
+			Message message = new Message();
+			message.setMessage(exception.getMessage());
+			event.setMessage(message);
+
+			// 상태 코드를 Extra 데이터로 추가
+			event.setExtra("statusCode", statusCode);
+			event.setTag("http.status_code", String.valueOf(statusCode));
+
+			Sentry.captureEvent(event);
+			log.info("Sentry로 예외 전송 완료: {} (상태 코드: {})", exception.getClass().getSimpleName(), statusCode);
+		} catch (Exception e) {
+			log.error("Sentry로 예외 전송 중 오류 발생", e);
+		}
 	}
 
 }
