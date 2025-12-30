@@ -7,29 +7,26 @@ import io.sentry.SentryEvent;
 import io.sentry.SentryOptions.BeforeSendCallback;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 500번대 서버 에러만 선별하여 Sentry로 전송하고, 나머지 에러는 필터링하는 설정 클래스
+ * 에러가 Sentry 서버로 발송되기 직전에 가로채서 HTTP 상태 코드가 500번대(서버 오류)인 경우만 통과시키는 필터링 역할을 수행합니다.
+ */
 @Slf4j
 @Configuration
 public class sentryConfiguration {
 
-	/**
-	 * 500번대 에러만 Sentry에 전송하도록 필터링
-	 */
 	@Bean
 	public BeforeSendCallback beforeSendCallback() {
 		return (event, hint) -> {
 
-			// HTTP 상태 코드 추출
 			Integer statusCode = extractStatusCode(event, hint);
 
 			if (statusCode != null) {
-				// 500번대 에러만 전송
+				// 500번대 에러만 전송 나머지는 필터링
 				if (statusCode >= 500 && statusCode < 600) {
 					log.info("Sentry로 {}번대 에러 전송 중: {}", statusCode / 100, event.getMessage());
 					return event;
 				}
-
-				// 400번대 에러는 필터링
-				log.debug("Sentry 전송 제외: {}번대 에러 - {}", statusCode / 100, event.getMessage());
 				return null;
 			}
 
@@ -39,9 +36,6 @@ public class sentryConfiguration {
 		};
 	}
 
-	/**
-	 * Event와 Hint에서 HTTP 상태 코드 추출
-	 */
 	private Integer extractStatusCode(SentryEvent event, Object hint) {
 		// 1. Event의 Extra 데이터에서 확인
 		Object statusCodeExtra = event.getExtra("statusCode");
