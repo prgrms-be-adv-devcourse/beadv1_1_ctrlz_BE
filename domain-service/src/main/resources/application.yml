@@ -98,6 +98,7 @@ springdoc:
     path: /swagger-ui.html
 
 sentry:
+  enabled: true
   environment: ${spring.profiles.active:local} # Sentry에 전송되는 이벤트에 노출되는 active
   traces-sample-rate: 1.0
   logging:
@@ -105,3 +106,7 @@ sentry:
     minimum-breadcrumb-level: info
   attach-stacktrace: true # 이벤트/로그 캡처 시 스택트레이스를 자동 첨부
   attach-threads: true # 이벤트에 스레드 정보(스레드 목록/상태 등)를 함께 첨부
+
+slack:
+  webhook:
+    enabled: true
