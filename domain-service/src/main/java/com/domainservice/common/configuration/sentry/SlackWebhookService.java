@@ -12,20 +12,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 500번대 서버 에러 발생 시 Slack Webhook을 통해 실시간 알림을 전송하는 서비스
- * Sentry와 함께 사용되어, Sentry는 에러 추적 및 분석 용도로,
- * 이 서비스는 팀원들에게 즉각적인 알림 전달 용도로 사용됩니다.
+ * 이 서비스는 팀원들에게 slack 채널에 즉각적인 알림 전달 용도로 사용됩니다.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "slack.webhook.enabled", havingValue = "true")
-public class SlackNotificationService {
+public class SlackWebhookService {
 
 	@Value("${slack.webhook.url}")
 	private String webhookUrl;
@@ -35,13 +37,51 @@ public class SlackNotificationService {
 	/**
 	 * Slack으로 에러 알림 전송
 	 */
-	public void sendErrorNotification(Exception exception, String requestUrl, String httpMethod, String userId) {
+	public void sendErrorNotification(Exception exception) {
+		try {
+			RequestInfo requestInfo = extractRequestInfo();
+			sendErrorNotificationWithContext(exception, requestInfo);
+		} catch (Exception e) {
+			log.error("Slack 알림 전송 실패: {}", e.getMessage());
+		}
+	}
+
+	public record RequestInfo(String url, String method, String userId) {
+	}
+
+	/**
+	 * HTTP Request에 포함된 정보 추출
+	 */
+	private RequestInfo extractRequestInfo() {
+		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+
+		if (attributes == null) {
+			return new RequestInfo(null, null, null);
+		}
+
+		HttpServletRequest request = attributes.getRequest();
+
+		return new RequestInfo(
+			request.getRequestURL().toString(),
+			request.getMethod(),
+			request.getHeader("X-REQUEST-ID")
+		);
+	}
+
+	/**
+	 * Slack으로 에러 알림 전송
+	 */
+	public void sendErrorNotificationWithContext(Exception exception, RequestInfo requestInfo) {
 
 		// 메시지 구성 요소 준비
-		String userInfo = (userId != null && !"anonymous".equals(userId)) ? String.format("`%s`", userId) : "인증되지 않음";
+		String userId = requestInfo.userId();
+
+		String userInfo = (userId != null && !"anonymous".equals(userId)) ?
+			String.format("`%s`", userId) : "인증되지 않음";
+
 		String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-		String errorMessage = escape(exception.getMessage());
+		String errorMessage = exception.getMessage();
 		String exceptionType = exception.getClass().getSimpleName();
 
 		String stackTrace = Arrays.stream(exception.getStackTrace())
@@ -50,16 +90,16 @@ public class SlackNotificationService {
 			.collect(Collectors.joining("\n"));
 
 		String endpoint = String.format("%s %s",
-			httpMethod != null ? httpMethod : "N/A",
-			requestUrl != null ? requestUrl : "N/A");
+			requestInfo.method() != null ? requestInfo.method() : "N/A",
+			requestInfo.url() != null ? requestInfo.url() : "N/A");
 
 		// 구성 요소를 기반으로 JSON 본문 생성
 		String payload = createSlackPayload(
-			errorMessage, endpoint, exceptionType, userInfo, currentTime, escape(stackTrace)
-		);
+			errorMessage, endpoint, exceptionType, userInfo, currentTime, stackTrace);
 
 		// Slack 전송
-		sendToSlack(payload);
+		sendToSlackWebhook(payload);
+
 	}
 
 	// Slack에 전송할 JSON 형태의 페이로드 생성
@@ -108,39 +148,15 @@ public class SlackNotificationService {
 			    }
 			  ]
 			}
-			""".formatted(
-			errorMessage,
-			endpoint,
-			exceptionType,
-			userInfo,
-			currentTime,
-			stackTrace
-		);
+			""".formatted(errorMessage, endpoint, exceptionType, userInfo, currentTime, stackTrace);
 	}
 
-	// Slack Webhook으로 메시지 전송
-	private void sendToSlack(String payload) {
+	private void sendToSlackWebhook(String payload) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> request = new HttpEntity<>(payload, headers);
 
-		try {
-			restTemplate.postForEntity(webhookUrl, request, String.class);
-			log.info("Slack 에러 알림 전송 완료");
-		} catch (Exception e) {
-			log.error("Slack 전송 실패: {}", e.getMessage());
-		}
+		restTemplate.postForEntity(webhookUrl, request, String.class);
 	}
 
-	// JSON 문자열 내 특수 문자 이스케이프 처리
-	private String escape(String input) {
-		if (input == null) {
-			return "정보 없음";
-		}
-		return input
-			.replace("\\", "\\\\")
-			.replace("\"", "\\\"")
-			.replace("\n", "\\n")
-			.replace("\r", "");
-	}
 }
