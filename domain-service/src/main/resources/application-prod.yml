@@ -32,7 +32,7 @@ spring:
         order_inserts: true
 
   elasticsearch:
-    uris: ${ELASTIC_SEARCH_URL} 
+    uris: ${ELASTIC_SEARCH_URL}
 
   data:
     redis:
@@ -91,6 +91,7 @@ custom:
   feign:
     url:
       user-service: http://account-svc:8080
+
 # k8s 설정
 eureka:
   instance:
@@ -105,6 +106,29 @@ eureka:
 openapi:
   service:
     url: https://api.yeongeun.chlab.org
-    
+
 logging:
   config: classpath:logback-prod.xml
+
+springdoc:
+  default-produces-media-type: application/json
+  default-flat-param-object: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# 배포 환경에서 에러 발생 시 sentry, slack으로 전송
+sentry:
+  enabled: true
+  environment: ${spring.profiles.active} # Sentry에 전송되는 이벤트에 노출되는 active
+  traces-sample-rate: 1.0
+  logging:
+    minimum-event-level: error # error 이상 로그는 Sentry에 전송
+    minimum-breadcrumb-level: info
+  attach-stacktrace: true # 이벤트/로그 캡처 시 스택트레이스를 자동 첨부
+  attach-threads: true # 이벤트에 스레드 정보(스레드 목록/상태 등)를 함께 첨부
+
+slack:
+  webhook:
+    enabled: true

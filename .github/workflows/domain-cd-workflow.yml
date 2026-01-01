@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - deploytest
+      - feature/#237-센트리-슬랙-연동
     paths:
       - 'domain-service/**'
       - 'common/**'
