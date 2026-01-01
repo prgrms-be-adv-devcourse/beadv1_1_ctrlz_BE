@@ -33,12 +33,20 @@ public class SlackWebhookService {
 	private String webhookUrl;
 
 	private final RestTemplate restTemplate = new RestTemplate();
+	private final ErrorNotificationLimiter notificationLimiter;
 
 	/**
 	 * Slack으로 에러 알림 전송
 	 */
 	public void sendErrorNotification(Exception exception) {
 		try {
+
+			// 중복 체크
+			if (!notificationLimiter.shouldNotify(exception)) {
+				log.debug("중복 에러, Slack 알림 스킵: {}", exception.getClass().getSimpleName());
+				return;
+			}
+
 			RequestInfo requestInfo = extractRequestInfo();
 			sendErrorNotificationWithContext(exception, requestInfo);
 		} catch (Exception e) {
