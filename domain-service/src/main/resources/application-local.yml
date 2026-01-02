@@ -3,6 +3,7 @@ spring:
     config: classpath:logback-local.xml
 
   datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/domain_dev?rewriteBatchedStatements=true&useServerPrepStmts=true&cachePrepStmts=true
     username: app
     password: 1234
@@ -45,3 +46,11 @@ openapi:
 
 logging:
   config: classpath:logback-local.xml
+
+# local 환경에서 에러 발생 시 sentry, slack으로 전송하지 않음
+sentry:
+  enabled: false
+
+slack:
+  webhook:
+    enabled: false

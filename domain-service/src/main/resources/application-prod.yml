@@ -32,7 +32,7 @@ spring:
         order_inserts: true
 
   elasticsearch:
-    uris: ${ELASTIC_SEARCH_URL} 
+    uris: ${ELASTIC_SEARCH_URL}
 
   data:
     redis:
@@ -91,6 +91,7 @@ custom:
   feign:
     url:
       user-service: http://account-svc:8080
+
 # k8s 설정
 eureka:
   instance:
@@ -101,10 +102,17 @@ eureka:
       defaultZone: http://discovery-svc:8761/eureka/
     enabled: true
 
-
 openapi:
   service:
     url: https://api.yeongeun.chlab.org
-    
+
 logging:
   config: classpath:logback-prod.xml
+
+# 배포 환경에서 에러 발생 시 sentry, slack으로 전송
+sentry:
+  enabled: true
+
+slack:
+  webhook:
+    enabled: true

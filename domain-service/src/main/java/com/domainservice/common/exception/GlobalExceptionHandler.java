@@ -22,57 +22,46 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 전역 예외 처리 핸들러, 500번대 에러 발생 시 Sentry와 Slack으로 알림 전송
+ */
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(UserClientException.class)
+	private final ErrorNotificationService errorNotificationService;
+
+	@ExceptionHandler({UserClientException.class, ReviewException.class})
 	public ResponseEntity<ErrorResponse> handleUserClientException(UserClientException e) {
-
 		e.printStackTrace();
-		log.info("error={}", e);
+		int statusCode = e.getStatus().value();
 
-		ErrorResponse response = ErrorResponse.of(e.getStatus().value(), e.getMessage());
-		return ResponseEntity.status(e.getStatus()).body(response);
+		// sentry, slack으로 에러 내용 전송
+		errorNotificationService.notifyError(e, statusCode);
 
+		ErrorResponse response = ErrorResponse.of(statusCode, e.getMessage());
+		return ResponseEntity.status(statusCode).body(response);
 	}
 
-	/**
-	 * ReviewException를 상속받는 모든 예외 처리
-	 */
-	@ExceptionHandler(ReviewException.class)
-	public ResponseEntity<ErrorResponse> handleReviewException(ReviewException e) {
-		e.printStackTrace();
-		int status = e.getStatus().value();
-		ErrorResponse response = ErrorResponse.of(status, e.getMessage());
-
-		return ResponseEntity.status(status).body(response);
-	}
-
-	/**
-	 * CustomException를 상속받는 모든 예외 처리
-	 */
 	@ExceptionHandler(ProductPostException.class)
 	public ResponseEntity<ErrorResponse> handleProductPostException(ProductPostException e) {
+		e.printStackTrace();
+		int statusCode = e.getCode();
 
-		HttpStatus status = HttpStatus.valueOf(e.getCode());
-		ErrorResponse response = ErrorResponse.of(e.getCode(), e.getMessage());
+		// sentry, slack으로 에러 내용 전송
+		errorNotificationService.notifyError(e, statusCode);
 
-		return ResponseEntity.status(status).body(response);
+		ErrorResponse response = ErrorResponse.of(statusCode, e.getMessage());
+		return ResponseEntity.status(statusCode).body(response);
 	}
 
-	/**
-	 * JSON 역직렬화 실패 처리 (400)
-	 * Enum 타입 불일치, 잘못된 JSON 형식 등
-	 */
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
 		HttpMessageNotReadableException e) {
 
 		String message = "잘못된 요청 형식입니다.";
 
-		// Enum 역직렬화 실패인 경우 구체적인 메시지 제공
 		Throwable cause = e.getCause();
 		if (cause instanceof InvalidFormatException ife) {
 			if (ife.getTargetType().isEnum()) {
@@ -90,92 +79,47 @@ public class GlobalExceptionHandler {
 			}
 		}
 
-		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value(),
-			message
-		);
-
-		return ResponseEntity
-			.status(HttpStatus.BAD_REQUEST)
-			.body(response);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), message));
 	}
 
-	/**
-	 * Validation 예외 처리 (400)
-	 * 입력값이 잘못 들어온 경우
-	 * 해당 입력값의 field, rejectedValue, reason을 확인할 수 있음
-	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorResponse> handleValidationException(
-		MethodArgumentNotValidException e) {
-
-		// ErrorResponse 생성
-		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value(),
-			"입력값 검증에 실패했습니다.",
-			e.getBindingResult()
-		);
-
+	public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(response);
-
+			.body(ErrorResponse.of(
+				HttpStatus.BAD_REQUEST.value(),
+				"입력값 검증에 실패했습니다.",
+				e.getBindingResult()
+			));
 	}
 
-	@ExceptionHandler(NoResourceFoundException.class)
-	public ResponseEntity<ErrorResponse> handleNoApiException(NoResourceFoundException e) {
-
-		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value()
-			, "요청하신 API 엔드포인트를 찾을 수 없습니다."
-		);
-
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(response);
-	}
-
-	/**
-	 * DB 유니크 제약조건 위반 (동시 요청)
-	 */
-	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<ErrorResponse> handleNoApiException(DataIntegrityViolationException e) {
-
-		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.BAD_REQUEST.value()
-			, "이미 좋아요한 글입니다."
-		);
+	@ExceptionHandler({NoResourceFoundException.class, DataIntegrityViolationException.class})
+	public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
+		String message = switch (e) {
+			case NoResourceFoundException nrf -> "요청하신 API 엔드포인트를 찾을 수 없습니다.";
+			case DataIntegrityViolationException div -> "이미 좋아요한 글입니다.";
+			default -> "잘못된 요청입니다.";
+		};
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(response);
+			.body(ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), message));
 	}
 
-	/**
-	 * CustomException를 상속받는 모든 예외 처리
-	 * ⚠️일단 모든 예외를 404 처리함
-	 */
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-
-		HttpStatus status = HttpStatus.NOT_FOUND;
-		ErrorResponse response = ErrorResponse.of(status.value(), e.getMessage());
-
-		return ResponseEntity.status(status).body(response);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+			.body(ErrorResponse.of(HttpStatus.NOT_FOUND.value(), e.getMessage()));
 	}
 
-	/**
-	 * 기타 걸러지지 않은 오류 발생 시 (500)
-	 * 현재 Feign 관련 오류가 잡히는 곳(추후 수정 예정)
-	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse> handleException(Exception e) {
-		e.printStackTrace();     //feign관련 에러 로그 추적용으로 작성했습니다. 각자 사용하시면 됩니다.
-		ErrorResponse response = ErrorResponse.of(
-			HttpStatus.INTERNAL_SERVER_ERROR.value()
-			, "서버 내부 오류가 발생했습니다."
-		);
+		e.printStackTrace();
+		int statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+		// sentry, slack으로 에러 내용 전송
+		errorNotificationService.notifyError(e, statusCode);
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			.body(response);
-
+			.body(ErrorResponse.of(statusCode, "서버 내부 오류가 발생했습니다."));
 	}
-
 }
